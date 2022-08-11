@@ -44,7 +44,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * accounts that have been granted it.
  */
 abstract contract TimeAccessControl is ITimeAccessControl {
-    uint8 immutable accessCodeNerverGrantOrAccessCodeTimeOut = 1; // Permission not granted before
+    uint8 immutable accessCodeNerverGrantOrAccessCodeTimeOut = 1; // Permission not granted before or Permission has timed out
     uint8 immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
     uint8 immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
     uint8 immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
@@ -116,8 +116,6 @@ abstract contract TimeAccessControl is ITimeAccessControl {
                 if (timeSpan.endTime != 0) {
                     if (timeSpan.endTime >= block.timestamp) {
                         return accessCodeValidAndTimeLimit;
-                    } else {
-                        return accessCodeNerverGrantOrAccessCodeTimeOut;
                     }
                 } else {
                     return accessCodeValid;
@@ -125,9 +123,8 @@ abstract contract TimeAccessControl is ITimeAccessControl {
             } else {
                 return accessCodeNotValid;
             }
-        } else {
-            return accessCodeNerverGrantOrAccessCodeTimeOut;
         }
+        return accessCodeNerverGrantOrAccessCodeTimeOut;
     }
 
     /**

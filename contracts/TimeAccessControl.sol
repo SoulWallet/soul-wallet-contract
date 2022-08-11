@@ -44,11 +44,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * accounts that have been granted it.
  */
 abstract contract TimeAccessControl is ITimeAccessControl {
-    uint8 public immutable accessCodeNerverGrant = 1; // Permission not granted before
-    uint8 public immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
-    uint8 public immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
-    uint8 public immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
-    uint8 public immutable accessCodeTimeOut = 5; // Permission has timed out
+    uint8 immutable accessCodeNerverGrant = 1; // Permission not granted before
+    uint8 immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
+    uint8 immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
+    uint8 immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
+    uint8 immutable accessCodeTimeOut = 5; // Permission has timed out
 
     struct TimeSpan {
         uint40 startTime; // uint40 (2^40 - 1) max is 36812 AD,

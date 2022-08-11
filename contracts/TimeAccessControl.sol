@@ -44,11 +44,10 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * accounts that have been granted it.
  */
 abstract contract TimeAccessControl is ITimeAccessControl {
-    uint8 immutable accessCodeNerverGrant = 1; // Permission not granted before
+    uint8 immutable accessCodeNerverGrantOrAccessCodeTimeOut = 1; // Permission not granted before
     uint8 immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
     uint8 immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
     uint8 immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
-    uint8 immutable accessCodeTimeOut = 5; // Permission has timed out
 
     struct TimeSpan {
         uint40 startTime; // uint40 (2^40 - 1) max is 36812 AD,
@@ -118,7 +117,7 @@ abstract contract TimeAccessControl is ITimeAccessControl {
                     if (timeSpan.endTime >= block.timestamp) {
                         return accessCodeValidAndTimeLimit;
                     } else {
-                        return accessCodeTimeOut;
+                        return accessCodeNerverGrantOrAccessCodeTimeOut;
                     }
                 } else {
                     return accessCodeValid;
@@ -127,7 +126,7 @@ abstract contract TimeAccessControl is ITimeAccessControl {
                 return accessCodeNotValid;
             }
         } else {
-            return accessCodeNerverGrant;
+            return accessCodeNerverGrantOrAccessCodeTimeOut;
         }
     }
 
@@ -295,7 +294,7 @@ abstract contract TimeAccessControl is ITimeAccessControl {
      */
     function _grantRole(bytes32 role, address account) internal virtual {
         uint8 code = _hasRole(role, account);
-        if (code == accessCodeNerverGrant || code == accessCodeTimeOut) {
+        if (code == accessCodeNerverGrantOrAccessCodeTimeOut) {
             unchecked {
                 uint40 startTime = uint40(block.timestamp) +
                     _roles[role].grantDelay;

@@ -321,6 +321,14 @@ abstract contract TimeAccessControl is ITimeAccessControl {
                 _roles[role].members[account].endTime = endTime;
                 emit RoleRevoked(role, account, msg.sender, endTime);
             }
+        } else if (code == accessCodeNotValid) {
+            _roles[role].members[account].startTime = 0;
+            emit RoleRevoked(
+                role,
+                account,
+                msg.sender,
+                uint40(block.timestamp)
+            );
         }
     }
 }

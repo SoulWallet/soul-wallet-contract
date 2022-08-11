@@ -112,9 +112,9 @@ abstract contract TimeAccessControl is ITimeAccessControl {
     {
         TimeSpan memory timeSpan = _roles[role].members[account];
         if (timeSpan.startTime != 0) {
-            if (timeSpan.startTime <= block.timestamp) {
+            if (timeSpan.startTime < block.timestamp) {
                 if (timeSpan.endTime != 0) {
-                    if (timeSpan.endTime >= block.timestamp) {
+                    if (timeSpan.endTime > block.timestamp) {
                         return accessCodeValidAndTimeLimit;
                     }
                 } else {

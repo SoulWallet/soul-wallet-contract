@@ -44,11 +44,10 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * accounts that have been granted it.
  */
 abstract contract TimeAccessControl is ITimeAccessControl {
-    uint8 public immutable accessCodeNerverGrant = 1; // Permission not granted before
-    uint8 public immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
-    uint8 public immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
-    uint8 public immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
-    uint8 public immutable accessCodeTimeOut = 5; // Permission has timed out
+    uint8 immutable accessCodeNerverGrantOrAccessCodeTimeOut = 1; // Permission not granted before or Permission has timed out
+    uint8 immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
+    uint8 immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
+    uint8 immutable accessCodeValidAndTimeLimit = 4; // Permission is in effect and time limit is set
 
     struct TimeSpan {
         uint40 startTime; // uint40 (2^40 - 1) max is 36812 AD,
@@ -113,12 +112,10 @@ abstract contract TimeAccessControl is ITimeAccessControl {
     {
         TimeSpan memory timeSpan = _roles[role].members[account];
         if (timeSpan.startTime != 0) {
-            if (timeSpan.startTime <= block.timestamp) {
+            if (timeSpan.startTime < block.timestamp) {
                 if (timeSpan.endTime != 0) {
-                    if (timeSpan.endTime >= block.timestamp) {
+                    if (timeSpan.endTime > block.timestamp) {
                         return accessCodeValidAndTimeLimit;
-                    } else {
-                        return accessCodeTimeOut;
                     }
                 } else {
                     return accessCodeValid;
@@ -126,9 +123,8 @@ abstract contract TimeAccessControl is ITimeAccessControl {
             } else {
                 return accessCodeNotValid;
             }
-        } else {
-            return accessCodeNerverGrant;
         }
+        return accessCodeNerverGrantOrAccessCodeTimeOut;
     }
 
     /**
@@ -295,7 +291,7 @@ abstract contract TimeAccessControl is ITimeAccessControl {
      */
     function _grantRole(bytes32 role, address account) internal virtual {
         uint8 code = _hasRole(role, account);
-        if (code == accessCodeNerverGrant || code == accessCodeTimeOut) {
+        if (code == accessCodeNerverGrantOrAccessCodeTimeOut) {
             unchecked {
                 uint40 startTime = uint40(block.timestamp) +
                     _roles[role].grantDelay;
@@ -321,6 +317,14 @@ abstract contract TimeAccessControl is ITimeAccessControl {
                 _roles[role].members[account].endTime = endTime;
                 emit RoleRevoked(role, account, msg.sender, endTime);
             }
+        } else if (code == accessCodeNotValid) {
+            _roles[role].members[account].startTime = 0;
+            emit RoleRevoked(
+                role,
+                account,
+                msg.sender,
+                uint40(block.timestamp)
+            );
         }
     }
 }

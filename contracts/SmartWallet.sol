@@ -60,6 +60,8 @@ contract SmartWallet is BaseWallet, ACL {
 
         // Then we set `OWNER_ROLE` as the admin role for `GUARDIAN_ROLE` as well.
         _setRoleAdmin(GUARDIAN_ROLE, OWNER_ROLE);
+        // set GUARDIAN_ROLE delay with 1 day
+        _setRoleDelay(GUARDIAN_ROLE, 1 days, 1 days);
     }
 
     modifier onlyOwner() {

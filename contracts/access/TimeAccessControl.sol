@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 
 import "./ITimeAccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /**
  * @dev Contract module that allows children to implement role-based access
@@ -43,7 +44,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * grant and revoke this role. Extra precautions should be taken to secure
  * accounts that have been granted it.
  */
-abstract contract TimeAccessControl is ITimeAccessControl {
+abstract contract TimeAccessControl is ITimeAccessControl, ERC165 {
     uint8 immutable accessCodeNerverGrantOrAccessCodeTimeOut = 1; // Permission not granted before or Permission has timed out
     uint8 immutable accessCodeNotValid = 2; // Permissions have been set but have not taken effect
     uint8 immutable accessCodeValid = 3; // Permission is in effect and no time limit is set
@@ -79,14 +80,28 @@ abstract contract TimeAccessControl is ITimeAccessControl {
         _;
     }
 
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(ITimeAccessControl).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+      /**
+     * @dev set role grantDelay and revokeDelay
+     */
+    function setRoleDelay(bytes32 role, uint24 grantDelay,uint24 revokeDelay) public virtual override
+        onlyRole(getRoleAdmin(role))
+    {
+        _setRoleDelay(role, grantDelay, revokeDelay);
+    }
+
+
     /**
      * @dev set role grantDelay and revokeDelay
      */
-    function setRoleDelay(
+    function _setRoleDelay(
         bytes32 role,
         uint24 grantDelay,
         uint24 revokeDelay
-    ) public override {
+    ) internal virtual{
         _roles[role].grantDelay = grantDelay;
         _roles[role].revokeDelay = revokeDelay;
     }

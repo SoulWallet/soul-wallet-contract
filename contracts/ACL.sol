@@ -3,10 +3,10 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-import "./access/TimeAccessControlEnumerable.sol";
 
-abstract contract ACL is TimeAccessControlEnumerable {
+abstract contract ACL is AccessControlEnumerable {
     using ECDSA for bytes32;
 
     // solhint-disable var-name-mixedcase
@@ -63,14 +63,30 @@ abstract contract ACL is TimeAccessControlEnumerable {
     }
 
     /**
-     * @dev Grants guardian permissions to an account
+     * @dev Grants guardian permissions to an account confirmation
      */
-    function grantGuardian(address account) external virtual;
+    function grantGuardianConfirmation(address account) external virtual;
 
     /**
-     * @dev Revokes guardian permissions to an account
+     * @dev Revokes guardian permissions to an account confirmation
      */
-    function revokeGuardian(address account) external virtual;
+    function revokeGuardianConfirmation(address account) external virtual;
+
+       /**
+     * @dev Grants guardian permissions to an account reqeust
+     */
+    function grantGuardianRequest(address account) external virtual;
+
+    /**
+     * @dev delete Request
+     */
+    function deleteGuardianRequest(address account) external virtual;
+
+
+      /**
+     * @dev Revokes guardian permissions to an account request
+     */
+    function revokeGuardianRequest(address account) external virtual;
 
     /**
      * @dev Transfers owner permissions from the owner at index #0 to another account

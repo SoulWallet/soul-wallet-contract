@@ -22,6 +22,25 @@ contract SmartWallet is BaseWallet, ACL {
     using Signatures for UserOperation;
     using Calldata for bytes;
 
+    enum PendingRequestType {
+        none,
+        addGuardian,
+        revokeGuardian
+    }
+
+    event PendingRequestEvent(
+        address indexed account,
+        PendingRequestType indexed pendingRequestType,
+        uint256 effectiveAt
+    );
+
+    struct PendingRequest {
+        PendingRequestType pendingRequestType;
+        uint256 effectiveAt;
+    }
+    mapping(address => PendingRequest) public pendingGuardian;
+    uint256 public guardianDelay = 1 days;
+
     function isGuardianActionAllowed(UserOperation calldata op)
         internal
         pure
@@ -61,7 +80,6 @@ contract SmartWallet is BaseWallet, ACL {
         // Then we set `OWNER_ROLE` as the admin role for `GUARDIAN_ROLE` as well.
         _setRoleAdmin(GUARDIAN_ROLE, OWNER_ROLE);
         // set GUARDIAN_ROLE delay with 1 day
-        _setRoleDelay(GUARDIAN_ROLE, 1 days, 1 days);
     }
 
     modifier onlyOwner() {
@@ -194,21 +212,82 @@ contract SmartWallet is BaseWallet, ACL {
         require(req);
     }
 
-    function grantGuardian(address account)
+    function grantGuardianConfirmation(address account)
         external
         override
         requireFromEntryPoint
     {
         require(!isOwner(account), "ACL: Owner cannot be guardian");
+        require(
+            pendingGuardian[account].pendingRequestType ==
+                PendingRequestType.addGuardian,
+            "add guardian request not exist"
+        );
+        require(
+            block.timestamp > pendingGuardian[account].effectiveAt,
+            "time delay not pass"
+        );
         _grantRole(GUARDIAN_ROLE, account);
+        pendingGuardian[account].pendingRequestType = PendingRequestType.none;
     }
 
-    function revokeGuardian(address account)
+    function revokeGuardianConfirmation(address account)
         external
         override
         requireFromEntryPoint
     {
+        require(
+            pendingGuardian[account].pendingRequestType ==
+                PendingRequestType.revokeGuardian,
+            "revoke guardian request not exist"
+        );
+        require(
+            block.timestamp > pendingGuardian[account].effectiveAt,
+            "time delay not pass"
+        );
         _revokeRole(GUARDIAN_ROLE, account);
+        pendingGuardian[account].pendingRequestType = PendingRequestType.none;
+    }
+
+    function deleteGuardianRequest(address account)
+        external
+        override
+        requireFromEntryPoint
+    {
+        require(
+            pendingGuardian[account].pendingRequestType !=
+                PendingRequestType.none,
+            "request not exist"
+        );
+        pendingGuardian[account].pendingRequestType = PendingRequestType.none;
+        emit PendingRequestEvent(account,  PendingRequestType.none, 0);
+    }
+
+    function grantGuardianRequest(address account)
+        external
+        override
+        requireFromEntryPoint
+    {
+        require(!isOwner(account), "ACL: Owner cannot be guardian");
+        uint256 effectiveAt = block.timestamp + guardianDelay;
+        pendingGuardian[account] = PendingRequest(
+            PendingRequestType.addGuardian,
+            effectiveAt
+        );
+        emit PendingRequestEvent(account,  PendingRequestType.addGuardian, effectiveAt);
+    }
+
+    function revokeGuardianRequest(address account)
+        external
+        override
+        requireFromEntryPoint
+    {
+        uint256 effectiveAt = block.timestamp + guardianDelay;
+        pendingGuardian[account] = PendingRequest(
+            PendingRequestType.revokeGuardian,
+            effectiveAt
+        );
+        emit PendingRequestEvent(account,  PendingRequestType.revokeGuardian, effectiveAt);
     }
 
     function transferOwner(address account)

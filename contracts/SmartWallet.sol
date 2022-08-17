@@ -338,6 +338,9 @@ contract SmartWallet is BaseWallet, ACL {
             signatureData.values.length >= getMinGuardiansSignatures(),
             "Wallet: Insufficient guardians"
         );
+         // There cannot be an owner with address 0.
+        address lastOwner = address(0);
+        address currentOwner;
 
         for (uint256 i = 0; i < signatureData.values.length; i++) {
             SignatureValue memory value = signatureData.values[i];
@@ -346,6 +349,9 @@ contract SmartWallet is BaseWallet, ACL {
                 requestId.toEthSignedMessageHash(),
                 value.signature
             );
+            currentOwner = value.signer;
+            require(currentOwner > lastOwner, "Invalid guardian address provided");
+            lastOwner = currentOwner;
         }
     }
 }

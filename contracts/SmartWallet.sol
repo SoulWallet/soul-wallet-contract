@@ -215,7 +215,6 @@ contract SmartWallet is BaseWallet, ACL {
     function grantGuardianConfirmation(address account)
         external
         override
-        requireFromEntryPoint
     {
         require(!isOwner(account), "ACL: Owner cannot be guardian");
         require(

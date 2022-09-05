@@ -19,6 +19,8 @@
     "@openzeppelin/contracts": "^4.2.0"
   },
   "dependencies": {
-    "solidity-bytes-utils": "^0.8.0"
+    "@openzeppelin/contracts-upgradeable": "^4.7.3",
+    "solidity-bytes-utils": "^0.8.0",
+    "soul-wallet-lib": "git+https://github.com/proofofsoulprotocol/soul-wallet-corelib.git"
   }
 }

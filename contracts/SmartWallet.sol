@@ -9,6 +9,8 @@ import "./ACL.sol";
 import "./helpers/Signatures.sol";
 import "./helpers/Calldata.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * minimal wallet.
@@ -16,7 +18,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SmartWallet is BaseWallet, ACL {
+contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
     using Signatures for UserOperation;
@@ -71,7 +73,16 @@ contract SmartWallet is BaseWallet, ACL {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(EntryPoint anEntryPoint, address anOwner) {
+    constructor() {
+        _disableInitializers();
+        // solhint-disable-previous-line no-empty-blocks
+    }
+
+    function initialize(EntryPoint anEntryPoint, address anOwner)
+        public
+        initializer
+    {
+        __AccessControlEnumerable_init();
         _entryPoint = anEntryPoint;
         require(anOwner != address(0), "ACL: Owner cannot be zero");
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
@@ -212,10 +223,7 @@ contract SmartWallet is BaseWallet, ACL {
         require(req);
     }
 
-    function grantGuardianConfirmation(address account)
-        external
-        override
-    {
+    function grantGuardianConfirmation(address account) external override {
         require(!isOwner(account), "ACL: Owner cannot be guardian");
         require(
             pendingGuardian[account].pendingRequestType ==
@@ -248,6 +256,15 @@ contract SmartWallet is BaseWallet, ACL {
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
     }
 
+    function _authorizeUpgrade(address)
+        internal
+        view
+        override
+        requireFromEntryPoint
+    {
+        // solhint-disable-previous-line no-empty-blocks
+    }
+
     function deleteGuardianRequest(address account)
         external
         override
@@ -259,7 +276,7 @@ contract SmartWallet is BaseWallet, ACL {
             "request not exist"
         );
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
-        emit PendingRequestEvent(account,  PendingRequestType.none, 0);
+        emit PendingRequestEvent(account, PendingRequestType.none, 0);
     }
 
     function grantGuardianRequest(address account)
@@ -273,7 +290,11 @@ contract SmartWallet is BaseWallet, ACL {
             PendingRequestType.addGuardian,
             effectiveAt
         );
-        emit PendingRequestEvent(account,  PendingRequestType.addGuardian, effectiveAt);
+        emit PendingRequestEvent(
+            account,
+            PendingRequestType.addGuardian,
+            effectiveAt
+        );
     }
 
     function revokeGuardianRequest(address account)
@@ -286,7 +307,11 @@ contract SmartWallet is BaseWallet, ACL {
             PendingRequestType.revokeGuardian,
             effectiveAt
         );
-        emit PendingRequestEvent(account,  PendingRequestType.revokeGuardian, effectiveAt);
+        emit PendingRequestEvent(
+            account,
+            PendingRequestType.revokeGuardian,
+            effectiveAt
+        );
     }
 
     function transferOwner(address account)
@@ -337,7 +362,7 @@ contract SmartWallet is BaseWallet, ACL {
             signatureData.values.length >= getMinGuardiansSignatures(),
             "Wallet: Insufficient guardians"
         );
-         // There cannot be an owner with address 0.
+        // There cannot be an owner with address 0.
         address lastGuardian = address(0);
         address currentGuardian;
 
@@ -349,8 +374,22 @@ contract SmartWallet is BaseWallet, ACL {
                 value.signature
             );
             currentGuardian = value.signer;
-            require(currentGuardian > lastGuardian, "Invalid guardian address provided");
+            require(
+                currentGuardian > lastGuardian,
+                "Invalid guardian address provided"
+            );
             lastGuardian = currentGuardian;
         }
     }
+
+    function getVersion() override external view virtual returns(uint){
+        return 1;
+    }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[50] private __gap;
 }

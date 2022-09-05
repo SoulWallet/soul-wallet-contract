@@ -3,10 +3,10 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 
-abstract contract ACL is AccessControlEnumerable {
+abstract contract ACL is AccessControlEnumerableUpgradeable {
     using ECDSA for bytes32;
 
     // solhint-disable var-name-mixedcase

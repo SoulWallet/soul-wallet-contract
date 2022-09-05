@@ -125,4 +125,6 @@ abstract contract BaseWallet is IWallet {
      * subclass should override and update current entrypoint
      */
     function _updateEntryPoint(address) internal virtual;
+
+    function getVersion() external virtual view returns(uint);
 }

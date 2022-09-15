@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/*
-    source from:https://github.com/eth-infinitism/account-abstraction/releases/tag/audit
-*/
-
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";

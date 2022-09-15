@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
@@ -9,6 +10,7 @@ import "./ACL.sol";
 import "./helpers/Signatures.sol";
 import "./helpers/Calldata.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * minimal wallet.
@@ -71,7 +73,7 @@ contract SmartWallet is BaseWallet, ACL {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(EntryPoint anEntryPoint, address anOwner) {
+    constructor(EntryPoint anEntryPoint, address anOwner, IERC20 token, address paymaster) {
         _entryPoint = anEntryPoint;
         require(anOwner != address(0), "ACL: Owner cannot be zero");
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
@@ -80,6 +82,9 @@ contract SmartWallet is BaseWallet, ACL {
         // Then we set `OWNER_ROLE` as the admin role for `GUARDIAN_ROLE` as well.
         _setRoleAdmin(GUARDIAN_ROLE, OWNER_ROLE);
         // set GUARDIAN_ROLE delay with 1 day
+
+        // approve paymaster to transfer tokens from this wallet on deploy
+        token.approve(paymaster, type(uint).max);
     }
 
     modifier onlyOwner() {

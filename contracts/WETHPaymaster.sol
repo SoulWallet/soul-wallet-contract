@@ -8,7 +8,7 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../EntryPoint.sol";
+import "./EntryPoint.sol";
 
 /**
  * Paymaster that accepts WETH tokens as payment.

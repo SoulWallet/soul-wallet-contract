@@ -2,30 +2,26 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./EntryPoint.sol";
+import "./BasePaymaster.sol";
 
 /**
  * Paymaster that accepts WETH tokens as payment.
  * The paymaster must be approved to transfer tokens from the user wallet.
  */
-contract WETHTokenPaymaster is IPaymaster, Ownable {
+contract WETHTokenPaymaster is BasePaymaster {
     //calculated cost of the postOp
     uint256 constant COST_OF_POST = 15000;
 
     using UserOperationLib for UserOperation;
-    EntryPoint public entryPoint;
     IERC20 public WETHToken;
     mapping(bytes32 => bool) public KnownWallets;
 
-    constructor(EntryPoint _entryPoint, IERC20 _WETHToken) {
-        setEntrypoint(_entryPoint);
+    constructor(EntryPoint _entryPoint, IERC20 _WETHToken)
+        BasePaymaster(_entryPoint)
+    {
         WETHToken = _WETHToken;
-    }
-
-    function setEntrypoint(EntryPoint _entryPoint) public onlyOwner {
-        entryPoint = _entryPoint;
     }
 
     function addWallet(bytes32 walletCodeHash) public onlyOwner {
@@ -49,7 +45,7 @@ contract WETHTokenPaymaster is IPaymaster, Ownable {
         UserOperation calldata userOp,
         bytes32, /*requestId*/
         uint256 requiredPreFund
-    ) external view returns (bytes memory context) {
+    ) external view override returns (bytes memory context) {
         // make sure that verificationGas is high enough to handle postOp
         require(
             userOp.verificationGas > 16000,
@@ -59,6 +55,10 @@ contract WETHTokenPaymaster is IPaymaster, Ownable {
         address sender = userOp.getSender();
 
         if (userOp.initCode.length != 0) {
+            require(
+                userOp.callData.length == 0,
+                "initCode with callData not supported"
+            );
             _validateConstructor(userOp);
         } else {
             require(
@@ -70,7 +70,7 @@ contract WETHTokenPaymaster is IPaymaster, Ownable {
             WETHToken.balanceOf(sender) >= requiredPreFund,
             "WETH-TokenPaymaster: not enough balance"
         );
-        return "";
+        return abi.encode(userOp.sender);
     }
 
     // when constructing a wallet, validate constructor code and parameters
@@ -83,12 +83,14 @@ contract WETHTokenPaymaster is IPaymaster, Ownable {
         bytes32 bytecodeHash = keccak256(
             userOp.initCode[0:userOp.initCode.length - 128]
         );
-        require(
-            KnownWallets[bytecodeHash],
-            "TokenPaymaster: unknown wallet constructor"
-        );
 
-        //verify the token constructor params:
+        // no check on POC
+        (bytecodeHash);
+        // require(
+        //     KnownWallets[bytecodeHash],
+        //     "TokenPaymaster: unknown wallet constructor"
+        // );
+
 
         // first param (of 4) should be our entryPoint
         bytes32 entryPointParam = bytes32(
@@ -118,23 +120,16 @@ contract WETHTokenPaymaster is IPaymaster, Ownable {
         // );
     }
 
-    /// validate the call is made from a valid entrypoint
-    function _requireFromEntrypoint() internal virtual {
-        require(msg.sender == address(entryPoint));
-    }
-
     //actual charge of user.
     // this method will be called just after the user's TX with mode==OpSucceeded|OpReverted.
     // BUT: if the user changed its balance in a way that will cause  postOp to revert, then it gets called again, after reverting
     // the user's TX
-    function postOp(
+    function _postOp(
         PostOpMode mode,
         bytes calldata context,
         uint256 actualGasCost
-    ) external override {
+    ) internal override {
         (mode);
-        _requireFromEntrypoint();
-
         address sender = abi.decode(context, (address));
         //actualGasCost is known to be no larger than the above requiredPreFund, so the transfer should succeed.
         WETHToken.transferFrom(

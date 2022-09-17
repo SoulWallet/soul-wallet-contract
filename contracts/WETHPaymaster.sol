@@ -18,8 +18,8 @@ contract WETHTokenPaymaster is BasePaymaster {
     IERC20 public WETHToken;
     mapping(bytes32 => bool) public KnownWallets;
 
-    constructor(EntryPoint _entryPoint, IERC20 _WETHToken)
-        BasePaymaster(_entryPoint)
+    constructor(EntryPoint _entryPoint,address _owner, IERC20 _WETHToken)
+        BasePaymaster(_entryPoint, _owner)
     {
         WETHToken = _WETHToken;
     }

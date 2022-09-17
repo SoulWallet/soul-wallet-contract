@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.7;
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Ownable.sol";
 import "./IPaymaster.sol";
 import "./EntryPoint.sol";
 
@@ -13,12 +13,16 @@ abstract contract BasePaymaster is IPaymaster, Ownable {
 
     EntryPoint public entryPoint;
 
-    constructor(EntryPoint _entryPoint) {
-        setEntrypoint(_entryPoint);
+    constructor(EntryPoint _entryPoint, address _owner) Ownable(_owner) {
+        _setEntrypoint(_entryPoint);
+    }
+
+    function _setEntrypoint(EntryPoint _entryPoint) private {
+        entryPoint = _entryPoint;
     }
 
     function setEntrypoint(EntryPoint _entryPoint) public onlyOwner {
-        entryPoint = _entryPoint;
+        _setEntrypoint(_entryPoint);
     }
 
     function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 requestId, uint maxCost) external virtual override view returns (bytes memory context);

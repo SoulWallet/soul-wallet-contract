@@ -26,7 +26,7 @@ contract VerifyingPaymaster is BasePaymaster {
 
     address public immutable verifyingSigner;
 
-    constructor(EntryPoint _entryPoint, address _verifyingSigner) BasePaymaster(_entryPoint) {
+    constructor(EntryPoint _entryPoint, address _verifyingSigner, address _owner) BasePaymaster(_entryPoint, _owner) {
         verifyingSigner = _verifyingSigner;
     }
 

@@ -48,7 +48,7 @@ contract WETHTokenPaymaster is BasePaymaster {
     ) external view override returns (bytes memory context) {
         // make sure that verificationGas is high enough to handle postOp
         require(
-            userOp.verificationGas > 16000,
+            userOp.verificationGas >= 45000,
             "WETH-TokenPaymaster: gas too low for postOp"
         );
 

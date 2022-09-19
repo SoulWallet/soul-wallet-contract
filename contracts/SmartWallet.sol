@@ -238,7 +238,6 @@ contract SmartWallet is BaseWallet, ACL {
     function revokeGuardianConfirmation(address account)
         external
         override
-        requireFromEntryPoint
     {
         require(
             pendingGuardian[account].pendingRequestType ==

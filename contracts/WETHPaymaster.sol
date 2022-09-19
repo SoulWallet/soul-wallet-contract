@@ -48,17 +48,13 @@ contract WETHTokenPaymaster is BasePaymaster {
     ) external view override returns (bytes memory context) {
         // make sure that verificationGas is high enough to handle postOp
         require(
-            userOp.verificationGas >= 45000,
+            userOp.verificationGas > 45000,
             "WETH-TokenPaymaster: gas too low for postOp"
         );
 
         address sender = userOp.getSender();
 
         if (userOp.initCode.length != 0) {
-            require(
-                userOp.callData.length == 0,
-                "initCode with callData not supported"
-            );
             _validateConstructor(userOp);
         } else {
             require(
@@ -66,10 +62,12 @@ contract WETHTokenPaymaster is BasePaymaster {
                 "WETH-TokenPaymaster: not enough allowance"
             );
         }
+
         require(
             WETHToken.balanceOf(sender) >= requiredPreFund,
             "WETH-TokenPaymaster: not enough balance"
         );
+        
         return abi.encode(userOp.sender);
     }
 
@@ -81,7 +79,7 @@ contract WETHTokenPaymaster is BasePaymaster {
     {
         //constructor(EntryPoint anEntryPoint, address anOwner, IERC20 token, address paymaster)
         bytes32 bytecodeHash = keccak256(
-            userOp.initCode[0:userOp.initCode.length - 128]
+            userOp.initCode[0:userOp.initCode.length - 64]
         );
 
         // no check on POC
@@ -92,23 +90,23 @@ contract WETHTokenPaymaster is BasePaymaster {
         // );
 
 
-        // first param (of 4) should be our entryPoint
+        // first param (of 2) should be our entryPoint
         bytes32 entryPointParam = bytes32(
-            userOp.initCode[userOp.initCode.length - 128:]
+            userOp.initCode[userOp.initCode.length - 64:]
         );
         require(
             address(uint160(uint256(entryPointParam))) == address(entryPoint),
             "wrong paymaster in constructor"
         );
 
-        //the 3nd parameter is WETH token
-        bytes32 tokenParam = bytes32(
-            userOp.initCode[userOp.initCode.length - 64:]
-        );
-        require(
-            address(uint160(uint256(tokenParam))) == address(WETHToken),
-            "wrong token in constructor"
-        );
+        // //the 3nd parameter is WETH token
+        // bytes32 tokenParam = bytes32(
+        //     userOp.initCode[userOp.initCode.length - 64:]
+        // );
+        // require(
+        //     address(uint160(uint256(tokenParam))) == address(WETHToken),
+        //     "wrong token in constructor"
+        // );
 
         // //the 4nd parameter is this paymaster
         // bytes32 paymasterParam = bytes32(

@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "solidity-bytes-utils": "^0.8.0",
+    "solidity-string-util": "^0.1.0",
     "solidity-string-utils": "^0.0.8-0"
   }
 }

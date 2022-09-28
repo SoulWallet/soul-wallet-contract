@@ -10,8 +10,7 @@ import "./ACL.sol";
 import "./helpers/Signatures.sol";
 import "./helpers/Calldata.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
-
+import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -32,7 +31,6 @@ interface IERC20 {
      * Emits an {Approval} event.
      */
     function approve(address spender, uint256 amount) external returns (bool);
- 
 }
 
 /**
@@ -41,7 +39,8 @@ interface IERC20 {
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SmartWallet is BaseWallet, ACL {
+contract SmartWallet is BaseWallet, ACL, IERC1271 {
+
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
     using Signatures for UserOperation;
@@ -96,7 +95,12 @@ contract SmartWallet is BaseWallet, ACL {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(EntryPoint anEntryPoint, address anOwner, IERC20 token, address paymaster) {
+    constructor(
+        EntryPoint anEntryPoint,
+        address anOwner,
+        IERC20 token,
+        address paymaster
+    ) {
         _entryPoint = anEntryPoint;
         require(anOwner != address(0), "ACL: Owner cannot be zero");
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
@@ -239,10 +243,7 @@ contract SmartWallet is BaseWallet, ACL {
         require(req);
     }
 
-    function grantGuardianConfirmation(address account)
-        external
-        override
-    {
+    function grantGuardianConfirmation(address account) external override {
         require(!isOwner(account), "ACL: Owner cannot be guardian");
         require(
             pendingGuardian[account].pendingRequestType ==
@@ -257,10 +258,7 @@ contract SmartWallet is BaseWallet, ACL {
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
     }
 
-    function revokeGuardianConfirmation(address account)
-        external
-        override
-    {
+    function revokeGuardianConfirmation(address account) external override {
         require(
             pendingGuardian[account].pendingRequestType ==
                 PendingRequestType.revokeGuardian,
@@ -285,7 +283,7 @@ contract SmartWallet is BaseWallet, ACL {
             "request not exist"
         );
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
-        emit PendingRequestEvent(account,  PendingRequestType.none, 0);
+        emit PendingRequestEvent(account, PendingRequestType.none, 0);
     }
 
     function grantGuardianRequest(address account)
@@ -299,7 +297,11 @@ contract SmartWallet is BaseWallet, ACL {
             PendingRequestType.addGuardian,
             effectiveAt
         );
-        emit PendingRequestEvent(account,  PendingRequestType.addGuardian, effectiveAt);
+        emit PendingRequestEvent(
+            account,
+            PendingRequestType.addGuardian,
+            effectiveAt
+        );
     }
 
     function revokeGuardianRequest(address account)
@@ -312,7 +314,11 @@ contract SmartWallet is BaseWallet, ACL {
             PendingRequestType.revokeGuardian,
             effectiveAt
         );
-        emit PendingRequestEvent(account,  PendingRequestType.revokeGuardian, effectiveAt);
+        emit PendingRequestEvent(
+            account,
+            PendingRequestType.revokeGuardian,
+            effectiveAt
+        );
     }
 
     function transferOwner(address account)
@@ -363,7 +369,7 @@ contract SmartWallet is BaseWallet, ACL {
             signatureData.values.length >= getMinGuardiansSignatures(),
             "Wallet: Insufficient guardians"
         );
-         // There cannot be an owner with address 0.
+        // There cannot be an owner with address 0.
         address lastGuardian = address(0);
         address currentGuardian;
 
@@ -375,8 +381,21 @@ contract SmartWallet is BaseWallet, ACL {
                 value.signature
             );
             currentGuardian = value.signer;
-            require(currentGuardian > lastGuardian, "Invalid guardian address provided");
+            require(
+                currentGuardian > lastGuardian,
+                "Invalid guardian address provided"
+            );
             lastGuardian = currentGuardian;
         }
+    }
+
+    function isValidSignature(bytes32 hash, bytes memory signature)
+        external
+        view
+        override
+        returns (bytes4)
+    {
+        require(isOwner(hash.recover(signature)), "ACL: Invalid signature");
+        return IERC1271.isValidSignature.selector;
     }
 }

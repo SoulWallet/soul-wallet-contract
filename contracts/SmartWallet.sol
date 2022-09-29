@@ -63,7 +63,7 @@ contract SmartWallet is BaseWallet, ACL, IERC1271 {
         uint256 effectiveAt;
     }
     mapping(address => PendingRequest) public pendingGuardian;
-    uint256 public guardianDelay = 1 days;
+    uint256 public guardianDelay = 2 minutes ; // 2 minutes for POC
 
     function isGuardianActionAllowed(UserOperation calldata op)
         internal

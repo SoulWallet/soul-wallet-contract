@@ -22,3 +22,5 @@ cache
 artifacts
 .DS_Store
 build
+
+hardhat.config.ts

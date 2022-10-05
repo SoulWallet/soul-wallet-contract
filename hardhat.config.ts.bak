@@ -1,0 +1,56 @@
+/*
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: daivd.ding
+ * @Date: 2022-09-29 16:22:19
+ * @LastEditors: cejay
+ * @LastEditTime: 2022-10-04 00:43:38
+ */
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+
+const config: HardhatUserConfig = {
+  defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {
+    },
+    ganache: {
+      url: "http://127.0.0.1:8545",
+      accounts: [""]
+    },
+    ropsten: {
+      url: "https://ropsten.infura.io/v3/<key>",
+      accounts: [""],
+      gasPrice: 10000000000,
+      timeout: 1000000
+    },
+    goerli: {
+      url: "https://ropsten.infura.io/v3/<key>",
+      accounts: [""]
+    }
+  },
+  etherscan: {
+    apiKey: "<key>"
+  },
+  solidity: { 
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 20000,
+          },
+        }
+      }
+    ]
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+};
+
+export default config;

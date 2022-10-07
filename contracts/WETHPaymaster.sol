@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./EntryPoint.sol";
@@ -46,9 +46,9 @@ contract WETHTokenPaymaster is BasePaymaster {
         bytes32, /*requestId*/
         uint256 requiredPreFund
     ) external view override returns (bytes memory context) {
-        // make sure that verificationGas is high enough to handle postOp
+        // make sure that verificationGasLimit is high enough to handle postOp
         require(
-            userOp.verificationGas > 45000,
+            userOp.verificationGasLimit > 45000,
             "WETH-TokenPaymaster: gas too low for postOp"
         );
 

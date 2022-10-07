@@ -1,11 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "./IWallet.sol";
-import "./EntryPoint.sol";
+import "./interfaces/IWallet.sol";
+import "./interfaces/IEntryPoint.sol";
 
 /**
  * Basic wallet implementation.
@@ -25,19 +26,15 @@ abstract contract BaseWallet is IWallet {
      * return the entryPoint used by this wallet.
      * subclass should return the current entryPoint used by this wallet.
      */
-    function entryPoint() public view virtual returns (EntryPoint);
+    function entryPoint() public view virtual returns (IEntryPoint);
 
     /**
      * Validate user's signature and nonce.
      * subclass doesn't override this method. instead, it should override the specific internal validation methods.
      */
-    function validateUserOp(
-        UserOperation calldata userOp,
-        bytes32 requestId,
-        uint256 missingWalletFunds
-    ) external override {
+    function validateUserOp(UserOperation calldata userOp, bytes32 requestId, address aggregator, uint256 missingWalletFunds) external override {
         _requireFromEntryPoint();
-        _validateSignature(userOp, requestId);
+        _validateSignature(userOp, requestId, aggregator);
         //during construction, the "nonce" field hold the salt.
         // if we assert it is zero, then we allow only a single wallet per owner.
         if (userOp.initCode.length == 0) {
@@ -49,11 +46,8 @@ abstract contract BaseWallet is IWallet {
     /**
      * ensure the request comes from the known entrypoint.
      */
-    function _requireFromEntryPoint() internal view virtual {
-        require(
-            msg.sender == address(entryPoint()),
-            "wallet: not from EntryPoint"
-        );
+    function _requireFromEntryPoint() internal virtual view {
+        require(msg.sender == address(entryPoint()), "wallet: not from EntryPoint");
     }
 
     /**
@@ -61,11 +55,9 @@ abstract contract BaseWallet is IWallet {
      * @param userOp validate the userOp.signature field
      * @param requestId convenient field: the hash of the request, to check the signature against
      *          (also hashes the entrypoint and chain-id)
+     * @param aggregator the current aggregator. can be ignored by wallets that don't use aggregators
      */
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 requestId
-    ) internal view virtual;
+    function _validateSignature(UserOperation calldata userOp, bytes32 requestId, address aggregator) internal virtual view;
 
     /**
      * validate the current nonce matches the UserOperation nonce.
@@ -73,9 +65,7 @@ abstract contract BaseWallet is IWallet {
      * called only if initCode is empty (since "nonce" field is used as "salt" on wallet creation)
      * @param userOp the op to validate.
      */
-    function _validateAndUpdateNonce(UserOperation calldata userOp)
-        internal
-        virtual;
+    function _validateAndUpdateNonce(UserOperation calldata userOp) internal virtual;
 
     /**
      * sends to the entrypoint (msg.sender) the missing funds for this transaction.
@@ -87,12 +77,7 @@ abstract contract BaseWallet is IWallet {
      */
     function _payPrefund(uint256 missingWalletFunds) internal virtual {
         if (missingWalletFunds != 0) {
-            //pay required prefund. make sure NOT to use the "gas" opcode, which is banned during validateUserOp
-            // (and used by default by the "call")
-            (bool success, ) = payable(msg.sender).call{
-                value: missingWalletFunds,
-                gas: type(uint256).max
-            }("");
+            (bool success,) = payable(msg.sender).call{value : missingWalletFunds, gas : type(uint256).max}("");
             (success);
             //ignore failure (its EntryPoint's job to verify, not wallet.)
         }
@@ -114,10 +99,7 @@ abstract contract BaseWallet is IWallet {
      * to be the "admin"
      */
     function _requireFromAdmin() internal view virtual {
-        require(
-            msg.sender == address(this) || msg.sender == address(entryPoint()),
-            "not admin"
-        );
+        require(msg.sender == address(this) || msg.sender == address(entryPoint()), "not admin");
     }
 
     /**
@@ -125,6 +107,5 @@ abstract contract BaseWallet is IWallet {
      * subclass should override and update current entrypoint
      */
     function _updateEntryPoint(address) internal virtual;
-
     function getVersion() external virtual view returns(uint);
 }

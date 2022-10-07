@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.12;
 
-/*
-    source from:https://github.com/eth-infinitism/
-*/
+/* solhint-disable reason-string */
 
-
-import "./EntryPoint.sol";
 import "./BasePaymaster.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -26,40 +22,51 @@ contract VerifyingPaymaster is BasePaymaster {
 
     address public immutable verifyingSigner;
 
-    constructor(EntryPoint _entryPoint, address _verifyingSigner, address _owner) BasePaymaster(_entryPoint, _owner) {
+    constructor(IEntryPoint _entryPoint, address _verifyingSigner, address _owner) BasePaymaster(_entryPoint, _owner) {
         verifyingSigner = _verifyingSigner;
     }
 
-    // return the hash we're going to sign off-chain (and validate on-chain)
+    /**
+     * return the hash we're going to sign off-chain (and validate on-chain)
+     * this method is called by the off-chain service, to sign the request.
+     * it is called on-chain from the validatePaymasterUserOp, to validate the signature.
+     * note that this signature covers all fields of the UserOperation, except the "paymasterAndData",
+     * which will carry the signature itself.
+     */
     function getHash(UserOperation calldata userOp)
     public pure returns (bytes32) {
-        //can't use userOp.hash(), since it contains also the paymasterData itself.
+        //can't use userOp.hash(), since it contains also the paymasterAndData itself.
         return keccak256(abi.encode(
                 userOp.getSender(),
                 userOp.nonce,
                 keccak256(userOp.initCode),
                 keccak256(userOp.callData),
-                userOp.callGas,
-                userOp.verificationGas,
+                userOp.callGasLimit,
+                userOp.verificationGasLimit,
                 userOp.preVerificationGas,
                 userOp.maxFeePerGas,
-                userOp.maxPriorityFeePerGas,
-                userOp.paymaster
+                userOp.maxPriorityFeePerGas
             ));
     }
 
-    // verify our external signer signed this request.
-    // the "paymasterData" is supposed to be a signature over the entire request params
-    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 /*requestId*/, uint requiredPreFund)
+    /**
+     * verify our external signer signed this request.
+     * the "paymasterAndData" is expected to be the paymaster and a signature over the entire request params
+     */
+    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 /*requestId*/, uint256 requiredPreFund)
     external view override returns (bytes memory context) {
         (requiredPreFund);
 
         bytes32 hash = getHash(userOp);
-        require(userOp.paymasterData.length >= 65, "VerifyingPaymaster: invalid signature length in paymasterData");
-        require(verifyingSigner == hash.toEthSignedMessageHash().recover(userOp.paymasterData), "VerifyingPaymaster: wrong signature");
+        bytes calldata paymasterAndData = userOp.paymasterAndData;
+        uint256 sigLength = paymasterAndData.length - 20;
+        //ECDSA library supports both 64 and 65-byte long signatures.
+        // we only "require" it here so that the revert reason on invalid signature will be of "VerifyingPaymaster", and not "ECDSA"
+        require(sigLength == 64 || sigLength == 65, "VerifyingPaymaster: invalid signature length in paymasterAndData");
+        require(verifyingSigner == hash.toEthSignedMessageHash().recover(paymasterAndData[20:]), "VerifyingPaymaster: wrong signature");
 
         //no need for other on-chain validation: entire UserOp should have been checked
-        // by the external service prior signing it.
+        // by the external service prior to signing it.
         return "";
     }
 

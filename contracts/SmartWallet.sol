@@ -84,11 +84,11 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         return _nonce;
     }
 
-    function entryPoint() public view virtual override returns (EntryPoint) {
+    function entryPoint() public view virtual override returns (IEntryPoint) {
         return _entryPoint;
     }
 
-    EntryPoint private _entryPoint;
+    IEntryPoint private _entryPoint;
 
     event EntryPointChanged(
         address indexed oldEntryPoint,
@@ -103,7 +103,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         // solhint-disable-previous-line no-empty-blocks
     }
 
-    function initialize(EntryPoint anEntryPoint, address anOwner,  IERC20 token,
+    function initialize(IEntryPoint anEntryPoint, address anOwner,  IERC20 token,
         address paymaster)
         public
         initializer
@@ -172,7 +172,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
      */
     function _updateEntryPoint(address newEntryPoint) internal override {
         emit EntryPointChanged(address(_entryPoint), newEntryPoint);
-        _entryPoint = EntryPoint(payable(newEntryPoint));
+        _entryPoint = IEntryPoint(payable(newEntryPoint));
     }
 
     function _requireFromAdmin() internal view override {
@@ -213,10 +213,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     }
 
     /// implement template method of BaseWallet
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 requestId
-    ) internal view override {
+    function _validateSignature(UserOperation calldata userOp, bytes32 requestId, address) internal view virtual override {
         SignatureData memory signatureData = userOp.decodeSignature();
         signatureData.mode == SignatureMode.owner
             ? _validateOwnerSignature(signatureData, requestId)

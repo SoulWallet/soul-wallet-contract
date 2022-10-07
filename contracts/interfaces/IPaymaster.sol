@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.12;
 
-import "./UserOperation.sol";
+import "../UserOperation.sol";
 
 /**
  * the interface exposed by a paymaster contract, who agrees to pay the gas for user's operations.
@@ -10,16 +10,18 @@ import "./UserOperation.sol";
 interface IPaymaster {
 
     /**
-     * payment validation: check if paymaster agree to pay (using its stake)
-     * revert to reject this request.
-     * actual payment is done after postOp is called, by deducting actual call cost form the paymaster's stake.
+     * payment validation: check if paymaster agree to pay.
+     * Must verify sender is the entryPoint.
+     * Revert to reject this request.
+     * Note that bundlers will reject this method if it changes the state, unless the paymaster is trusted (whitelisted)
+     * The paymaster pre-pays using its deposit, and receive back a refund after the postOp method returns.
      * @param userOp the user operation
      * @param requestId hash of the user's request data.
      * @param maxCost the maximum cost of this transaction (based on maximum gas and gas price from userOp)
      * @return context value to send to a postOp
      *  zero length to signify postOp is not required.
      */
-    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 requestId, uint maxCost) external view returns (bytes memory context);
+    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 requestId, uint256 maxCost) external returns (bytes memory context);
 
     /**
      * post-operation handler.
@@ -32,7 +34,7 @@ interface IPaymaster {
      * @param context - the context value returned by validatePaymasterUserOp
      * @param actualGasCost - actual gas used so far (without this postOp call).
      */
-    function postOp(PostOpMode mode, bytes calldata context, uint actualGasCost) external;
+    function postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) external;
 
     enum PostOpMode {
         opSucceeded, // user op succeeded

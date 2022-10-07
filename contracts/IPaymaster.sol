@@ -1,4 +1,5 @@
-pragma solidity ^0.8.12;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.7;
 
 import "./UserOperation.sol";
 
@@ -7,6 +8,7 @@ import "./UserOperation.sol";
  * a paymaster must hold a stake to cover the required entrypoint stake and also the gas for the transaction.
  */
 interface IPaymaster {
+
     /**
      * payment validation: check if paymaster agree to pay (using its stake)
      * revert to reject this request.
@@ -17,11 +19,7 @@ interface IPaymaster {
      * @return context value to send to a postOp
      *  zero length to signify postOp is not required.
      */
-    function validatePaymasterUserOp(
-        UserOperation calldata userOp,
-        bytes32 requestId,
-        uint256 maxCost
-    ) external view returns (bytes memory context);
+    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 requestId, uint maxCost) external view returns (bytes memory context);
 
     /**
      * post-operation handler.
@@ -34,11 +32,7 @@ interface IPaymaster {
      * @param context - the context value returned by validatePaymasterUserOp
      * @param actualGasCost - actual gas used so far (without this postOp call).
      */
-    function postOp(
-        PostOpMode mode,
-        bytes calldata context,
-        uint256 actualGasCost
-    ) external;
+    function postOp(PostOpMode mode, bytes calldata context, uint actualGasCost) external;
 
     enum PostOpMode {
         opSucceeded, // user op succeeded

@@ -21,3 +21,4 @@ typechain-types
 cache
 artifacts
 .DS_Store
+build

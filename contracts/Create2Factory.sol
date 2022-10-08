@@ -15,13 +15,4 @@ contract Create2Factory {
             createdContract := create2(0, add(_initCode, 0x20), mload(_initCode), _salt)
         }
     }
-
-      function deploy2(bytes memory _initCode, bytes32 _salt)
-        public
-        returns (address payable createdContract)
-    {
-       
-       address payable createAddr = deploy(_initCode, _salt);
-       return createAddr;
-    }
 }

@@ -32,6 +32,27 @@ interface IERC20 {
      */
     function approve(address spender, uint256 amount) external returns (bool);
 }
+/**
+ * @dev All custom errors to be used 
+ */
+contract CustomErrorsList{
+
+//  Name of errors                               Functions this error is to be used               
+    error SmartWallet_NotZeroAddress();          // Constructor, transferOwner
+    error SmartWallet_NotOwner();                // _onlyOwner
+    error SmartWallet_InvalidArrayLength();      // execBatch
+    error SmartWallet_InvalidEntryPoint();       // requireFromEntryPoint
+    error SmartWallet_InvalidNonce();            // _validateAndUpdateNonce
+    error SmartWallet_NotDelayPassed();          // grantGuardianConfirmation, revokeGuardianConfirmation
+    error SmartWallet_NoAddGuardianRequest();    // grantGuardianConfirmation
+    error SmartWallet_NoRevokeGuardianRequest(); // revokeGuardianConfirmation
+    error SmartWallet_AddressCanNotBeGuardian(); // grantGuardianConfirmation
+    error SmartWallet_NoRequestExists();         // deleteGuardianRequest
+    error SmartWallet_NoGuardiansAllowed();      // _validateGuardiansSignature
+    error SmartWallet_InvalidGuardianAction();   // _validateGuardiansSignature
+    error SmartWallet_InvalidAddress();          // _validateGuardiansSignature
+    error SmartWallet_InvalidSignature();        // isValidSignature
+}
 
 /**
  * minimal wallet.

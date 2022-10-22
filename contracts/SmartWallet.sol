@@ -49,6 +49,27 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     using Signatures for UserOperation;
     using Calldata for bytes;
 
+    /*//////////////////////////////////////////////////////////////
+                                 ERRORS
+    //////////////////////////////////////////////////////////////*/
+
+    //  Name of errors                               Functions this error is to be used               
+    error SmartWallet_NotZeroAddress();          // Constructor, transferOwner
+    error SmartWallet_NotOwner();                // _onlyOwner
+    error SmartWallet_InvalidArrayLength();      // execBatch
+    error SmartWallet_InvalidEntryPoint();       // requireFromEntryPoint
+    error SmartWallet_InvalidNonce();            // _validateAndUpdateNonce
+    error SmartWallet_NotDelayPassed();          // grantGuardianConfirmation, revokeGuardianConfirmation
+    error SmartWallet_NoAddGuardianRequest();    // grantGuardianConfirmation
+    error SmartWallet_NoRevokeGuardianRequest(); // revokeGuardianConfirmation
+    error SmartWallet_AddressCanNotBeGuardian(); // grantGuardianConfirmation
+    error SmartWallet_NoRequestExists();         // deleteGuardianRequest
+    error SmartWallet_NoGuardiansAllowed();      // _validateGuardiansSignature
+    error SmartWallet_InvalidGuardianAction();   // _validateGuardiansSignature
+    error SmartWallet_InsufficientGuardians();   // _validateGuardiansSignature
+    error SmartWallet_InvalidAddress();          // _validateGuardiansSignature
+    error SmartWallet_InvalidSignature();        // isValidSignature
+
     enum PendingRequestType {
         none,
         addGuardian,
@@ -110,7 +131,10 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     {
         __AccessControlEnumerable_init();
         _entryPoint = anEntryPoint;
-        require(anOwner != address(0), "ACL: Owner cannot be zero");
+        if( anOwner == address(0) ){
+            revert SmartWallet_NotZeroAddress();
+        }
+        // require(anOwner != address(0), "ACL: Owner cannot be zero");
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
         _grantRole(OWNER_ROLE, anOwner);
 
@@ -128,10 +152,13 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the entryPoint (which gets redirected through execFromEntryPoint)
-        require(
-            hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this),
-            "only owner"
-        );
+        if( !(hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this))){
+            revert SmartWallet_NotOwner();
+        }
+        // require(
+        //     hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this),
+        //     "only owner"
+        // );
     }
 
     /**
@@ -158,8 +185,11 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     function execBatch(address[] calldata dest, bytes[] calldata func)
         external
         onlyOwner
-    {
-        require(dest.length == func.length, "wrong array lengths");
+    {   
+        if( dest.length != func.length){
+            revert SmartWallet_InvalidArrayLength();
+        }
+        // require(dest.length == func.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
         }
@@ -188,10 +218,9 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
      * - pay prefund, in case current deposit is not enough
      */
     modifier requireFromEntryPoint() {
-        require(
-            msg.sender == address(entryPoint()),
-            "wallet: not from EntryPoint"
-        );
+        if(msg.sender != address(entryPoint())){
+            revert SmartWallet_InvalidNonce();
+        }
         _;
     }
 
@@ -209,7 +238,10 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         internal
         override
     {
-        require(_nonce++ == userOp.nonce, "wallet: invalid nonce");
+        if(_nonce++ != userOp.nonce){
+            revert SmartWallet_InvalidNonce();
+        }
+       
     }
 
     /// implement template method of BaseWallet
@@ -249,16 +281,18 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     }
 
     function grantGuardianConfirmation(address account) external override {
-        require(!isOwner(account), "ACL: Owner cannot be guardian");
-        require(
-            pendingGuardian[account].pendingRequestType ==
-                PendingRequestType.addGuardian,
-            "add guardian request not exist"
-        );
-        require(
-            block.timestamp > pendingGuardian[account].effectiveAt,
-            "time delay not pass"
-        );
+        if(isOwner(account)){
+            revert SmartWallet_AddressCanNotBeGuardian();
+        }
+        
+        if(pendingGuardian[account].pendingRequestType != PendingRequestType.addGuardian ){
+            revert SmartWallet_NoAddGuardianRequest();
+        }
+        
+        if( block.timestamp <=  pendingGuardian[account].effectiveAt){
+            revert SmartWallet_NotDelayPassed();
+        }
+        
         _grantRole(GUARDIAN_ROLE, account);
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
     }
@@ -267,15 +301,13 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         external
         override
     {
-        require(
-            pendingGuardian[account].pendingRequestType ==
-                PendingRequestType.revokeGuardian,
-            "revoke guardian request not exist"
-        );
-        require(
-            block.timestamp > pendingGuardian[account].effectiveAt,
-            "time delay not pass"
-        );
+        if( pendingGuardian[account].pendingRequestType !=
+                PendingRequestType.revokeGuardian  ){
+                    revert SmartWallet_NoRevokeGuardianRequest();
+                }
+        if( ! (block.timestamp > pendingGuardian[account].effectiveAt) ){
+            revert SmartWallet_NotDelayPassed();          
+        }
         _revokeRole(GUARDIAN_ROLE, account);
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
     }
@@ -293,12 +325,11 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         external
         override
         requireFromEntryPoint
-    {
-        require(
-            pendingGuardian[account].pendingRequestType !=
-                PendingRequestType.none,
-            "request not exist"
-        );
+    { 
+        if(pendingGuardian[account].pendingRequestType ==
+                PendingRequestType.none){
+                    revert SmartWallet_NoRequestExists(); 
+                }
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
         emit PendingRequestEvent(account, PendingRequestType.none, 0);
     }
@@ -308,7 +339,9 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         override
         requireFromEntryPoint
     {
-        require(!isOwner(account), "ACL: Owner cannot be guardian");
+        if(isOwner(account)){
+            revert SmartWallet_AddressCanNotBeGuardian();
+        }
         uint256 effectiveAt = block.timestamp + guardianDelay;
         pendingGuardian[account] = PendingRequest(
             PendingRequestType.addGuardian,
@@ -343,7 +376,9 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         override
         requireFromEntryPoint
     {
-        require(account != address(0), "ACL: Owner cannot be zero");
+        if( account == address(0)){
+            revert SmartWallet_NotZeroAddress();  
+        }
         _revokeRole(OWNER_ROLE, getRoleMember(OWNER_ROLE, 0));
         _grantRole(OWNER_ROLE, account);
     }
@@ -380,12 +415,18 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         UserOperation calldata op,
         bytes32 requestId
     ) internal view {
-        require(getGuardiansCount() > 0, "Wallet: No guardians allowed");
-        require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
-        require(
-            signatureData.values.length >= getMinGuardiansSignatures(),
-            "Wallet: Insufficient guardians"
-        );
+        if(!(getGuardiansCount() > 0) ){
+            revert SmartWallet_NoGuardiansAllowed();
+        }
+        
+        if(!(isGuardianActionAllowed(op)) ){
+            revert SmartWallet_InvalidGuardianAction();   
+        }
+        
+        if( signatureData.values.length< getMinGuardiansSignatures()  ){
+            revert SmartWallet_InsufficientGuardians();   
+        }
+
         // There cannot be an owner with address 0.
         address lastGuardian = address(0);
         address currentGuardian;
@@ -398,10 +439,9 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
                 value.signature
             );
             currentGuardian = value.signer;
-            require(
-                currentGuardian > lastGuardian,
-                "Invalid guardian address provided"
-            );
+            if( !(currentGuardian > lastGuardian) ){
+                revert SmartWallet_InvalidAddress();
+            }
             lastGuardian = currentGuardian;
         }
     }

@@ -54,20 +54,20 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     //////////////////////////////////////////////////////////////*/
 
     //  Name of errors                               Functions this error is to be used               
-    error SmartWallet_NotZeroAddress();          // Constructor, transferOwner
-    error SmartWallet_NotOwner();                // _onlyOwner
-    error SmartWallet_InvalidArrayLength();      // execBatch
-    error SmartWallet_InvalidEntryPoint();       // requireFromEntryPoint
-    error SmartWallet_InvalidNonce();            // _validateAndUpdateNonce
-    error SmartWallet_NotDelayPassed();          // grantGuardianConfirmation, revokeGuardianConfirmation
-    error SmartWallet_NoAddGuardianRequest();    // grantGuardianConfirmation
-    error SmartWallet_NoRevokeGuardianRequest(); // revokeGuardianConfirmation
-    error SmartWallet_AddressCanNotBeGuardian(); // grantGuardianConfirmation
-    error SmartWallet_NoRequestExists();         // deleteGuardianRequest
-    error SmartWallet_NoGuardiansAllowed();      // _validateGuardiansSignature
-    error SmartWallet_InvalidGuardianAction();   // _validateGuardiansSignature
-    error SmartWallet_InsufficientGuardians();   // _validateGuardiansSignature
-    error SmartWallet_InvalidAddress();          // _validateGuardiansSignature
+    error SmartWallet_NotZeroAddress();          //  transferOwner                         
+    error SmartWallet_NotOwner();                // _onlyOwner                              
+    error SmartWallet_InvalidArrayLength();      // execBatch                               
+    error SmartWallet_InvalidEntryPoint();       // requireFromEntryPoint                   
+    error SmartWallet_InvalidNonce();            // _validateAndUpdateNonce                 
+    error SmartWallet_NotDelayPassed();          // grantGuardianConfirmation, revokeGuardianConfirmation   
+    error SmartWallet_NoAddGuardianRequest();    // grantGuardianConfirmation               
+    error SmartWallet_NoRevokeGuardianRequest(); // revokeGuardianConfirmation              
+    error SmartWallet_AddressCanNotBeGuardian(); // grantGuardianConfirmation, grantGuardianRequest               
+    error SmartWallet_NoRequestExists();         // deleteGuardianRequest                   
+    error SmartWallet_NoGuardiansAllowed();      // _validateGuardiansSignature             
+    error SmartWallet_InvalidGuardianAction();   // _validateGuardiansSignature             
+    error SmartWallet_InsufficientGuardians();   // _validateGuardiansSignature             
+    error SmartWallet_InvalidAddress();          // _validateGuardiansSignature             
     error SmartWallet_InvalidSignature();        // isValidSignature
 
     enum PendingRequestType {
@@ -155,10 +155,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         if( !(hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this))){
             revert SmartWallet_NotOwner();
         }
-        // require(
-        //     hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this),
-        //     "only owner"
-        // );
+       
     }
 
     /**
@@ -219,7 +216,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
      */
     modifier requireFromEntryPoint() {
         if(msg.sender != address(entryPoint())){
-            revert SmartWallet_InvalidNonce();
+            revert SmartWallet_InvalidEntryPoint();
         }
         _;
     }

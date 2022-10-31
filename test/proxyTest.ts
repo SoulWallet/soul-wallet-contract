@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-10-24 10:00:34
  * @LastEditors: cejay
- * @LastEditTime: 2022-10-24 23:03:04
+ * @LastEditTime: 2022-10-31 22:09:57
  */
 
 import "hardhat-gas-reporter";
@@ -56,15 +56,16 @@ async function main() {
         if (logicInfo != 'SoulWalletLogicTestBefore') {
             throw new Error("logicInfo error");
         }
+        
         try {
-            await ProxyContract.upgradeTo(SoulWalletLogicTestAfter.address);
+            await contract_before.upgradeTo(SoulWalletLogicTestAfter.address);
             throw new Error("upgradeTo should fail");
         } catch (error) {
         }
         // setAllowedUpgrade
         await contract_before.setAllowedUpgrade(SoulWalletLogicTestAfter.address);
         try {
-            await ProxyContract.upgradeTo(SoulWalletLogicTestAfter.address);
+            await contract_before.upgradeTo(SoulWalletLogicTestAfter.address);
         } catch (error) {
             throw new Error("upgradeTo should success");
         }

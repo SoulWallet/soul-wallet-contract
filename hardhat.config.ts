@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2022-10-24 22:20:44
+ * @LastEditTime: 2022-10-31 22:18:56
  */
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
@@ -30,7 +30,7 @@ const config: HardhatUserConfig =  {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: true
     },
     localhost: {
       allowUnlimitedContractSize: true,

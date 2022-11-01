@@ -20,7 +20,7 @@ contract SoulWalletProxy is Upgradeable {
      *
      * This function does not return to its internal call site, it will return directly to the external caller.
      */
-    function _delegate(address implementation) internal {
+    function _delegate(address implementation) private {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
             // block because it will not return to Solidity code. We overwrite the
@@ -57,7 +57,7 @@ contract SoulWalletProxy is Upgradeable {
      *
      * This function does not return to its internal call site, it will return directly to the external caller.
      */
-    function _fallback() internal virtual {
+    function _fallback() internal {
         _delegate(_getImplementation());
     }
 
@@ -65,7 +65,7 @@ contract SoulWalletProxy is Upgradeable {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if no other
      * function in the contract matches the call data.
      */
-    fallback() external payable virtual {
+    fallback() external payable {
         _fallback();
     }
 
@@ -73,7 +73,7 @@ contract SoulWalletProxy is Upgradeable {
      * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if call data
      * is empty.
      */
-    receive() external payable virtual {
+    receive() external payable {
         _fallback();
     }
 }

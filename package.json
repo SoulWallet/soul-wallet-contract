@@ -1,5 +1,5 @@
 {
-  "name": "hardhat-project",
+  "name": "soulwallet-contract",
   "devDependencies": {
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/providers": "^5.6.8",

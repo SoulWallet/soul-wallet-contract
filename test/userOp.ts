@@ -113,10 +113,8 @@
 
  export function signGuardianOp( requestId: string,  privateKeys: string[], guardian: string): string {
   let guardianSignature: GuardianSignature[]= new Array();
-  console.log(`requestId`, requestId)
   for(let i=0; i < privateKeys.length; i++) {
     let privateKey = privateKeys[i];
-    console.log(`privateKey`, privateKey)
     let msg1 = Buffer.concat([
       Buffer.from('\x19Ethereum Signed Message:\n32', 'ascii'),
       Buffer.from(arrayify(requestId))
@@ -127,7 +125,6 @@
     // (but without "async"
     let signedMessage1 = toRpcSig(sig.v, sig.r, sig.s);
     var wallet = new ethers.Wallet(privateKey);
-    console.log("Address: " + wallet.address);
     let signature: GuardianSignature = {
       signer: wallet.address,
       data: signedMessage1

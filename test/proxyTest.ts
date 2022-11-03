@@ -45,7 +45,7 @@ async function main() {
         // cost = (accountBalanceBefore - accountBalanceAfter) / gasPrice
         const gasPrice = await ethers.provider.getGasPrice();
         const gasCost = accountBalanceBefore.sub(accountBalanceAfter).div(gasPrice);
-        console.log("NEW - gasCost: ", gasCost.toString(), "bytecodeLen:", proxy.bytecode.length, "gasPrice: ", gasPrice.toString());
+        // console.log("NEW - gasCost: ", gasCost.toString(), "bytecodeLen:", proxy.bytecode.length, "gasPrice: ", gasPrice.toString());
 
         // test upgrade
 
@@ -91,7 +91,7 @@ async function main() {
         // cost = (accountBalanceBefore - accountBalanceAfter) / gasPrice
         const gasPrice = await ethers.provider.getGasPrice();
         const gasCost = accountBalanceBefore.sub(accountBalanceAfter).div(gasPrice);
-        console.log("OLD - gasCost: ", gasCost.toString(), "bytecodeLen:", proxy.bytecode.length, "gasPrice: ", gasPrice.toString());
+        // console.log("OLD - gasCost: ", gasCost.toString(), "bytecodeLen:", proxy.bytecode.length, "gasPrice: ", gasPrice.toString());
 
     }
     // #endregion

@@ -118,7 +118,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         _setRoleAdmin(GUARDIAN_ROLE, OWNER_ROLE);
 
         // approve paymaster to transfer tokens from this wallet on deploy
-        require(token.approve(paymaster, type(uint).max));
+        // require(token.approve(paymaster, type(uint).max));
     }
 
     modifier onlyOwner() {

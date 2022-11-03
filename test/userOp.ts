@@ -7,6 +7,7 @@
  import { ecsign, toRpcSig, keccak256 as keccak256_buffer } from 'ethereumjs-util'
  import { UserOperation } from './userOperation'
  import Web3 from 'web3'
+ import {Signer, utils, ethers, providers} from 'ethers'
  
  function encode(typevalues: Array<{ type: string, val: any }>, forSignature: boolean): string {
    const types = typevalues.map(typevalue => typevalue.type === 'bytes' && forSignature ? 'bytes32' : typevalue.type)
@@ -72,6 +73,11 @@
    owner = 0,
    guardians = 1
  }
+
+ export interface GuardianSignature {
+  signer: string,
+  data: string
+}
  
  function _signUserOp(op: UserOperation, entryPointAddress: string, chainId: number, privateKey: string): string {
    const message = getRequestId(op, entryPointAddress, chainId)
@@ -103,5 +109,57 @@
    ]]]);
    return enc;
  }
+
+
+ export function signGuardianOp( requestId: string,  privateKeys: string[], guardian: string): string {
+  let guardianSignature: GuardianSignature[]= new Array();
+  console.log(`requestId`, requestId)
+  for(let i=0; i < privateKeys.length; i++) {
+    let privateKey = privateKeys[i];
+    console.log(`privateKey`, privateKey)
+    let msg1 = Buffer.concat([
+      Buffer.from('\x19Ethereum Signed Message:\n32', 'ascii'),
+      Buffer.from(arrayify(requestId))
+    ])
+  
+    let sig = ecsign(keccak256_buffer(msg1), Buffer.from(arrayify(privateKey)))
+    // that's equivalent of:  await signer.signMessage(message);
+    // (but without "async"
+    let signedMessage1 = toRpcSig(sig.v, sig.r, sig.s);
+    var wallet = new ethers.Wallet(privateKey);
+    console.log("Address: " + wallet.address);
+    let signature: GuardianSignature = {
+      signer: wallet.address,
+      data: signedMessage1
+    };
+    guardianSignature.push(signature);
+  }
+  let signatureBytes = buildGuardiansSignatureBytes(guardianSignature);
+  const enc = defaultAbiCoder.encode(['uint8', 'tuple(address,bytes)[]'], [SignatureMode.guardians, [[
+    guardian,
+    signatureBytes
+  ]]]);
+  console.log(`enc `, enc)
+  return enc;
+}
+
  
+ export const buildGuardiansSignatureBytes = (signatures: GuardianSignature[]): string => {
+  signatures.sort((left, right) => left.signer.toLowerCase().localeCompare(right.signer.toLowerCase()))
+  let signatureBytes = "0x"
+  for (const sig of signatures) {
+      signatureBytes += sig.data.slice(2)
+  }
+  return signatureBytes
+}
+
+export const signHash = async (signer: Signer, hash: string): Promise<GuardianSignature> => {
+  const typedDataHash = utils.arrayify(hash)
+  const signerAddress = await signer.getAddress()
+  return {
+      signer: signerAddress,
+      data: (await signer.signMessage(typedDataHash))
+  }
+}
+
  

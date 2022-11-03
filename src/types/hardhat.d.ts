@@ -33,6 +33,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1822ProxiableUpgradeable__factory>;
     getContractFactory(
+      name: "IERC1271Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1271Upgradeable__factory>;
+    getContractFactory(
       name: "IBeaconUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBeaconUpgradeable__factory>;
@@ -60,22 +64,6 @@ declare module "hardhat/types/runtime" {
       name: "IERC165Upgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
-    getContractFactory(
-      name: "AccessControl",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AccessControl__factory>;
-    getContractFactory(
-      name: "AccessControlEnumerable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AccessControlEnumerable__factory>;
-    getContractFactory(
-      name: "IAccessControl",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAccessControl__factory>;
-    getContractFactory(
-      name: "IAccessControlEnumerable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAccessControlEnumerable__factory>;
     getContractFactory(
       name: "IERC1822Proxiable",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -105,14 +93,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC165__factory>;
-    getContractFactory(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC165__factory>;
-    getContractFactory(
       name: "ACL",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ACL__factory>;
@@ -137,6 +117,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EntryPoint__factory>;
     getContractFactory(
+      name: "GuardianFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GuardianFactory__factory>;
+    getContractFactory(
+      name: "GuardianMultiSigProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GuardianMultiSigProxy__factory>;
+    getContractFactory(
+      name: "GuardianMultiSigWallet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GuardianMultiSigWallet__factory>;
+    getContractFactory(
       name: "IAggregatedWallet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAggregatedWallet__factory>;
@@ -152,6 +144,10 @@ declare module "hardhat/types/runtime" {
       name: "IEntryPoint",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IEntryPoint__factory>;
+    getContractFactory(
+      name: "IGuardianMultiSigWallet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IGuardianMultiSigWallet__factory>;
     getContractFactory(
       name: "IPaymaster",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -185,9 +181,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SmartWalletV2Mock__factory>;
     getContractFactory(
+      name: "SoulWalletProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SoulWalletProxy__factory>;
+    getContractFactory(
       name: "StakeManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StakeManager__factory>;
+    getContractFactory(
+      name: "SoulWalletLogicTestAfter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SoulWalletLogicTestAfter__factory>;
+    getContractFactory(
+      name: "SoulWalletLogicTestBefore",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SoulWalletLogicTestBefore__factory>;
     getContractFactory(
       name: "VerifyingPaymaster",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -227,6 +235,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC1822ProxiableUpgradeable>;
     getContractAt(
+      name: "IERC1271Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1271Upgradeable>;
+    getContractAt(
       name: "IBeaconUpgradeable",
       address: string,
       signer?: ethers.Signer
@@ -261,26 +274,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
-    getContractAt(
-      name: "AccessControl",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AccessControl>;
-    getContractAt(
-      name: "AccessControlEnumerable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AccessControlEnumerable>;
-    getContractAt(
-      name: "IAccessControl",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IAccessControl>;
-    getContractAt(
-      name: "IAccessControlEnumerable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IAccessControlEnumerable>;
     getContractAt(
       name: "IERC1822Proxiable",
       address: string,
@@ -317,16 +310,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
-      name: "ERC165",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC165>;
-    getContractAt(
-      name: "IERC165",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC165>;
-    getContractAt(
       name: "ACL",
       address: string,
       signer?: ethers.Signer
@@ -357,6 +340,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.EntryPoint>;
     getContractAt(
+      name: "GuardianFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GuardianFactory>;
+    getContractAt(
+      name: "GuardianMultiSigProxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GuardianMultiSigProxy>;
+    getContractAt(
+      name: "GuardianMultiSigWallet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GuardianMultiSigWallet>;
+    getContractAt(
       name: "IAggregatedWallet",
       address: string,
       signer?: ethers.Signer
@@ -376,6 +374,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IEntryPoint>;
+    getContractAt(
+      name: "IGuardianMultiSigWallet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IGuardianMultiSigWallet>;
     getContractAt(
       name: "IPaymaster",
       address: string,
@@ -417,10 +420,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SmartWalletV2Mock>;
     getContractAt(
+      name: "SoulWalletProxy",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SoulWalletProxy>;
+    getContractAt(
       name: "StakeManager",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.StakeManager>;
+    getContractAt(
+      name: "SoulWalletLogicTestAfter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SoulWalletLogicTestAfter>;
+    getContractAt(
+      name: "SoulWalletLogicTestBefore",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SoulWalletLogicTestBefore>;
     getContractAt(
       name: "VerifyingPaymaster",
       address: string,

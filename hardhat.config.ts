@@ -30,7 +30,12 @@ const config: HardhatUserConfig =  {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
+      accounts: {
+        mnemonic: 'test test test test test test test test test test test junk',
+        initialIndex: 0,
+        accountsBalance: '10000000000000000000000000' // 10,000,000 ETH
+    }
     },
     localhost: {
       allowUnlimitedContractSize: true,

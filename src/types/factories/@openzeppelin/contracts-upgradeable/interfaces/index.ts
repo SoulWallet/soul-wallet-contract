@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as draftIerc1822UpgradeableSol from "./draft-IERC1822Upgradeable.sol";
+export { IERC1271Upgradeable__factory } from "./IERC1271Upgradeable__factory";

@@ -139,7 +139,6 @@
     guardian,
     signatureBytes
   ]]]);
-  console.log(`enc `, enc)
   return enc;
 }
 

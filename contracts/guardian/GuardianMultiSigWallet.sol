@@ -12,11 +12,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
 
-/**
- * minimal wallet.
- *  this is sample minimal wallet.
- *  has execute, eth handling methods
- *  has a single signer that can send requests through the entryPoint.
+/*
  */
 contract GuardianMultiSigWallet is
     Initializable,

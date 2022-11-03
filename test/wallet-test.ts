@@ -15,7 +15,7 @@ import {
   GuardianFactory__factory,
 } from "../src/types/index";
 import { UserOperation } from "./userOperation";
-import { signUserOp, getRequestId, signGuardianOp} from "./userOp";
+import { signUserOp, getRequestId, signGuardianOp } from "./userOp";
 
 import {
   getCreate2Address,
@@ -25,10 +25,14 @@ import {
 } from "ethers/lib/utils";
 import { EIP4337Lib } from "soul-wallet-lib/dist/exportLib/EIP4337Lib";
 import fs from "fs";
+import { Wallet } from "ethers";
 
 describe("WalletTest", function () {
-  let addr1: any, addr2: any, addr3: any, addr4:any, addr5:any, addr6: any;
-  let owner, ownerPrivateKey;
+  let addr1: any, addr2: any, addr3: any, addr4: any, addr5: any, addr6: any;
+  let owner: Wallet, ownerPrivateKey: string;
+  let guardian1: Wallet, guardian1PrivateKey: string;
+  let guardian2: Wallet, guardian2PrivateKey: string;
+  let guardian3: Wallet, guardian3PrivateKey: string;
   let create2Factory: Create2Factory;
   let entryPoint: EntryPoint;
   let smartWalletAddress;
@@ -73,7 +77,6 @@ describe("WalletTest", function () {
     );
 
     const salt = "0x".padEnd(66, "0");
-    console.log(`create2Factory address`, create2Factory.address);
     let contractCreateInitCode = `${WalletProxy__factory.bytecode.slice(
       2
     )}${constructorArg.slice(2)}`;
@@ -119,6 +122,10 @@ describe("WalletTest", function () {
   }
 
   before(async function () {
+   
+  });
+
+  beforeEach(async function () {
     create2Factory = await new Create2Factory__factory(ethersSigner).deploy();
     entryPoint = await new EntryPoint__factory(ethersSigner).deploy(
       hre.ethers.utils.parseEther("1").toString(),
@@ -128,15 +135,21 @@ describe("WalletTest", function () {
     let ownerWallet = hre.ethers.Wallet.createRandom();
     ownerPrivateKey = ownerWallet.privateKey;
     owner = new hre.ethers.Wallet(ownerWallet);
-    console.log(`addr1 ${addr1.privateKey}`)
+
+    guardian1 = hre.ethers.Wallet.createRandom();
+    guardian1PrivateKey = guardian1.privateKey;
+
+    guardian2 = hre.ethers.Wallet.createRandom();
+    guardian2PrivateKey = guardian2.privateKey;
+
+    guardian3 = hre.ethers.Wallet.createRandom();
+    guardian3PrivateKey = guardian3.privateKey;
+
     await deployWallet();
   });
 
-  beforeEach(async function () {});
-
   describe("wallet test", async function () {
     it("test upgrade", async function () {
-      console.log(`smartWalletAddress`, smartWalletAddress);
       const smartWalletContract = await hre.ethers.getContractAt(
         "SmartWallet",
         smartWalletAddress
@@ -177,7 +190,6 @@ describe("WalletTest", function () {
 
   describe("anonymous guardian test", async function () {
     it("test replace key using anonymous guardian", async function () {
-      console.log(`smartWalletAddress`, smartWalletAddress);
       const smartWalletContract = await hre.ethers.getContractAt(
         "SmartWallet",
         smartWalletAddress
@@ -187,41 +199,32 @@ describe("WalletTest", function () {
       let guardianImp = await new GuardianMultiSigWallet__factory(
         ethersSigner
       ).deploy();
-      console.log(`guardianImp`, guardianImp.address);
-
 
       let guardianFactory = await new GuardianFactory__factory(
         ethersSigner
       ).deploy();
-      console.log(`guardianFactory`, guardianFactory.address);
 
       let iface = new hre.ethers.utils.Interface([
         `function initialize(address[] calldata _guardians, uint256 _threshold)`,
       ]);
       // create 2/ 3 multi sig wallet
       let functionEncode = iface.encodeFunctionData("initialize", [
-        [addr3.address, addr4.address, addr5.address], 2
+        [guardian1.address, guardian2.address, guardian3.address],
+        2,
       ]);
 
       // calculate getGuardianAddress address
-      let calcuateGuardianAddr = await guardianFactory.getGuardianAddress(guardianImp.address, functionEncode, hre.ethers.utils.formatBytes32String(""));
-      console.log(`calcuateGuardianAddr`, calcuateGuardianAddr);
-
-
-      // deploy guardian multi sig wallet
-      await expect(guardianFactory.createGuardianMultiSig(guardianImp.address, [addr3.address, addr4.address, addr5.address], 2, hre.ethers.utils.formatBytes32String("")))
-        .to.emit(guardianFactory, "NewGuardianCreated")
-        .withArgs(calcuateGuardianAddr);
-
-
-
-        //create replace key operation
-        iface = new hre.ethers.utils.Interface([
-          `function transferOwner(address account)`,
-        ]);
-        functionEncode = iface.encodeFunctionData("transferOwner", [
-          addr6.address,
-        ]);
+      let calcuateGuardianAddr = await guardianFactory.getGuardianAddress(
+        guardianImp.address,
+        functionEncode,
+        hre.ethers.utils.formatBytes32String("")
+      );
+      // set guardian to contract
+      {
+      iface = new hre.ethers.utils.Interface([
+        `function grantGuardianRequest(address account)`,
+      ]);
+      functionEncode = iface.encodeFunctionData("grantGuardianRequest", [calcuateGuardianAddr]);
         let userOperation: UserOperation = new UserOperation();
         userOperation.sender = smartWalletAddress;
         userOperation.paymasterAndData = "0x";
@@ -231,12 +234,98 @@ describe("WalletTest", function () {
         userOperation.preVerificationGas = 12e6;
         userOperation.maxFeePerGas = 12e9;
         userOperation.maxPriorityFeePerGas = 12e9;
+        userOperation.nonce = 0;
 
-        let requestId = await getRequestId(userOperation, entryPoint.address, chainId!);
-        console.log(`requestId`, requestId);
+        userOperation.signature = signUserOp(
+          userOperation,
+          entryPoint.address,
+          chainId!,
+          ownerPrivateKey
+        );
+        await entryPoint
+          .connect(addr1)
+          .handleOps([userOperation], addr1.address);
+      }
+      // change block time to pass the guardian delay 
+      await hre.ethers.provider.send("evm_increaseTime", [3600 * 48])
+      await hre.ethers.provider.send("evm_mine", [])
 
-        let sig = signGuardianOp(requestId, [addr3.privateKey, addr4.privateKey, addr5.privateKey], calcuateGuardianAddr);
-        console.log(`sig `, sig)
+
+      {
+        iface = new hre.ethers.utils.Interface([
+          `function grantGuardianConfirmation(address account)`,
+        ]);
+        functionEncode = iface.encodeFunctionData("grantGuardianConfirmation", [calcuateGuardianAddr]);
+          let userOperation: UserOperation = new UserOperation();
+          userOperation.sender = smartWalletAddress;
+          userOperation.paymasterAndData = "0x";
+          userOperation.callData = functionEncode;
+          userOperation.callGasLimit = 10e6;
+          userOperation.verificationGasLimit = 11e6;
+          userOperation.preVerificationGas = 12e6;
+          userOperation.maxFeePerGas = 12e9;
+          userOperation.maxPriorityFeePerGas = 12e9;
+          userOperation.nonce = 1;
+  
+          userOperation.signature = signUserOp(
+            userOperation,
+            entryPoint.address,
+            chainId!,
+            ownerPrivateKey
+          );
+          await entryPoint
+            .connect(addr1)
+            .handleOps([userOperation], addr1.address);
+        }
+
+      // deploy guardian multi sig wallet
+      await expect(
+        guardianFactory.createGuardianMultiSig(
+          guardianImp.address,
+          [guardian1.address, guardian2.address, guardian3.address],
+          2,
+          hre.ethers.utils.formatBytes32String("")
+        )
+      )
+        .to.emit(guardianFactory, "NewGuardianCreated")
+        .withArgs(calcuateGuardianAddr);
+
+      //create replace key operation
+      iface = new hre.ethers.utils.Interface([
+        `function transferOwner(address account)`,
+      ]);
+
+      functionEncode = iface.encodeFunctionData("transferOwner", [
+        addr6.address,
+      ]);
+      let userOperation: UserOperation = new UserOperation();
+      userOperation.sender = smartWalletAddress;
+      userOperation.paymasterAndData = "0x";
+      userOperation.callData = functionEncode;
+      userOperation.callGasLimit = 10e6;
+      userOperation.verificationGasLimit = 11e6;
+      userOperation.preVerificationGas = 12e6;
+      userOperation.maxFeePerGas = 12e9;
+      userOperation.maxPriorityFeePerGas = 12e9;
+      userOperation.nonce = 2;
+
+      let requestId = await getRequestId(
+        userOperation,
+        entryPoint.address,
+        chainId!
+      );
+
+      let sig = signGuardianOp(
+        requestId,
+        [guardian1.privateKey, guardian2.privateKey, guardian3.privateKey],
+        calcuateGuardianAddr
+      );
+      userOperation.signature = sig;
+      await entryPoint.connect(addr1).handleOps([userOperation], addr1.address);
+
+
+      let newOwner = await smartWalletContract.getOwner(0);
+      expect(newOwner).to.equal(addr6.address);
     });
   });
 });

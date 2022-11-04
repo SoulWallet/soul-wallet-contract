@@ -32,8 +32,7 @@ abstract contract BaseWallet is IWallet {
      * Validate user's signature and nonce.
      * subclass doesn't override this method. instead, it should override the specific internal validation methods.
      */
-    function validateUserOp(UserOperation calldata userOp, bytes32 requestId, address aggregator, uint256 missingWalletFunds) external override {
-        _requireFromEntryPoint();
+    function validateUserOp(UserOperation calldata userOp, bytes32 requestId, address aggregator, uint256 missingWalletFunds) external requireFromEntryPoint override {
         _validateSignature(userOp, requestId, aggregator);
         //during construction, the "nonce" field hold the salt.
         // if we assert it is zero, then we allow only a single wallet per owner.
@@ -43,11 +42,20 @@ abstract contract BaseWallet is IWallet {
         _payPrefund(missingWalletFunds);
     }
 
-    /**
-     * ensure the request comes from the known entrypoint.
+     /**
+     * validate the userOp is correct.
+     * revert if it doesn't.
+     * - must only be called from the entryPoint.
+     * - make sure the signature is of our supported signer.
+     * - validate current nonce matches request nonce, and increment it.
+     * - pay prefund, in case current deposit is not enough
      */
-    function _requireFromEntryPoint() internal virtual view {
-        require(msg.sender == address(entryPoint()), "wallet: not from EntryPoint");
+    modifier requireFromEntryPoint() {
+        require(
+            msg.sender == address(entryPoint()),
+            "wallet: not from EntryPoint"
+        );
+        _;
     }
 
     /**

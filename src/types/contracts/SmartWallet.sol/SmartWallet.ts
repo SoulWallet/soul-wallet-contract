@@ -74,7 +74,6 @@ export interface SmartWalletInterface extends utils.Interface {
     "GUARDIAN_ROLE()": FunctionFragment;
     "OWNER_ROLE()": FunctionFragment;
     "addDeposit()": FunctionFragment;
-    "deleteGuardianRequest(address)": FunctionFragment;
     "entryPoint()": FunctionFragment;
     "exec(address,uint256,bytes)": FunctionFragment;
     "execBatch(address[],bytes[])": FunctionFragment;
@@ -89,8 +88,6 @@ export interface SmartWalletInterface extends utils.Interface {
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
     "getVersion()": FunctionFragment;
-    "grantGuardianConfirmation(address)": FunctionFragment;
-    "grantGuardianRequest(address)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "guardianDelay()": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
@@ -101,13 +98,14 @@ export interface SmartWalletInterface extends utils.Interface {
     "pendingGuardian(address)": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeGuardianConfirmation(address)": FunctionFragment;
-    "revokeGuardianRequest(address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
     "transferOwner(address)": FunctionFragment;
+    "undoUpdateGuardianRequest(address)": FunctionFragment;
     "updateEntryPoint(address)": FunctionFragment;
+    "updateGuardianConfirmation(address)": FunctionFragment;
+    "updateGuardianRequest(address)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,address,uint256)": FunctionFragment;
@@ -120,7 +118,6 @@ export interface SmartWalletInterface extends utils.Interface {
       | "GUARDIAN_ROLE"
       | "OWNER_ROLE"
       | "addDeposit"
-      | "deleteGuardianRequest"
       | "entryPoint"
       | "exec"
       | "execBatch"
@@ -135,8 +132,6 @@ export interface SmartWalletInterface extends utils.Interface {
       | "getRoleMember"
       | "getRoleMemberCount"
       | "getVersion"
-      | "grantGuardianConfirmation"
-      | "grantGuardianRequest"
       | "grantRole"
       | "guardianDelay"
       | "hasRole"
@@ -147,13 +142,14 @@ export interface SmartWalletInterface extends utils.Interface {
       | "pendingGuardian"
       | "proxiableUUID"
       | "renounceRole"
-      | "revokeGuardianConfirmation"
-      | "revokeGuardianRequest"
       | "revokeRole"
       | "supportsInterface"
       | "transfer"
       | "transferOwner"
+      | "undoUpdateGuardianRequest"
       | "updateEntryPoint"
+      | "updateGuardianConfirmation"
+      | "updateGuardianRequest"
       | "upgradeTo"
       | "upgradeToAndCall"
       | "validateUserOp"
@@ -175,10 +171,6 @@ export interface SmartWalletInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "addDeposit",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deleteGuardianRequest",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "entryPoint",
@@ -245,14 +237,6 @@ export interface SmartWalletInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "grantGuardianConfirmation",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "grantGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "grantRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -295,14 +279,6 @@ export interface SmartWalletInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "revokeGuardianConfirmation",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "revokeRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -319,7 +295,19 @@ export interface SmartWalletInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "undoUpdateGuardianRequest",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "updateEntryPoint",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateGuardianConfirmation",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateGuardianRequest",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -354,10 +342,6 @@ export interface SmartWalletInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "OWNER_ROLE", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "addDeposit", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "deleteGuardianRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "entryPoint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "exec", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "execBatch", data: BytesLike): Result;
@@ -396,14 +380,6 @@ export interface SmartWalletInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getVersion", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "grantGuardianConfirmation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "grantGuardianRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "guardianDelay",
@@ -426,14 +402,6 @@ export interface SmartWalletInterface extends utils.Interface {
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "revokeGuardianConfirmation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "revokeGuardianRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
@@ -445,7 +413,19 @@ export interface SmartWalletInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "undoUpdateGuardianRequest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "updateEntryPoint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateGuardianConfirmation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateGuardianRequest",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -619,11 +599,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     entryPoint(overrides?: CallOverrides): Promise<[string]>;
 
     exec(
@@ -682,16 +657,6 @@ export interface SmartWallet extends BaseContract {
 
     getVersion(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -744,16 +709,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -776,8 +731,23 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     updateEntryPoint(
       newEntryPoint: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -815,11 +785,6 @@ export interface SmartWallet extends BaseContract {
 
   addDeposit(
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  deleteGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   entryPoint(overrides?: CallOverrides): Promise<string>;
@@ -880,16 +845,6 @@ export interface SmartWallet extends BaseContract {
 
   getVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
-  grantGuardianConfirmation(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  grantGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   grantRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -939,16 +894,6 @@ export interface SmartWallet extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  revokeGuardianConfirmation(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  revokeGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   revokeRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -971,8 +916,23 @@ export interface SmartWallet extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  undoUpdateGuardianRequest(
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   updateEntryPoint(
     newEntryPoint: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  updateGuardianConfirmation(
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  updateGuardianRequest(
+    account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1009,11 +969,6 @@ export interface SmartWallet extends BaseContract {
     OWNER_ROLE(overrides?: CallOverrides): Promise<string>;
 
     addDeposit(overrides?: CallOverrides): Promise<void>;
-
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     entryPoint(overrides?: CallOverrides): Promise<string>;
 
@@ -1073,16 +1028,6 @@ export interface SmartWallet extends BaseContract {
 
     getVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1135,16 +1080,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1167,8 +1102,23 @@ export interface SmartWallet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     updateEntryPoint(
       newEntryPoint: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1290,11 +1240,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     entryPoint(overrides?: CallOverrides): Promise<BigNumber>;
 
     exec(
@@ -1353,16 +1298,6 @@ export interface SmartWallet extends BaseContract {
 
     getVersion(overrides?: CallOverrides): Promise<BigNumber>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1410,16 +1345,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1442,8 +1367,23 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     updateEntryPoint(
       newEntryPoint: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1484,11 +1424,6 @@ export interface SmartWallet extends BaseContract {
 
     addDeposit(
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     entryPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1551,16 +1486,6 @@ export interface SmartWallet extends BaseContract {
 
     getVersion(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1608,16 +1533,6 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1640,8 +1555,23 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     updateEntryPoint(
       newEntryPoint: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

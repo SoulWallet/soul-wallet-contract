@@ -137,19 +137,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "deleteGuardianRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
         name: "index",
         type: "uint256",
@@ -289,32 +276,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "grantGuardianConfirmation",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "grantGuardianRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "bytes32",
         name: "role",
         type: "bytes32",
@@ -413,32 +374,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "revokeGuardianConfirmation",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "revokeGuardianRequest",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "bytes32",
         name: "role",
         type: "bytes32",
@@ -482,6 +417,45 @@ const _abi = [
       },
     ],
     name: "transferOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "undoUpdateGuardianRequest",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "updateGuardianConfirmation",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "updateGuardianRequest",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

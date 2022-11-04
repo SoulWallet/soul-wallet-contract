@@ -32,7 +32,6 @@ export interface ACLInterface extends utils.Interface {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "GUARDIAN_ROLE()": FunctionFragment;
     "OWNER_ROLE()": FunctionFragment;
-    "deleteGuardianRequest(address)": FunctionFragment;
     "getGuardian(uint256)": FunctionFragment;
     "getGuardiansCount()": FunctionFragment;
     "getMinGuardiansSignatures()": FunctionFragment;
@@ -41,18 +40,17 @@ export interface ACLInterface extends utils.Interface {
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
-    "grantGuardianConfirmation(address)": FunctionFragment;
-    "grantGuardianRequest(address)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "isGuardian(address)": FunctionFragment;
     "isOwner(address)": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeGuardianConfirmation(address)": FunctionFragment;
-    "revokeGuardianRequest(address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwner(address)": FunctionFragment;
+    "undoUpdateGuardianRequest(address)": FunctionFragment;
+    "updateGuardianConfirmation(address)": FunctionFragment;
+    "updateGuardianRequest(address)": FunctionFragment;
   };
 
   getFunction(
@@ -60,7 +58,6 @@ export interface ACLInterface extends utils.Interface {
       | "DEFAULT_ADMIN_ROLE"
       | "GUARDIAN_ROLE"
       | "OWNER_ROLE"
-      | "deleteGuardianRequest"
       | "getGuardian"
       | "getGuardiansCount"
       | "getMinGuardiansSignatures"
@@ -69,18 +66,17 @@ export interface ACLInterface extends utils.Interface {
       | "getRoleAdmin"
       | "getRoleMember"
       | "getRoleMemberCount"
-      | "grantGuardianConfirmation"
-      | "grantGuardianRequest"
       | "grantRole"
       | "hasRole"
       | "isGuardian"
       | "isOwner"
       | "renounceRole"
-      | "revokeGuardianConfirmation"
-      | "revokeGuardianRequest"
       | "revokeRole"
       | "supportsInterface"
       | "transferOwner"
+      | "undoUpdateGuardianRequest"
+      | "updateGuardianConfirmation"
+      | "updateGuardianRequest"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -94,10 +90,6 @@ export interface ACLInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "OWNER_ROLE",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deleteGuardianRequest",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getGuardian",
@@ -132,14 +124,6 @@ export interface ACLInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "grantGuardianConfirmation",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "grantGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "grantRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -160,14 +144,6 @@ export interface ACLInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "revokeGuardianConfirmation",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "revokeRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -177,6 +153,18 @@ export interface ACLInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwner",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "undoUpdateGuardianRequest",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateGuardianConfirmation",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateGuardianRequest",
     values: [PromiseOrValue<string>]
   ): string;
 
@@ -189,10 +177,6 @@ export interface ACLInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "OWNER_ROLE", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "deleteGuardianRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getGuardian",
     data: BytesLike
@@ -222,28 +206,12 @@ export interface ACLInterface extends utils.Interface {
     functionFragment: "getRoleMemberCount",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "grantGuardianConfirmation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "grantGuardianRequest",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isGuardian", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "revokeGuardianConfirmation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "revokeGuardianRequest",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
@@ -253,6 +221,18 @@ export interface ACLInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "undoUpdateGuardianRequest",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateGuardianConfirmation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateGuardianRequest",
     data: BytesLike
   ): Result;
 
@@ -346,11 +326,6 @@ export interface ACL extends BaseContract {
 
     OWNER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     getGuardian(
       index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -383,16 +358,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -421,16 +386,6 @@ export interface ACL extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -446,6 +401,21 @@ export interface ACL extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
@@ -453,11 +423,6 @@ export interface ACL extends BaseContract {
   GUARDIAN_ROLE(overrides?: CallOverrides): Promise<string>;
 
   OWNER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  deleteGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   getGuardian(
     index: PromiseOrValue<BigNumberish>,
@@ -491,16 +456,6 @@ export interface ACL extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  grantGuardianConfirmation(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  grantGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   grantRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -529,16 +484,6 @@ export interface ACL extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  revokeGuardianConfirmation(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  revokeGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   revokeRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -555,17 +500,27 @@ export interface ACL extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  undoUpdateGuardianRequest(
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  updateGuardianConfirmation(
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  updateGuardianRequest(
+    account: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
     GUARDIAN_ROLE(overrides?: CallOverrides): Promise<string>;
 
     OWNER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     getGuardian(
       index: PromiseOrValue<BigNumberish>,
@@ -599,16 +554,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -637,16 +582,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -659,6 +594,21 @@ export interface ACL extends BaseContract {
     ): Promise<boolean>;
 
     transferOwner(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateGuardianRequest(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -709,11 +659,6 @@ export interface ACL extends BaseContract {
 
     OWNER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     getGuardian(
       index: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -746,16 +691,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -784,16 +719,6 @@ export interface ACL extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -809,6 +734,21 @@ export interface ACL extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    updateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -819,11 +759,6 @@ export interface ACL extends BaseContract {
     GUARDIAN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     OWNER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    deleteGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     getGuardian(
       index: PromiseOrValue<BigNumberish>,
@@ -859,16 +794,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    grantGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    grantGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     grantRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -897,16 +822,6 @@ export interface ACL extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    revokeGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    revokeGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -919,6 +834,21 @@ export interface ACL extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     transferOwner(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    undoUpdateGuardianRequest(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateGuardianConfirmation(
+      account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateGuardianRequest(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

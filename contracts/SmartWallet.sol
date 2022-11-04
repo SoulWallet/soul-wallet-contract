@@ -13,8 +13,6 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-
-
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
@@ -34,7 +32,6 @@ interface IERC20 {
      * Emits an {Approval} event.
      */
     function approve(address spender, uint256 amount) external returns (bool);
- 
 }
 
 /**
@@ -51,8 +48,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
 
     enum PendingRequestType {
         none,
-        addGuardian,
-        revokeGuardian
+        updateGuardian
     }
 
     event PendingRequestEvent(
@@ -103,11 +99,12 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         // solhint-disable-previous-line no-empty-blocks
     }
 
-    function initialize(IEntryPoint anEntryPoint, address anOwner,  IERC20 token,
-        address paymaster)
-        public
-        initializer
-    {
+    function initialize(
+        IEntryPoint anEntryPoint,
+        address anOwner,
+        IERC20 token,
+        address paymaster
+    ) public initializer {
         __AccessControlEnumerable_init();
         _entryPoint = anEntryPoint;
         require(anOwner != address(0), "ACL: Owner cannot be zero");
@@ -132,6 +129,16 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
             hasRole(OWNER_ROLE, msg.sender) || msg.sender == address(this),
             "only owner"
         );
+    }
+
+    modifier onlyOwnerOrFromEntryPoint() {
+        require(
+            hasRole(OWNER_ROLE, msg.sender) ||
+                msg.sender == address(entryPoint()) ||
+                msg.sender == address(this),
+            "no permission"
+        );
+        _;
     }
 
     /**
@@ -175,26 +182,6 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         _entryPoint = IEntryPoint(payable(newEntryPoint));
     }
 
-    function _requireFromAdmin() internal view override {
-        _onlyOwner();
-    }
-
-    /**
-     * validate the userOp is correct.
-     * revert if it doesn't.
-     * - must only be called from the entryPoint.
-     * - make sure the signature is of our supported signer.
-     * - validate current nonce matches request nonce, and increment it.
-     * - pay prefund, in case current deposit is not enough
-     */
-    modifier requireFromEntryPoint() {
-        require(
-            msg.sender == address(entryPoint()),
-            "wallet: not from EntryPoint"
-        );
-        _;
-    }
-
     // called by entryPoint, only after validateUserOp succeeded.
     function execFromEntryPoint(
         address dest,
@@ -213,7 +200,11 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     }
 
     /// implement template method of BaseWallet
-    function _validateSignature(UserOperation calldata userOp, bytes32 requestId, address) internal view virtual override {
+    function _validateSignature(
+        UserOperation calldata userOp,
+        bytes32 requestId,
+        address
+    ) internal view virtual override {
         SignatureData memory signatureData = userOp.decodeSignature();
         signatureData.mode == SignatureMode.owner
             ? _validateOwnerSignature(signatureData, requestId)
@@ -248,38 +239,6 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         require(req);
     }
 
-    function grantGuardianConfirmation(address account) external override {
-        require(!isOwner(account), "ACL: Owner cannot be guardian");
-        require(
-            pendingGuardian[account].pendingRequestType ==
-                PendingRequestType.addGuardian,
-            "add guardian request not exist"
-        );
-        require(
-            block.timestamp > pendingGuardian[account].effectiveAt,
-            "time delay not pass"
-        );
-        _grantRole(GUARDIAN_ROLE, account);
-        pendingGuardian[account].pendingRequestType = PendingRequestType.none;
-    }
-
-    function revokeGuardianConfirmation(address account)
-        external
-        override
-    {
-        require(
-            pendingGuardian[account].pendingRequestType ==
-                PendingRequestType.revokeGuardian,
-            "revoke guardian request not exist"
-        );
-        require(
-            block.timestamp > pendingGuardian[account].effectiveAt,
-            "time delay not pass"
-        );
-        _revokeRole(GUARDIAN_ROLE, account);
-        pendingGuardian[account].pendingRequestType = PendingRequestType.none;
-    }
-
     function _authorizeUpgrade(address)
         internal
         view
@@ -289,51 +248,62 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
         // solhint-disable-previous-line no-empty-blocks
     }
 
-    function deleteGuardianRequest(address account)
+    function updateGuardianConfirmation(address account)
         external
         override
-        requireFromEntryPoint
+        onlyOwnerOrFromEntryPoint
     {
+        require(!isOwner(account), "ACL: Owner cannot be guardian");
         require(
-            pendingGuardian[account].pendingRequestType !=
-                PendingRequestType.none,
-            "request not exist"
+            pendingGuardian[account].pendingRequestType ==
+                PendingRequestType.updateGuardian,
+            "update guardian request not exist"
         );
+        require(
+            block.timestamp > pendingGuardian[account].effectiveAt,
+            "time delay not pass"
+        );
+        uint256 guardianCount = getGuardiansCount();
+        // remove old guardian
+        for (uint256 i = 0; i < guardianCount; i++) {
+            _revokeRole(GUARDIAN_ROLE, getRoleMember(GUARDIAN_ROLE, i));
+        }
+        //update the new guardian
+        _grantRole(GUARDIAN_ROLE, account);
         pendingGuardian[account].pendingRequestType = PendingRequestType.none;
-        emit PendingRequestEvent(account, PendingRequestType.none, 0);
     }
 
-    function grantGuardianRequest(address account)
+    function updateGuardianRequest(address account)
         external
         override
-        requireFromEntryPoint
+        onlyOwnerOrFromEntryPoint
     {
         require(!isOwner(account), "ACL: Owner cannot be guardian");
         uint256 effectiveAt = block.timestamp + guardianDelay;
         pendingGuardian[account] = PendingRequest(
-            PendingRequestType.addGuardian,
+            PendingRequestType.updateGuardian,
             effectiveAt
         );
         emit PendingRequestEvent(
             account,
-            PendingRequestType.addGuardian,
+            PendingRequestType.updateGuardian,
             effectiveAt
         );
     }
 
-    function revokeGuardianRequest(address account)
+    function undoUpdateGuardianRequest(address account)
         external
         override
-        requireFromEntryPoint
+        onlyOwnerOrFromEntryPoint
     {
         uint256 effectiveAt = block.timestamp + guardianDelay;
         pendingGuardian[account] = PendingRequest(
-            PendingRequestType.revokeGuardian,
+            PendingRequestType.updateGuardian,
             effectiveAt
         );
         emit PendingRequestEvent(
             account,
-            PendingRequestType.revokeGuardian,
+            PendingRequestType.updateGuardian,
             effectiveAt
         );
     }
@@ -341,7 +311,7 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     function transferOwner(address account)
         external
         override
-        requireFromEntryPoint
+        onlyOwnerOrFromEntryPoint
     {
         require(account != address(0), "ACL: Owner cannot be zero");
         _revokeRole(OWNER_ROLE, getRoleMember(OWNER_ROLE, 0));
@@ -382,31 +352,16 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
     ) internal view {
         require(getGuardiansCount() > 0, "Wallet: No guardians allowed");
         require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
-        require(
-            signatureData.values.length >= getMinGuardiansSignatures(),
-            "Wallet: Insufficient guardians"
-        );
-        // There cannot be an owner with address 0.
-        address lastGuardian = address(0);
-        address currentGuardian;
 
-        for (uint256 i = 0; i < signatureData.values.length; i++) {
-            SignatureValue memory value = signatureData.values[i];
-            _validateGuardianSignature(
-                value.signer,
-                requestId.toEthSignedMessageHash(),
-                value.signature
-            );
-            currentGuardian = value.signer;
-            require(
-                currentGuardian > lastGuardian,
-                "Invalid guardian address provided"
-            );
-            lastGuardian = currentGuardian;
-        }
+        SignatureValue memory value = signatureData.values[0];
+        _validateGuardianSignature(
+            value.signer,
+            requestId.toEthSignedMessageHash(),
+            value.signature
+        );
     }
 
-    function getVersion() override external view virtual returns(uint){
+    function getVersion() external view virtual override returns (uint) {
         return 1;
     }
 

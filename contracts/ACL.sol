@@ -63,30 +63,19 @@ abstract contract ACL is AccessControlEnumerableUpgradeable {
     }
 
     /**
-     * @dev Grants guardian permissions to an account confirmation
+     * @dev update the guardiain confirmation
      */
-    function grantGuardianConfirmation(address account) external virtual;
-
-    /**
-     * @dev Revokes guardian permissions to an account confirmation
-     */
-    function revokeGuardianConfirmation(address account) external virtual;
+    function updateGuardianConfirmation(address account) external virtual;
 
        /**
-     * @dev Grants guardian permissions to an account reqeust
+     * @dev send request to add guardian
      */
-    function grantGuardianRequest(address account) external virtual;
-
-    /**
-     * @dev delete Request
-     */
-    function deleteGuardianRequest(address account) external virtual;
-
+    function updateGuardianRequest(address account) external virtual;
 
       /**
-     * @dev Revokes guardian permissions to an account request
+     * @dev undo the request to add guardian
      */
-    function revokeGuardianRequest(address account) external virtual;
+    function undoUpdateGuardianRequest(address account) external virtual;
 
     /**
      * @dev Transfers owner permissions from the owner at index #0 to another account

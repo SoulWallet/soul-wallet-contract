@@ -15,7 +15,7 @@ import {
   GuardianFactory__factory,
 } from "../src/types/index";
 import { UserOperation } from "./userOperation";
-import { signUserOp, getRequestId, signGuardianOp } from "./userOp";
+import { signUserOp, getRequestId, signGuardianOp, fillUserOp } from "./userOp";
 
 import {
   getCreate2Address,
@@ -104,11 +104,7 @@ describe("WalletTest", function () {
     let userOperation: UserOperation = new UserOperation();
     userOperation.sender = smartWalletAddress;
     userOperation.initCode = initCode;
-    userOperation.callGasLimit = 10e6;
-    userOperation.verificationGasLimit = 11e6;
-    userOperation.preVerificationGas = 12e6;
-    userOperation.maxFeePerGas = 12e9;
-    userOperation.maxPriorityFeePerGas = 12e9;
+    userOperation = await fillUserOp(userOperation, entryPoint);
 
     userOperation.signature = signUserOp(
       userOperation,
@@ -168,11 +164,7 @@ describe("WalletTest", function () {
       userOperation.sender = smartWalletAddress;
       userOperation.paymasterAndData = "0x";
       userOperation.callData = functionEncode;
-      userOperation.callGasLimit = 10e6;
-      userOperation.verificationGasLimit = 11e6;
-      userOperation.preVerificationGas = 12e6;
-      userOperation.maxFeePerGas = 12e9;
-      userOperation.maxPriorityFeePerGas = 12e9;
+      userOperation = await fillUserOp(userOperation, entryPoint);
 
       userOperation.signature = signUserOp(
         userOperation,
@@ -230,12 +222,7 @@ describe("WalletTest", function () {
         userOperation.sender = smartWalletAddress;
         userOperation.paymasterAndData = "0x";
         userOperation.callData = functionEncode;
-        userOperation.callGasLimit = 10e6;
-        userOperation.verificationGasLimit = 11e6;
-        userOperation.preVerificationGas = 12e6;
-        userOperation.maxFeePerGas = 12e9;
-        userOperation.maxPriorityFeePerGas = 12e9;
-        userOperation.nonce = 0;
+        userOperation = await fillUserOp(userOperation, entryPoint);
 
         userOperation.signature = signUserOp(
           userOperation,
@@ -263,12 +250,7 @@ describe("WalletTest", function () {
         userOperation.sender = smartWalletAddress;
         userOperation.paymasterAndData = "0x";
         userOperation.callData = functionEncode;
-        userOperation.callGasLimit = 10e6;
-        userOperation.verificationGasLimit = 11e6;
-        userOperation.preVerificationGas = 12e6;
-        userOperation.maxFeePerGas = 12e9;
-        userOperation.maxPriorityFeePerGas = 12e9;
-        userOperation.nonce = 1;
+        userOperation = await fillUserOp(userOperation, entryPoint);
 
         userOperation.signature = signUserOp(
           userOperation,
@@ -305,12 +287,7 @@ describe("WalletTest", function () {
       userOperation.sender = smartWalletAddress;
       userOperation.paymasterAndData = "0x";
       userOperation.callData = functionEncode;
-      userOperation.callGasLimit = 10e6;
-      userOperation.verificationGasLimit = 11e6;
-      userOperation.preVerificationGas = 12e6;
-      userOperation.maxFeePerGas = 12e9;
-      userOperation.maxPriorityFeePerGas = 12e9;
-      userOperation.nonce = 2;
+      userOperation = await fillUserOp(userOperation, entryPoint);
 
       let requestId = await getRequestId(
         userOperation,

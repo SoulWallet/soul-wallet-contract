@@ -3,11 +3,16 @@
  * @link https://github.com/eth-infinitism/account-abstraction/blob/develop/test/UserOp.ts
  */
 
- import { arrayify, defaultAbiCoder, keccak256 } from 'ethers/lib/utils'
+ import { arrayify, defaultAbiCoder, keccak256, hexDataSlice} from 'ethers/lib/utils'
  import { ecsign, toRpcSig, keccak256 as keccak256_buffer } from 'ethereumjs-util'
  import { UserOperation } from './userOperation'
  import Web3 from 'web3'
- import {Signer, utils, ethers, providers} from 'ethers'
+ import {Signer, utils, ethers, providers, BigNumber, Contract} from 'ethers'
+ import {
+  EntryPoint,
+  SmartWallet,
+} from "../src/types/index";
+export const AddressZero = ethers.constants.AddressZero;
  
  function encode(typevalues: Array<{ type: string, val: any }>, forSignature: boolean): string {
    const types = typevalues.map(typevalue => typevalue.type === 'bytes' && forSignature ? 'bytes32' : typevalue.type)
@@ -158,4 +163,89 @@ export const signHash = async (signer: Signer, hash: string): Promise<GuardianSi
   }
 }
 
- 
+export const DefaultsForUserOp: UserOperation = {
+  sender: AddressZero,
+  nonce: 0,
+  initCode: '0x',
+  callData: '0x',
+  callGasLimit: 0,
+  verificationGasLimit: 200000,
+  preVerificationGas: 21000,
+  maxFeePerGas: 0,
+  maxPriorityFeePerGas: 1e9,
+  paymasterAndData: '0x',
+  signature: '0x'
+}
+
+export async function fillUserOp (op: Partial<UserOperation>, entryPoint?: EntryPoint): Promise<UserOperation> {
+  const op1 = { ...op }
+  const provider = entryPoint?.provider
+  if (op.initCode != "0x") {
+    const initAddr = hexDataSlice(op1.initCode!, 0, 20)
+    const initCallData = hexDataSlice(op1.initCode!, 20)
+    if (op1.nonce == null) op1.nonce = 0
+    if (provider == null) throw new Error('no entrypoint/provider')
+    op1.sender = await entryPoint!.connect(AddressZero).callStatic.getSenderAddress(op1.initCode!)
+    if (op1.verificationGasLimit == 0) {
+      if (provider == null) throw new Error('no entrypoint/provider')
+      console.log('verificationGasLimit trying to estimate')
+      const initEstimate = await provider.estimateGas({
+        from: entryPoint?.address,
+        to: initAddr,
+        data: initCallData,
+        gasLimit: 10e9
+      })
+      op1.verificationGasLimit = DefaultsForUserOp.verificationGasLimit + Number(initEstimate.toString())
+    }
+  }
+  if (op1.nonce == 0 && op1.initCode == "0x") {
+    if (provider == null) throw new Error('must have entryPoint to autofill nonce')
+    const c = new Contract(op.sender!, ['function nonce() public view returns (uint256)'], provider)
+    let nonce = await c.nonce()
+    op1.nonce = Number(nonce.toString())
+  }
+  if (op1.callGasLimit == 0) {
+    if (provider == null) throw new Error('must have entryPoint for callGasLimit estimate')
+    const gasEstimated = await provider.estimateGas({
+      from: entryPoint?.address,
+      to: op1.sender,
+      data: op1.callData
+    })
+
+    op1.callGasLimit = gasEstimated.add(100000).toNumber()
+  }
+  if (op1.maxFeePerGas == 0) {
+    if (provider == null) throw new Error('must have entryPoint to autofill maxFeePerGas')
+    const block = await provider.getBlock('latest')
+    op1.maxFeePerGas = block.baseFeePerGas!.add(op1.maxPriorityFeePerGas ?? DefaultsForUserOp.maxPriorityFeePerGas).toNumber()
+  }
+  if (op1.maxPriorityFeePerGas == 0) {
+    op1.maxPriorityFeePerGas = DefaultsForUserOp.maxPriorityFeePerGas
+  }
+  const op2 = fillUserOpDefaults(op1)
+  if (op2.preVerificationGas.toString() === '0') {
+    op2.preVerificationGas = callDataCost(packUserOp(op2, false))
+  }
+  // op2.callGasLimit = 10e6;
+  op2.verificationGasLimit = 11e6;
+  return op2
+}
+export function fillUserOpDefaults (op: Partial<UserOperation>, defaults = DefaultsForUserOp): UserOperation {
+  const partial: any = { ...op }
+  // we want "item:undefined" to be used from defaults, and not override defaults, so we must explicitly
+  // remove those so "merge" will succeed.
+  for (const key in partial) {
+    if (partial[key] == null) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete partial[key]
+    }
+  }
+  const filled = { ...defaults, ...partial }
+  return filled
+}
+
+export function callDataCost (data: string): number {
+  return ethers.utils.arrayify(data)
+    .map(x => x === 0 ? 4 : 16)
+    .reduce((sum, x) => sum + x)
+}

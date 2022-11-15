@@ -86,29 +86,29 @@ abstract contract ACL is AccessControlEnumerableUpgradeable {
      * @dev Internal function to validate owner's signatures
      */
     function _validateOwnerSignature(
-        address signer,
-        bytes32 hash,
-        bytes memory signature
+        address _signer,
+        bytes32 _hash,
+        bytes memory _signature
     ) internal view {
         require(
-            SignatureChecker.isValidSignatureNow(signer, hash, signature),
+            SignatureChecker.isValidSignatureNow(_signer, _hash, _signature),
             "ACL: Invalid owner sig"
         );
-        require(isOwner(signer), "ACL: Signer not an owner");
+        require(isOwner(_signer), "ACL: Signer not an owner");
     }
 
     /**
      * @dev Internal function to validate guardian's signatures
      */
     function _validateGuardianSignature(
-        address signer,
-        bytes32 hash,
-        bytes memory signature
+        address _signer,
+        bytes32 _hash,
+        bytes memory _signature
     ) internal view {
         require(
-            SignatureChecker.isValidSignatureNow(signer, hash, signature),
+            SignatureChecker.isValidSignatureNow(_signer, _hash, _signature),
             "ACL: Invalid guardian sig"
         );
-        require(isGuardian(signer), "ACL: Signer not a guardian");
+        require(isGuardian(_signer), "ACL: Signer not a guardian");
     }
 }

@@ -95,6 +95,7 @@ export interface SmartWalletV2MockInterface extends utils.Interface {
     "initialize(address,address,address,address)": FunctionFragment;
     "isGuardian(address)": FunctionFragment;
     "isOwner(address)": FunctionFragment;
+    "isValidSignature(bytes32,bytes)": FunctionFragment;
     "nonce()": FunctionFragment;
     "pendingGuardian(address)": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
@@ -141,6 +142,7 @@ export interface SmartWalletV2MockInterface extends utils.Interface {
       | "initialize"
       | "isGuardian"
       | "isOwner"
+      | "isValidSignature"
       | "nonce"
       | "pendingGuardian"
       | "proxiableUUID"
@@ -272,6 +274,10 @@ export interface SmartWalletV2MockInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "isOwner",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isValidSignature",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(functionFragment: "nonce", values?: undefined): string;
   encodeFunctionData(
@@ -412,6 +418,10 @@ export interface SmartWalletV2MockInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isGuardian", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isOwner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isValidSignature",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "nonce", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingGuardian",
@@ -737,6 +747,12 @@ export interface SmartWalletV2Mock extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    isValidSignature(
+      hash: PromiseOrValue<BytesLike>,
+      signature: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     nonce(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     pendingGuardian(
@@ -939,6 +955,12 @@ export interface SmartWalletV2Mock extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  isValidSignature(
+    hash: PromiseOrValue<BytesLike>,
+    signature: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
   pendingGuardian(
@@ -1135,6 +1157,12 @@ export interface SmartWalletV2Mock extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    isValidSignature(
+      hash: PromiseOrValue<BytesLike>,
+      signature: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1427,6 +1455,12 @@ export interface SmartWalletV2Mock extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    isValidSignature(
+      hash: PromiseOrValue<BytesLike>,
+      signature: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
     pendingGuardian(
@@ -1624,6 +1658,12 @@ export interface SmartWalletV2Mock extends BaseContract {
 
     isOwner(
       account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isValidSignature(
+      hash: PromiseOrValue<BytesLike>,
+      signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

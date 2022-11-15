@@ -12,6 +12,7 @@ import "./helpers/Calldata.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC1271Upgradeable.sol";
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -40,7 +41,13 @@ interface IERC20 {
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
+contract SmartWallet is
+    BaseWallet,
+    Initializable,
+    UUPSUpgradeable,
+    ACL,
+    IERC1271Upgradeable
+{
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
     using Signatures for UserOperation;
@@ -363,6 +370,16 @@ contract SmartWallet is BaseWallet, Initializable, UUPSUpgradeable, ACL {
 
     function getVersion() external view virtual override returns (uint) {
         return 1;
+    }
+
+    function isValidSignature(bytes32 hash, bytes memory signature)
+        external
+        view
+        override
+        returns (bytes4)
+    {
+        require(isOwner(hash.recover(signature)), "SmartWallet: Invalid signature");
+        return IERC1271.isValidSignature.selector;
     }
 
     /**

@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 /**
  * @dev Collection of functions related to the address type
  */
-library Address {
+library TinyAddress {
     /**
      * @dev Returns true if `account` is a contract.
      *

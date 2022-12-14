@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
-import "./Ownable.sol";
+import "./utils/ownable/Ownable.sol";
 import "./interfaces/IPaymaster.sol";
 import "./interfaces/IEntryPoint.sol";
 

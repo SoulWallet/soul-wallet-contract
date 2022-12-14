@@ -6,7 +6,6 @@ pragma solidity ^0.8.12;
 /* solhint-disable reason-string */
 
 import "../helpers/Signatures.sol";
-import "../helpers/Calldata.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -20,17 +19,16 @@ contract GuardianMultiSigWallet is
     IERC1271Upgradeable
 {
     using ECDSA for bytes32;
-    using Calldata for bytes;
 
     mapping(address => bool) internal isGuardian;
-    uint256 threshold;
+    uint16 threshold;
 
     constructor() {
         _disableInitializers();
         // solhint-disable-previous-line no-empty-blocks
     }
 
-    function initialize(address[] calldata _guardians, uint256 _threshold)
+    function initialize(address[] calldata _guardians, uint16 _threshold)
         public
         initializer
     {
@@ -54,7 +52,7 @@ contract GuardianMultiSigWallet is
         returns (bytes4)
     {
         checkNSignatures(hash, signature, threshold);
-        return IERC1271.isValidSignature.selector;
+        return IERC1271Upgradeable.isValidSignature.selector;
     }
 
     /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.
@@ -93,7 +91,7 @@ contract GuardianMultiSigWallet is
     function checkNSignatures(
         bytes32 dataHash,
         bytes memory signatures,
-        uint256 requiredSignatures
+        uint16 requiredSignatures
     ) public view {
         // Check that the provided signature data is not too short
         require(

@@ -77,9 +77,17 @@ contract WETHTokenPaymaster is BasePaymaster {
         view
         virtual
     {
-        //constructor(EntryPoint anEntryPoint, address anOwner, IERC20 token, address paymaster)
+        /*
+        constructor(IEntryPoint _entryPoint,
+            address _owner,
+            uint32 _upgradeDelay,
+            uint32 _guardianDelay,
+            address _guardian,
+            IERC20 _erc20token,
+            address _paymaster)
+        */
         bytes32 bytecodeHash = keccak256(
-            userOp.initCode[0:userOp.initCode.length - 128]
+            userOp.initCode[0:userOp.initCode.length - 270] /* (32*7)+46=270  46 is fixed in current parameter encode */
         );
 
         // no check on POC
@@ -90,27 +98,25 @@ contract WETHTokenPaymaster is BasePaymaster {
         // );
 
 
-        // first param (of 4) should be our entryPoint
-        bytes32 entryPointParam = bytes32(
-            userOp.initCode[userOp.initCode.length - 128:]
-        );
+        // first param (of 7) should be our entryPoint
+        bytes32 entryPointParam = bytes32(userOp.initCode[userOp.initCode.length - 270:]);
         require(
             address(uint160(uint256(entryPointParam))) == address(entryPoint),
             "wrong paymaster in constructor"
         );
 
-        //the 3rd parameter is WETH token
+        //the 6th parameter is WETH token
         bytes32 tokenParam = bytes32(
-            userOp.initCode[userOp.initCode.length - 64:]
+            userOp.initCode[userOp.initCode.length - 110:] /* 64+46=110 */
         );
         require(
             address(uint160(uint256(tokenParam))) == address(WETHToken),
             "wrong token in constructor"
         );
 
-        //the 4th parameter is this paymaster
+        //the 7th parameter is this paymaster
         bytes32 paymasterParam = bytes32(
-            userOp.initCode[userOp.initCode.length - 32:]
+            userOp.initCode[userOp.initCode.length - 78:] /* 32+46=78 */
         );
         require(
             address(uint160(uint256(paymasterParam))) == address(this),

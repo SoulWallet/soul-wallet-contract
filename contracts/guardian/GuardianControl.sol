@@ -130,10 +130,12 @@ contract GuardianControl is IGuardianControl {
         require(guardian == signer, "signer not guardian");
 
         if (guardianCallData.initCode.length > 0) {
-            senderCreator.createSender(guardianCallData.initCode);
+            require(
+                senderCreator.createSender(guardianCallData.initCode) ==
+                    guardian,
+                "guardian contract not deployed"
+            );
         }
-
-        require(Address.isContract(guardian),"guardian contract not deployed");
 
         require(
             SignatureChecker.isValidSignatureNow(

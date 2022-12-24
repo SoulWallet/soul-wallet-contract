@@ -29,7 +29,6 @@ import {
   hexZeroPad,
   keccak256,
 } from "ethers/lib/utils";
-import { EIP4337Lib } from "soul-wallet-lib/dist/exportLib/EIP4337Lib";
 import fs from "fs";
 import { Wallet } from "ethers";
 

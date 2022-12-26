@@ -5,11 +5,37 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  IWallet,
-  IWalletInterface,
-} from "../../../contracts/interfaces/IWallet";
+  BaseAccount,
+  BaseAccountInterface,
+} from "../../contracts/BaseAccount";
 
 const _abi = [
+  {
+    inputs: [],
+    name: "entryPoint",
+    outputs: [
+      {
+        internalType: "contract IEntryPoint",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "nonce",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
   {
     inputs: [
       {
@@ -76,7 +102,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -86,26 +112,32 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "missingWalletFunds",
+        name: "missingAccountFunds",
         type: "uint256",
       },
     ],
     name: "validateUserOp",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
 ];
 
-export class IWallet__factory {
+export class BaseAccount__factory {
   static readonly abi = _abi;
-  static createInterface(): IWalletInterface {
-    return new utils.Interface(_abi) as IWalletInterface;
+  static createInterface(): BaseAccountInterface {
+    return new utils.Interface(_abi) as BaseAccountInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IWallet {
-    return new Contract(address, _abi, signerOrProvider) as IWallet;
+  ): BaseAccount {
+    return new Contract(address, _abi, signerOrProvider) as BaseAccount;
   }
 }

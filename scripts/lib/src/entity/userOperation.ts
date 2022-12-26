@@ -4,14 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-23 20:30:07
+ * @LastEditTime: 2022-12-26 22:31:57
  */
 
 import { ethers, BigNumber } from "ethers";
 import { Deferrable } from "ethers/lib/utils";
-import { NumberLike } from "../defines/numberLike";
+import { NumberLike, toDecString } from "../defines/numberLike";
 import { guardianSignature } from "../utils/guardian";
-import { signUserOp, payMasterSignHash, getRequestId, signUserOpWithPersonalSign, packGuardiansSignByInitCode } from '../utils/userOp';
+import { signUserOp, payMasterSignHash, getUserOpHash, signUserOpWithPersonalSign, packGuardiansSignByInitCode } from '../utils/userOp';
 import { TransactionInfo } from './transactionInfo';
 
 /**
@@ -48,6 +48,22 @@ class UserOperation {
         bytes signature;
         */
         return `["${this.sender.toLocaleLowerCase()}","${this.nonce}","${this.initCode}","${this.callData}","${this.callGasLimit}","${this.verificationGasLimit}","${this.preVerificationGas}","${this.maxFeePerGas}","${this.maxPriorityFeePerGas}","${this.paymasterAndData}","${this.signature}"]`;
+    }
+
+    public toJSON(): string {
+        return JSON.stringify({
+            sender: this.sender,
+            nonce: this.nonce,
+            initCode: this.initCode,
+            callData: this.callData,
+            callGasLimit: toDecString(this.callGasLimit),
+            verificationGasLimit: toDecString(this.verificationGasLimit),
+            preVerificationGas: toDecString(this.preVerificationGas),
+            maxFeePerGas: toDecString(this.maxFeePerGas),
+            maxPriorityFeePerGas: toDecString(this.maxPriorityFeePerGas),
+            paymasterAndData: this.paymasterAndData,
+            signature: this.signature
+        });
     }
 
     /**
@@ -108,7 +124,7 @@ class UserOperation {
     /**
      * sign the user operation with personal sign
      * @param signAddress the sign address
-     * @param signature the signature of the requestId
+     * @param signature the signature of the UserOpHash
      */
     public signWithSignature(signAddress: string, signature: string) {
         this.signature = signUserOpWithPersonalSign(signAddress, signature);
@@ -118,21 +134,22 @@ class UserOperation {
      * sign the user operation with guardians sign
      * @param guardianAddress guardian address
      * @param signature guardians signature
+     * @param deadline deadline (block timestamp)
      * @param initCode guardian contract init code
      */
-    public signWithGuardiansSign(guardianAddress: string, signature: guardianSignature[], initCode = '0x') {
-        this.signature = packGuardiansSignByInitCode(guardianAddress, signature, initCode);
+    public signWithGuardiansSign(guardianAddress: string, signature: guardianSignature[],deadline = 0, initCode = '0x') {
+        this.signature = packGuardiansSignByInitCode(guardianAddress, signature, deadline,initCode);
     }
 
 
     /**
-     * get the request id (userOp hash)
+     * get the UserOpHash (userOp hash)
      * @param entryPointAddress the entry point address
      * @param chainId the chain id
      * @returns hex string
      */
-    public getRequestId(entryPointAddress: string, chainId: number): string {
-        return getRequestId(this, entryPointAddress, chainId);
+    public getUserOpHash(entryPointAddress: string, chainId: number): string {
+        return getUserOpHash(this, entryPointAddress, chainId);
     }
 
 }

@@ -21,7 +21,7 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../common";
+} from "../../common";
 
 export type UserOperationStruct = {
   sender: PromiseOrValue<string>;
@@ -63,37 +63,13 @@ export type UserOperationStructOutput = [
   signature: string;
 };
 
-export interface BaseWalletInterface extends utils.Interface {
+export interface IAccountInterface extends utils.Interface {
   functions: {
-    "entryPoint()": FunctionFragment;
-    "getVersion()": FunctionFragment;
-    "nonce()": FunctionFragment;
-    "updateEntryPoint(address)": FunctionFragment;
     "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,address,uint256)": FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic:
-      | "entryPoint"
-      | "getVersion"
-      | "nonce"
-      | "updateEntryPoint"
-      | "validateUserOp"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "validateUserOp"): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "entryPoint",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getVersion",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "nonce", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "updateEntryPoint",
-    values: [PromiseOrValue<string>]
-  ): string;
   encodeFunctionData(
     functionFragment: "validateUserOp",
     values: [
@@ -104,13 +80,6 @@ export interface BaseWalletInterface extends utils.Interface {
     ]
   ): string;
 
-  decodeFunctionResult(functionFragment: "entryPoint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getVersion", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "nonce", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "updateEntryPoint",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "validateUserOp",
     data: BytesLike
@@ -119,12 +88,12 @@ export interface BaseWalletInterface extends utils.Interface {
   events: {};
 }
 
-export interface BaseWallet extends BaseContract {
+export interface IAccount extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: BaseWalletInterface;
+  interface: IAccountInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -146,106 +115,51 @@ export interface BaseWallet extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    entryPoint(overrides?: CallOverrides): Promise<[string]>;
-
-    getVersion(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    nonce(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
-  entryPoint(overrides?: CallOverrides): Promise<string>;
-
-  getVersion(overrides?: CallOverrides): Promise<BigNumber>;
-
-  nonce(overrides?: CallOverrides): Promise<BigNumber>;
-
-  updateEntryPoint(
-    newEntryPoint: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   validateUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     aggregator: PromiseOrValue<string>,
-    missingWalletFunds: PromiseOrValue<BigNumberish>,
+    missingAccountFunds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    entryPoint(overrides?: CallOverrides): Promise<string>;
-
-    getVersion(overrides?: CallOverrides): Promise<BigNumber>;
-
-    nonce(overrides?: CallOverrides): Promise<BigNumber>;
-
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
-    entryPoint(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getVersion(overrides?: CallOverrides): Promise<BigNumber>;
-
-    nonce(overrides?: CallOverrides): Promise<BigNumber>;
-
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    entryPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getVersion(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    nonce(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

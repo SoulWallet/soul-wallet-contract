@@ -135,7 +135,7 @@ export interface IPaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -150,7 +150,7 @@ export interface IPaymaster extends BaseContract {
 
   validatePaymasterUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     maxCost: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -165,10 +165,10 @@ export interface IPaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<[string, BigNumber] & { context: string; deadline: BigNumber }>;
   };
 
   filters: {};
@@ -183,7 +183,7 @@ export interface IPaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -199,7 +199,7 @@ export interface IPaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

@@ -3,3 +3,4 @@
 /* eslint-disable */
 export { IAccessControl__factory } from "./IAccessControl__factory";
 export { IAccessControlEnumerable__factory } from "./IAccessControlEnumerable__factory";
+export { Ownable__factory } from "./Ownable__factory";

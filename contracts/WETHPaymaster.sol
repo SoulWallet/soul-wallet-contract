@@ -18,9 +18,10 @@ contract WETHTokenPaymaster is BasePaymaster {
     IERC20 public WETHToken;
     mapping(bytes32 => bool) public KnownWallets;
 
-    constructor(EntryPoint _entryPoint,address _owner, IERC20 _WETHToken)
-        BasePaymaster(_entryPoint, _owner)
-    {
+    constructor(
+        EntryPoint _entryPoint,
+        IERC20 _WETHToken
+    ) BasePaymaster(_entryPoint) {
         WETHToken = _WETHToken;
     }
 
@@ -39,14 +40,17 @@ contract WETHTokenPaymaster is BasePaymaster {
     }
 
     /**
-     * @dev check allowance amount and user wallet banlance
+     * validate the request:
+     * if this is a constructor call, make sure it is a known account (that is, a contract that
+     * we trust that in its constructor will set
+     * verify the sender has enough tokens.
+     * (since the paymaster is also the token, there is no notion of "approval")
      */
     function validatePaymasterUserOp(
         UserOperation calldata userOp,
-        bytes32, /*requestId*/
+        bytes32 /*userOpHash*/,
         uint256 requiredPreFund
-    ) external view override returns (bytes memory context) {
-        // make sure that verificationGasLimit is high enough to handle postOp
+    ) external view override returns (bytes memory context, uint256 deadline) {
         require(
             userOp.verificationGasLimit > 45000,
             "WETH-TokenPaymaster: gas too low for postOp"
@@ -67,16 +71,14 @@ contract WETHTokenPaymaster is BasePaymaster {
             WETHToken.balanceOf(sender) >= requiredPreFund,
             "WETH-TokenPaymaster: not enough balance"
         );
-        
-        return abi.encode(userOp.sender);
+
+        return (abi.encode(userOp.sender), 0);
     }
 
     // when constructing a wallet, validate constructor code and parameters
-    function _validateConstructor(UserOperation calldata userOp)
-        internal
-        view
-        virtual
-    {
+    function _validateConstructor(
+        UserOperation calldata userOp
+    ) internal view virtual {
         /*
         constructor(IEntryPoint _entryPoint,
             address _owner,
@@ -87,7 +89,8 @@ contract WETHTokenPaymaster is BasePaymaster {
             address _paymaster)
         */
         bytes32 bytecodeHash = keccak256(
-            userOp.initCode[0:userOp.initCode.length - 270] /* (32*7)+46=270  46 is fixed in current parameter encode */
+            userOp.initCode[0:userOp.initCode.length -
+                270] /* (32*7)+46=270  46 is fixed in current parameter encode */
         );
 
         // no check on POC
@@ -97,9 +100,10 @@ contract WETHTokenPaymaster is BasePaymaster {
         //     "TokenPaymaster: unknown wallet constructor"
         // );
 
-
         // first param (of 7) should be our entryPoint
-        bytes32 entryPointParam = bytes32(userOp.initCode[userOp.initCode.length - 270:]);
+        bytes32 entryPointParam = bytes32(
+            userOp.initCode[userOp.initCode.length - 270:]
+        );
         require(
             address(uint160(uint256(entryPointParam))) == address(entryPoint),
             "wrong paymaster in constructor"

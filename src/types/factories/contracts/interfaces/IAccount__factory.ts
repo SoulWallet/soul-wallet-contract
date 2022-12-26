@@ -5,63 +5,11 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  BaseWallet,
-  BaseWalletInterface,
-} from "../../contracts/BaseWallet";
+  IAccount,
+  IAccountInterface,
+} from "../../../contracts/interfaces/IAccount";
 
 const _abi = [
-  {
-    inputs: [],
-    name: "entryPoint",
-    outputs: [
-      {
-        internalType: "contract IEntryPoint",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getVersion",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "nonce",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newEntryPoint",
-        type: "address",
-      },
-    ],
-    name: "updateEntryPoint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
   {
     inputs: [
       {
@@ -128,7 +76,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -138,26 +86,32 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "missingWalletFunds",
+        name: "missingAccountFunds",
         type: "uint256",
       },
     ],
     name: "validateUserOp",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
 ];
 
-export class BaseWallet__factory {
+export class IAccount__factory {
   static readonly abi = _abi;
-  static createInterface(): BaseWalletInterface {
-    return new utils.Interface(_abi) as BaseWalletInterface;
+  static createInterface(): IAccountInterface {
+    return new utils.Interface(_abi) as IAccountInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): BaseWallet {
-    return new Contract(address, _abi, signerOrProvider) as BaseWallet;
+  ): IAccount {
+    return new Contract(address, _abi, signerOrProvider) as IAccount;
   }
 }

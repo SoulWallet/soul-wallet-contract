@@ -99,7 +99,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -114,6 +114,11 @@ const _abi = [
         internalType: "bytes",
         name: "context",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
       },
     ],
     stateMutability: "nonpayable",

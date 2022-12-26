@@ -21,7 +21,7 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../common";
+} from "../common";
 
 export type UserOperationStruct = {
   sender: PromiseOrValue<string>;
@@ -63,20 +63,22 @@ export type UserOperationStructOutput = [
   signature: string;
 };
 
-export interface IAggregatedWalletInterface extends utils.Interface {
+export interface BaseAccountInterface extends utils.Interface {
   functions: {
-    "getAggregator()": FunctionFragment;
+    "entryPoint()": FunctionFragment;
+    "nonce()": FunctionFragment;
     "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,address,uint256)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "getAggregator" | "validateUserOp"
+    nameOrSignatureOrTopic: "entryPoint" | "nonce" | "validateUserOp"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "getAggregator",
+    functionFragment: "entryPoint",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "nonce", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "validateUserOp",
     values: [
@@ -87,10 +89,8 @@ export interface IAggregatedWalletInterface extends utils.Interface {
     ]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "getAggregator",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "entryPoint", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "nonce", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "validateUserOp",
     data: BytesLike
@@ -99,12 +99,12 @@ export interface IAggregatedWalletInterface extends utils.Interface {
   events: {};
 }
 
-export interface IAggregatedWallet extends BaseContract {
+export interface BaseAccount extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IAggregatedWalletInterface;
+  interface: BaseAccountInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -126,61 +126,71 @@ export interface IAggregatedWallet extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    getAggregator(overrides?: CallOverrides): Promise<[string]>;
+    entryPoint(overrides?: CallOverrides): Promise<[string]>;
+
+    nonce(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
-  getAggregator(overrides?: CallOverrides): Promise<string>;
+  entryPoint(overrides?: CallOverrides): Promise<string>;
+
+  nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
   validateUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     aggregator: PromiseOrValue<string>,
-    missingWalletFunds: PromiseOrValue<BigNumberish>,
+    missingAccountFunds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    getAggregator(overrides?: CallOverrides): Promise<string>;
+    entryPoint(overrides?: CallOverrides): Promise<string>;
+
+    nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
-    getAggregator(overrides?: CallOverrides): Promise<BigNumber>;
+    entryPoint(overrides?: CallOverrides): Promise<BigNumber>;
+
+    nonce(overrides?: CallOverrides): Promise<BigNumber>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    getAggregator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    entryPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    nonce(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

@@ -63,13 +63,20 @@ export type UserOperationStructOutput = [
   signature: string;
 };
 
-export interface IWalletInterface extends utils.Interface {
+export interface IAggregatedAccountInterface extends utils.Interface {
   functions: {
+    "getAggregator()": FunctionFragment;
     "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,address,uint256)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "validateUserOp"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic: "getAggregator" | "validateUserOp"
+  ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "getAggregator",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "validateUserOp",
     values: [
@@ -81,6 +88,10 @@ export interface IWalletInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "getAggregator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "validateUserOp",
     data: BytesLike
   ): Result;
@@ -88,12 +99,12 @@ export interface IWalletInterface extends utils.Interface {
   events: {};
 }
 
-export interface IWallet extends BaseContract {
+export interface IAggregatedAccount extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IWalletInterface;
+  interface: IAggregatedAccountInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -115,51 +126,61 @@ export interface IWallet extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    getAggregator(overrides?: CallOverrides): Promise<[string]>;
+
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
+  getAggregator(overrides?: CallOverrides): Promise<string>;
+
   validateUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     aggregator: PromiseOrValue<string>,
-    missingWalletFunds: PromiseOrValue<BigNumberish>,
+    missingAccountFunds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    getAggregator(overrides?: CallOverrides): Promise<string>;
+
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
+    getAggregator(overrides?: CallOverrides): Promise<BigNumber>;
+
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    getAggregator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

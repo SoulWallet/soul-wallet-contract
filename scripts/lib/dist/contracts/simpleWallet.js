@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 21:13:10
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-13 15:17:37
+ * @LastEditTime: 2022-12-26 20:01:14
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleWalletContract = void 0;
@@ -83,25 +83,6 @@ const ABI = [
             }
         ],
         "name": "PreUpgrade",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "oldOwner",
-                "type": "address"
-            }
-        ],
-        "name": "Recovered",
         "type": "event"
     },
     {
@@ -374,7 +355,7 @@ const ABI = [
                 "type": "uint256"
             }
         ],
-        "stateMutability": "view",
+        "stateMutability": "pure",
         "type": "function"
     },
     {
@@ -707,19 +688,6 @@ const ABI = [
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newEntryPoint",
-                "type": "address"
-            }
-        ],
-        "name": "updateEntryPoint",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "upgrade",
         "outputs": [],
@@ -792,7 +760,7 @@ const ABI = [
             },
             {
                 "internalType": "bytes32",
-                "name": "requestId",
+                "name": "userOpHash",
                 "type": "bytes32"
             },
             {
@@ -802,12 +770,18 @@ const ABI = [
             },
             {
                 "internalType": "uint256",
-                "name": "missingWalletFunds",
+                "name": "missingAccountFunds",
                 "type": "uint256"
             }
         ],
         "name": "validateUserOp",
-        "outputs": [],
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "deadline",
+                "type": "uint256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },

@@ -8,7 +8,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "./BaseWallet.sol";
+import "./BaseAccount.sol";
 import "./helpers/Signatures.sol";
 import "./helpers/Calldata.sol";
 import "./guardian/GuardianControl.sol";
@@ -24,7 +24,7 @@ import "./utils/upgradeable/Initializable.sol";
  *  has a single signer that can send requests through the entryPoint.
  */
 contract SmartWallet is
-    BaseWallet,
+    BaseAccount,
     Initializable,
     GuardianControl,
     LogicUpgradeControl,
@@ -167,23 +167,14 @@ contract SmartWallet is
         }
     }
 
-    /**
-     * change entry-point:
-     * a wallet must have a method for replacing the entryPoint, in case the the entryPoint is
-     * upgraded to a newer version.
-     */
-    function _updateEntryPoint(address newEntryPoint) internal override {
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        emit EntryPointChanged(address(layout.entryPoint), newEntryPoint);
-        layout.entryPoint = IEntryPoint(payable(newEntryPoint));
-    }
 
     // called by entryPoint, only after validateUserOp succeeded.
     function execFromEntryPoint(
         address dest,
         uint256 value,
         bytes calldata func
-    ) external requireFromEntryPoint {
+    ) external {
+        _requireFromEntryPoint();
         _call(dest, value, func);
     }
 
@@ -197,17 +188,28 @@ contract SmartWallet is
         );
     }
 
-    /// implement template method of BaseWallet
+    /**
+     * validate the signature is valid for this message.
+     * @param userOp validate the userOp.signature field
+     * @param userOpHash convenient field: the hash of the request, to check the signature against
+     *          (also hashes the entrypoint and chain-id)
+     * @param aggregator the current aggregator. can be ignored by accounts that don't use aggregators
+     * @return deadline the last block timestamp this operation is valid, or zero if it is valid indefinitely.
+     *      Note that the validation code cannot use block.timestamp (or block.number) directly.
+     */
     function _validateSignature(
         UserOperation calldata userOp,
-        bytes32 requestId,
-        address
-    ) internal virtual override {
+        bytes32 userOpHash,
+        address aggregator
+    ) internal virtual override returns (uint256 deadline) {
+        (aggregator);
         SignatureData memory signatureData = userOp.decodeSignature();
         signatureData.mode == SignatureMode.owner
-            ? _validateOwnerSignature(signatureData, requestId)
-            : _validateGuardiansSignature(signatureData, userOp, requestId);
+            ? _validateOwnerSignature(signatureData, userOpHash)
+            : _validateGuardiansSignature(signatureData, userOp, userOpHash);
+        return signatureData.deadline;
     }
+
 
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);
@@ -255,14 +257,14 @@ contract SmartWallet is
 
     function _validateOwnerSignature(
         SignatureData memory signatureData,
-        bytes32 requestId
+        bytes32 userOpHash
     ) internal view {
         require(isOwner(signatureData.signer), "Signer not an owner");
 
         require(
             SignatureChecker.isValidSignatureNow(
                 signatureData.signer,
-                requestId.toEthSignedMessageHash(),
+                userOpHash.toEthSignedMessageHash(),
                 signatureData.signature
             ),
             "Wallet: Invalid owner sig"
@@ -275,18 +277,18 @@ contract SmartWallet is
     function _validateGuardiansSignature(
         SignatureData memory signatureData,
         UserOperation calldata op,
-        bytes32 requestId
+        bytes32 userOpHash
     ) internal {
         require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
 
         _validateGuardiansSignatureCallData(
             signatureData.signer,
-            requestId.toEthSignedMessageHash(),
+            userOpHash.toEthSignedMessageHash(),
             signatureData.signature
         );
     }
 
-    function getVersion() external view virtual override returns (uint) {
+    function getVersion() external pure returns (uint) {
         return 1;
     }
 
@@ -301,10 +303,4 @@ contract SmartWallet is
         return IERC1271.isValidSignature.selector;
     }
 
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[50] private __gap;
 }

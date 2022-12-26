@@ -118,7 +118,6 @@ export interface SmartWalletInterface extends utils.Interface {
     "supportsInterface(bytes4)": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
     "transferOwner(address)": FunctionFragment;
-    "updateEntryPoint(address)": FunctionFragment;
     "upgrade()": FunctionFragment;
     "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,address,uint256)": FunctionFragment;
     "withdrawDepositTo(address,uint256)": FunctionFragment;
@@ -153,7 +152,6 @@ export interface SmartWalletInterface extends utils.Interface {
       | "supportsInterface"
       | "transfer"
       | "transferOwner"
-      | "updateEntryPoint"
       | "upgrade"
       | "validateUserOp"
       | "withdrawDepositTo"
@@ -280,10 +278,6 @@ export interface SmartWalletInterface extends utils.Interface {
     functionFragment: "transferOwner",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "updateEntryPoint",
-    values: [PromiseOrValue<string>]
-  ): string;
   encodeFunctionData(functionFragment: "upgrade", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "validateUserOp",
@@ -366,10 +360,6 @@ export interface SmartWalletInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateEntryPoint",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgrade", data: BytesLike): Result;
@@ -649,20 +639,15 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     upgrade(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -807,20 +792,15 @@ export interface SmartWallet extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  updateEntryPoint(
-    newEntryPoint: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   upgrade(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   validateUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     aggregator: PromiseOrValue<string>,
-    missingWalletFunds: PromiseOrValue<BigNumberish>,
+    missingAccountFunds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -961,20 +941,15 @@ export interface SmartWallet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     upgrade(overrides?: CallOverrides): Promise<void>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
 
     withdrawDepositTo(
       withdrawAddress: PromiseOrValue<string>,
@@ -1176,20 +1151,15 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     upgrade(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1333,20 +1303,15 @@ export interface SmartWallet extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    updateEntryPoint(
-      newEntryPoint: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     upgrade(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     validateUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       aggregator: PromiseOrValue<string>,
-      missingWalletFunds: PromiseOrValue<BigNumberish>,
+      missingAccountFunds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

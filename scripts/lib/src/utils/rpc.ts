@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-11-16 15:50:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-23 19:16:57
+ * @LastEditTime: 2022-12-26 20:02:40
  */
 import { ethers } from "ethers";
 import { EntryPointContract } from "../contracts/entryPoint";
@@ -12,7 +12,7 @@ import { UserOperation } from "../entity/userOperation";
 
 export class RPC {
     static eth_sendUserOperation(op: UserOperation, entryPointAddress: string) {
-        const op_str = JSON.stringify(op);
+        const op_str = op.toJSON();
         return '{\
             "jsonrpc": "2.0",\
             "method": "eth_sendUserOperation",\
@@ -40,7 +40,7 @@ export class RPC {
      * wait for the userOp to be mined
      * @param web3 web3 instance
      * @param entryPointAddress the entryPoint address
-     * @param requestId the requestId
+     * @param userOpHash the UserOpHash
      * @param timeOut the time out, default:1000 * 60 * 10 ( 10 minutes)
      * @param fromBlock the fromBlock, default: latest - 5
      * @param toBlock the toBlock, default: pending
@@ -49,7 +49,7 @@ export class RPC {
     static async waitUserOperation(
         etherProvider: ethers.providers.BaseProvider,
         entryPointAddress: string,
-        requestId: string,
+        userOpHash: string,
         timeOut: number = 1000 * 60 * 10,
         fromBlock: number = 0,
         toBlock: number | string = 'pending'
@@ -71,7 +71,7 @@ export class RPC {
             const pastEvent: Array<ethers.Event> = await entryPoint.queryFilter({
                 topics: [
                     UserOperationEventTopic,
-                    requestId
+                    userOpHash
                 ]
             }, _fromBlock, toBlock);
 

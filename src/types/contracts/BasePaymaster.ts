@@ -236,7 +236,7 @@ export interface BasePaymaster extends BaseContract {
 
   functions: {
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -277,7 +277,7 @@ export interface BasePaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -295,7 +295,7 @@ export interface BasePaymaster extends BaseContract {
   };
 
   addStake(
-    extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+    unstakeDelaySec: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -336,7 +336,7 @@ export interface BasePaymaster extends BaseContract {
 
   validatePaymasterUserOp(
     userOp: UserOperationStruct,
-    requestId: PromiseOrValue<BytesLike>,
+    userOpHash: PromiseOrValue<BytesLike>,
     maxCost: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -354,7 +354,7 @@ export interface BasePaymaster extends BaseContract {
 
   callStatic: {
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -389,10 +389,10 @@ export interface BasePaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<[string, BigNumber] & { context: string; deadline: BigNumber }>;
 
     withdrawStake(
       withdrawAddress: PromiseOrValue<string>,
@@ -419,7 +419,7 @@ export interface BasePaymaster extends BaseContract {
 
   estimateGas: {
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -460,7 +460,7 @@ export interface BasePaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -479,7 +479,7 @@ export interface BasePaymaster extends BaseContract {
 
   populateTransaction: {
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -520,7 +520,7 @@ export interface BasePaymaster extends BaseContract {
 
     validatePaymasterUserOp(
       userOp: UserOperationStruct,
-      requestId: PromiseOrValue<BytesLike>,
+      userOpHash: PromiseOrValue<BytesLike>,
       maxCost: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

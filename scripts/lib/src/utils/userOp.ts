@@ -60,7 +60,7 @@ export function packUserOp(op: UserOperation, forSignature = true): string {
   return encode(typevalues, forSignature)
 }
 
-export function getRequestId(op: UserOperation, entryPointAddress: string, chainId: number): string {
+export function getUserOpHash(op: UserOperation, entryPointAddress: string, chainId: number): string {
   const userOpHash = keccak256(packUserOp(op, true))
   const enc = defaultAbiCoder.encode(
     ['bytes32', 'address', 'uint256'],
@@ -74,14 +74,14 @@ enum SignatureMode {
 }
 
 function _signUserOp(op: UserOperation, entryPointAddress: string, chainId: number, privateKey: string): string {
-  const message = getRequestId(op, entryPointAddress, chainId)
+  const message = getUserOpHash(op, entryPointAddress, chainId)
   return _signReuestId(message, privateKey);
 }
 
-function _signReuestId(requestId: string, privateKey: string): string {
+function _signReuestId(userOpHash: string, privateKey: string): string {
   const msg1 = Buffer.concat([
     Buffer.from('\x19Ethereum Signed Message:\n32', 'ascii'),
-    Buffer.from(arrayify(requestId))
+    Buffer.from(arrayify(userOpHash))
   ])
 
   const sig = ecsign(keccak256_buffer(msg1), Buffer.from(arrayify(privateKey)))
@@ -106,16 +106,18 @@ export function signUserOp(op: UserOperation, entryPointAddress: string, chainId
 }
 
 /**
- * sign a user operation with the requestId signature
+ * sign a user operation with the UserOpHash signature
  * @param signAddress signer address
- * @param signature the signature of the requestId
+ * @param signature the signature of the UserOpHash
+ * @param deadline deadline (block time), default 0
  * @returns signature
  */
-export function signUserOpWithPersonalSign(signAddress: string, signature: string) {
-  const enc = defaultAbiCoder.encode(['uint8', 'address', 'bytes'],
+export function signUserOpWithPersonalSign(signAddress: string, signature: string, deadline = 0) {
+  const enc = defaultAbiCoder.encode(['uint8', 'address', 'uint64', 'bytes'],
     [
       SignatureMode.owner,
       signAddress,
+      deadline,
       signature
     ]
   );
@@ -136,6 +138,7 @@ export function signUserOpWithPersonalSign(signAddress: string, signature: strin
  * @returns signature
  */
 export function packGuardiansSign(
+  deadline: number,
   signature: guardianSignature[],
   guardianLogicAddress: string, guardians: string[],
   threshold: number, salt: string, create2Factory: string,
@@ -147,7 +150,7 @@ export function packGuardiansSign(
       throw new Error('guardianAddress is not equal to the calculated guardian address');
     }
   }
-  return packGuardiansSignByInitCode(guardianData.address, signature, guardianData.initCode);
+  return packGuardiansSignByInitCode(guardianData.address, signature, deadline,guardianData.initCode);
 }
 
 
@@ -156,19 +159,21 @@ export function packGuardiansSign(
  * sign a user operation with guardian signatures
  * @param guardianAddress guardian contract address
  * @param signatures guardian signatures
+ * @param deadline deadline (block time), default 0
  * @param initCode intiCode must given when the guardian contract is not deployed
  * @returns 
  */
-export function packGuardiansSignByInitCode(guardianAddress: string, signature: guardianSignature[], initCode = '0x'
+export function packGuardiansSignByInitCode(guardianAddress: string, signature: guardianSignature[], deadline = 0, initCode = '0x'
 ): string {
 
   const signatureBytes = Guaridian.guardianSign(signature);
 
   const guardianCallData = defaultAbiCoder.encode(['bytes', 'bytes'], [signatureBytes, initCode]);
-  const enc = defaultAbiCoder.encode(['uint8', 'address', 'bytes'],
+  const enc = defaultAbiCoder.encode(['uint8', 'address', 'uint64', 'bytes'],
     [
       SignatureMode.guardian,
       guardianAddress,
+      deadline,
       guardianCallData
     ]
   );

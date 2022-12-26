@@ -45,6 +45,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAccessControlEnumerable__factory>;
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "IERC1822Proxiable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1822Proxiable__factory>;
@@ -85,13 +89,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ACL__factory>;
     getContractFactory(
+      name: "BaseAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BaseAccount__factory>;
+    getContractFactory(
       name: "BasePaymaster",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BasePaymaster__factory>;
-    getContractFactory(
-      name: "BaseWallet",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BaseWallet__factory>;
     getContractFactory(
       name: "Create2Factory",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -117,9 +121,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GuardianMultiSigWallet__factory>;
     getContractFactory(
-      name: "IAggregatedWallet",
+      name: "IAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAggregatedWallet__factory>;
+    ): Promise<Contracts.IAccount__factory>;
+    getContractFactory(
+      name: "IAggregatedAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAggregatedAccount__factory>;
     getContractFactory(
       name: "IAggregator",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -153,10 +161,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStakeManager__factory>;
     getContractFactory(
-      name: "IWallet",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWallet__factory>;
-    getContractFactory(
       name: "SenderCreator",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SenderCreator__factory>;
@@ -168,10 +172,6 @@ declare module "hardhat/types/runtime" {
       name: "SmartWallet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SmartWallet__factory>;
-    getContractFactory(
-      name: "SmartWalletV2Mock",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SmartWalletV2Mock__factory>;
     getContractFactory(
       name: "SoulWalletProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -200,14 +200,6 @@ declare module "hardhat/types/runtime" {
       name: "LogicUpgradeControl",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LogicUpgradeControl__factory>;
-    getContractFactory(
-      name: "VerifyingPaymaster",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.VerifyingPaymaster__factory>;
-    getContractFactory(
-      name: "WalletProxy",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WalletProxy__factory>;
     getContractFactory(
       name: "WETHTokenPaymaster",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -253,6 +245,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IAccessControlEnumerable>;
+    getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
     getContractAt(
       name: "IERC1822Proxiable",
       address: string,
@@ -304,15 +301,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ACL>;
     getContractAt(
+      name: "BaseAccount",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BaseAccount>;
+    getContractAt(
       name: "BasePaymaster",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.BasePaymaster>;
-    getContractAt(
-      name: "BaseWallet",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BaseWallet>;
     getContractAt(
       name: "Create2Factory",
       address: string,
@@ -344,10 +341,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.GuardianMultiSigWallet>;
     getContractAt(
-      name: "IAggregatedWallet",
+      name: "IAccount",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IAggregatedWallet>;
+    ): Promise<Contracts.IAccount>;
+    getContractAt(
+      name: "IAggregatedAccount",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAggregatedAccount>;
     getContractAt(
       name: "IAggregator",
       address: string,
@@ -389,11 +391,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IStakeManager>;
     getContractAt(
-      name: "IWallet",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IWallet>;
-    getContractAt(
       name: "SenderCreator",
       address: string,
       signer?: ethers.Signer
@@ -408,11 +405,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SmartWallet>;
-    getContractAt(
-      name: "SmartWalletV2Mock",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SmartWalletV2Mock>;
     getContractAt(
       name: "SoulWalletProxy",
       address: string,
@@ -448,16 +440,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.LogicUpgradeControl>;
-    getContractAt(
-      name: "VerifyingPaymaster",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.VerifyingPaymaster>;
-    getContractAt(
-      name: "WalletProxy",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.WalletProxy>;
     getContractAt(
       name: "WETHTokenPaymaster",
       address: string,

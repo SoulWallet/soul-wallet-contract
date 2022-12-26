@@ -5,7 +5,7 @@
 import { UserOperation } from '../entity/userOperation';
 import { guardianSignature } from './guardian';
 export declare function packUserOp(op: UserOperation, forSignature?: boolean): string;
-export declare function getRequestId(op: UserOperation, entryPointAddress: string, chainId: number): string;
+export declare function getUserOpHash(op: UserOperation, entryPointAddress: string, chainId: number): string;
 /**
  * sign a user operation with the given private key
  * @param op
@@ -16,12 +16,13 @@ export declare function getRequestId(op: UserOperation, entryPointAddress: strin
  */
 export declare function signUserOp(op: UserOperation, entryPointAddress: string, chainId: number, privateKey: string): string;
 /**
- * sign a user operation with the requestId signature
+ * sign a user operation with the UserOpHash signature
  * @param signAddress signer address
- * @param signature the signature of the requestId
+ * @param signature the signature of the UserOpHash
+ * @param deadline deadline (block time), default 0
  * @returns signature
  */
-export declare function signUserOpWithPersonalSign(signAddress: string, signature: string): string;
+export declare function signUserOpWithPersonalSign(signAddress: string, signature: string, deadline?: number): string;
 /**
  * sign a user operation with guardian signatures
  * @param signatures guardian signatures
@@ -33,13 +34,14 @@ export declare function signUserOpWithPersonalSign(signAddress: string, signatur
  * @param guardianAddress guardian contract address,if provided will check if equal to the calculated guardian address
  * @returns signature
  */
-export declare function packGuardiansSign(signature: guardianSignature[], guardianLogicAddress: string, guardians: string[], threshold: number, salt: string, create2Factory: string, guardianAddress?: string | undefined): string;
+export declare function packGuardiansSign(deadline: number, signature: guardianSignature[], guardianLogicAddress: string, guardians: string[], threshold: number, salt: string, create2Factory: string, guardianAddress?: string | undefined): string;
 /**
  * sign a user operation with guardian signatures
  * @param guardianAddress guardian contract address
  * @param signatures guardian signatures
+ * @param deadline deadline (block time), default 0
  * @param initCode intiCode must given when the guardian contract is not deployed
  * @returns
  */
-export declare function packGuardiansSignByInitCode(guardianAddress: string, signature: guardianSignature[], initCode?: string): string;
+export declare function packGuardiansSignByInitCode(guardianAddress: string, signature: guardianSignature[], deadline?: number, initCode?: string): string;
 export declare function payMasterSignHash(op: UserOperation): string;

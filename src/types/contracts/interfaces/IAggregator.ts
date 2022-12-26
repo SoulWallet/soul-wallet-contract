@@ -63,9 +63,9 @@ export type UserOperationStructOutput = [
 
 export interface IAggregatorInterface extends utils.Interface {
   functions: {
-    "aggregateSignatures(bytes[])": FunctionFragment;
+    "aggregateSignatures((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[])": FunctionFragment;
     "validateSignatures((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[],bytes)": FunctionFragment;
-    "validateUserOpSignature((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bool)": FunctionFragment;
+    "validateUserOpSignature((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
   };
 
   getFunction(
@@ -77,7 +77,7 @@ export interface IAggregatorInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "aggregateSignatures",
-    values: [PromiseOrValue<BytesLike>[]]
+    values: [UserOperationStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "validateSignatures",
@@ -85,7 +85,7 @@ export interface IAggregatorInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "validateUserOpSignature",
-    values: [UserOperationStruct, PromiseOrValue<boolean>]
+    values: [UserOperationStruct]
   ): string;
 
   decodeFunctionResult(
@@ -132,7 +132,7 @@ export interface IAggregator extends BaseContract {
 
   functions: {
     aggregateSignatures(
-      sigsForAggregation: PromiseOrValue<BytesLike>[],
+      userOps: UserOperationStruct[],
       overrides?: CallOverrides
     ): Promise<[string] & { aggregatesSignature: string }>;
 
@@ -144,19 +144,12 @@ export interface IAggregator extends BaseContract {
 
     validateUserOpSignature(
       userOp: UserOperationStruct,
-      offChainSigCheck: PromiseOrValue<boolean>,
       overrides?: CallOverrides
-    ): Promise<
-      [string, string, string] & {
-        sigForUserOp: string;
-        sigForAggregation: string;
-        offChainSigInfo: string;
-      }
-    >;
+    ): Promise<[string] & { sigForUserOp: string }>;
   };
 
   aggregateSignatures(
-    sigsForAggregation: PromiseOrValue<BytesLike>[],
+    userOps: UserOperationStruct[],
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -168,19 +161,12 @@ export interface IAggregator extends BaseContract {
 
   validateUserOpSignature(
     userOp: UserOperationStruct,
-    offChainSigCheck: PromiseOrValue<boolean>,
     overrides?: CallOverrides
-  ): Promise<
-    [string, string, string] & {
-      sigForUserOp: string;
-      sigForAggregation: string;
-      offChainSigInfo: string;
-    }
-  >;
+  ): Promise<string>;
 
   callStatic: {
     aggregateSignatures(
-      sigsForAggregation: PromiseOrValue<BytesLike>[],
+      userOps: UserOperationStruct[],
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -192,22 +178,15 @@ export interface IAggregator extends BaseContract {
 
     validateUserOpSignature(
       userOp: UserOperationStruct,
-      offChainSigCheck: PromiseOrValue<boolean>,
       overrides?: CallOverrides
-    ): Promise<
-      [string, string, string] & {
-        sigForUserOp: string;
-        sigForAggregation: string;
-        offChainSigInfo: string;
-      }
-    >;
+    ): Promise<string>;
   };
 
   filters: {};
 
   estimateGas: {
     aggregateSignatures(
-      sigsForAggregation: PromiseOrValue<BytesLike>[],
+      userOps: UserOperationStruct[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -219,14 +198,13 @@ export interface IAggregator extends BaseContract {
 
     validateUserOpSignature(
       userOp: UserOperationStruct,
-      offChainSigCheck: PromiseOrValue<boolean>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     aggregateSignatures(
-      sigsForAggregation: PromiseOrValue<BytesLike>[],
+      userOps: UserOperationStruct[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -238,7 +216,6 @@ export interface IAggregator extends BaseContract {
 
     validateUserOpSignature(
       userOp: UserOperationStruct,
-      offChainSigCheck: PromiseOrValue<boolean>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

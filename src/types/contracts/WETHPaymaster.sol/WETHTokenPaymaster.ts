@@ -281,7 +281,7 @@ export interface WETHTokenPaymaster extends BaseContract {
     WETHToken(overrides?: CallOverrides): Promise<[string]>;
 
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -335,7 +335,7 @@ export interface WETHTokenPaymaster extends BaseContract {
       arg1: PromiseOrValue<BytesLike>,
       requiredPreFund: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[string] & { context: string }>;
+    ): Promise<[string, BigNumber] & { context: string; deadline: BigNumber }>;
 
     withdraw(
       to: PromiseOrValue<string>,
@@ -362,7 +362,7 @@ export interface WETHTokenPaymaster extends BaseContract {
   WETHToken(overrides?: CallOverrides): Promise<string>;
 
   addStake(
-    extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+    unstakeDelaySec: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -416,7 +416,7 @@ export interface WETHTokenPaymaster extends BaseContract {
     arg1: PromiseOrValue<BytesLike>,
     requiredPreFund: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
-  ): Promise<string>;
+  ): Promise<[string, BigNumber] & { context: string; deadline: BigNumber }>;
 
   withdraw(
     to: PromiseOrValue<string>,
@@ -443,7 +443,7 @@ export interface WETHTokenPaymaster extends BaseContract {
     WETHToken(overrides?: CallOverrides): Promise<string>;
 
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -491,7 +491,7 @@ export interface WETHTokenPaymaster extends BaseContract {
       arg1: PromiseOrValue<BytesLike>,
       requiredPreFund: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<[string, BigNumber] & { context: string; deadline: BigNumber }>;
 
     withdraw(
       to: PromiseOrValue<string>,
@@ -530,7 +530,7 @@ export interface WETHTokenPaymaster extends BaseContract {
     WETHToken(overrides?: CallOverrides): Promise<BigNumber>;
 
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -612,7 +612,7 @@ export interface WETHTokenPaymaster extends BaseContract {
     WETHToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     addStake(
-      extraUnstakeDelaySec: PromiseOrValue<BigNumberish>,
+      unstakeDelaySec: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

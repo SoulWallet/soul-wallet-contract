@@ -4,14 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-24 23:18:51
+ * @LastEditTime: 2022-12-26 22:35:22
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
-import { arrayify, defaultAbiCoder, hexlify, hexZeroPad, keccak256 } from 'ethers/lib/utils'
+import { defaultAbiCoder } from 'ethers/lib/utils'
 import * as ethUtil from 'ethereumjs-util';
 import { SmartWallet__factory } from "../src/types/index";
 
@@ -73,7 +73,7 @@ describe("SoulWalletContract", function () {
         const _paymasterStake = '' + Math.pow(10, 18);
         const _unstakeDelaySec = 100;
         const EntryPoint = {
-            contract: await (await ethers.getContractFactory("EntryPoint")).deploy(_paymasterStake, _unstakeDelaySec),
+            contract: await (await ethers.getContractFactory("EntryPoint")).deploy(),
             paymasterStake: _paymasterStake,
             unstakeDelaySec: _unstakeDelaySec,
         };
@@ -373,7 +373,6 @@ describe("SoulWalletContract", function () {
         const WETHPaymaster = {
             contract: await (await ethers.getContractFactory("WETHTokenPaymaster")).deploy(
                 EntryPoint.contract.address,
-                accounts[0].address,
                 WETH.contract.address
             )
         };
@@ -484,15 +483,14 @@ describe("SoulWalletContract", function () {
 
 
 
-        const requestId = activateOp.getRequestId(EntryPoint.contract.address, chainId);
+        const userOpHash = activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
         {
-            //  function getRequestId(UserOperation calldata userOp) public view returns (bytes32) 
-            const _requestid = await EntryPoint.contract.getRequestId(activateOp);
-            expect(_requestid).to.equal(requestId);
+            const _userOpHash = await EntryPoint.contract.getUserOpHash(activateOp);
+            expect(_userOpHash).to.equal(userOpHash);
         }
         activateOp.signWithSignature(
             walletOwner.address,
-            Utils.signMessage(requestId, walletOwner.privateKey)
+            Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
         const simulate = await Utils.simulateValidation(EntryPoint.contract.address, activateOp);
         log(`simulateValidation result:`, simulate);
@@ -547,8 +545,8 @@ describe("SoulWalletContract", function () {
         if (!setGuardianOP) {
             throw new Error('setGuardianOP is null');
         }
-        const setGuardianOPRequestId = setGuardianOP.getRequestId(EntryPoint.contract.address, chainId);
-        const setGuardianOPSignature = Utils.signMessage(setGuardianOPRequestId, walletOwner.privateKey)
+        const setGuardianOPuserOpHash = setGuardianOP.getUserOpHash(EntryPoint.contract.address, chainId);
+        const setGuardianOPSignature = Utils.signMessage(setGuardianOPuserOpHash, walletOwner.privateKey)
         setGuardianOP.signWithSignature(walletOwner.address, setGuardianOPSignature);
         await EntryPoint.contract.handleOps([setGuardianOP], accounts[0].address);
         guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
@@ -582,7 +580,7 @@ describe("SoulWalletContract", function () {
             throw new Error('transferOwnerOP is null');
         }
 
-        const transferOwnerOPRequestId = transferOwnerOP.getRequestId(EntryPoint.contract.address, chainId);
+        const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHash(EntryPoint.contract.address, chainId);
 
         const guardianSignArr: any[] = [];
         for (let index = 0; index < Math.round(guardiansAddress.length / 2); index++) {
@@ -592,13 +590,13 @@ describe("SoulWalletContract", function () {
                 {
                     contract: false,
                     address: _address,
-                    signature: Utils.signMessage(transferOwnerOPRequestId, _privateKey)
+                    signature: Utils.signMessage(transferOwnerOPuserOpHash, _privateKey)
                 }
             );
         }
-        transferOwnerOP.signWithGuardiansSign(guardian, guardianSignArr, guardianInitcode);
+        transferOwnerOP.signWithGuardiansSign(guardian, guardianSignArr, 0, guardianInitcode);
         const simulate = await Utils.simulateValidation(EntryPoint.contract.address, transferOwnerOP);
-        log(`simulateValidation result:`, simulate); 
+        log(`simulateValidation result:`, simulate);
         const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
         await EntryPoint.contract.handleOps([transferOwnerOP], accounts[0].address);
@@ -640,15 +638,32 @@ class Utils {
 
 
     static async simulateValidation(entrypointAddress: string, op: UserOperation) {
-        try {
-            const abi = [{
+
+        const abi = [
+            {
                 "inputs": [
                     {
                         "components": [
-                            { "internalType": "address", "name": "sender", "type": "address" },
-                            { "internalType": "uint256", "name": "nonce", "type": "uint256" },
-                            { "internalType": "bytes", "name": "initCode", "type": "bytes" },
-                            { "internalType": "bytes", "name": "callData", "type": "bytes" },
+                            {
+                                "internalType": "address",
+                                "name": "sender",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "nonce",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "initCode",
+                                "type": "bytes"
+                            },
+                            {
+                                "internalType": "bytes",
+                                "name": "callData",
+                                "type": "bytes"
+                            },
                             {
                                 "internalType": "uint256",
                                 "name": "callGasLimit",
@@ -679,51 +694,53 @@ class Utils {
                                 "name": "paymasterAndData",
                                 "type": "bytes"
                             },
-                            { "internalType": "bytes", "name": "signature", "type": "bytes" }
+                            {
+                                "internalType": "bytes",
+                                "name": "signature",
+                                "type": "bytes"
+                            }
                         ],
                         "internalType": "struct UserOperation",
                         "name": "userOp",
                         "type": "tuple"
-                    },
-                    { "internalType": "bool", "name": "offChainSigCheck", "type": "bool" }
+                    }
                 ],
                 "name": "simulateValidation",
-                "outputs": [
-                    { "internalType": "uint256", "name": "preOpGas", "type": "uint256" },
-                    { "internalType": "uint256", "name": "prefund", "type": "uint256" },
-                    {
-                        "internalType": "address",
-                        "name": "actualAggregator",
-                        "type": "address"
-                    },
-                    { "internalType": "bytes", "name": "sigForUserOp", "type": "bytes" },
-                    { "internalType": "bytes", "name": "sigForAggregation", "type": "bytes" },
-                    { "internalType": "bytes", "name": "offChainSigInfo", "type": "bytes" }
-                ],
+                "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
-            }];
-            const result = await ethers.provider.call({
-                from: EIP4337Lib.Defines.AddressZero,
-                to: entrypointAddress,
-                data: new ethers.utils.Interface(abi).encodeFunctionData("simulateValidation", [op, false]),
-            });
-            const decoded = new ethers.utils.Interface(abi).decodeFunctionResult("simulateValidation", result);
-            log(`simulateValidation result:`, decoded);
-            return decoded;
-        } catch (error) {
-            // decode FailedOp(uint256,address,string)
-            let data = (<any>error).data as string;
-            if (data.startsWith("0x00fa072b")) {
-                // FailedOp(uint256,address,string)
-                const re = defaultAbiCoder.decode(
-                    ['uint256', 'address', 'string'],
-                    '0x' + data.substring(10)
-                );
-                throw new Error(`FailedOp(${re[0]},${re[1]},${re[2]})`);
-            } else {
-                throw error
             }
+        ];
+
+        const result = await ethers.provider.call({
+            from: EIP4337Lib.Defines.AddressZero,
+            to: entrypointAddress,
+            data: new ethers.utils.Interface(abi).encodeFunctionData("simulateValidation", [op]),
+        });
+        if (result.startsWith('0x5f8f83a2')) {
+            // SimulationResult(uint256 preOpGas, uint256 prefund, uint256 deadline, (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec))
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'uint256', 'uint256', '(uint256,uint256)', '(uint256,uint256)', '(uint256,uint256)'],
+                '0x' + result.substring(10)
+            );
+            return {
+                preOpGas: re[0],
+                prefund: re[1],
+                deadline: re[2],
+                senderInfo: re[3],
+                factoryInfo: re[4],
+                paymasterInfo: re[5],
+            };
+        } else if (result.startsWith("0x00fa072b")) {
+            // FailedOp(uint256,address,string)
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'address', 'string'],
+                '0x' + result.substring(10)
+            );
+            throw new Error(`FailedOp(${re[0]},${re[1]},${re[2]})`);
+        } else {
+            throw new Error(`simulateValidation failed: ${result}`);
         }
+
     }
 }

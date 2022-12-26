@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../UserOperation.sol";
+import "../interfaces/UserOperation.sol";
 
 /**
  * @dev Signatures layout used by the Paymasters and Wallets internally
@@ -11,6 +11,7 @@ import "../UserOperation.sol";
 struct SignatureData {
     SignatureMode mode;
     address signer;
+    uint64 deadline;
     bytes signature;
 }
 
@@ -38,8 +39,12 @@ library Signatures {
     function decodeSignature(
         bytes memory signature
     ) internal pure returns (SignatureData memory) {
-        (SignatureMode _mode, address _singer, bytes memory _signature) = abi
-            .decode(signature, (SignatureMode, address, bytes));
-        return SignatureData(_mode, _singer, _signature);
+        (
+            SignatureMode _mode,
+            address _singer,
+            uint64 _deadline,
+            bytes memory _signature
+        ) = abi.decode(signature, (SignatureMode, address, uint64, bytes));
+        return SignatureData(_mode, _singer, _deadline, _signature);
     }
 }

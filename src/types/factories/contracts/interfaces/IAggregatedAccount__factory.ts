@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  IAggregatedWallet,
-  IAggregatedWalletInterface,
-} from "../../../contracts/interfaces/IAggregatedWallet";
+  IAggregatedAccount,
+  IAggregatedAccountInterface,
+} from "../../../contracts/interfaces/IAggregatedAccount";
 
 const _abi = [
   {
@@ -89,7 +89,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -99,26 +99,32 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "missingWalletFunds",
+        name: "missingAccountFunds",
         type: "uint256",
       },
     ],
     name: "validateUserOp",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
 ];
 
-export class IAggregatedWallet__factory {
+export class IAggregatedAccount__factory {
   static readonly abi = _abi;
-  static createInterface(): IAggregatedWalletInterface {
-    return new utils.Interface(_abi) as IAggregatedWalletInterface;
+  static createInterface(): IAggregatedAccountInterface {
+    return new utils.Interface(_abi) as IAggregatedAccountInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): IAggregatedWallet {
-    return new Contract(address, _abi, signerOrProvider) as IAggregatedWallet;
+  ): IAggregatedAccount {
+    return new Contract(address, _abi, signerOrProvider) as IAggregatedAccount;
   }
 }

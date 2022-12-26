@@ -59,9 +59,7 @@ export interface StakeManagerInterface extends utils.Interface {
     "depositTo(address)": FunctionFragment;
     "deposits(address)": FunctionFragment;
     "getDepositInfo(address)": FunctionFragment;
-    "paymasterStake()": FunctionFragment;
     "unlockStake()": FunctionFragment;
-    "unstakeDelaySec()": FunctionFragment;
     "withdrawStake(address)": FunctionFragment;
     "withdrawTo(address,uint256)": FunctionFragment;
   };
@@ -73,9 +71,7 @@ export interface StakeManagerInterface extends utils.Interface {
       | "depositTo"
       | "deposits"
       | "getDepositInfo"
-      | "paymasterStake"
       | "unlockStake"
-      | "unstakeDelaySec"
       | "withdrawStake"
       | "withdrawTo"
   ): FunctionFragment;
@@ -101,15 +97,7 @@ export interface StakeManagerInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "paymasterStake",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "unlockStake",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "unstakeDelaySec",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -130,15 +118,7 @@ export interface StakeManagerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "paymasterStake",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "unlockStake",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "unstakeDelaySec",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -284,13 +264,9 @@ export interface StakeManager extends BaseContract {
       }
     >;
 
-    paymasterStake(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     unlockStake(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    unstakeDelaySec(overrides?: CallOverrides): Promise<[number]>;
 
     withdrawStake(
       withdrawAddress: PromiseOrValue<string>,
@@ -337,13 +313,9 @@ export interface StakeManager extends BaseContract {
     overrides?: CallOverrides
   ): Promise<IStakeManager.DepositInfoStructOutput>;
 
-  paymasterStake(overrides?: CallOverrides): Promise<BigNumber>;
-
   unlockStake(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  unstakeDelaySec(overrides?: CallOverrides): Promise<number>;
 
   withdrawStake(
     withdrawAddress: PromiseOrValue<string>,
@@ -390,11 +362,7 @@ export interface StakeManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<IStakeManager.DepositInfoStructOutput>;
 
-    paymasterStake(overrides?: CallOverrides): Promise<BigNumber>;
-
     unlockStake(overrides?: CallOverrides): Promise<void>;
-
-    unstakeDelaySec(overrides?: CallOverrides): Promise<number>;
 
     withdrawStake(
       withdrawAddress: PromiseOrValue<string>,
@@ -487,13 +455,9 @@ export interface StakeManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    paymasterStake(overrides?: CallOverrides): Promise<BigNumber>;
-
     unlockStake(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    unstakeDelaySec(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawStake(
       withdrawAddress: PromiseOrValue<string>,
@@ -533,13 +497,9 @@ export interface StakeManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    paymasterStake(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     unlockStake(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    unstakeDelaySec(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdrawStake(
       withdrawAddress: PromiseOrValue<string>,

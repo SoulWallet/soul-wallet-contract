@@ -35,12 +35,227 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "SenderAddressResult",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "aggregator",
         type: "address",
       },
     ],
     name: "SignatureValidationFailed",
     type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "preOpGas",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "prefund",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "senderInfo",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "factoryInfo",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "paymasterInfo",
+        type: "tuple",
+      },
+    ],
+    name: "SimulationResult",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "preOpGas",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "prefund",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "senderInfo",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "factoryInfo",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "stake",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "unstakeDelaySec",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IStakeManager.StakeInfo",
+        name: "paymasterInfo",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "actualAggregator",
+            type: "address",
+          },
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "stake",
+                type: "uint256",
+              },
+              {
+                internalType: "uint256",
+                name: "unstakeDelaySec",
+                type: "uint256",
+              },
+            ],
+            internalType: "struct IStakeManager.StakeInfo",
+            name: "stakeInfo",
+            type: "tuple",
+          },
+        ],
+        internalType: "struct IEntryPoint.AggregatorStakeInfo",
+        name: "aggregatorInfo",
+        type: "tuple",
+      },
+    ],
+    name: "SimulationResultWithAggregation",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "userOpHash",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "factory",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "paymaster",
+        type: "address",
+      },
+    ],
+    name: "AccountDeployed",
+    type: "event",
   },
   {
     anonymous: false,
@@ -59,6 +274,19 @@ const _abi = [
       },
     ],
     name: "Deposited",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "aggregator",
+        type: "address",
+      },
+    ],
+    name: "SignatureAggregatorChanged",
     type: "event",
   },
   {
@@ -136,7 +364,7 @@ const _abi = [
       {
         indexed: true,
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -159,6 +387,12 @@ const _abi = [
       },
       {
         indexed: false,
+        internalType: "bool",
+        name: "success",
+        type: "bool",
+      },
+      {
+        indexed: false,
         internalType: "uint256",
         name: "actualGasCost",
         type: "uint256",
@@ -166,14 +400,8 @@ const _abi = [
       {
         indexed: false,
         internalType: "uint256",
-        name: "actualGasPrice",
+        name: "actualGasUsed",
         type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "success",
-        type: "bool",
       },
     ],
     name: "UserOperationEvent",
@@ -185,7 +413,7 @@ const _abi = [
       {
         indexed: true,
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -329,6 +557,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "bytes",
+        name: "initCode",
+        type: "bytes",
+      },
+    ],
+    name: "getSenderAddress",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         components: [
           {
             internalType: "address",
@@ -391,50 +632,12 @@ const _abi = [
         type: "tuple",
       },
     ],
-    name: "getRequestId",
+    name: "getUserOpHash",
     outputs: [
       {
         internalType: "bytes32",
         name: "",
         type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes",
-        name: "initCode",
-        type: "bytes",
-      },
-    ],
-    name: "getSenderAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-    ],
-    name: "getSenderStorage",
-    outputs: [
-      {
-        internalType: "uint256[]",
-        name: "senderStorageCells",
-        type: "uint256[]",
       },
     ],
     stateMutability: "view",
@@ -608,19 +811,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "paymasterStake",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         components: [
@@ -684,45 +874,9 @@ const _abi = [
         name: "userOp",
         type: "tuple",
       },
-      {
-        internalType: "bool",
-        name: "offChainSigCheck",
-        type: "bool",
-      },
     ],
     name: "simulateValidation",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "preOpGas",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "prefund",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "actualAggregator",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "sigForUserOp",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "sigForAggregation",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "offChainSigInfo",
-        type: "bytes",
-      },
-    ],
+    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -730,19 +884,6 @@ const _abi = [
     inputs: [],
     name: "unlockStake",
     outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "unstakeDelaySec",
-    outputs: [
-      {
-        internalType: "uint32",
-        name: "",
-        type: "uint32",
-      },
-    ],
     stateMutability: "nonpayable",
     type: "function",
   },

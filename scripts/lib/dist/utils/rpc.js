@@ -16,13 +16,13 @@ exports.RPC = void 0;
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-11-16 15:50:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-23 19:16:57
+ * @LastEditTime: 2022-12-26 20:02:40
  */
 const ethers_1 = require("ethers");
 const entryPoint_1 = require("../contracts/entryPoint");
 class RPC {
     static eth_sendUserOperation(op, entryPointAddress) {
-        const op_str = JSON.stringify(op);
+        const op_str = op.toJSON();
         return '{\
             "jsonrpc": "2.0",\
             "method": "eth_sendUserOperation",\
@@ -45,13 +45,13 @@ class RPC {
      * wait for the userOp to be mined
      * @param web3 web3 instance
      * @param entryPointAddress the entryPoint address
-     * @param requestId the requestId
+     * @param userOpHash the UserOpHash
      * @param timeOut the time out, default:1000 * 60 * 10 ( 10 minutes)
      * @param fromBlock the fromBlock, default: latest - 5
      * @param toBlock the toBlock, default: pending
      * @returns the userOp event array
      */
-    static waitUserOperation(etherProvider, entryPointAddress, requestId, timeOut = 1000 * 60 * 10, fromBlock = 0, toBlock = 'pending') {
+    static waitUserOperation(etherProvider, entryPointAddress, userOpHash, timeOut = 1000 * 60 * 10, fromBlock = 0, toBlock = 'pending') {
         return __awaiter(this, void 0, void 0, function* () {
             const interval = 1000 * 10;
             const startTime = Date.now();
@@ -69,7 +69,7 @@ class RPC {
                 const pastEvent = yield entryPoint.queryFilter({
                     topics: [
                         UserOperationEventTopic,
-                        requestId
+                        userOpHash
                     ]
                 }, _fromBlock, toBlock);
                 if (pastEvent && pastEvent.length > 0) {

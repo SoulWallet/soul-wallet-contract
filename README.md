@@ -8,5 +8,5 @@
 **Test**
 
 ```shell
-npx hardhat test scripts/deploy.ts
+npx hardhat test scripts/test.ts
 ```

@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-24 14:23:26
+ * @LastEditTime: 2022-12-27 09:53:10
  */
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
@@ -50,7 +50,22 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       allowUnlimitedContractSize: true,
+    },
+    goerli: {
+      url: "https://goerli.infura.io/v3/<>",
+      accounts: ["<>"],
+      gasPrice: "auto",
+      timeout: 1000000
+    },
+    mainnet: {
+      url: "https://mainnet.infura.io/v3/<>",
+      accounts: ["<>"],
+      gasPrice: "auto",
+      timeout: 1000000
     }
+  },
+  etherscan: {
+    apiKey: "<>"
   },
   paths: {
     sources: "./contracts",

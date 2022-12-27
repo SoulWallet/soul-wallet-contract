@@ -167,7 +167,6 @@ contract SmartWallet is
         }
     }
 
-
     // called by entryPoint, only after validateUserOp succeeded.
     function execFromEntryPoint(
         address dest,
@@ -204,12 +203,21 @@ contract SmartWallet is
     ) internal virtual override returns (uint256 deadline) {
         (aggregator);
         SignatureData memory signatureData = userOp.decodeSignature();
+
+        bytes32 _hash;
+        if (signatureData.deadline == 0) {
+            _hash = userOpHash;
+        } else {
+            _hash = keccak256(
+                abi.encodePacked(userOpHash, signatureData.deadline)
+            );
+        }
         signatureData.mode == SignatureMode.owner
-            ? _validateOwnerSignature(signatureData, userOpHash)
-            : _validateGuardiansSignature(signatureData, userOp, userOpHash);
+            ? _validateOwnerSignature(signatureData, _hash)
+            : _validateGuardiansSignature(signatureData, userOp, _hash);
+
         return signatureData.deadline;
     }
-
 
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);
@@ -302,5 +310,4 @@ contract SmartWallet is
         );
         return IERC1271.isValidSignature.selector;
     }
-
 }

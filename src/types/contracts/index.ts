@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as wethPaymasterSol from "./WETHPaymaster.sol";
 export type { wethPaymasterSol };
+import type * as dev from "./dev";
+export type { dev };
 import type * as guardian from "./guardian";
 export type { guardian };
 import type * as interfaces from "./interfaces";
@@ -15,7 +17,6 @@ export type { BasePaymaster } from "./BasePaymaster";
 export type { Create2Factory } from "./Create2Factory";
 export type { EntryPoint } from "./EntryPoint";
 export type { SenderCreator } from "./SenderCreator";
-export type { SingletonFactory } from "./SingletonFactory";
 export type { SmartWallet } from "./SmartWallet";
 export type { SoulWalletProxy } from "./SoulWalletProxy";
 export type { StakeManager } from "./StakeManager";

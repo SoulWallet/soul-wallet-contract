@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-24 23:01:46
+ * @LastEditTime: 2022-12-27 20:00:31
  */
 
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -46,6 +46,7 @@ export class EIP4337Lib {
         eth_sendUserOperation: RPC.eth_sendUserOperation,
         eth_supportedEntryPoints: RPC.eth_supportedEntryPoints,
         waitUserOperation: RPC.waitUserOperation,
+        simulateValidation: RPC.simulateValidation,
     }
 
 
@@ -140,16 +141,16 @@ export class EIP4337Lib {
     public static activateWalletOp(
         walletLogicAddress: string,
         entryPointAddress: string,
-        payMasterAddress: string,
         ownerAddress: string,
         upgradeDelay: number,
         guardianDelay: number,
         guardianAddress: string,
         tokenAddress: string,
-        maxFeePerGas: NumberLike,
-        maxPriorityFeePerGas: NumberLike,
+        payMasterAddress: string,
         salt: number,
-        create2Factory: string) {
+        create2Factory: string,
+        maxFeePerGas: NumberLike,
+        maxPriorityFeePerGas: NumberLike) {
         const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
         const initCodeHash = keccak256(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);

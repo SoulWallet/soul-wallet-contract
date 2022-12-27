@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-24 23:01:46
+ * @LastEditTime: 2022-12-27 20:00:31
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -99,7 +99,7 @@ class EIP4337Lib {
      * @param salt
      * @param create2Factory
      */
-    static activateWalletOp(walletLogicAddress, entryPointAddress, payMasterAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, maxFeePerGas, maxPriorityFeePerGas, salt, create2Factory) {
+    static activateWalletOp(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress, salt, create2Factory, maxFeePerGas, maxPriorityFeePerGas) {
         const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
         const initCodeHash = (0, utils_1.keccak256)(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);
@@ -200,6 +200,7 @@ EIP4337Lib.RPC = {
     eth_sendUserOperation: rpc_1.RPC.eth_sendUserOperation,
     eth_supportedEntryPoints: rpc_1.RPC.eth_supportedEntryPoints,
     waitUserOperation: rpc_1.RPC.waitUserOperation,
+    simulateValidation: rpc_1.RPC.simulateValidation,
 };
 var userOperation_2 = require("../entity/userOperation");
 Object.defineProperty(exports, "UserOperation", { enumerable: true, get: function () { return userOperation_2.UserOperation; } });

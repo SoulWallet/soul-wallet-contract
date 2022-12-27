@@ -20,9 +20,11 @@ contract WETHTokenPaymaster is BasePaymaster {
 
     constructor(
         EntryPoint _entryPoint,
-        IERC20 _WETHToken
+        IERC20 _WETHToken,
+        address _owner
     ) BasePaymaster(_entryPoint) {
         WETHToken = _WETHToken;
+        _transferOwnership(_owner);
     }
 
     function addWallet(bytes32 walletCodeHash) public onlyOwner {

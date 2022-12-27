@@ -4,22 +4,20 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 22:35:22
+ * @LastEditTime: 2022-12-27 20:59:51
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
-import { defaultAbiCoder } from 'ethers/lib/utils'
-import * as ethUtil from 'ethereumjs-util';
 import { SmartWallet__factory } from "../src/types/index";
+import { Utils } from "./Utils";
 
 const log_on = false;
 const log = (message?: any, ...optionalParams: any[]) => { if (log_on) console.log(message, ...optionalParams) };
 
 describe("SoulWalletContract", function () {
-
 
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
@@ -70,12 +68,8 @@ describe("SoulWalletContract", function () {
         // #endregion
 
         // #region EntryPoint  
-        const _paymasterStake = '' + Math.pow(10, 18);
-        const _unstakeDelaySec = 100;
         const EntryPoint = {
-            contract: await (await ethers.getContractFactory("EntryPoint")).deploy(),
-            paymasterStake: _paymasterStake,
-            unstakeDelaySec: _unstakeDelaySec,
+            contract: await (await ethers.getContractFactory("EntryPoint")).deploy()
         };
         log("EntryPoint:", EntryPoint.contract.address);
         // #endregion
@@ -373,9 +367,12 @@ describe("SoulWalletContract", function () {
         const WETHPaymaster = {
             contract: await (await ethers.getContractFactory("WETHTokenPaymaster")).deploy(
                 EntryPoint.contract.address,
-                WETH.contract.address
+                WETH.contract.address,
+                accounts[0].address
             )
         };
+
+        const _paymasterStake = '' + Math.pow(10, 17);
         await WETHPaymaster.contract.addStake(
             1, {
             from: accounts[0].address,
@@ -469,16 +466,16 @@ describe("SoulWalletContract", function () {
         const activateOp = EIP4337Lib.activateWalletOp(
             SoulWalletLogic.contract.address,
             EntryPoint.contract.address,
-            WETHPaymaster.contract.address,
             walletOwner.address,
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
             WETH.contract.address,
-            10000000000,// 100Gwei
-            1000000000,// 10Gwei
+            WETHPaymaster.contract.address,
             0,
-            SingletonFactory
+            SingletonFactory,
+            10000000000,// 100Gwei
+            1000000000,// 10Gwei 
         );
 
 
@@ -492,7 +489,7 @@ describe("SoulWalletContract", function () {
             walletOwner.address,
             Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
-        const simulate = await Utils.simulateValidation(EntryPoint.contract.address, activateOp);
+        const simulate = await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPoint.contract.address, activateOp);
         log(`simulateValidation result:`, simulate);
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
@@ -595,7 +592,7 @@ describe("SoulWalletContract", function () {
             );
         }
         transferOwnerOP.signWithGuardiansSign(guardian, guardianSignArr, 0, guardianInitcode);
-        const simulate = await Utils.simulateValidation(EntryPoint.contract.address, transferOwnerOP);
+        const simulate = await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPoint.contract.address, transferOwnerOP);
         log(`simulateValidation result:`, simulate);
         const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
@@ -624,123 +621,3 @@ describe("SoulWalletContract", function () {
 
 
 });
-
-class Utils {
-
-    static signMessage(msg: string, privateKey: string) {
-        const messageHex = Buffer.from(ethers.utils.arrayify(msg)).toString('hex');
-        const personalMessage = ethUtil.hashPersonalMessage(ethUtil.toBuffer(ethUtil.addHexPrefix(messageHex)));
-        const _privateKey = Buffer.from(privateKey.substring(2), "hex");
-        const signature1 = ethUtil.ecsign(personalMessage, _privateKey);
-        return ethUtil.toRpcSig(signature1.v, signature1.r, signature1.s);
-    }
-
-
-
-    static async simulateValidation(entrypointAddress: string, op: UserOperation) {
-
-        const abi = [
-            {
-                "inputs": [
-                    {
-                        "components": [
-                            {
-                                "internalType": "address",
-                                "name": "sender",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "nonce",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "initCode",
-                                "type": "bytes"
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "callData",
-                                "type": "bytes"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "callGasLimit",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "verificationGasLimit",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "preVerificationGas",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "maxFeePerGas",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "maxPriorityFeePerGas",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "paymasterAndData",
-                                "type": "bytes"
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "signature",
-                                "type": "bytes"
-                            }
-                        ],
-                        "internalType": "struct UserOperation",
-                        "name": "userOp",
-                        "type": "tuple"
-                    }
-                ],
-                "name": "simulateValidation",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            }
-        ];
-
-        const result = await ethers.provider.call({
-            from: EIP4337Lib.Defines.AddressZero,
-            to: entrypointAddress,
-            data: new ethers.utils.Interface(abi).encodeFunctionData("simulateValidation", [op]),
-        });
-        if (result.startsWith('0x5f8f83a2')) {
-            // SimulationResult(uint256 preOpGas, uint256 prefund, uint256 deadline, (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec))
-            const re = defaultAbiCoder.decode(
-                ['uint256', 'uint256', 'uint256', '(uint256,uint256)', '(uint256,uint256)', '(uint256,uint256)'],
-                '0x' + result.substring(10)
-            );
-            return {
-                preOpGas: re[0],
-                prefund: re[1],
-                deadline: re[2],
-                senderInfo: re[3],
-                factoryInfo: re[4],
-                paymasterInfo: re[5],
-            };
-        } else if (result.startsWith("0x00fa072b")) {
-            // FailedOp(uint256,address,string)
-            const re = defaultAbiCoder.decode(
-                ['uint256', 'address', 'string'],
-                '0x' + result.substring(10)
-            );
-            throw new Error(`FailedOp(${re[0]},${re[1]},${re[2]})`);
-        } else {
-            throw new Error(`simulateValidation failed: ${result}`);
-        }
-
-    }
-}

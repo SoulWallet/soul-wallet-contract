@@ -26,6 +26,7 @@ export declare class EIP4337Lib {
         eth_sendUserOperation: typeof RPC.eth_sendUserOperation;
         eth_supportedEntryPoints: typeof RPC.eth_supportedEntryPoints;
         waitUserOperation: typeof RPC.waitUserOperation;
+        simulateValidation: typeof RPC.simulateValidation;
     };
     /**
      *
@@ -80,7 +81,7 @@ export declare class EIP4337Lib {
      * @param salt
      * @param create2Factory
      */
-    static activateWalletOp(walletLogicAddress: string, entryPointAddress: string, payMasterAddress: string, ownerAddress: string, upgradeDelay: number, guardianDelay: number, guardianAddress: string, tokenAddress: string, maxFeePerGas: NumberLike, maxPriorityFeePerGas: NumberLike, salt: number, create2Factory: string): UserOperation;
+    static activateWalletOp(walletLogicAddress: string, entryPointAddress: string, ownerAddress: string, upgradeDelay: number, guardianDelay: number, guardianAddress: string, tokenAddress: string, payMasterAddress: string, salt: number, create2Factory: string, maxFeePerGas: NumberLike, maxPriorityFeePerGas: NumberLike): UserOperation;
     static getPackedInitCode(create2Factory: string, initCode: string, salt: number): string;
     /**
      * calculate EIP-4337 wallet address

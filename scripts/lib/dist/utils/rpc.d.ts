@@ -3,6 +3,14 @@ import { UserOperation } from "../entity/userOperation";
 export declare class RPC {
     static eth_sendUserOperation(op: UserOperation, entryPointAddress: string): string;
     static eth_supportedEntryPoints(): string;
+    static simulateValidation(etherProvider: ethers.providers.BaseProvider, entryPointAddress: string, op: UserOperation): Promise<{
+        preOpGas: any;
+        prefund: any;
+        deadline: any;
+        senderInfo: any;
+        factoryInfo: any;
+        paymasterInfo: any;
+    }>;
     /**
      * wait for the userOp to be mined
      * @param web3 web3 instance

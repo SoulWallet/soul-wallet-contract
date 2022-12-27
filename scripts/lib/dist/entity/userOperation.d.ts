@@ -58,5 +58,13 @@ declare class UserOperation {
      * @returns hex string
      */
     getUserOpHash(entryPointAddress: string, chainId: number): string;
+    /**
+     * get the UserOpHash (userOp hash) with deadline
+     * @param entryPointAddress
+     * @param chainId
+     * @param deadline unix timestamp
+     * @returns bytes32 hash
+     */
+    getUserOpHashWithDeadline(entryPointAddress: string, chainId: number, deadline: number): string;
 }
 export { UserOperation };

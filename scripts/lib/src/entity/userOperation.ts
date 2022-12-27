@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 22:31:57
+ * @LastEditTime: 2022-12-27 19:12:59
  */
 
 import { ethers, BigNumber } from "ethers";
@@ -137,8 +137,8 @@ class UserOperation {
      * @param deadline deadline (block timestamp)
      * @param initCode guardian contract init code
      */
-    public signWithGuardiansSign(guardianAddress: string, signature: guardianSignature[],deadline = 0, initCode = '0x') {
-        this.signature = packGuardiansSignByInitCode(guardianAddress, signature, deadline,initCode);
+    public signWithGuardiansSign(guardianAddress: string, signature: guardianSignature[], deadline = 0, initCode = '0x') {
+        this.signature = packGuardiansSignByInitCode(guardianAddress, signature, deadline, initCode);
     }
 
 
@@ -150,6 +150,18 @@ class UserOperation {
      */
     public getUserOpHash(entryPointAddress: string, chainId: number): string {
         return getUserOpHash(this, entryPointAddress, chainId);
+    }
+
+    /**
+     * get the UserOpHash (userOp hash) with deadline
+     * @param entryPointAddress 
+     * @param chainId 
+     * @param deadline unix timestamp
+     * @returns bytes32 hash
+     */
+    public getUserOpHashWithDeadline(entryPointAddress: string, chainId: number, deadline: number): string {
+        const _hash = this.getUserOpHash(entryPointAddress, chainId);
+        return ethers.utils.solidityKeccak256(['bytes32', 'uint64'], [_hash, deadline]);
     }
 
 }

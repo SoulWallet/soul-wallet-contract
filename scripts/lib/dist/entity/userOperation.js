@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 22:31:57
+ * @LastEditTime: 2022-12-27 19:12:59
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -18,6 +18,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserOperation = void 0;
+const ethers_1 = require("ethers");
 const numberLike_1 = require("../defines/numberLike");
 const userOp_1 = require("../utils/userOp");
 /**
@@ -142,6 +143,17 @@ class UserOperation {
      */
     getUserOpHash(entryPointAddress, chainId) {
         return (0, userOp_1.getUserOpHash)(this, entryPointAddress, chainId);
+    }
+    /**
+     * get the UserOpHash (userOp hash) with deadline
+     * @param entryPointAddress
+     * @param chainId
+     * @param deadline unix timestamp
+     * @returns bytes32 hash
+     */
+    getUserOpHashWithDeadline(entryPointAddress, chainId, deadline) {
+        const _hash = this.getUserOpHash(entryPointAddress, chainId);
+        return ethers_1.ethers.utils.solidityKeccak256(['bytes32', 'uint64'], [_hash, deadline]);
     }
 }
 exports.UserOperation = UserOperation;

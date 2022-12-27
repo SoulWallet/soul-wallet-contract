@@ -4,13 +4,16 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 09:41:00
+ * @LastEditTime: 2022-12-27 21:30:07
  */
 
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
-import { Create2Factory__factory } from "../src/types/index";
+import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
+import { WETH9__factory, WETHTokenPaymaster__factory, Create2Factory__factory, EntryPoint__factory } from "../src/types/index";
+import { Utils } from "./Utils";
+import * as ethUtil from 'ethereumjs-util';
 
 
 async function main() {
@@ -34,7 +37,13 @@ async function main() {
         throw new Error("WETHContractAddress not set");
     }
 
+    const chainId = await (await ethers.provider.getNetwork()).chainId;
+
     const EOA = await ethers.getSigner('0x00000000000d3b4EA88f9B3fE809D386B86F5898');
+
+    const walletOwner = '0x93EDb58cFc5d77028C138e47Fffb929A57C52082';
+    const walletOwnerPrivateKey = '0x82cfe73c005926089ebf7ec1f49852207e5670870d0dfa544caabb83d2cd2d5f';
+
 
     const salt = hexZeroPad(hexlify(0), 32);
 
@@ -60,7 +69,7 @@ async function main() {
         console.log("EntryPoint tx:", tx.hash);
         while (await ethers.provider.getCode(EntryPointAddress) === '0x') {
             console.log("EntryPoint not deployed, waiting...");
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 3000));
         }
         console.log("EntryPoint deployed, verifying...");
         try {
@@ -76,11 +85,10 @@ async function main() {
 
     // #endregion Entrypoint
 
-
     // #region WETHPaymaster 
 
     const WETHTokenPaymasterFactory = await ethers.getContractFactory("WETHTokenPaymaster");
-    const WETHTokenPaymasterBytecode = WETHTokenPaymasterFactory.getDeployTransaction(EntryPointAddress, WETHContractAddress).data;
+    const WETHTokenPaymasterBytecode = WETHTokenPaymasterFactory.getDeployTransaction(EntryPointAddress, WETHContractAddress, EOA.address).data;
     if (!WETHTokenPaymasterBytecode) {
         throw new Error("WETHTokenPaymasterBytecode not set");
     }
@@ -100,8 +108,21 @@ async function main() {
         console.log("EntryPoint tx:", tx.hash);
         while (await ethers.provider.getCode(WETHTokenPaymasterAddress) === '0x') {
             console.log("WETHTokenPaymaster not deployed, waiting...");
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 3000));
         }
+        const _paymasterStake = '' + Math.pow(10, 17);
+        const WETHPaymaster = await WETHTokenPaymaster__factory.connect(WETHTokenPaymasterAddress, EOA);
+        console.log(await WETHPaymaster.owner());
+        console.log('adding stake');
+        await WETHPaymaster.addStake(
+            1, {
+            from: EOA.address,
+            value: _paymasterStake
+        });
+        await WETHPaymaster.deposit({
+            from: EOA.address,
+            value: _paymasterStake
+        });
         console.log("WETHTokenPaymaster deployed, verifying...");
         try {
             await run("verify:verify", {
@@ -114,10 +135,10 @@ async function main() {
             console.log("WETHTokenPaymaster verify failed:", error);
         }
     } else {
+
     }
 
     // #endregion WETHPaymaster
-
 
     // #region WalletLogic 
 
@@ -139,7 +160,7 @@ async function main() {
         console.log("WalletLogic tx:", tx.hash);
         while (await ethers.provider.getCode(WalletLogicAddress) === '0x') {
             console.log("WalletLogic not deployed, waiting...");
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 3000));
         }
         console.log("WalletLogic deployed, verifying...");
         try {
@@ -154,8 +175,6 @@ async function main() {
     }
 
     // #endregion WalletLogic
-
-
 
     // #region GuardianLogic 
 
@@ -177,7 +196,7 @@ async function main() {
         console.log("GuardianLogic tx:", tx.hash);
         while (await ethers.provider.getCode(GuardianLogicAddress) === '0x') {
             console.log("GuardianLogic not deployed, waiting...");
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 3000));
         }
         console.log("GuardianLogic deployed, verifying...");
         try {
@@ -192,6 +211,64 @@ async function main() {
     }
 
     // #endregion GuardianLogic
+
+    // #region deploy wallet
+
+    const upgradeDelay = 10;
+    const guardianDelay = 10;
+    const walletAddress = await EIP4337Lib.calculateWalletAddress(
+        WalletLogicAddress,
+        EntryPointAddress,
+        walletOwner,
+        upgradeDelay,
+        guardianDelay,
+        EIP4337Lib.Defines.AddressZero,
+        WETHContractAddress,
+        WETHTokenPaymasterAddress,
+        0,
+        create2Factory
+    );
+
+    console.log('walletAddress: ' + walletAddress);
+
+    // send 0.02 WETH to wallet
+    const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
+    const _b = await WETHContract.balanceOf(walletAddress);
+    if (_b.lt(ethers.utils.parseEther('0.02'))) {
+        console.log('sending 0.05 WETH to wallet');
+        await WETHContract.transferFrom(EOA.address, walletAddress, ethers.utils.parseEther('0.05'));
+    }
+
+    const activateOp = EIP4337Lib.activateWalletOp(
+        WalletLogicAddress,
+        EntryPointAddress,
+        walletOwner,
+        upgradeDelay,
+        guardianDelay,
+        EIP4337Lib.Defines.AddressZero,
+        WETHContractAddress,
+        WETHTokenPaymasterAddress,
+        0,
+        create2Factory,
+        3000000000,// 30Gwei
+        500000000// 5Gwei 
+    );
+
+    const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+
+    activateOp.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+    );
+
+    await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, activateOp);
+
+
+    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+    const re = await EntryPoint.handleOps([activateOp], EOA.address);
+    console.table(re);
+
+    // #endregion deploy wallet
 
 
 }

@@ -4,11 +4,13 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-11-16 15:50:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 20:02:40
+ * @LastEditTime: 2022-12-27 20:11:57
  */
 import { ethers } from "ethers";
-import { EntryPointContract } from "../contracts/entryPoint";
 import { UserOperation } from "../entity/userOperation";
+import { AddressZero } from "../defines/address";
+import { EntryPointContract } from "../contracts/entryPoint";
+import { defaultAbiCoder } from "ethers/lib/utils";
 
 export class RPC {
     static eth_sendUserOperation(op: UserOperation, entryPointAddress: string) {
@@ -33,7 +35,40 @@ export class RPC {
           }';
     }
 
-
+    static async simulateValidation(
+        etherProvider: ethers.providers.BaseProvider,
+        entryPointAddress: string,
+        op: UserOperation) {
+        const result = await etherProvider.call({
+            from: AddressZero,
+            to: entryPointAddress,
+            data: new ethers.utils.Interface(EntryPointContract.ABI).encodeFunctionData("simulateValidation", [op]),
+        });
+        if (result.startsWith('0x5f8f83a2')) {
+            // SimulationResult(uint256 preOpGas, uint256 prefund, uint256 deadline, (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec), (uint256 stake,uint256 unstakeDelaySec))
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'uint256', 'uint256', '(uint256,uint256)', '(uint256,uint256)', '(uint256,uint256)'],
+                '0x' + result.substring(10)
+            );
+            return {
+                preOpGas: re[0],
+                prefund: re[1],
+                deadline: re[2],
+                senderInfo: re[3],
+                factoryInfo: re[4],
+                paymasterInfo: re[5],
+            };
+        } else if (result.startsWith("0x00fa072b")) {
+            // FailedOp(uint256,address,string)
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'address', 'string'],
+                '0x' + result.substring(10)
+            );
+            throw new Error(`FailedOp(${re[0]},${re[1]},${re[2]})`);
+        } else {
+            throw new Error(`simulateValidation failed: ${result}`);
+        }
+    }
 
 
     /**

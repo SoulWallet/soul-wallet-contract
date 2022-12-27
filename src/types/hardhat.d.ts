@@ -101,6 +101,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Create2Factory__factory>;
     getContractFactory(
+      name: "SingletonFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SingletonFactory__factory>;
+    getContractFactory(
+      name: "WETH9",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WETH9__factory>;
+    getContractFactory(
       name: "EntryPoint",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EntryPoint__factory>;
@@ -164,10 +172,6 @@ declare module "hardhat/types/runtime" {
       name: "SenderCreator",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SenderCreator__factory>;
-    getContractFactory(
-      name: "SingletonFactory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SingletonFactory__factory>;
     getContractFactory(
       name: "SmartWallet",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -316,6 +320,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Create2Factory>;
     getContractAt(
+      name: "SingletonFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SingletonFactory>;
+    getContractAt(
+      name: "WETH9",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WETH9>;
+    getContractAt(
       name: "EntryPoint",
       address: string,
       signer?: ethers.Signer
@@ -395,11 +409,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SenderCreator>;
-    getContractAt(
-      name: "SingletonFactory",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SingletonFactory>;
     getContractAt(
       name: "SmartWallet",
       address: string,

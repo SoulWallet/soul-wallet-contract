@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 20:00:31
+ * @LastEditTime: 2022-12-28 20:58:20
  */
 
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -20,6 +20,7 @@ import { RPC } from '../utils/rpc';
 import { Converter } from "../utils/converter";
 import { ethers } from "ethers";
 import { NumberLike } from "../defines/numberLike";
+import { CodefiGasFees } from '../utils/gasFee';
 
 export class EIP4337Lib {
 
@@ -27,6 +28,7 @@ export class EIP4337Lib {
         getNonce: EIP4337Lib.getNonce,
         DecodeCallData: DecodeCallData,
         fromTransaction: Converter.fromTransaction,
+        suggestedGasFee: CodefiGasFees
     }
 
     public static Defines = {

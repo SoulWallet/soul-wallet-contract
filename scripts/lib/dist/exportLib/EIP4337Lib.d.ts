@@ -6,11 +6,13 @@ import { ERC1155, ERC20, ERC721, ETH } from "../utils/token";
 import { RPC } from '../utils/rpc';
 import { Converter } from "../utils/converter";
 import { NumberLike } from "../defines/numberLike";
+import { CodefiGasFees } from '../utils/gasFee';
 export declare class EIP4337Lib {
     static Utils: {
         getNonce: typeof EIP4337Lib.getNonce;
         DecodeCallData: typeof DecodeCallData;
         fromTransaction: typeof Converter.fromTransaction;
+        suggestedGasFee: typeof CodefiGasFees;
     };
     static Defines: {
         AddressZero: string;

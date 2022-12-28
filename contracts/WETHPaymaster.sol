@@ -12,7 +12,7 @@ import "./BasePaymaster.sol";
  */
 contract WETHTokenPaymaster is BasePaymaster {
     //calculated cost of the postOp
-    uint256 constant COST_OF_POST = 15000;
+    uint256 constant COST_OF_POST = 20000;
 
     using UserOperationLib for UserOperation;
     IERC20 public WETHToken;
@@ -74,7 +74,7 @@ contract WETHTokenPaymaster is BasePaymaster {
             "WETH-TokenPaymaster: not enough balance"
         );
 
-        return (abi.encode(userOp.sender), 0);
+        return (abi.encode(userOp.sender, userOp.gasPrice()), 0);
     }
 
     // when constructing a wallet, validate constructor code and parameters
@@ -140,12 +140,15 @@ contract WETHTokenPaymaster is BasePaymaster {
         uint256 actualGasCost
     ) internal override {
         (mode);
-        address sender = abi.decode(context, (address));
+        (address sender, uint256 gasPrice) = abi.decode(
+            context,
+            (address, uint256)
+        );
         //actualGasCost is known to be no larger than the above requiredPreFund, so the transfer should succeed.
         WETHToken.transferFrom(
             sender,
             address(this),
-            actualGasCost + COST_OF_POST
+            actualGasCost + (COST_OF_POST * gasPrice)
         );
     }
 }

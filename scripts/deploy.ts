@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 21:30:07
+ * @LastEditTime: 2022-12-28 21:40:52
  */
 
 import { BigNumber } from "ethers";
@@ -110,33 +110,37 @@ async function main() {
             console.log("WETHTokenPaymaster not deployed, waiting...");
             await new Promise(r => setTimeout(r, 3000));
         }
-        const _paymasterStake = '' + Math.pow(10, 17);
-        const WETHPaymaster = await WETHTokenPaymaster__factory.connect(WETHTokenPaymasterAddress, EOA);
-        console.log(await WETHPaymaster.owner());
-        console.log('adding stake');
-        await WETHPaymaster.addStake(
-            1, {
-            from: EOA.address,
-            value: _paymasterStake
-        });
-        await WETHPaymaster.deposit({
-            from: EOA.address,
-            value: _paymasterStake
-        });
+        {
+            const _paymasterStake = '' + Math.pow(10, 17);
+            const WETHPaymaster = await WETHTokenPaymaster__factory.connect(WETHTokenPaymasterAddress, EOA);
+            console.log(await WETHPaymaster.owner());
+            console.log('adding stake');
+            await WETHPaymaster.addStake(
+                1, {
+                from: EOA.address,
+                value: _paymasterStake
+            });
+            await WETHPaymaster.deposit({
+                from: EOA.address,
+                value: _paymasterStake
+            });
+        }
+
         console.log("WETHTokenPaymaster deployed, verifying...");
         try {
             await run("verify:verify", {
                 address: WETHTokenPaymasterAddress,
                 constructorArguments: [
-                    EntryPointAddress, WETHContractAddress
+                    EntryPointAddress, WETHContractAddress, EOA.address
                 ],
             });
         } catch (error) {
             console.log("WETHTokenPaymaster verify failed:", error);
         }
     } else {
-
+         
     }
+
 
     // #endregion WETHPaymaster
 
@@ -231,6 +235,8 @@ async function main() {
 
     console.log('walletAddress: ' + walletAddress);
 
+
+
     // send 0.02 WETH to wallet
     const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
     const _b = await WETHContract.balanceOf(walletAddress);
@@ -239,36 +245,78 @@ async function main() {
         await WETHContract.transferFrom(EOA.address, walletAddress, ethers.utils.parseEther('0.05'));
     }
 
-    const activateOp = EIP4337Lib.activateWalletOp(
-        WalletLogicAddress,
+
+
+    // check if wallet is activated (deployed) 
+    const code = await ethers.provider.getCode(walletAddress);
+    if (code === '0x') {
+        // get gas price
+        const eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
+        if (!eip1559GasFee) {
+            throw new Error('eip1559GasFee is null');
+        }
+        const activateOp = EIP4337Lib.activateWalletOp(
+            WalletLogicAddress,
+            EntryPointAddress,
+            walletOwner,
+            upgradeDelay,
+            guardianDelay,
+            EIP4337Lib.Defines.AddressZero,
+            WETHContractAddress,
+            WETHTokenPaymasterAddress,
+            0,
+            create2Factory,
+            ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
+            ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').toString()
+        );
+
+        const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+
+        activateOp.signWithSignature(
+            walletOwner,
+            Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+        );
+        await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, activateOp);
+        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+        const re = await EntryPoint.handleOps([activateOp], EOA.address);
+        console.log(re);
+    }
+
+    // #endregion deploy wallet
+
+    // #region send 1wei Weth to wallet
+    const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
+    const eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
+    if (!eip1559GasFee) {
+        throw new Error('eip1559GasFee is null');
+    }
+    const sendWETHOP = await EIP4337Lib.Tokens.ERC20.transfer(
+        ethers.provider,
+        walletAddress,
+        nonce,
         EntryPointAddress,
-        walletOwner,
-        upgradeDelay,
-        guardianDelay,
-        EIP4337Lib.Defines.AddressZero,
-        WETHContractAddress,
         WETHTokenPaymasterAddress,
-        0,
-        create2Factory,
-        3000000000,// 30Gwei
-        500000000// 5Gwei 
+        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
+        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').toString(),
+        WETHContractAddress,
+        EOA.address,
+        '1'
     );
-
-    const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
-
-    activateOp.signWithSignature(
+    if (!sendWETHOP) {
+        throw new Error('sendWETHOP is null');
+    }
+    const userOpHash = sendWETHOP.getUserOpHash(EntryPointAddress, chainId);
+    sendWETHOP.signWithSignature(
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
     );
-
-    await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, activateOp);
-
-
+    await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, sendWETHOP);
     const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    const re = await EntryPoint.handleOps([activateOp], EOA.address);
-    console.table(re);
+    console.log(sendWETHOP);
+    const re = await EntryPoint.handleOps([sendWETHOP], EOA.address);
+    console.log(re);
 
-    // #endregion deploy wallet
+    // #endregion send 1wei Weth to wallet
 
 
 }

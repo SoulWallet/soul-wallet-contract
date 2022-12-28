@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 20:00:31
+ * @LastEditTime: 2022-12-28 20:58:20
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -29,6 +29,7 @@ const token_1 = require("../utils/token");
 const rpc_1 = require("../utils/rpc");
 const converter_1 = require("../utils/converter");
 const ethers_1 = require("ethers");
+const gasFee_1 = require("../utils/gasFee");
 class EIP4337Lib {
     /**
      *
@@ -185,6 +186,7 @@ EIP4337Lib.Utils = {
     getNonce: EIP4337Lib.getNonce,
     DecodeCallData: decodeCallData_1.DecodeCallData,
     fromTransaction: converter_1.Converter.fromTransaction,
+    suggestedGasFee: gasFee_1.CodefiGasFees
 };
 EIP4337Lib.Defines = {
     AddressZero: address_1.AddressZero

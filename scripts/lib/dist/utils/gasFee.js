@@ -19,7 +19,7 @@ exports.CodefiGasFees = void 0;
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-28 20:46:15
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-28 20:57:04
+ * @LastEditTime: 2022-12-28 21:01:27
  */
 const axios_1 = __importDefault(require("axios"));
 class CodefiGasFees {
@@ -29,24 +29,34 @@ class CodefiGasFees {
     */
     static getEIP1559GasFees(chainId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield axios_1.default.get(`https://gas-api.metaswap.codefi.network/networks/${chainId}/suggestedGasFees`);
-            if (response.status === 200) {
-                const gas = response.data;
-                if (gas) {
-                    return gas;
+            try {
+                const response = yield axios_1.default.get(`https://gas-api.metaswap.codefi.network/networks/${chainId}/suggestedGasFees`);
+                if (response.status === 200) {
+                    const gas = response.data;
+                    if (gas) {
+                        return gas;
+                    }
                 }
+            }
+            catch (error) {
+                console.log(error);
             }
             return null;
         });
     }
     static getLegacyGasPrices(chainId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield axios_1.default.get(`https://gas-api.metaswap.codefi.network/networks/${chainId}/gasPrices`);
-            if (response.status === 200) {
-                const gas = response.data;
-                if (gas) {
-                    return gas;
+            try {
+                const response = yield axios_1.default.get(`https://gas-api.metaswap.codefi.network/networks/${chainId}/gasPrices`);
+                if (response.status === 200) {
+                    const gas = response.data;
+                    if (gas) {
+                        return gas;
+                    }
                 }
+            }
+            catch (error) {
+                console.log(error);
             }
             return null;
         });

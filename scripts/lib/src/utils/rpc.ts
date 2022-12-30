@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-11-16 15:50:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 20:11:57
+ * @LastEditTime: 2022-12-30 10:58:50
  */
 import { ethers } from "ethers";
 import { UserOperation } from "../entity/userOperation";
@@ -33,6 +33,32 @@ export class RPC {
             "method": "eth_supportedEntryPoints",\
             "params": []\
           }';
+    }
+
+    static async simulateHandleOp(
+        etherProvider: ethers.providers.BaseProvider,
+        entryPointAddress: string,
+        op: UserOperation) {
+        const result = await etherProvider.call({
+            from: AddressZero,
+            to: entryPointAddress,
+            data: new ethers.utils.Interface(EntryPointContract.ABI).encodeFunctionData("simulateHandleOp", [op]),
+        });
+        // error ExecutionResult(uint256 preOpGas, uint256 paid, uint256 deadline, uint256 paymasterDeadline);
+        if (result.startsWith('0xa30fd31e')) {
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'uint256', 'uint256', 'uint256'],
+                '0x' + result.substring(10)
+            );
+            return {
+                preOpGas: re[0],
+                paid: re[1],
+                deadline: re[2],
+                paymasterDeadline: re[3]
+            };
+        }
+        throw new Error(result);
+
     }
 
     static async simulateValidation(

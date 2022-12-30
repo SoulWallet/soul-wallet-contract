@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 21:13:10
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 20:01:14
+ * @LastEditTime: 2022-12-30 10:46:12
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleWalletContract = void 0;

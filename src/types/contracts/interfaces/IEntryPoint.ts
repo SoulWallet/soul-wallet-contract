@@ -120,6 +120,7 @@ export interface IEntryPointInterface extends utils.Interface {
     "getUserOpHash((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
     "handleAggregatedOps(((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[],address,bytes)[],address)": FunctionFragment;
     "handleOps((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes)[],address)": FunctionFragment;
+    "simulateHandleOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
     "simulateValidation((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))": FunctionFragment;
     "unlockStake()": FunctionFragment;
     "withdrawStake(address)": FunctionFragment;
@@ -136,6 +137,7 @@ export interface IEntryPointInterface extends utils.Interface {
       | "getUserOpHash"
       | "handleAggregatedOps"
       | "handleOps"
+      | "simulateHandleOp"
       | "simulateValidation"
       | "unlockStake"
       | "withdrawStake"
@@ -175,6 +177,10 @@ export interface IEntryPointInterface extends utils.Interface {
     values: [UserOperationStruct[], PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "simulateHandleOp",
+    values: [UserOperationStruct]
+  ): string;
+  encodeFunctionData(
     functionFragment: "simulateValidation",
     values: [UserOperationStruct]
   ): string;
@@ -211,6 +217,10 @@ export interface IEntryPointInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "handleOps", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "simulateHandleOp",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "simulateValidation",
     data: BytesLike
@@ -434,6 +444,11 @@ export interface IEntryPoint extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    simulateHandleOp(
+      op: UserOperationStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     simulateValidation(
       userOp: UserOperationStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -497,6 +512,11 @@ export interface IEntryPoint extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  simulateHandleOp(
+    op: UserOperationStruct,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   simulateValidation(
     userOp: UserOperationStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -557,6 +577,11 @@ export interface IEntryPoint extends BaseContract {
     handleOps(
       ops: UserOperationStruct[],
       beneficiary: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    simulateHandleOp(
+      op: UserOperationStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -727,6 +752,11 @@ export interface IEntryPoint extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    simulateHandleOp(
+      op: UserOperationStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     simulateValidation(
       userOp: UserOperationStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -788,6 +818,11 @@ export interface IEntryPoint extends BaseContract {
     handleOps(
       ops: UserOperationStruct[],
       beneficiary: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    simulateHandleOp(
+      op: UserOperationStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

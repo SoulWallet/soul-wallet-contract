@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 20:59:51
+ * @LastEditTime: 2022-12-30 11:08:29
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
@@ -489,8 +489,8 @@ describe("SoulWalletContract", function () {
             walletOwner.address,
             Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
-        const simulate = await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPoint.contract.address, activateOp);
-        log(`simulateValidation result:`, simulate);
+        const simulate = await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPoint.contract.address, activateOp);
+        log(`simulateHandleOp result:`, simulate);
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
@@ -592,8 +592,8 @@ describe("SoulWalletContract", function () {
             );
         }
         transferOwnerOP.signWithGuardiansSign(guardian, guardianSignArr, 0, guardianInitcode);
-        const simulate = await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPoint.contract.address, transferOwnerOP);
-        log(`simulateValidation result:`, simulate);
+        const simulate = await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPoint.contract.address, transferOwnerOP);
+        log(`simulateHandleOp result:`, simulate);
         const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
         await EntryPoint.contract.handleOps([transferOwnerOP], accounts[0].address);

@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-28 20:58:20
+ * @LastEditTime: 2022-12-30 10:54:53
  */
 
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -49,6 +49,7 @@ export class EIP4337Lib {
         eth_supportedEntryPoints: RPC.eth_supportedEntryPoints,
         waitUserOperation: RPC.waitUserOperation,
         simulateValidation: RPC.simulateValidation,
+        simulateHandleOp: RPC.simulateHandleOp,
     }
 
 

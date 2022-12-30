@@ -4,12 +4,39 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 21:04:19
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-26 20:00:46
+ * @LastEditTime: 2022-12-30 10:45:27
  */
 import { IContract } from './icontract';
 
 const ABI: any =
+
 [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "preOpGas",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "paid",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "deadline",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "paymasterDeadline",
+				"type": "uint256"
+			}
+		],
+		"name": "ExecutionResult",
+		"type": "error"
+	},
 	{
 		"inputs": [
 			{
@@ -56,19 +83,36 @@ const ABI: any =
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "preOpGas",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "prefund",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "deadline",
-				"type": "uint256"
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "preOpGas",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "prefund",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "paymasterDeadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "paymasterContext",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct IEntryPoint.ReturnInfo",
+				"name": "returnInfo",
+				"type": "tuple"
 			},
 			{
 				"components": [
@@ -122,25 +166,42 @@ const ABI: any =
 				"type": "tuple"
 			}
 		],
-		"name": "SimulationResult",
+		"name": "ValidationResult",
 		"type": "error"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "preOpGas",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "prefund",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "deadline",
-				"type": "uint256"
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "preOpGas",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "prefund",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "paymasterDeadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "paymasterContext",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct IEntryPoint.ReturnInfo",
+				"name": "returnInfo",
+				"type": "tuple"
 			},
 			{
 				"components": [
@@ -223,7 +284,7 @@ const ABI: any =
 				"type": "tuple"
 			}
 		],
-		"name": "SimulationResultWithAggregation",
+		"name": "ValidationResultWithAggregation",
 		"type": "error"
 	},
 	{
@@ -462,6 +523,19 @@ const ABI: any =
 		],
 		"name": "Withdrawn",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "SIG_VALIDATION_FAILED",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -1008,6 +1082,76 @@ const ABI: any =
 					}
 				],
 				"internalType": "struct UserOperation",
+				"name": "op",
+				"type": "tuple"
+			}
+		],
+		"name": "simulateHandleOp",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nonce",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "initCode",
+						"type": "bytes"
+					},
+					{
+						"internalType": "bytes",
+						"name": "callData",
+						"type": "bytes"
+					},
+					{
+						"internalType": "uint256",
+						"name": "callGasLimit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "verificationGasLimit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "preVerificationGas",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "maxFeePerGas",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "maxPriorityFeePerGas",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "paymasterAndData",
+						"type": "bytes"
+					},
+					{
+						"internalType": "bytes",
+						"name": "signature",
+						"type": "bytes"
+					}
+				],
+				"internalType": "struct UserOperation",
 				"name": "userOp",
 				"type": "tuple"
 			}
@@ -1060,6 +1204,7 @@ const ABI: any =
 		"type": "receive"
 	}
 ]
+
 	;
 
 const bytecode = '';

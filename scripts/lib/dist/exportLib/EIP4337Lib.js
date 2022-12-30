@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-28 20:58:20
+ * @LastEditTime: 2022-12-30 10:54:53
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -203,6 +203,7 @@ EIP4337Lib.RPC = {
     eth_supportedEntryPoints: rpc_1.RPC.eth_supportedEntryPoints,
     waitUserOperation: rpc_1.RPC.waitUserOperation,
     simulateValidation: rpc_1.RPC.simulateValidation,
+    simulateHandleOp: rpc_1.RPC.simulateHandleOp,
 };
 var userOperation_2 = require("../entity/userOperation");
 Object.defineProperty(exports, "UserOperation", { enumerable: true, get: function () { return userOperation_2.UserOperation; } });

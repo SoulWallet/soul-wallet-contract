@@ -29,6 +29,7 @@ export declare class EIP4337Lib {
         eth_supportedEntryPoints: typeof RPC.eth_supportedEntryPoints;
         waitUserOperation: typeof RPC.waitUserOperation;
         simulateValidation: typeof RPC.simulateValidation;
+        simulateHandleOp: typeof RPC.simulateHandleOp;
     };
     /**
      *

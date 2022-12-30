@@ -3,6 +3,12 @@ import { UserOperation } from "../entity/userOperation";
 export declare class RPC {
     static eth_sendUserOperation(op: UserOperation, entryPointAddress: string): string;
     static eth_supportedEntryPoints(): string;
+    static simulateHandleOp(etherProvider: ethers.providers.BaseProvider, entryPointAddress: string, op: UserOperation): Promise<{
+        preOpGas: any;
+        paid: any;
+        deadline: any;
+        paymasterDeadline: any;
+    }>;
     static simulateValidation(etherProvider: ethers.providers.BaseProvider, entryPointAddress: string, op: UserOperation): Promise<{
         preOpGas: any;
         prefund: any;

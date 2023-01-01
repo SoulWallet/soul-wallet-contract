@@ -3,7 +3,7 @@
  * @link https://github.com/eth-infinitism/account-abstraction/blob/develop/test/UserOp.ts
  */
 import { UserOperation } from '../entity/userOperation';
-import { guardianSignature } from './guardian';
+import { guardianSignature } from './Guardian';
 export declare function packUserOp(op: UserOperation, forSignature?: boolean): string;
 export declare function getUserOpHash(op: UserOperation, entryPointAddress: string, chainId: number): string;
 /**

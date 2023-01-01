@@ -8,7 +8,7 @@ import { ecsign, toRpcSig, fromRpcSig, keccak256 as keccak256_buffer } from 'eth
 import { UserOperation } from '../entity/userOperation'
 import { ethers, BigNumber } from "ethers";
 import { SimpleWalletContract } from '../contracts/simpleWallet'
-import { guardianSignature, Guaridian } from './guardian';
+import { guardianSignature, Guaridian } from './Guardian';
 
 function encode(typevalues: Array<{ type: string, val: any }>, forSignature: boolean): string {
   const types = typevalues.map(typevalue => typevalue.type === 'bytes' && forSignature ? 'bytes32' : typevalue.type)

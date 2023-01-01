@@ -134,4 +134,4 @@ class ETH {
     }
 }
 exports.ETH = ETH;
-//# sourceMappingURL=token.js.map
+//# sourceMappingURL=Token.js.map

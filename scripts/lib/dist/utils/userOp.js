@@ -8,7 +8,7 @@ exports.payMasterSignHash = exports.packGuardiansSignByInitCode = exports.packGu
 const utils_1 = require("ethers/lib/utils");
 const ethereumjs_util_1 = require("ethereumjs-util");
 const ethers_1 = require("ethers");
-const guardian_1 = require("./guardian");
+const Guardian_1 = require("./Guardian");
 function encode(typevalues, forSignature) {
     const types = typevalues.map(typevalue => typevalue.type === 'bytes' && forSignature ? 'bytes32' : typevalue.type);
     const values = typevalues.map((typevalue) => typevalue.type === 'bytes' && forSignature ? (0, utils_1.keccak256)(typevalue.val) : typevalue.val);
@@ -126,7 +126,7 @@ exports.signUserOpWithPersonalSign = signUserOpWithPersonalSign;
  * @returns signature
  */
 function packGuardiansSign(deadline, signature, guardianLogicAddress, guardians, threshold, salt, create2Factory, guardianAddress = undefined) {
-    const guardianData = guardian_1.Guaridian.calculateGuardianAndInitCode(guardianLogicAddress, guardians, threshold, salt, create2Factory);
+    const guardianData = Guardian_1.Guaridian.calculateGuardianAndInitCode(guardianLogicAddress, guardians, threshold, salt, create2Factory);
     if (guardianAddress) {
         if (guardianData.address != guardianAddress) {
             throw new Error('guardianAddress is not equal to the calculated guardian address');
@@ -144,7 +144,7 @@ exports.packGuardiansSign = packGuardiansSign;
  * @returns
  */
 function packGuardiansSignByInitCode(guardianAddress, signature, deadline = 0, initCode = '0x') {
-    const signatureBytes = guardian_1.Guaridian.guardianSign(signature);
+    const signatureBytes = Guardian_1.Guaridian.guardianSign(signature);
     const guardianCallData = utils_1.defaultAbiCoder.encode(['bytes', 'bytes'], [signatureBytes, initCode]);
     const enc = utils_1.defaultAbiCoder.encode(['uint8', 'address', 'uint64', 'bytes'], [
         SignatureMode.guardian,

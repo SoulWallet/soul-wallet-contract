@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-28 21:40:52
+ * @LastEditTime: 2023-01-03 09:50:01
  */
 
 import { BigNumber } from "ethers";
@@ -276,7 +276,7 @@ async function main() {
             walletOwner,
             Utils.signMessage(userOpHash, walletOwnerPrivateKey)
         );
-        await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, activateOp);
+        await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPointAddress, activateOp);
         const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
         const re = await EntryPoint.handleOps([activateOp], EOA.address);
         console.log(re);
@@ -310,7 +310,7 @@ async function main() {
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
     );
-    await EIP4337Lib.RPC.simulateValidation(ethers.provider, EntryPointAddress, sendWETHOP);
+    await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPointAddress, sendWETHOP);
     const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
     console.log(sendWETHOP);
     const re = await EntryPoint.handleOps([sendWETHOP], EOA.address);

@@ -10,3 +10,7 @@
 ```shell
 npx hardhat test scripts/test.ts
 ```
+
+```shell
+npx hardhat --network goerli  run scripts/deploy.ts
+```

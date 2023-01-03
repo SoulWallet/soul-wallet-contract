@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 21:13:10
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-30 10:46:12
+ * @LastEditTime: 2023-01-03 09:29:12
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleWalletContract = void 0;
@@ -21,17 +21,53 @@ const ABI = [
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "oldEntryPoint",
+                "name": "account",
                 "type": "address"
             },
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "newEntryPoint",
+                "name": "entryPoint",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "upgradeDelay",
+                "type": "uint32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "guardianDelay",
+                "type": "uint32"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "erc20token",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "paymaster",
                 "type": "address"
             }
         ],
-        "name": "EntryPointChanged",
+        "name": "AccountInitialized",
         "type": "event"
     },
     {
@@ -40,14 +76,46 @@ const ABI = [
             {
                 "indexed": false,
                 "internalType": "address",
-                "name": "newGuardian",
+                "name": "guardian",
+                "type": "address"
+            }
+        ],
+        "name": "GuardianCanceled",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "guardian",
                 "type": "address"
             },
             {
                 "indexed": false,
                 "internalType": "address",
-                "name": "oldGuardian",
+                "name": "previousGuardian",
                 "type": "address"
+            }
+        ],
+        "name": "GuardianConfirmed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint64",
+                "name": "activateTime",
+                "type": "uint64"
             }
         ],
         "name": "GuardianSet",
@@ -191,6 +259,19 @@ const ABI = [
         "name": "addDeposit",
         "outputs": [],
         "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+            }
+        ],
+        "name": "cancelGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -814,4 +895,4 @@ const contract = {
     bytecode
 };
 exports.SimpleWalletContract = contract;
-//# sourceMappingURL=simpleWallet.js.map
+//# sourceMappingURL=soulWallet.js.map

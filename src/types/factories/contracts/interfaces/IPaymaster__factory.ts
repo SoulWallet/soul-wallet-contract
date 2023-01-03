@@ -124,7 +124,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class IPaymaster__factory {
   static readonly abi = _abi;

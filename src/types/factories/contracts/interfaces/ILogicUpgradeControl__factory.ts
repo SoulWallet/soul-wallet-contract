@@ -42,7 +42,7 @@ const _abi = [
     name: "Upgraded",
     type: "event",
   },
-];
+] as const;
 
 export class ILogicUpgradeControl__factory {
   static readonly abi = _abi;

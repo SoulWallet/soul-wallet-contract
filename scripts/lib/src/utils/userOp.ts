@@ -7,7 +7,7 @@ import { arrayify, defaultAbiCoder, keccak256, recoverAddress } from 'ethers/lib
 import { ecsign, toRpcSig, fromRpcSig, keccak256 as keccak256_buffer } from 'ethereumjs-util'
 import { UserOperation } from '../entity/userOperation'
 import { ethers, BigNumber } from "ethers";
-import { SimpleWalletContract } from '../contracts/simpleWallet'
+import { SimpleWalletContract } from '../contracts/soulWallet'
 import { guardianSignature, Guaridian } from './Guardian';
 
 function encode(typevalues: Array<{ type: string, val: any }>, forSignature: boolean): string {

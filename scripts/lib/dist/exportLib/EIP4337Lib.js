@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-01 21:54:30
+ * @LastEditTime: 2023-01-02 22:47:37
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -21,7 +21,7 @@ exports.UserOperation = exports.EIP4337Lib = void 0;
 const utils_1 = require("ethers/lib/utils");
 const address_1 = require("../defines/address");
 const userOperation_1 = require("../entity/userOperation");
-const simpleWallet_1 = require("../contracts/simpleWallet");
+const soulWallet_1 = require("../contracts/soulWallet");
 const walletProxy_1 = require("../contracts/walletProxy");
 const decodeCallData_1 = require("../utils/decodeCallData");
 const Guardian_1 = require("../utils/Guardian");
@@ -44,7 +44,7 @@ class EIP4337Lib {
     static getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress) {
         // function initialize(IEntryPoint anEntryPoint, address anOwner,  IERC20 token,address paymaster)
         // encodeFunctionData
-        let iface = new ethers_1.ethers.utils.Interface(simpleWallet_1.SimpleWalletContract.ABI);
+        let iface = new ethers_1.ethers.utils.Interface(soulWallet_1.SimpleWalletContract.ABI);
         let initializeData = iface.encodeFunctionData("initialize", [entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress]);
         return initializeData;
     }
@@ -111,7 +111,7 @@ class EIP4337Lib {
         userOperation.maxFeePerGas = maxFeePerGas;
         userOperation.maxPriorityFeePerGas = maxPriorityFeePerGas;
         userOperation.initCode = EIP4337Lib.getPackedInitCode(create2Factory, initCodeWithArgs, salt);
-        userOperation.verificationGasLimit = 385000; //100000 + 3200 + 200 * userOperation.initCode.length;
+        userOperation.verificationGasLimit = 500000; //100000 + 3200 + 200 * userOperation.initCode.length;
         userOperation.callGasLimit = 0;
         userOperation.callData = "0x";
         return userOperation;

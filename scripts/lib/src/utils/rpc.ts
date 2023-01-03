@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-11-16 15:50:52
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-30 10:58:50
+ * @LastEditTime: 2023-01-02 22:45:59
  */
 import { ethers } from "ethers";
 import { UserOperation } from "../entity/userOperation";
@@ -56,6 +56,13 @@ export class RPC {
                 deadline: re[2],
                 paymasterDeadline: re[3]
             };
+        }else if (result.startsWith('0x00fa072b')){
+            // FailedOp(uint256,address,string)
+            const re = defaultAbiCoder.decode(
+                ['uint256', 'address', 'string'],
+                '0x' + result.substring(10)
+            );
+            throw new Error(`FailedOp(${re[0]},${re[1]},${re[2]})`);
         }
         throw new Error(result);
 

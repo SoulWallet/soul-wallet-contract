@@ -17,10 +17,20 @@ interface IGuardianControl {
         uint256[50] __gap;
     }
 
-    /**
-     * @dev Emitted when `guardian` is set/updated.
-     */
-    event GuardianSet(address newGuardian, address oldGuardian);
 
+    /**
+     * @dev Emitted when `guardian` is set. ( Just added, not yet reached the activate time )
+     */
+    event GuardianSet(address guardian, uint64 activateTime);
+
+    /**
+     * @dev Emitted when `guardian` is confirmed. ( Initialize or reached the activate time )
+     */
+    event GuardianConfirmed(address guardian, address previousGuardian);
+
+    /**
+     * @dev Emitted when `guardian` is canceled. ( Cancel before reached the activate time )
+     */
+    event GuardianCanceled(address guardian);
     
 }

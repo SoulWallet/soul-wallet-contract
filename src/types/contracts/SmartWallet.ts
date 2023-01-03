@@ -93,6 +93,7 @@ export interface SmartWalletInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "addDeposit()": FunctionFragment;
+    "cancelGuardian(address)": FunctionFragment;
     "entryPoint()": FunctionFragment;
     "exec(address,uint256,bytes)": FunctionFragment;
     "execBatch(address[],bytes[])": FunctionFragment;
@@ -127,6 +128,7 @@ export interface SmartWalletInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
       | "addDeposit"
+      | "cancelGuardian"
       | "entryPoint"
       | "exec"
       | "execBatch"
@@ -164,6 +166,10 @@ export interface SmartWalletInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "addDeposit",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "cancelGuardian",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "entryPoint",
@@ -298,6 +304,10 @@ export interface SmartWalletInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "addDeposit", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "cancelGuardian",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "entryPoint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "exec", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "execBatch", data: BytesLike): Result;
@@ -373,8 +383,10 @@ export interface SmartWalletInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "EntryPointChanged(address,address)": EventFragment;
-    "GuardianSet(address,address)": EventFragment;
+    "AccountInitialized(address,address,address,uint32,uint32,address,address,address)": EventFragment;
+    "GuardianCanceled(address)": EventFragment;
+    "GuardianConfirmed(address,address)": EventFragment;
+    "GuardianSet(address,uint64)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "PreUpgrade(address,uint64)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
@@ -383,7 +395,9 @@ export interface SmartWalletInterface extends utils.Interface {
     "Upgraded(address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "EntryPointChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "AccountInitialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "GuardianCanceled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "GuardianConfirmed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "GuardianSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PreUpgrade"): EventFragment;
@@ -393,24 +407,53 @@ export interface SmartWalletInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
-export interface EntryPointChangedEventObject {
-  oldEntryPoint: string;
-  newEntryPoint: string;
+export interface AccountInitializedEventObject {
+  account: string;
+  entryPoint: string;
+  owner: string;
+  upgradeDelay: number;
+  guardianDelay: number;
+  guardian: string;
+  erc20token: string;
+  paymaster: string;
 }
-export type EntryPointChangedEvent = TypedEvent<
-  [string, string],
-  EntryPointChangedEventObject
+export type AccountInitializedEvent = TypedEvent<
+  [string, string, string, number, number, string, string, string],
+  AccountInitializedEventObject
 >;
 
-export type EntryPointChangedEventFilter =
-  TypedEventFilter<EntryPointChangedEvent>;
+export type AccountInitializedEventFilter =
+  TypedEventFilter<AccountInitializedEvent>;
+
+export interface GuardianCanceledEventObject {
+  guardian: string;
+}
+export type GuardianCanceledEvent = TypedEvent<
+  [string],
+  GuardianCanceledEventObject
+>;
+
+export type GuardianCanceledEventFilter =
+  TypedEventFilter<GuardianCanceledEvent>;
+
+export interface GuardianConfirmedEventObject {
+  guardian: string;
+  previousGuardian: string;
+}
+export type GuardianConfirmedEvent = TypedEvent<
+  [string, string],
+  GuardianConfirmedEventObject
+>;
+
+export type GuardianConfirmedEventFilter =
+  TypedEventFilter<GuardianConfirmedEvent>;
 
 export interface GuardianSetEventObject {
-  newGuardian: string;
-  oldGuardian: string;
+  guardian: string;
+  activateTime: BigNumber;
 }
 export type GuardianSetEvent = TypedEvent<
-  [string, string],
+  [string, BigNumber],
   GuardianSetEventObject
 >;
 
@@ -509,6 +552,11 @@ export interface SmartWallet extends BaseContract {
 
     addDeposit(
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    cancelGuardian(
+      guardian: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     entryPoint(overrides?: CallOverrides): Promise<[string]>;
@@ -664,6 +712,11 @@ export interface SmartWallet extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  cancelGuardian(
+    guardian: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   entryPoint(overrides?: CallOverrides): Promise<string>;
 
   exec(
@@ -815,6 +868,11 @@ export interface SmartWallet extends BaseContract {
 
     addDeposit(overrides?: CallOverrides): Promise<void>;
 
+    cancelGuardian(
+      guardian: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     entryPoint(overrides?: CallOverrides): Promise<string>;
 
     exec(
@@ -959,20 +1017,44 @@ export interface SmartWallet extends BaseContract {
   };
 
   filters: {
-    "EntryPointChanged(address,address)"(
-      oldEntryPoint?: PromiseOrValue<string> | null,
-      newEntryPoint?: PromiseOrValue<string> | null
-    ): EntryPointChangedEventFilter;
-    EntryPointChanged(
-      oldEntryPoint?: PromiseOrValue<string> | null,
-      newEntryPoint?: PromiseOrValue<string> | null
-    ): EntryPointChangedEventFilter;
+    "AccountInitialized(address,address,address,uint32,uint32,address,address,address)"(
+      account?: PromiseOrValue<string> | null,
+      entryPoint?: PromiseOrValue<string> | null,
+      owner?: null,
+      upgradeDelay?: null,
+      guardianDelay?: null,
+      guardian?: null,
+      erc20token?: null,
+      paymaster?: null
+    ): AccountInitializedEventFilter;
+    AccountInitialized(
+      account?: PromiseOrValue<string> | null,
+      entryPoint?: PromiseOrValue<string> | null,
+      owner?: null,
+      upgradeDelay?: null,
+      guardianDelay?: null,
+      guardian?: null,
+      erc20token?: null,
+      paymaster?: null
+    ): AccountInitializedEventFilter;
 
-    "GuardianSet(address,address)"(
-      newGuardian?: null,
-      oldGuardian?: null
+    "GuardianCanceled(address)"(guardian?: null): GuardianCanceledEventFilter;
+    GuardianCanceled(guardian?: null): GuardianCanceledEventFilter;
+
+    "GuardianConfirmed(address,address)"(
+      guardian?: null,
+      previousGuardian?: null
+    ): GuardianConfirmedEventFilter;
+    GuardianConfirmed(
+      guardian?: null,
+      previousGuardian?: null
+    ): GuardianConfirmedEventFilter;
+
+    "GuardianSet(address,uint64)"(
+      guardian?: null,
+      activateTime?: null
     ): GuardianSetEventFilter;
-    GuardianSet(newGuardian?: null, oldGuardian?: null): GuardianSetEventFilter;
+    GuardianSet(guardian?: null, activateTime?: null): GuardianSetEventFilter;
 
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
@@ -1025,6 +1107,11 @@ export interface SmartWallet extends BaseContract {
 
     addDeposit(
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    cancelGuardian(
+      guardian: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     entryPoint(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1177,6 +1264,11 @@ export interface SmartWallet extends BaseContract {
 
     addDeposit(
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    cancelGuardian(
+      guardian: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     entryPoint(overrides?: CallOverrides): Promise<PopulatedTransaction>;

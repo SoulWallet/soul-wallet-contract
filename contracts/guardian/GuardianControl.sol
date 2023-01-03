@@ -60,18 +60,11 @@ contract GuardianControl is IGuardianControl {
         ) {
             layout.activateTime = 0;
             _setGuardian(layout, layout.pendingGuardian);
+            layout.pendingGuardian = address(0);
             return true;
         } else {
             return false;
         }
-    }
-
-    function _setGuardian(
-        IGuardianControl.GuardianLayout storage layout,
-        address guardian
-    ) internal {
-        emit GuardianSet(guardian, layout.guardian);
-        layout.guardian = guardian;
     }
 
     function _setGuardianDelay(uint32 guardianDelay) internal {
@@ -90,7 +83,27 @@ contract GuardianControl is IGuardianControl {
         layout.guardianDelay = guardianDelay;
     }
 
-    function _setGuardian(address guardian) internal {
+    function _setGuardian(
+        IGuardianControl.GuardianLayout storage layout,
+        address guardian
+    ) internal {
+        emit GuardianConfirmed(guardian, layout.guardian);
+        layout.guardian = guardian;
+    }
+
+    function _setGuardianWithDelay(address guardian) internal {
+        IGuardianControl.GuardianLayout storage layout = AccountStorage
+            .layout()
+            .guardian;
+
+        _guardianProcess(layout);
+
+        layout.pendingGuardian = guardian;
+        layout.activateTime = uint64(block.timestamp + layout.guardianDelay);
+        emit GuardianSet(guardian, layout.activateTime);
+    }
+
+    function _cancelGuardian(address guardian) internal {
         IGuardianControl.GuardianLayout storage layout = AccountStorage
             .layout()
             .guardian;
@@ -98,18 +111,13 @@ contract GuardianControl is IGuardianControl {
         _guardianProcess(layout);
 
         require(
-            layout.guardianDelay > 0,
-            "GuardianControl: guardian delay not set"
+            layout.pendingGuardian == guardian,
+            "GuardianControl: guardian not pending"
         );
 
-        if (layout.guardian == address(0)) {
-            _setGuardian(layout, guardian);
-        } else {
-            layout.pendingGuardian = guardian;
-            layout.activateTime = uint64(
-                block.timestamp + layout.guardianDelay
-            );
-        }
+        emit GuardianCanceled(guardian);
+        layout.pendingGuardian = address(0);
+        layout.activateTime = 0;
     }
 
     function _validateGuardiansSignatureCallData(

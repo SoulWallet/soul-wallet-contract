@@ -4,14 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-01 21:54:30
+ * @LastEditTime: 2023-01-02 22:47:37
  */
 
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { AddressZero } from "../defines/address";
 import { UserOperation } from "../entity/userOperation";
 import { IContract } from "../contracts/icontract";
-import { SimpleWalletContract } from "../contracts/simpleWallet";
+import { SimpleWalletContract } from "../contracts/soulWallet";
 import { WalletProxyContract } from "../contracts/walletProxy";
 import { DecodeCallData } from '../utils/decodeCallData';
 import { Guaridian } from "../utils/Guardian";
@@ -164,7 +164,7 @@ export class EIP4337Lib {
         userOperation.maxFeePerGas = maxFeePerGas;
         userOperation.maxPriorityFeePerGas = maxPriorityFeePerGas;
         userOperation.initCode = EIP4337Lib.getPackedInitCode(create2Factory, initCodeWithArgs, salt);
-        userOperation.verificationGasLimit = 385000;//100000 + 3200 + 200 * userOperation.initCode.length;
+        userOperation.verificationGasLimit = 500000;//100000 + 3200 + 200 * userOperation.initCode.length;
         userOperation.callGasLimit = 0;
         userOperation.callData = "0x";
         return userOperation;

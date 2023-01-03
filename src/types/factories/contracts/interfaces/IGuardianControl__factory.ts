@@ -16,20 +16,52 @@ const _abi = [
       {
         indexed: false,
         internalType: "address",
-        name: "newGuardian",
+        name: "guardian",
+        type: "address",
+      },
+    ],
+    name: "GuardianCanceled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "guardian",
         type: "address",
       },
       {
         indexed: false,
         internalType: "address",
-        name: "oldGuardian",
+        name: "previousGuardian",
         type: "address",
+      },
+    ],
+    name: "GuardianConfirmed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "guardian",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "activateTime",
+        type: "uint64",
       },
     ],
     name: "GuardianSet",
     type: "event",
   },
-];
+] as const;
 
 export class IGuardianControl__factory {
   static readonly abi = _abi;

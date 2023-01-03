@@ -37,10 +37,22 @@ contract SmartWallet is
     using Signatures for UserOperation;
     using Calldata for bytes;
 
-    event EntryPointChanged(
-        address indexed oldEntryPoint,
-        address indexed newEntryPoint
+
+    /**
+     * @dev Emitted when `Account` is initialized.
+     */
+    event AccountInitialized(
+        address indexed account,
+        address indexed entryPoint,
+        address owner,
+        uint32 upgradeDelay,
+        uint32 guardianDelay,
+        address guardian,
+        address erc20token,
+        address paymaster
     );
+
+
 
     constructor() {
         _disableInitializers();
@@ -65,13 +77,13 @@ contract SmartWallet is
         layout.entryPoint = _entryPoint;
 
         // upgrade delay
-        require(_upgradeDelay > 0, "Upgrade delay cannot be zero"); //require(upgradeDelay > 1 days, "Upgrade delay cannot be less than 1 day");
+        require(_upgradeDelay > 0, "Upgrade delay cannot be zero"); // For testing only,for release: require(upgradeDelay > 2 days, "Upgrade delay cannot be less than 2 days");
         layout.logicUpgrade.upgradeDelay = _upgradeDelay;
 
         // set guardian contract address and delay
         IGuardianControl.GuardianLayout storage guardianLayout = layout
             .guardian;
-        require(_guardianDelay > 0, "Guardian delay cannot be zero"); //require(guardianDelay > 1 days, "Guardian delay cannot be less than 1 day");
+        require(_guardianDelay > 0, "Guardian delay cannot be zero"); // For testing only,for release: require(guardianDelay > 2 days, "Guardian delay cannot be less than 2 days");
 
         _setGuardianDelay(guardianLayout, _guardianDelay);
         if (_guardian != address(0)) {
@@ -79,9 +91,20 @@ contract SmartWallet is
         }
 
         // approve paymaster to transfer tokens from this wallet on deploy
-        if (address(_erc20token) != address(0)) {
-            require(_erc20token.approve(_paymaster, type(uint).max));
+        if (address(_erc20token) != address(0) && _paymaster != address(0)) {
+            _erc20token.approve(_paymaster, type(uint).max);
         }
+
+        emit AccountInitialized(
+            address(this),
+            address(_entryPoint),
+            _owner,
+            _upgradeDelay,
+            _guardianDelay,
+            _guardian,
+            address(_erc20token),
+            _paymaster
+        );
     }
 
     // solhint-disable-next-line no-empty-blocks
@@ -117,7 +140,14 @@ contract SmartWallet is
      * @dev see guardian/GuardianControl.sol for more details
      */
     function setGuardian(address guardian) external onlyOwnerOrFromEntryPoint {
-        _setGuardian(guardian);
+        _setGuardianWithDelay(guardian);
+    }
+
+    /**
+     * @dev see guardian/GuardianControl.sol for more details
+     */
+    function cancelGuardian(address guardian) external onlyOwnerOrFromEntryPoint {
+        _cancelGuardian(guardian); 
     }
 
     /**

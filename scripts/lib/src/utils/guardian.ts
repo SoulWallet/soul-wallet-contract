@@ -8,7 +8,7 @@
  */
 
 import { UserOperation } from "../entity/userOperation";
-import { SimpleWalletContract } from "../contracts/simpleWallet";
+import { SimpleWalletContract } from "../contracts/soulWallet";
 import { BigNumber, ethers } from "ethers";
 import { GuardianMultiSigWallet } from "../contracts/guardianMultiSigWallet";
 import { WalletProxyContract } from "../contracts/walletProxy";

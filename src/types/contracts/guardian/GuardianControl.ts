@@ -55,18 +55,45 @@ export interface GuardianControlInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "GuardianSet(address,address)": EventFragment;
+    "GuardianCanceled(address)": EventFragment;
+    "GuardianConfirmed(address,address)": EventFragment;
+    "GuardianSet(address,uint64)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "GuardianCanceled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "GuardianConfirmed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "GuardianSet"): EventFragment;
 }
 
+export interface GuardianCanceledEventObject {
+  guardian: string;
+}
+export type GuardianCanceledEvent = TypedEvent<
+  [string],
+  GuardianCanceledEventObject
+>;
+
+export type GuardianCanceledEventFilter =
+  TypedEventFilter<GuardianCanceledEvent>;
+
+export interface GuardianConfirmedEventObject {
+  guardian: string;
+  previousGuardian: string;
+}
+export type GuardianConfirmedEvent = TypedEvent<
+  [string, string],
+  GuardianConfirmedEventObject
+>;
+
+export type GuardianConfirmedEventFilter =
+  TypedEventFilter<GuardianConfirmedEvent>;
+
 export interface GuardianSetEventObject {
-  newGuardian: string;
-  oldGuardian: string;
+  guardian: string;
+  activateTime: BigNumber;
 }
 export type GuardianSetEvent = TypedEvent<
-  [string, string],
+  [string, BigNumber],
   GuardianSetEventObject
 >;
 
@@ -125,11 +152,23 @@ export interface GuardianControl extends BaseContract {
   };
 
   filters: {
-    "GuardianSet(address,address)"(
-      newGuardian?: null,
-      oldGuardian?: null
+    "GuardianCanceled(address)"(guardian?: null): GuardianCanceledEventFilter;
+    GuardianCanceled(guardian?: null): GuardianCanceledEventFilter;
+
+    "GuardianConfirmed(address,address)"(
+      guardian?: null,
+      previousGuardian?: null
+    ): GuardianConfirmedEventFilter;
+    GuardianConfirmed(
+      guardian?: null,
+      previousGuardian?: null
+    ): GuardianConfirmedEventFilter;
+
+    "GuardianSet(address,uint64)"(
+      guardian?: null,
+      activateTime?: null
     ): GuardianSetEventFilter;
-    GuardianSet(newGuardian?: null, oldGuardian?: null): GuardianSetEventFilter;
+    GuardianSet(guardian?: null, activateTime?: null): GuardianSetEventFilter;
   };
 
   estimateGas: {

@@ -30,8 +30,8 @@ import type {
 
 export interface GuardianMultiSigWalletInterface extends utils.Interface {
   functions: {
-    "checkNSignatures(bytes32,bytes,uint256)": FunctionFragment;
-    "initialize(address[],uint256)": FunctionFragment;
+    "checkNSignatures(bytes32,bytes,uint16)": FunctionFragment;
+    "initialize(address[],uint16)": FunctionFragment;
     "isValidSignature(bytes32,bytes)": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;

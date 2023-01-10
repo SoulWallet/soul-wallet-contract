@@ -2,7 +2,7 @@
 // Some functions are from `OpenZeppelin Contracts`
 pragma solidity ^0.8.17;
 
-import "./utils/Upgradeable.sol";
+import "./utils/upgradeable/Upgradeable.sol";
 
 contract SoulWalletProxy is Upgradeable {
     /**

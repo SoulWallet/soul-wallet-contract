@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
-import "../UserOperation.sol";
+import "./UserOperation.sol";
 
 /**
  * the interface exposed by a paymaster contract, who agrees to pay the gas for user's operations.
@@ -16,12 +16,15 @@ interface IPaymaster {
      * Note that bundlers will reject this method if it changes the state, unless the paymaster is trusted (whitelisted)
      * The paymaster pre-pays using its deposit, and receive back a refund after the postOp method returns.
      * @param userOp the user operation
-     * @param requestId hash of the user's request data.
+     * @param userOpHash hash of the user's request data.
      * @param maxCost the maximum cost of this transaction (based on maximum gas and gas price from userOp)
      * @return context value to send to a postOp
      *  zero length to signify postOp is not required.
+     * @return deadline the last block timestamp this operation is valid, or zero if it is valid indefinitely.
+     *      Note that the validation code cannot use block.timestamp (or block.number) directly.
      */
-    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 requestId, uint256 maxCost) external returns (bytes memory context);
+    function validatePaymasterUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 maxCost)
+    external returns (bytes memory context, uint256 deadline);
 
     /**
      * post-operation handler.

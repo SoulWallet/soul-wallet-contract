@@ -30,85 +30,35 @@ import type {
 export interface ACLInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "GUARDIAN_ROLE()": FunctionFragment;
-    "OWNER_ROLE()": FunctionFragment;
-    "getGuardian(uint256)": FunctionFragment;
-    "getGuardiansCount()": FunctionFragment;
-    "getMinGuardiansSignatures()": FunctionFragment;
-    "getOwner(uint256)": FunctionFragment;
-    "getOwnersCount()": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "isGuardian(address)": FunctionFragment;
     "isOwner(address)": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwner(address)": FunctionFragment;
-    "undoUpdateGuardianRequest(address)": FunctionFragment;
-    "updateGuardianConfirmation(address)": FunctionFragment;
-    "updateGuardianRequest(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
-      | "GUARDIAN_ROLE"
-      | "OWNER_ROLE"
-      | "getGuardian"
-      | "getGuardiansCount"
-      | "getMinGuardiansSignatures"
-      | "getOwner"
-      | "getOwnersCount"
       | "getRoleAdmin"
       | "getRoleMember"
       | "getRoleMemberCount"
       | "grantRole"
       | "hasRole"
-      | "isGuardian"
       | "isOwner"
       | "renounceRole"
       | "revokeRole"
       | "supportsInterface"
       | "transferOwner"
-      | "undoUpdateGuardianRequest"
-      | "updateGuardianConfirmation"
-      | "updateGuardianRequest"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "GUARDIAN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "OWNER_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getGuardian",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getGuardiansCount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getMinGuardiansSignatures",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getOwner",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getOwnersCount",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -132,10 +82,6 @@ export interface ACLInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "isGuardian",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "isOwner",
     values: [PromiseOrValue<string>]
   ): string;
@@ -155,43 +101,9 @@ export interface ACLInterface extends utils.Interface {
     functionFragment: "transferOwner",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "undoUpdateGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateGuardianConfirmation",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateGuardianRequest",
-    values: [PromiseOrValue<string>]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "GUARDIAN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "OWNER_ROLE", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getGuardian",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getGuardiansCount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getMinGuardiansSignatures",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getOwner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getOwnersCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -208,7 +120,6 @@ export interface ACLInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "isGuardian", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
@@ -223,38 +134,17 @@ export interface ACLInterface extends utils.Interface {
     functionFragment: "transferOwner",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "undoUpdateGuardianRequest",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateGuardianConfirmation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateGuardianRequest",
-    data: BytesLike
-  ): Result;
 
   events: {
-    "Initialized(uint8)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
 }
-
-export interface InitializedEventObject {
-  version: number;
-}
-export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
-
-export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface RoleAdminChangedEventObject {
   role: string;
@@ -322,26 +212,6 @@ export interface ACL extends BaseContract {
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    GUARDIAN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    OWNER_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    getGuardian(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    getGuardiansCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getMinGuardiansSignatures(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getOwner(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    getOwnersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -366,11 +236,6 @@ export interface ACL extends BaseContract {
 
     hasRole(
       role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    isGuardian(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -401,44 +266,9 @@ export interface ACL extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    undoUpdateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    updateGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    updateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  GUARDIAN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  OWNER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  getGuardian(
-    index: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  getGuardiansCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getMinGuardiansSignatures(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getOwner(
-    index: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  getOwnersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
   getRoleAdmin(
     role: PromiseOrValue<BytesLike>,
@@ -464,11 +294,6 @@ export interface ACL extends BaseContract {
 
   hasRole(
     role: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  isGuardian(
     account: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -500,43 +325,8 @@ export interface ACL extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  undoUpdateGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  updateGuardianConfirmation(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  updateGuardianRequest(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    GUARDIAN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    OWNER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    getGuardian(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    getGuardiansCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getMinGuardiansSignatures(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getOwner(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    getOwnersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
@@ -562,11 +352,6 @@ export interface ACL extends BaseContract {
 
     hasRole(
       role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    isGuardian(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -597,27 +382,9 @@ export interface ACL extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    undoUpdateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    updateGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    updateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
-    Initialized(version?: null): InitializedEventFilter;
-
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(
       role?: PromiseOrValue<BytesLike> | null,
       previousAdminRole?: PromiseOrValue<BytesLike> | null,
@@ -655,26 +422,6 @@ export interface ACL extends BaseContract {
   estimateGas: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    GUARDIAN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    OWNER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getGuardian(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getGuardiansCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getMinGuardiansSignatures(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getOwner(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getOwnersCount(overrides?: CallOverrides): Promise<BigNumber>;
-
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -703,11 +450,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isGuardian(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     isOwner(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -731,21 +473,6 @@ export interface ACL extends BaseContract {
     ): Promise<BigNumber>;
 
     transferOwner(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    undoUpdateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    updateGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    updateGuardianRequest(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -756,28 +483,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    GUARDIAN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    OWNER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getGuardian(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getGuardiansCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getMinGuardiansSignatures(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getOwner(
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getOwnersCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -806,11 +511,6 @@ export interface ACL extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isGuardian(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     isOwner(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -834,21 +534,6 @@ export interface ACL extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     transferOwner(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    undoUpdateGuardianRequest(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    updateGuardianConfirmation(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    updateGuardianRequest(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

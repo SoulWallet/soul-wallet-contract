@@ -216,34 +216,8 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "paymasterStake",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "unlockStake",
     outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "unstakeDelaySec",
-    outputs: [
-      {
-        internalType: "uint32",
-        name: "",
-        type: "uint32",
-      },
-    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -278,7 +252,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class IStakeManager__factory {
   static readonly abi = _abi;

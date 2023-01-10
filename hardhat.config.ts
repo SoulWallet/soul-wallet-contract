@@ -4,19 +4,30 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2022-10-31 22:18:56
+ * @LastEditTime: 2022-12-27 09:53:10
  */
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 /** @type import('hardhat/config').HardhatUserConfig */
-const config: HardhatUserConfig =  {
+const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.17',
+    overrides: {
+      "contracts/SoulWalletProxy.sol": {
+        version: '0.8.17',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1
+          },
+        },
+      },
+    },
     settings: {
-      optimizer: { 
-        enabled: true, 
-        runs: 1
+      optimizer: {
+        enabled: true,
+        runs: 2000
       }
     }
   },
@@ -35,11 +46,26 @@ const config: HardhatUserConfig =  {
         mnemonic: 'test test test test test test test test test test test junk',
         initialIndex: 0,
         accountsBalance: '10000000000000000000000000' // 10,000,000 ETH
-    }
+      }
     },
     localhost: {
       allowUnlimitedContractSize: true,
+    },
+    goerli: {
+      url: "https://goerli.infura.io/v3/<>",
+      accounts: ["<>"],
+      gasPrice: "auto",
+      timeout: 1000000
+    },
+    mainnet: {
+      url: "https://mainnet.infura.io/v3/<>",
+      accounts: ["<>"],
+      gasPrice: "auto",
+      timeout: 1000000
     }
+  },
+  etherscan: {
+    apiKey: "<>"
   },
   paths: {
     sources: "./contracts",

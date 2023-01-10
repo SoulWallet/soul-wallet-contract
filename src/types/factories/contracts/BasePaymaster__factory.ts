@@ -33,7 +33,7 @@ const _abi = [
     inputs: [
       {
         internalType: "uint32",
-        name: "extraUnstakeDelaySec",
+        name: "unstakeDelaySec",
         type: "uint32",
       },
     ],
@@ -217,7 +217,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "requestId",
+        name: "userOpHash",
         type: "bytes32",
       },
       {
@@ -232,6 +232,11 @@ const _abi = [
         internalType: "bytes",
         name: "context",
         type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "deadline",
+        type: "uint256",
       },
     ],
     stateMutability: "nonpayable",
@@ -268,7 +273,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class BasePaymaster__factory {
   static readonly abi = _abi;

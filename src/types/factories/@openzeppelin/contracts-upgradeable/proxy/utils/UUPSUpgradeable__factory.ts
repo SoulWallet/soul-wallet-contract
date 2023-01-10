@@ -112,7 +112,7 @@ const _abi = [
     stateMutability: "payable",
     type: "function",
   },
-];
+] as const;
 
 export class UUPSUpgradeable__factory {
   static readonly abi = _abi;

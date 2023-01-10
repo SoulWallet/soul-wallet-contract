@@ -1,6 +1,7 @@
-pragma solidity ^0.8.12;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.17;
 
-import "../UserOperation.sol";
+import "../interfaces/UserOperation.sol";
 
 /**
  * @dev Signatures layout used by the Paymasters and Wallets internally
@@ -9,16 +10,8 @@ import "../UserOperation.sol";
  */
 struct SignatureData {
     SignatureMode mode;
-    SignatureValue[] values;
-}
-
-/**
- * @dev Signature's value layout used by the Paymasters and Wallets internally
- * @param signer address of the owner or guardian signing the data
- * @param signature data signed
- */
-struct SignatureValue {
     address signer;
+    uint64 deadline;
     bytes signature;
 }
 
@@ -34,26 +27,24 @@ library Signatures {
     /**
      * @dev Decodes a user operation's signature assuming the expected layout defined by the Signatures library
      */
-    function decodeSignature(UserOperation calldata op)
-        internal
-        pure
-        returns (SignatureData memory)
-    {
+    function decodeSignature(
+        UserOperation calldata op
+    ) internal pure returns (SignatureData memory) {
         return decodeSignature(op.signature);
     }
 
     /**
      * @dev Decodes a signature assuming the expected layout defined by the Signatures library
      */
-    function decodeSignature(bytes memory signature)
-        internal
-        pure
-        returns (SignatureData memory)
-    {
-        (SignatureMode mode, SignatureValue[] memory values) = abi.decode(
-            signature,
-            (SignatureMode, SignatureValue[])
-        );
-        return SignatureData(mode, values);
+    function decodeSignature(
+        bytes memory signature
+    ) internal pure returns (SignatureData memory) {
+        (
+            SignatureMode _mode,
+            address _singer,
+            uint64 _deadline,
+            bytes memory _signature
+        ) = abi.decode(signature, (SignatureMode, address, uint64, bytes));
+        return SignatureData(_mode, _singer, _deadline, _signature);
     }
 }

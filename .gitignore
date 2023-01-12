@@ -22,3 +22,4 @@ cache
 artifacts
 .DS_Store
 build
+src/types

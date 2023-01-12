@@ -8,6 +8,12 @@
  */
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+const GOERLI_PRIVATE_KEY =
+  process.env.GOERLI_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
+const MAINNET_PRIVATE_KEY =
+  process.env.MAINNET_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
@@ -46,20 +52,20 @@ const config: HardhatUserConfig = {
         mnemonic: 'test test test test test test test test test test test junk',
         initialIndex: 0,
         accountsBalance: '10000000000000000000000000' // 10,000,000 ETH
-      }
+      },
     },
     localhost: {
       allowUnlimitedContractSize: true,
     },
     goerli: {
-      url: "https://goerli.infura.io/v3/<>",
-      accounts: ["<>"],
+      url: process.env.ETH_GOERLI_PROVIDER || "",
+      accounts: [GOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
     },
     mainnet: {
-      url: "https://mainnet.infura.io/v3/<>",
-      accounts: ["<>"],
+      url: process.env.ETH_MAINNET_PROVIDER || "",
+      accounts: [MAINNET_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
     }

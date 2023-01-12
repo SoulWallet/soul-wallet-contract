@@ -4,7 +4,7 @@
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
-    "deploy": "npx hardhat test scripts/deploy.js"
+    "deploy": "npx hardhat run scripts/deploy.ts"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.6.4",

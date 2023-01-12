@@ -8,7 +8,7 @@
 **Test**
 
 ```shell
-npx hardhat test scripts/test.ts
+npx hardhat test
 ```
 
 ```shell

@@ -12,23 +12,74 @@ import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/ut
 import { ethers, network, run } from "hardhat";
 import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
 import { WETH9__factory, WETHTokenPaymaster__factory, Create2Factory__factory, EntryPoint__factory } from "../src/types/index";
-import { Utils } from "./Utils";
+import { Utils } from "../test/Utils";
 import * as ethUtil from 'ethereumjs-util';
 
+function isLocalTestnet() {
+    return network.name === "localhost" || network.name === "hardhat"
+}
 
 async function main() {
+    let mockGasFee = {
+        "low": {
+          "suggestedMaxPriorityFeePerGas": "1",
+          "suggestedMaxFeePerGas": "16.984563596",
+          "minWaitTimeEstimate": 15000,
+          "maxWaitTimeEstimate": 30000
+        },
+        "medium": {
+          "suggestedMaxPriorityFeePerGas": "1.5",
+          "suggestedMaxFeePerGas": "23.079160855",
+          "minWaitTimeEstimate": 15000,
+          "maxWaitTimeEstimate": 45000
+        },
+        "high": {
+          "suggestedMaxPriorityFeePerGas": "2",
+          "suggestedMaxFeePerGas": "29.173758114",
+          "minWaitTimeEstimate": 15000,
+          "maxWaitTimeEstimate": 60000
+        },
+        "estimatedBaseFee": "15.984563596",
+        "networkCongestion": 0.31675,
+        "latestPriorityFeeRange": [
+          "0.131281956",
+          "4.015436404"
+        ],
+        "historicalPriorityFeeRange": [
+          "0.02829803",
+          "58.45567467"
+        ],
+        "historicalBaseFeeRange": [
+          "13.492240252",
+          "17.51875421"
+        ],
+        "priorityFeeTrend": "level",
+        "baseFeeTrend": "down"
+      }
 
     // npx hardhat run --network goerli scripts/deploy.ts
 
     let create2Factory = '';
     let WETHContractAddress = '';
-
+    let EOA
     if (network.name === "mainnet") {
-        create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
-        WETHContractAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+      create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
+      WETHContractAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
     } else if (network.name === "goerli") {
-        create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
-        WETHContractAddress = '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6';
+      EOA = await ethers.getSigner(
+        "0x00000000000d3b4EA88f9B3fE809D386B86F5898"
+      );
+      create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
+      WETHContractAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
+    } else if (isLocalTestnet()) {
+      EOA = await ethers.getSigner(
+        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      );
+      let create2 = await new Create2Factory__factory(EOA).deploy();
+      create2Factory = create2.address;
+      let weth9 = await new WETH9__factory(EOA).deploy();
+      WETHContractAddress = weth9.address;
+      await weth9.deposit({ value: ethers.utils.parseEther("100") });
     }
     if (!create2Factory) {
         throw new Error("create2Factory not set");
@@ -39,7 +90,6 @@ async function main() {
 
     const chainId = await (await ethers.provider.getNetwork()).chainId;
 
-    const EOA = await ethers.getSigner('0x00000000000d3b4EA88f9B3fE809D386B86F5898');
 
     const walletOwner = '0x93EDb58cFc5d77028C138e47Fffb929A57C52082';
     const walletOwnerPrivateKey = '0x82cfe73c005926089ebf7ec1f49852207e5670870d0dfa544caabb83d2cd2d5f';
@@ -249,47 +299,73 @@ async function main() {
 
     // check if wallet is activated (deployed) 
     const code = await ethers.provider.getCode(walletAddress);
-    if (code === '0x') {
-        // get gas price
-        const eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
+    if (code === "0x") {
+      // get gas price
+      let eip1559GasFee: any;
+      if (!isLocalTestnet()) {
+        eip1559GasFee =
+          await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
         if (!eip1559GasFee) {
-            throw new Error('eip1559GasFee is null');
+          throw new Error("eip1559GasFee is null");
         }
-        const activateOp = EIP4337Lib.activateWalletOp(
-            WalletLogicAddress,
-            EntryPointAddress,
-            walletOwner,
-            upgradeDelay,
-            guardianDelay,
-            EIP4337Lib.Defines.AddressZero,
-            WETHContractAddress,
-            WETHTokenPaymasterAddress,
-            0,
-            create2Factory,
-            ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
-            ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').toString()
-        );
+      } else {
+        eip1559GasFee = mockGasFee;
+      }
 
-        const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+      const activateOp = EIP4337Lib.activateWalletOp(
+        WalletLogicAddress,
+        EntryPointAddress,
+        walletOwner,
+        upgradeDelay,
+        guardianDelay,
+        EIP4337Lib.Defines.AddressZero,
+        WETHContractAddress,
+        WETHTokenPaymasterAddress,
+        0,
+        create2Factory,
+        ethers.utils
+          .parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(
+            eip1559GasFee.medium.suggestedMaxPriorityFeePerGas,
+            "gwei"
+          )
+          .toString()
+      );
 
-        activateOp.signWithSignature(
-            walletOwner,
-            Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-        );
-        await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPointAddress, activateOp);
-        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-        const re = await EntryPoint.handleOps([activateOp], EOA.address);
-        console.log(re);
+      const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+
+      activateOp.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+      await EIP4337Lib.RPC.simulateHandleOp(
+        ethers.provider,
+        EntryPointAddress,
+        activateOp
+      );
+      const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+      const re = await EntryPoint.handleOps([activateOp], EOA.address);
+      console.log(re);
     }
 
     // #endregion deploy wallet
 
     // #region send 1wei Weth to wallet
     const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
-    const eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
-    if (!eip1559GasFee) {
-        throw new Error('eip1559GasFee is null');
+    let eip1559GasFee: any;
+    if (!isLocalTestnet()) {
+      eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(
+        chainId
+      );
+      if (!eip1559GasFee) {
+        throw new Error("eip1559GasFee is null");
+      }
+    } else {
+      eip1559GasFee = mockGasFee;
     }
+
     const sendWETHOP = await EIP4337Lib.Tokens.ERC20.transfer(
         ethers.provider,
         walletAddress,

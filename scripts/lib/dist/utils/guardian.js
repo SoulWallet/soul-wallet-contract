@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-09-21 20:28:54
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-24 22:48:04
+ * @LastEditTime: 2023-01-14 12:35:41
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -155,7 +155,7 @@ class Guaridian {
             const calldata = iface.encodeFunctionData("transferOwner", [newOwner]);
             const op = yield this._guardian(etherProvider, walletAddress, nonce, entryPointAddress, paymasterAddress, maxFeePerGas, maxPriorityFeePerGas, calldata);
             if (op)
-                op.verificationGasLimit = 500000;
+                op.verificationGasLimit = 600000;
             return op;
         });
     }

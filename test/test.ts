@@ -601,10 +601,67 @@ describe("SoulWalletContract", function () {
 
     }
 
+    async function interfaceResolver() {
+      const {
+        WETH,
+        guardiansAddress,
+        guardiansPrivateKey,
+        guardianSalt,
+        guardianInitcode,
+        walletAddress,
+        walletOwner,
+        guardian,
+        guardianDelay,
+        chainId,
+        accounts,
+        GuardianLogic,
+        SingletonFactory,
+        EntryPoint,
+        WETHPaymaster,
+      } = await activateWallet();
+      const walletContract = new ethers.Contract(
+        walletAddress,
+        SmartWallet__factory.abi,
+        ethers.provider
+      );
+
+      const SUPPORT_INTERFACE_ID = "0x01ffc9a7";
+      const ERC721_INTERFACE_ID = "0x150b7a02";
+      const ERC1155_INTERFACE_ID = "0x4e2312e0";
+
+      let support = await walletContract.supportsInterface(
+        SUPPORT_INTERFACE_ID
+      );
+      expect(support).to.equal(true);
+      support = await walletContract.supportsInterface(ERC721_INTERFACE_ID);
+      expect(support).to.equal(true);
+      support = await walletContract.supportsInterface(ERC1155_INTERFACE_ID);
+      expect(support).to.equal(true);
+      await expect(
+        await walletContract.callStatic.onERC1155Received(
+          EIP4337Lib.Defines.AddressZero,
+          EIP4337Lib.Defines.AddressZero,
+          0,
+          0,
+          "0x"
+        )
+      ).to.be.eq("0xf23a6e61");
+      await expect(
+        await walletContract.callStatic.onERC1155BatchReceived(
+          EIP4337Lib.Defines.AddressZero,
+          EIP4337Lib.Defines.AddressZero,
+          [0],
+          [0],
+          "0x"
+        )
+      ).to.be.eq("0xbc197c81");
+    }
+
     describe("wallet test", async function () {
         it("activate wallet", activateWallet);
         it("update guardian", updateGuardian);
         it("recovery wallet", recoveryWallet);
+        it("interface resolver", interfaceResolver);
     });
 
 

@@ -14,6 +14,7 @@ import "./helpers/Calldata.sol";
 import "./guardian/GuardianControl.sol";
 import "./AccountStorage.sol";
 import "./ACL.sol";
+import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
 
@@ -28,7 +29,8 @@ contract SmartWallet is
     Initializable,
     GuardianControl,
     LogicUpgradeControl,
-    ACL
+    ACL,
+    DefaultCallbackHandler
 {
     using AccountStorage for AccountStorage.Layout;
 
@@ -339,5 +341,9 @@ contract SmartWallet is
             "SmartWallet: Invalid signature"
         );
         return IERC1271.isValidSignature.selector;
+    }
+
+    function supportsInterface(bytes4 _interfaceID) public view override(DefaultCallbackHandler, AccessControlEnumerable) returns (bool) {
+         return super.supportsInterface(_interfaceID);
     }
 }

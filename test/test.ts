@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-01 21:58:16
+ * @LastEditTime: 2023-01-19 20:14:20
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -657,22 +657,124 @@ describe("SoulWalletContract", function () {
       ).to.be.eq("0xbc197c81");
     }
 
+
+    async function stakeETH() {
+        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, WETH } = await activateWallet();
+        await EntryPoint.contract.depositTo(walletAddress, {
+            from: accounts[0].address,
+            value: ethers.utils.parseEther('1')
+        });
+        const depositInfo = await EntryPoint.contract.getDepositInfo(walletAddress);
+        expect(depositInfo.deposit).to.equal(ethers.utils.parseEther('1'));
+        // send transaction direct pay gas fee
+        let nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
+        // get balance before send(ERC20:WETH.contract.address)
+        const balanceBefore = await WETH.contract.balanceOf(walletAddress);
+        const sendETHOp = await EIP4337Lib.Tokens.ERC20.transfer(
+            ethers.provider,
+            walletAddress,
+            nonce, EntryPoint.contract.address,
+            EIP4337Lib.Defines.AddressZero,
+            10000000000, 10000000000,
+            WETH.contract.address,
+            accounts[0].address,
+            ethers.utils.parseEther('0.001').toString()
+        );
+        if (!sendETHOp) {
+            throw new Error('sendETHOp is null');
+        }
+        const sendETHOpuserOpHash = sendETHOp.getUserOpHash(EntryPoint.contract.address, chainId);
+        const sendETHOpSignature = Utils.signMessage(sendETHOpuserOpHash, walletOwner.privateKey)
+        sendETHOp.signWithSignature(walletOwner.address, sendETHOpSignature);
+        await EntryPoint.contract.handleOps([sendETHOp], accounts[0].address);
+        // get balance after send(ERC20:WETH.contract.address)
+        const balanceAfter = await WETH.contract.balanceOf(walletAddress);
+        expect(balanceBefore.sub(balanceAfter).toString()).to.equal(ethers.utils.parseEther('0.001').toString());
+
+
+        // withdrawDepositTo
+        const transaction = {
+            data: new ethers.utils.Interface([
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "withdrawAddress",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "withdrawDepositTo",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ]).encodeFunctionData("withdrawDepositTo", [
+                accounts[0].address,
+                ethers.utils.parseEther('0.1').toString()
+            ]),
+            from: walletAddress,
+            gas: 60000 .toString(16),
+            to: walletAddress,
+            value: '0'
+        };
+
+        const gas = await ethers.provider.estimateGas(transaction);
+        log(`gas:`, gas.toString());
+
+        nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
+
+        const withdrawDepositToOp = await EIP4337Lib.Utils.fromTransaction(
+            ethers.provider,
+            EntryPoint.contract.address,
+            transaction,
+            nonce,
+            10000000000, 10000000000,
+            EIP4337Lib.Defines.AddressZero,
+        );
+
+        if (!withdrawDepositToOp) {
+            throw new Error('withdrawDepositToOp is null');
+        }
+        const withdrawDepositToOpuserOpHash = withdrawDepositToOp.getUserOpHash(EntryPoint.contract.address, chainId);
+        const withdrawDepositToOpSignature = Utils.signMessage(withdrawDepositToOpuserOpHash, walletOwner.privateKey)
+        withdrawDepositToOp.signWithSignature(walletOwner.address, withdrawDepositToOpSignature);
+        await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPoint.contract.address, withdrawDepositToOp);
+        // get balanceOf before withdrawDepositTo
+        const balanceOfBefore = await EntryPoint.contract.balanceOf(walletAddress);
+        await EntryPoint.contract.handleOps([withdrawDepositToOp], accounts[0].address);
+        // get balanceOf after withdrawDepositTo
+        const balanceOfAfter = await EntryPoint.contract.balanceOf(walletAddress);
+        const gasFee = balanceOfBefore.sub(balanceOfAfter).sub(ethers.utils.parseEther('0.1'));
+        expect(gasFee.toNumber() > 0).to.equal(true);
+
+
+
+    }
+
+    async function coverageTest() {
+        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, WETH } = await activateWallet();
+        const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
+
+        // getVersion
+        const version = await walletContract.getVersion();
+        expect(version).to.equal(1);
+
+    }
+
+
     describe("wallet test", async function () {
         it("activate wallet", activateWallet);
         it("update guardian", updateGuardian);
         it("recovery wallet", recoveryWallet);
         it("interface resolver", interfaceResolver);
+        it("stake ETH direct pay gas fee", stakeETH);
+        it("other coverage test", coverageTest);
     });
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-14 12:33:21
+ * @LastEditTime: 2023-01-19 15:43:45
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -19,6 +19,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserOperation = void 0;
 const ethers_1 = require("ethers");
+const address_1 = require("../defines/address");
 const numberLike_1 = require("../defines/numberLike");
 const userOp_1 = require("../utils/userOp");
 /**
@@ -58,15 +59,15 @@ class UserOperation {
     toJSON() {
         return JSON.stringify({
             sender: this.sender,
-            nonce: this.nonce,
+            nonce: (0, numberLike_1.toHexString)(this.nonce),
             initCode: this.initCode,
             callData: this.callData,
-            callGasLimit: (0, numberLike_1.toDecString)(this.callGasLimit),
-            verificationGasLimit: (0, numberLike_1.toDecString)(this.verificationGasLimit),
-            preVerificationGas: (0, numberLike_1.toDecString)(this.preVerificationGas),
-            maxFeePerGas: (0, numberLike_1.toDecString)(this.maxFeePerGas),
-            maxPriorityFeePerGas: (0, numberLike_1.toDecString)(this.maxPriorityFeePerGas),
-            paymasterAndData: this.paymasterAndData,
+            callGasLimit: (0, numberLike_1.toHexString)(this.callGasLimit),
+            verificationGasLimit: (0, numberLike_1.toHexString)(this.verificationGasLimit),
+            preVerificationGas: (0, numberLike_1.toHexString)(this.preVerificationGas),
+            maxFeePerGas: (0, numberLike_1.toHexString)(this.maxFeePerGas),
+            maxPriorityFeePerGas: (0, numberLike_1.toHexString)(this.maxPriorityFeePerGas),
+            paymasterAndData: this.paymasterAndData === address_1.AddressZero ? '0x' : this.paymasterAndData,
             signature: this.signature
         });
     }
@@ -90,7 +91,8 @@ class UserOperation {
                 const estimateGasRe = yield etherProvider.estimateGas({
                     from: entryPointAddress,
                     to: this.sender,
-                    data: this.callData
+                    data: this.callData,
+                    gasLimit: 20000000
                 });
                 this.callGasLimit = estimateGasRe.toNumber();
                 return true;

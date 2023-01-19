@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-18 16:49:12
+ * @LastEditTime: 2023-01-19 15:43:30
  */
 
 import { ethers, BigNumber } from "ethers";
@@ -54,7 +54,7 @@ class UserOperation {
     public toJSON(): string {
         return JSON.stringify({
             sender: this.sender,
-            nonce: this.nonce.toString(16),
+            nonce: toHexString(this.nonce),
             initCode: this.initCode,
             callData: this.callData,
             callGasLimit: toHexString(this.callGasLimit),
@@ -88,7 +88,8 @@ class UserOperation {
             const estimateGasRe = await etherProvider.estimateGas({
                 from: entryPointAddress,
                 to: this.sender,
-                data: this.callData
+                data: this.callData,
+                gasLimit: 20000000
             });
 
             this.callGasLimit = estimateGasRe.toNumber();

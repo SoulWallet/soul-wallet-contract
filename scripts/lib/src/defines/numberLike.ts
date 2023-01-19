@@ -19,7 +19,7 @@ export function isNumberLike(value: any): boolean {
 export function toDecString(value: NumberLike): string {
     if (typeof value === "number") {
         return value.toString();
-    }else if (value.startsWith("0x")) {
+    } else if (value.startsWith("0x")) {
         return BigNumber.from(value).toString();
     }
     return value;
@@ -27,10 +27,10 @@ export function toDecString(value: NumberLike): string {
 
 export function toHexString(value: NumberLike): string {
     if (typeof value === "number") {
-        return value.toString(16);
-    }else if (value.startsWith("0x")) {
+        return '0x' + value.toString(16);
+    } else if (value.startsWith("0x")) {
         return value;
-    }else{
+    } else {
         throw new Error("value is not a number or hex string");
     }
 }

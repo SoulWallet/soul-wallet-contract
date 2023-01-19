@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-18 16:49:12
+ * @LastEditTime: 2023-01-19 15:42:34
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -59,7 +59,7 @@ class UserOperation {
     toJSON() {
         return JSON.stringify({
             sender: this.sender,
-            nonce: this.nonce.toString(16),
+            nonce: (0, numberLike_1.toHexString)(this.nonce),
             initCode: this.initCode,
             callData: this.callData,
             callGasLimit: (0, numberLike_1.toHexString)(this.callGasLimit),
@@ -91,7 +91,8 @@ class UserOperation {
                 const estimateGasRe = yield etherProvider.estimateGas({
                     from: entryPointAddress,
                     to: this.sender,
-                    data: this.callData
+                    data: this.callData,
+                    gasLimit: 20000000
                 });
                 this.callGasLimit = estimateGasRe.toNumber();
                 return true;

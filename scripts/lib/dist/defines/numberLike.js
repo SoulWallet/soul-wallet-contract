@@ -26,7 +26,7 @@ function toDecString(value) {
 exports.toDecString = toDecString;
 function toHexString(value) {
     if (typeof value === "number") {
-        return value.toString(16);
+        return '0x' + value.toString(16);
     }
     else if (value.startsWith("0x")) {
         return value;

@@ -4,13 +4,13 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-07-25 10:53:52
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-19 15:43:45
+ * @LastEditTime: 2023-01-28 09:45:54
  */
 
 import { ethers, BigNumber } from "ethers";
 import { Deferrable } from "ethers/lib/utils";
 import { AddressZero } from "../defines/address";
-import { NumberLike, toHexString } from "../defines/numberLike";
+import { NumberLike, toHexString, toNumber } from "../defines/numberLike";
 import { guardianSignature } from "../utils/Guardian";
 import { signUserOp, payMasterSignHash, getUserOpHash, signUserOpWithPersonalSign, packGuardiansSignByInitCode } from '../utils/userOp';
 import { TransactionInfo } from './transactionInfo';
@@ -65,6 +65,60 @@ class UserOperation {
             paymasterAndData: this.paymasterAndData === AddressZero ? '0x' : this.paymasterAndData,
             signature: this.signature
         });
+    }
+
+    public static fromJSON(json: string): UserOperation {
+        const obj = JSON.parse(json);
+        if(!obj || typeof obj !== 'object'){
+            throw new Error('invalid json');
+        }
+        if(typeof obj.sender !== 'string'){
+            throw new Error('invalid sender');
+        }
+        if(typeof obj.nonce !== 'string' && typeof obj.nonce !== 'number'){
+            throw new Error('invalid nonce');
+        }
+        if(typeof obj.initCode !== 'string' || !obj.initCode.startsWith('0x')){
+            throw new Error('invalid initCode');
+        }
+        if(typeof obj.callData !== 'string' || !obj.callData.startsWith('0x')){
+            throw new Error('invalid callData');
+        }
+        if(typeof obj.callGasLimit !== 'string' && typeof obj.callGasLimit !== 'number'){
+            throw new Error('invalid callGasLimit');
+        }
+        if(typeof obj.verificationGasLimit !== 'string' && typeof obj.verificationGasLimit !== 'number'){
+            throw new Error('invalid verificationGasLimit');
+        }
+        if(typeof obj.preVerificationGas !== 'string' && typeof obj.preVerificationGas !== 'number'){
+            throw new Error('invalid preVerificationGas');
+        }
+        if(typeof obj.maxFeePerGas !== 'string' && typeof obj.maxFeePerGas !== 'number'){
+            throw new Error('invalid maxFeePerGas');
+        }
+        if(typeof obj.maxPriorityFeePerGas !== 'string' && typeof obj.maxPriorityFeePerGas !== 'number'){
+            throw new Error('invalid maxPriorityFeePerGas');
+        }
+        if(typeof obj.paymasterAndData !== 'string' || !obj.paymasterAndData.startsWith('0x')){
+            throw new Error('invalid paymasterAndData');
+        }
+        if(typeof obj.signature !== 'string' || !obj.signature.startsWith('0x')){
+            throw new Error('invalid signature');
+        }
+        
+        const userOp = new UserOperation();
+        userOp.sender = obj.sender;
+        userOp.nonce = toNumber(obj.nonce);
+        userOp.initCode = obj.initCode;
+        userOp.callData = obj.callData;
+        userOp.callGasLimit = obj.callGasLimit;
+        userOp.verificationGasLimit = obj.verificationGasLimit;
+        userOp.preVerificationGas = obj.preVerificationGas;
+        userOp.maxFeePerGas = obj.maxFeePerGas;
+        userOp.maxPriorityFeePerGas = obj.maxPriorityFeePerGas;
+        userOp.paymasterAndData = obj.paymasterAndData;
+        userOp.signature = obj.signature;
+        return userOp;
     }
 
     /**

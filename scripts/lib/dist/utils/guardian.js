@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-09-21 20:28:54
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-14 12:35:41
+ * @LastEditTime: 2023-01-28 10:07:26
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -28,6 +28,20 @@ const address_1 = require("../defines/address");
 class Guaridian {
     static getInitializeData(guardians, threshold) {
         // function initialize(address[] calldata _guardians, uint16 _threshold)
+        // order by guardians asc
+        guardians.sort((a, b) => {
+            const aBig = ethers_1.BigNumber.from(a);
+            const bBig = ethers_1.BigNumber.from(b);
+            if (aBig.eq(bBig)) {
+                throw new Error(`guardian address is same: ${a}`);
+            }
+            else if (aBig.lt(bBig)) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        });
         let iface = new ethers_1.ethers.utils.Interface(guardianMultiSigWallet_1.GuardianMultiSigWallet.ABI);
         let initializeData = iface.encodeFunctionData("initialize", [guardians, threshold]);
         return initializeData;

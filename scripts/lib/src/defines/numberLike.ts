@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-19 09:43:11
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-17 15:18:26
+ * @LastEditTime: 2023-01-28 09:39:54
  */
 
 import { BigNumber } from "@ethersproject/bignumber";
@@ -33,4 +33,13 @@ export function toHexString(value: NumberLike): string {
     } else {
         throw new Error("value is not a number or hex string");
     }
+}
+
+export function toNumber(value: NumberLike): number {
+    if (typeof value === "number") {
+        return value;
+    } else if (value.startsWith("0x")) {
+        return BigNumber.from(value).toNumber();
+    }
+    return Number(value);
 }

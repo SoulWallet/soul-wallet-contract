@@ -4,10 +4,11 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-19 20:14:20
+ * @LastEditTime: 2023-01-28 10:20:06
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
 import { SmartWallet__factory } from "../src/types/index";
@@ -414,16 +415,32 @@ describe("SoulWalletContract", function () {
         const upgradeDelay = 10;
         const guardianDelay = 10;
 
+        const guardians = [];
         const guardiansAddress = [];
-        const guardiansPrivateKey = [];
+
         for (let i = 0; i < 10; i++) {
             const _account = await ethers.Wallet.createRandom();
+            guardians.push({
+                address: _account.address,
+                privateKey: _account.privateKey
+            });
             guardiansAddress.push(_account.address);
-            guardiansPrivateKey.push(_account.privateKey);
         }
+
         const guardianSalt = 'saltText<text or bytes32>';
         const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
         log('guardian address ==> ' + gurdianAddressAndInitCode.address);
+        {
+            // test guardian order (For user experience, guardian cannot rely on the order of address)
+            const _guardiansAddress = [...guardiansAddress];
+            const _guardianTmpItem = _guardiansAddress[0];
+            _guardiansAddress[0] = _guardiansAddress[1];
+            _guardiansAddress[1] = _guardianTmpItem;
+
+            const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
+            expect(gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
+
+        }
 
         const walletAddress = await EIP4337Lib.calculateWalletAddress(
             SoulWalletLogic.contract.address,
@@ -481,6 +498,12 @@ describe("SoulWalletContract", function () {
 
         const userOpHash = activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
         {
+            // test toJson and fromJson
+            const _activateOp = UserOperation.fromJSON(activateOp.toJSON());
+            const _userOpHash = _activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
+            expect(_userOpHash).to.equal(userOpHash);
+        }
+        {
             const _userOpHash = await EntryPoint.contract.getUserOpHash(activateOp);
             expect(_userOpHash).to.equal(userOpHash);
         }
@@ -504,8 +527,7 @@ describe("SoulWalletContract", function () {
             walletOwner,
             guardian: gurdianAddressAndInitCode.address,
             guardianInitcode: gurdianAddressAndInitCode.initCode,
-            guardiansAddress,
-            guardiansPrivateKey,
+            guardians,
             guardianSalt,
             guardianDelay,
 
@@ -555,7 +577,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function recoveryWallet() {
-        const { WETH, guardiansAddress, guardiansPrivateKey, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, WETHPaymaster } = await activateWallet();
+        const { WETH, guardians, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, WETHPaymaster } = await activateWallet();
         let guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
 
@@ -579,9 +601,10 @@ describe("SoulWalletContract", function () {
         const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHash(EntryPoint.contract.address, chainId);
 
         const guardianSignArr: any[] = [];
-        for (let index = 0; index < Math.round(guardiansAddress.length / 2); index++) {
-            const _address = guardiansAddress[index];
-            const _privateKey = guardiansPrivateKey[index];
+        for (let index = 0; index < Math.round(guardians.length / 2); index++) {
+            const _guardian = guardians[index];
+            const _address = _guardian.address;
+            const _privateKey = _guardian.privateKey;
             guardianSignArr.push(
                 {
                     contract: false,
@@ -602,59 +625,59 @@ describe("SoulWalletContract", function () {
     }
 
     async function interfaceResolver() {
-      const {
-        WETH,
-        guardiansAddress,
-        guardiansPrivateKey,
-        guardianSalt,
-        guardianInitcode,
-        walletAddress,
-        walletOwner,
-        guardian,
-        guardianDelay,
-        chainId,
-        accounts,
-        GuardianLogic,
-        SingletonFactory,
-        EntryPoint,
-        WETHPaymaster,
-      } = await activateWallet();
-      const walletContract = new ethers.Contract(
-        walletAddress,
-        SmartWallet__factory.abi,
-        ethers.provider
-      );
+        const {
+            WETH,
+            guardiansAddress,
+            guardiansPrivateKey,
+            guardianSalt,
+            guardianInitcode,
+            walletAddress,
+            walletOwner,
+            guardian,
+            guardianDelay,
+            chainId,
+            accounts,
+            GuardianLogic,
+            SingletonFactory,
+            EntryPoint,
+            WETHPaymaster,
+        } = await activateWallet();
+        const walletContract = new ethers.Contract(
+            walletAddress,
+            SmartWallet__factory.abi,
+            ethers.provider
+        );
 
-      const SUPPORT_INTERFACE_ID = "0x01ffc9a7";
-      const ERC721_INTERFACE_ID = "0x150b7a02";
-      const ERC1155_INTERFACE_ID = "0x4e2312e0";
+        const SUPPORT_INTERFACE_ID = "0x01ffc9a7";
+        const ERC721_INTERFACE_ID = "0x150b7a02";
+        const ERC1155_INTERFACE_ID = "0x4e2312e0";
 
-      let support = await walletContract.supportsInterface(
-        SUPPORT_INTERFACE_ID
-      );
-      expect(support).to.equal(true);
-      support = await walletContract.supportsInterface(ERC721_INTERFACE_ID);
-      expect(support).to.equal(true);
-      support = await walletContract.supportsInterface(ERC1155_INTERFACE_ID);
-      expect(support).to.equal(true);
-      await expect(
-        await walletContract.callStatic.onERC1155Received(
-          EIP4337Lib.Defines.AddressZero,
-          EIP4337Lib.Defines.AddressZero,
-          0,
-          0,
-          "0x"
-        )
-      ).to.be.eq("0xf23a6e61");
-      await expect(
-        await walletContract.callStatic.onERC1155BatchReceived(
-          EIP4337Lib.Defines.AddressZero,
-          EIP4337Lib.Defines.AddressZero,
-          [0],
-          [0],
-          "0x"
-        )
-      ).to.be.eq("0xbc197c81");
+        let support = await walletContract.supportsInterface(
+            SUPPORT_INTERFACE_ID
+        );
+        expect(support).to.equal(true);
+        support = await walletContract.supportsInterface(ERC721_INTERFACE_ID);
+        expect(support).to.equal(true);
+        support = await walletContract.supportsInterface(ERC1155_INTERFACE_ID);
+        expect(support).to.equal(true);
+        await expect(
+            await walletContract.callStatic.onERC1155Received(
+                EIP4337Lib.Defines.AddressZero,
+                EIP4337Lib.Defines.AddressZero,
+                0,
+                0,
+                "0x"
+            )
+        ).to.be.eq("0xf23a6e61");
+        await expect(
+            await walletContract.callStatic.onERC1155BatchReceived(
+                EIP4337Lib.Defines.AddressZero,
+                EIP4337Lib.Defines.AddressZero,
+                [0],
+                [0],
+                "0x"
+            )
+        ).to.be.eq("0xbc197c81");
     }
 
 

@@ -18,6 +18,7 @@ declare class UserOperation {
     signature: string;
     toTuple(): string;
     toJSON(): string;
+    static fromJSON(json: string): UserOperation;
     /**
      * estimate the gas
      * @param entryPointAddress the entry point address

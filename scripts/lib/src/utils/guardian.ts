@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-09-21 20:28:54
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-14 12:35:41
+ * @LastEditTime: 2023-01-28 10:07:26
  */
 
 import { UserOperation } from "../entity/userOperation";
@@ -21,6 +21,19 @@ export class Guaridian {
 
     private static getInitializeData(guardians: string[], threshold: number) {
         // function initialize(address[] calldata _guardians, uint16 _threshold)
+        // order by guardians asc
+        guardians.sort((a, b) => {
+            const aBig = BigNumber.from(a);
+            const bBig = BigNumber.from(b);
+            if (aBig.eq(bBig)) {
+                throw new Error(`guardian address is same: ${a}`);
+            } else if (aBig.lt(bBig)) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+
         let iface = new ethers.utils.Interface(GuardianMultiSigWallet.ABI);
         let initializeData = iface.encodeFunctionData("initialize", [guardians, threshold]);
         return initializeData;

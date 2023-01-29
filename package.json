@@ -7,6 +7,7 @@
     "deploy": "npx hardhat run scripts/deploy.ts"
   },
   "devDependencies": {
+    "@chainlink/contracts": "^0.6.0",
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/providers": "^5.6.8",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
@@ -27,10 +28,8 @@
     "solidity-coverage": "^0.8.2",
     "solidity-string-utils": "^0.0.8-0",
     "soul-wallet-lib": "file:scripts/lib",
+    "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
-    "typescript": "^4.9.4", 
-    "ts-node": "^10.9.1"
-  },
-  "dependencies": {
+    "typescript": "^4.9.4"
   }
 }

@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-15 23:07:12
+ * @LastEditTime: 2023-01-28 20:04:45
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -30,6 +30,7 @@ const rpc_1 = require("../utils/rpc");
 const converter_1 = require("../utils/converter");
 const ethers_1 = require("ethers");
 const gasFee_1 = require("../utils/gasFee");
+const tokenAndPaymaster_1 = require("../utils/tokenAndPaymaster");
 class EIP4337Lib {
     /**
      *
@@ -37,15 +38,15 @@ class EIP4337Lib {
      * @param ownerAddress the owner address
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param guardianAddress the guardian contract address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @returns inithex
      */
-    static getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress) {
+    static getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster) {
         // function initialize(IEntryPoint anEntryPoint, address anOwner,  IERC20 token,address paymaster)
         // encodeFunctionData
         let iface = new ethers_1.ethers.utils.Interface(soulWallet_1.SimpleWalletContract.ABI);
-        let initializeData = iface.encodeFunctionData("initialize", [entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress]);
+        let initializeData = iface.encodeFunctionData("initialize", [entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster]);
         return initializeData;
     }
     /**
@@ -55,12 +56,12 @@ class EIP4337Lib {
      * @param ownerAddress the owner address
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param guardianAddress the guardian contract address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @returns the wallet code hex string
      */
-    static getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress) {
-        const initializeData = EIP4337Lib.getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+    static getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster) {
+        const initializeData = EIP4337Lib.getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const factory = new ethers_1.ethers.ContractFactory(walletProxy_1.WalletProxyContract.ABI, walletProxy_1.WalletProxyContract.bytecode);
         const walletBytecode = factory.getDeployTransaction(walletLogicAddress, initializeData).data;
         return walletBytecode;
@@ -73,14 +74,13 @@ class EIP4337Lib {
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
      * @param guardianAddress the guardian contract address
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @param salt the salt number,default is 0
      * @param create2Factory create2factory address defined in EIP-2470
      * @returns
      */
-    static calculateWalletAddress(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress, salt, create2Factory) {
-        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+    static calculateWalletAddress(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster, salt, create2Factory) {
+        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const initCodeHash = (0, utils_1.keccak256)(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);
         return walletAddress;
@@ -94,14 +94,15 @@ class EIP4337Lib {
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
      * @param guardianAddress the guardian contract address
-     * @param tokenAddress WETH address
-     * @param maxFeePerGas
-     * @param maxPriorityFeePerGas
-     * @param salt
-     * @param create2Factory
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
+     * @param payMasterAddress the paymaster address
+     * @param salt the salt number,default is 0
+     * @param create2Factory create2factory address
+     * @param maxFeePerGas the max fee per gas
+     * @param maxPriorityFeePerGas the max priority fee per gas
      */
-    static activateWalletOp(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress, salt, create2Factory, maxFeePerGas, maxPriorityFeePerGas) {
-        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+    static activateWalletOp(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster, payMasterAddress, salt, create2Factory, maxFeePerGas, maxPriorityFeePerGas) {
+        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const initCodeHash = (0, utils_1.keccak256)(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);
         let userOperation = new userOperation_1.UserOperation();
@@ -186,7 +187,8 @@ EIP4337Lib.Utils = {
     getNonce: EIP4337Lib.getNonce,
     DecodeCallData: decodeCallData_1.DecodeCallData,
     fromTransaction: converter_1.Converter.fromTransaction,
-    suggestedGasFee: gasFee_1.CodefiGasFees
+    suggestedGasFee: gasFee_1.CodefiGasFees,
+    tokenAndPaymaster: tokenAndPaymaster_1.TokenAndPaymaster
 };
 EIP4337Lib.Defines = {
     AddressZero: address_1.AddressZero

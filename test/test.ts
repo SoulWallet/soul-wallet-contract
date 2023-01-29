@@ -4,15 +4,16 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-28 10:20:06
+ * @LastEditTime: 2023-01-29 17:25:34
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
-import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
+import { EIP4337Lib, UserOperation, ITokenAndPaymaster } from 'soul-wallet-lib';
 import { SmartWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
+import fs from 'fs';
 
 const log_on = false;
 const log = (message?: any, ...optionalParams: any[]) => { if (log_on) console.log(message, ...optionalParams) };
@@ -65,6 +66,12 @@ describe("SoulWalletContract", function () {
             contract: await (await ethers.getContractFactory("SmartWallet")).deploy()
         };
         log("SoulWalletLogic:", SoulWalletLogic.contract.address);
+        // get SoulWalletLogic contract code
+        const SoulWalletLogicCode = await ethers.provider.getCode(SoulWalletLogic.contract.address);
+
+        // calculate SoulWalletLogic contract code hash
+        const SoulWalletLogicCodeHash = ethers.utils.keccak256(SoulWalletLogicCode);
+        log("SoulWalletLogicCodeHash:", SoulWalletLogicCodeHash);
         // #endregion
 
         // #region EntryPoint  
@@ -365,12 +372,14 @@ describe("SoulWalletContract", function () {
 
         // #region WETHPaymaster
         const WETHPaymaster = {
-            contract: await (await ethers.getContractFactory("WETHTokenPaymaster")).deploy(
+            contract: await (await ethers.getContractFactory("WETHPaymaster")).deploy(
                 EntryPoint.contract.address,
                 WETH.contract.address,
                 accounts[0].address
             )
         };
+        // addKnownWalletLogic
+        await WETHPaymaster.contract.addKnownWalletLogic([SoulWalletLogicCodeHash]);
 
         const _paymasterStake = '' + Math.pow(10, 17);
         await WETHPaymaster.contract.addStake(
@@ -442,6 +451,14 @@ describe("SoulWalletContract", function () {
 
         }
 
+        const tokenAndPaymaster = [
+            {
+                token: WETH.contract.address,
+                paymaster: WETHPaymaster.contract.address
+            }
+        ];
+        const packedTokenAndPaymaster = EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster);
+
         const walletAddress = await EIP4337Lib.calculateWalletAddress(
             SoulWalletLogic.contract.address,
             EntryPoint.contract.address,
@@ -449,12 +466,10 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            WETH.contract.address,
-            WETHPaymaster.contract.address,
+            packedTokenAndPaymaster,
             0,
             SingletonFactory
         );
-
 
         log('walletAddress: ' + walletAddress);
 
@@ -486,7 +501,7 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            WETH.contract.address,
+            packedTokenAndPaymaster,
             WETHPaymaster.contract.address,
             0,
             SingletonFactory,
@@ -625,23 +640,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function interfaceResolver() {
-        const {
-            WETH,
-            guardiansAddress,
-            guardiansPrivateKey,
-            guardianSalt,
-            guardianInitcode,
-            walletAddress,
-            walletOwner,
-            guardian,
-            guardianDelay,
-            chainId,
-            accounts,
-            GuardianLogic,
-            SingletonFactory,
-            EntryPoint,
-            WETHPaymaster,
-        } = await activateWallet();
+        const { walletAddress } = await activateWallet();
         const walletContract = new ethers.Contract(
             walletAddress,
             SmartWallet__factory.abi,

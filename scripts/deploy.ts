@@ -4,16 +4,15 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-03 09:50:01
+ * @LastEditTime: 2023-01-29 17:25:59
  */
 
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
-import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
-import { WETH9__factory, WETHTokenPaymaster__factory, Create2Factory__factory, EntryPoint__factory } from "../src/types/index";
+import { EIP4337Lib } from 'soul-wallet-lib';
+import { WETH9__factory, WETHPaymaster__factory, Create2Factory__factory, EntryPoint__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
-import * as ethUtil from 'ethereumjs-util';
 
 function isLocalTestnet() {
     return network.name === "localhost" || network.name === "hardhat"
@@ -61,35 +60,38 @@ async function main() {
 
     let create2Factory = '';
     let WETHContractAddress = '';
-    let EOA
+    let EOA=(await ethers.getSigners())[0];
+
     if (network.name === "mainnet") {
+
       create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
       WETHContractAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      
     } else if (network.name === "goerli") {
-      EOA = await ethers.getSigner(
-        "0x00000000000d3b4EA88f9B3fE809D386B86F5898"
-      );
+
       create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
       WETHContractAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
+
     } else if (isLocalTestnet()) {
-      EOA = await ethers.getSigner(
-        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-      );
+
       let create2 = await new Create2Factory__factory(EOA).deploy();
       create2Factory = create2.address;
       let weth9 = await new WETH9__factory(EOA).deploy();
       WETHContractAddress = weth9.address;
       await weth9.deposit({ value: ethers.utils.parseEther("100") });
+
     }
+
+
     if (!create2Factory) {
         throw new Error("create2Factory not set");
     }
+
     if (!WETHContractAddress) {
         throw new Error("WETHContractAddress not set");
     }
 
     const chainId = await (await ethers.provider.getNetwork()).chainId;
-
 
     const walletOwner = '0x93EDb58cFc5d77028C138e47Fffb929A57C52082';
     const walletOwnerPrivateKey = '0x82cfe73c005926089ebf7ec1f49852207e5670870d0dfa544caabb83d2cd2d5f';
@@ -121,78 +123,22 @@ async function main() {
             console.log("EntryPoint not deployed, waiting...");
             await new Promise(r => setTimeout(r, 3000));
         }
-        console.log("EntryPoint deployed, verifying...");
-        try {
-            await run("verify:verify", {
-                address: EntryPointAddress,
-                constructorArguments: [],
-            });
-        } catch (error) {
-            console.log("EntryPoint verify failed:", error);
+        if(!isLocalTestnet()){
+          console.log("EntryPoint deployed, verifying...");
+          try {
+              await run("verify:verify", {
+                  address: EntryPointAddress,
+                  constructorArguments: [],
+              });
+          } catch (error) {
+              console.log("EntryPoint verify failed:", error);
+          }
         }
     } else {
     }
 
     // #endregion Entrypoint
 
-    // #region WETHPaymaster 
-
-    const WETHTokenPaymasterFactory = await ethers.getContractFactory("WETHTokenPaymaster");
-    const WETHTokenPaymasterBytecode = WETHTokenPaymasterFactory.getDeployTransaction(EntryPointAddress, WETHContractAddress, EOA.address).data;
-    if (!WETHTokenPaymasterBytecode) {
-        throw new Error("WETHTokenPaymasterBytecode not set");
-    }
-    const WETHTokenPaymasterInitCodeHash = keccak256(WETHTokenPaymasterBytecode);
-    const WETHTokenPaymasterAddress = getCreate2Address(create2Factory, salt, WETHTokenPaymasterInitCodeHash);
-    console.log("WETHTokenPaymasterAddress:", WETHTokenPaymasterAddress);
-    // if not deployed, deploy
-    if (await ethers.provider.getCode(WETHTokenPaymasterAddress) === '0x') {
-        console.log("WETHTokenPaymaster not deployed, deploying...");
-        const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-            return ethers.BigNumber.from(Math.pow(10, 7) + '');
-            //return estimatedGasLimit.mul(10)  // 10x gas
-        }
-        const create2FactoryContract = Create2Factory__factory.connect(create2Factory, EOA);
-        const estimatedGas = await create2FactoryContract.estimateGas.deploy(WETHTokenPaymasterBytecode, salt);
-        const tx = await create2FactoryContract.deploy(WETHTokenPaymasterBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
-        console.log("EntryPoint tx:", tx.hash);
-        while (await ethers.provider.getCode(WETHTokenPaymasterAddress) === '0x') {
-            console.log("WETHTokenPaymaster not deployed, waiting...");
-            await new Promise(r => setTimeout(r, 3000));
-        }
-        {
-            const _paymasterStake = '' + Math.pow(10, 17);
-            const WETHPaymaster = await WETHTokenPaymaster__factory.connect(WETHTokenPaymasterAddress, EOA);
-            console.log(await WETHPaymaster.owner());
-            console.log('adding stake');
-            await WETHPaymaster.addStake(
-                1, {
-                from: EOA.address,
-                value: _paymasterStake
-            });
-            await WETHPaymaster.deposit({
-                from: EOA.address,
-                value: _paymasterStake
-            });
-        }
-
-        console.log("WETHTokenPaymaster deployed, verifying...");
-        try {
-            await run("verify:verify", {
-                address: WETHTokenPaymasterAddress,
-                constructorArguments: [
-                    EntryPointAddress, WETHContractAddress, EOA.address
-                ],
-            });
-        } catch (error) {
-            console.log("WETHTokenPaymaster verify failed:", error);
-        }
-    } else {
-         
-    }
-
-
-    // #endregion WETHPaymaster
 
     // #region WalletLogic 
 
@@ -216,19 +162,92 @@ async function main() {
             console.log("WalletLogic not deployed, waiting...");
             await new Promise(r => setTimeout(r, 3000));
         }
-        console.log("WalletLogic deployed, verifying...");
-        try {
-            await run("verify:verify", {
-                address: WalletLogicAddress,
-                constructorArguments: [],
-            });
-        } catch (error) {
-            console.log("WalletLogic verify failed:", error);
+
+        if(!isLocalTestnet()){
+          console.log("WalletLogic deployed, verifying...");
+          try {
+              await run("verify:verify", {
+                  address: WalletLogicAddress,
+                  constructorArguments: [],
+              });
+          } catch (error) {
+              console.log("WalletLogic verify failed:", error);
+          }
         }
     } else {
     }
 
     // #endregion WalletLogic
+
+
+    // #region WETHPaymaster 
+
+    const WETHPaymasterFactory = await ethers.getContractFactory("WETHPaymaster");
+    const WETHPaymasterBytecode = WETHPaymasterFactory.getDeployTransaction(EntryPointAddress, WETHContractAddress, EOA.address).data;
+    if (!WETHPaymasterBytecode) {
+        throw new Error("WETHPaymasterBytecode not set");
+    }
+    const WETHPaymasterInitCodeHash = keccak256(WETHPaymasterBytecode);
+    const WETHPaymasterAddress = getCreate2Address(create2Factory, salt, WETHPaymasterInitCodeHash);
+    console.log("WETHPaymasterAddress:", WETHPaymasterAddress);
+    // if not deployed, deploy
+    if (await ethers.provider.getCode(WETHPaymasterAddress) === '0x') {
+        console.log("WETHPaymaster not deployed, deploying...");
+        const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
+            return ethers.BigNumber.from(Math.pow(10, 7) + '');
+            //return estimatedGasLimit.mul(10)  // 10x gas
+        }
+        const create2FactoryContract = Create2Factory__factory.connect(create2Factory, EOA);
+        const estimatedGas = await create2FactoryContract.estimateGas.deploy(WETHPaymasterBytecode, salt);
+        const tx = await create2FactoryContract.deploy(WETHPaymasterBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
+        console.log("EntryPoint tx:", tx.hash);
+        while (await ethers.provider.getCode(WETHPaymasterAddress) === '0x') {
+            console.log("WETHPaymaster not deployed, waiting...");
+            await new Promise(r => setTimeout(r, 3000));
+        }
+        {
+            const _paymasterStake = '' + Math.pow(10, 17);
+            const WETHPaymaster = await WETHPaymaster__factory.connect(WETHPaymasterAddress, EOA);
+            console.log(await WETHPaymaster.owner());
+
+            // addKnownWalletLogic
+            // get SoulWalletLogic contract code
+            const SoulWalletLogicCode = await ethers.provider.getCode(WalletLogicAddress);
+            // calculate SoulWalletLogic contract code hash
+            const SoulWalletLogicCodeHash = ethers.utils.keccak256(SoulWalletLogicCode);
+            await WETHPaymaster.addKnownWalletLogic([SoulWalletLogicCodeHash]);
+
+            console.log('adding stake');
+            await WETHPaymaster.addStake(
+                1, {
+                from: EOA.address,
+                value: _paymasterStake
+            });
+            await WETHPaymaster.deposit({
+                from: EOA.address,
+                value: _paymasterStake
+            });
+        } 
+
+        if(!isLocalTestnet()){
+          console.log("WETHPaymaster deployed, verifying...");
+          try {
+              await run("verify:verify", {
+                  address: WETHPaymasterAddress,
+                  constructorArguments: [
+                      EntryPointAddress, WETHContractAddress, EOA.address
+                  ],
+              });
+          } catch (error) {
+              console.log("WETHPaymaster verify failed:", error);
+          }
+        }
+    } else {
+         
+    }
+
+
+    // #endregion WETHPaymaster
 
     // #region GuardianLogic 
 
@@ -252,14 +271,16 @@ async function main() {
             console.log("GuardianLogic not deployed, waiting...");
             await new Promise(r => setTimeout(r, 3000));
         }
-        console.log("GuardianLogic deployed, verifying...");
-        try {
-            await run("verify:verify", {
-                address: GuardianLogicAddress,
-                constructorArguments: [],
-            });
-        } catch (error) {
-            console.log("GuardianLogic verify failed:", error);
+        if(!isLocalTestnet()){
+          console.log("GuardianLogic deployed, verifying...");
+          try {
+              await run("verify:verify", {
+                  address: GuardianLogicAddress,
+                  constructorArguments: [],
+              });
+          } catch (error) {
+              console.log("GuardianLogic verify failed:", error);
+          }
         }
     } else {
     }
@@ -267,6 +288,14 @@ async function main() {
     // #endregion GuardianLogic
 
     // #region deploy wallet
+
+    const tokenAndPaymaster = [
+      {
+          token: WETHContractAddress,
+          paymaster: WETHPaymasterAddress
+      }
+    ];
+    const packedTokenAndPaymaster = EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster);
 
     const upgradeDelay = 10;
     const guardianDelay = 10;
@@ -277,8 +306,7 @@ async function main() {
         upgradeDelay,
         guardianDelay,
         EIP4337Lib.Defines.AddressZero,
-        WETHContractAddress,
-        WETHTokenPaymasterAddress,
+        packedTokenAndPaymaster,
         0,
         create2Factory
     );
@@ -319,8 +347,8 @@ async function main() {
         upgradeDelay,
         guardianDelay,
         EIP4337Lib.Defines.AddressZero,
-        WETHContractAddress,
-        WETHTokenPaymasterAddress,
+        packedTokenAndPaymaster,
+        WETHPaymasterAddress,
         0,
         create2Factory,
         ethers.utils
@@ -371,7 +399,7 @@ async function main() {
         walletAddress,
         nonce,
         EntryPointAddress,
-        WETHTokenPaymasterAddress,
+        WETHPaymasterAddress,
         ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
         ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').toString(),
         WETHContractAddress,

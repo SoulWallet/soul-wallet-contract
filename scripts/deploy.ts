@@ -4,14 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-29 17:25:59
+ * @LastEditTime: 2023-01-30 21:15:29
  */
 
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
 import { EIP4337Lib } from 'soul-wallet-lib';
-import { WETH9__factory, WETHPaymaster__factory, Create2Factory__factory, EntryPoint__factory } from "../src/types/index";
+import { USDCoin__factory , USDCPaymaster__factory, Create2Factory__factory, EntryPoint__factory, ERC20__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
 
 function isLocalTestnet() {
@@ -59,27 +59,30 @@ async function main() {
     // npx hardhat run --network goerli scripts/deploy.ts
 
     let create2Factory = '';
-    let WETHContractAddress = '';
+    let USDCContractAddress = '';
+    let USDCPriceFeedAddress = '';
+
     let EOA=(await ethers.getSigners())[0];
+
+    // print EOA Address
+    console.log("EOA Address:", EOA.address);
 
     if (network.name === "mainnet") {
 
       create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
-      WETHContractAddress = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+      USDCContractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
       
     } else if (network.name === "goerli") {
 
       create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
-      WETHContractAddress = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
+      USDCContractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 
     } else if (isLocalTestnet()) {
-
       let create2 = await new Create2Factory__factory(EOA).deploy();
       create2Factory = create2.address;
-      let weth9 = await new WETH9__factory(EOA).deploy();
-      WETHContractAddress = weth9.address;
-      await weth9.deposit({ value: ethers.utils.parseEther("100") });
-
+      let usdc = await new USDCoin__factory(EOA).deploy();
+      USDCContractAddress = usdc.address;
+      USDCPriceFeedAddress =  await (await (await ethers.getContractFactory("USDCPriceFeed")).deploy()).address;
     }
 
 
@@ -87,8 +90,12 @@ async function main() {
         throw new Error("create2Factory not set");
     }
 
-    if (!WETHContractAddress) {
-        throw new Error("WETHContractAddress not set");
+    if (!USDCContractAddress) {
+        throw new Error("USDCContractAddress not set");
+    }
+
+    if (!USDCPriceFeedAddress) {
+        throw new Error("USDCPriceFeedAddress not set(ChainLink Price Feed)");
     }
 
     const chainId = await (await ethers.provider.getNetwork()).chainId;
@@ -180,66 +187,66 @@ async function main() {
     // #endregion WalletLogic
 
 
-    // #region WETHPaymaster 
+    // #region USDCPaymaster 
 
-    const WETHPaymasterFactory = await ethers.getContractFactory("WETHPaymaster");
-    const WETHPaymasterBytecode = WETHPaymasterFactory.getDeployTransaction(EntryPointAddress, WETHContractAddress, EOA.address).data;
-    if (!WETHPaymasterBytecode) {
-        throw new Error("WETHPaymasterBytecode not set");
+    const USDCPaymasterFactory = await ethers.getContractFactory("USDCPaymaster");
+    const USDCPaymasterBytecode = USDCPaymasterFactory.getDeployTransaction(EntryPointAddress, USDCContractAddress, USDCPriceFeedAddress, EOA.address).data;
+    if (!USDCPaymasterBytecode) {
+        throw new Error("USDCPaymasterBytecode not set");
     }
-    const WETHPaymasterInitCodeHash = keccak256(WETHPaymasterBytecode);
-    const WETHPaymasterAddress = getCreate2Address(create2Factory, salt, WETHPaymasterInitCodeHash);
-    console.log("WETHPaymasterAddress:", WETHPaymasterAddress);
+    const USDCPaymasterInitCodeHash = keccak256(USDCPaymasterBytecode);
+    const USDCPaymasterAddress = getCreate2Address(create2Factory, salt, USDCPaymasterInitCodeHash);
+    console.log("USDCPaymasterAddress:", USDCPaymasterAddress);
     // if not deployed, deploy
-    if (await ethers.provider.getCode(WETHPaymasterAddress) === '0x') {
-        console.log("WETHPaymaster not deployed, deploying...");
+    if (await ethers.provider.getCode(USDCPaymasterAddress) === '0x') {
+        console.log("USDCPaymaster not deployed, deploying...");
         const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
             return ethers.BigNumber.from(Math.pow(10, 7) + '');
             //return estimatedGasLimit.mul(10)  // 10x gas
         }
         const create2FactoryContract = Create2Factory__factory.connect(create2Factory, EOA);
-        const estimatedGas = await create2FactoryContract.estimateGas.deploy(WETHPaymasterBytecode, salt);
-        const tx = await create2FactoryContract.deploy(WETHPaymasterBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
+        const estimatedGas = await create2FactoryContract.estimateGas.deploy(USDCPaymasterBytecode, salt);
+        const tx = await create2FactoryContract.deploy(USDCPaymasterBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
         console.log("EntryPoint tx:", tx.hash);
-        while (await ethers.provider.getCode(WETHPaymasterAddress) === '0x') {
-            console.log("WETHPaymaster not deployed, waiting...");
+        while (await ethers.provider.getCode(USDCPaymasterAddress) === '0x') {
+            console.log("USDCPaymaster not deployed, waiting...");
             await new Promise(r => setTimeout(r, 3000));
         }
         {
             const _paymasterStake = '' + Math.pow(10, 17);
-            const WETHPaymaster = await WETHPaymaster__factory.connect(WETHPaymasterAddress, EOA);
-            console.log(await WETHPaymaster.owner());
+            const USDCPaymaster = await USDCPaymaster__factory.connect(USDCPaymasterAddress, EOA);
+            console.log(await USDCPaymaster.owner());
 
             // addKnownWalletLogic
             // get SoulWalletLogic contract code
             const SoulWalletLogicCode = await ethers.provider.getCode(WalletLogicAddress);
             // calculate SoulWalletLogic contract code hash
             const SoulWalletLogicCodeHash = ethers.utils.keccak256(SoulWalletLogicCode);
-            await WETHPaymaster.addKnownWalletLogic([SoulWalletLogicCodeHash]);
+            await USDCPaymaster.addKnownWalletLogic([SoulWalletLogicCodeHash]);
 
             console.log('adding stake');
-            await WETHPaymaster.addStake(
+            await USDCPaymaster.addStake(
                 1, {
                 from: EOA.address,
                 value: _paymasterStake
             });
-            await WETHPaymaster.deposit({
+            await USDCPaymaster.deposit({
                 from: EOA.address,
                 value: _paymasterStake
             });
         } 
 
         if(!isLocalTestnet()){
-          console.log("WETHPaymaster deployed, verifying...");
+          console.log("USDCPaymaster deployed, verifying...");
           try {
               await run("verify:verify", {
-                  address: WETHPaymasterAddress,
+                  address: USDCPaymasterAddress,
                   constructorArguments: [
-                      EntryPointAddress, WETHContractAddress, EOA.address
+                      EntryPointAddress, USDCContractAddress, EOA.address
                   ],
               });
           } catch (error) {
-              console.log("WETHPaymaster verify failed:", error);
+              console.log("USDCPaymaster verify failed:", error);
           }
         }
     } else {
@@ -247,7 +254,7 @@ async function main() {
     }
 
 
-    // #endregion WETHPaymaster
+    // #endregion USDCPaymaster
 
     // #region GuardianLogic 
 
@@ -291,8 +298,8 @@ async function main() {
 
     const tokenAndPaymaster = [
       {
-          token: WETHContractAddress,
-          paymaster: WETHPaymasterAddress
+          token: USDCContractAddress,
+          paymaster: USDCPaymasterAddress
       }
     ];
     const packedTokenAndPaymaster = EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster);
@@ -315,12 +322,14 @@ async function main() {
 
 
 
-    // send 0.02 WETH to wallet
-    const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
-    const _b = await WETHContract.balanceOf(walletAddress);
+    // send 0.02 USDC to wallet
+    const USDCContract = USDCoin__factory.connect(USDCContractAddress, EOA);
+    const _b = await USDCContract.balanceOf(walletAddress);
     if (_b.lt(ethers.utils.parseEther('0.02'))) {
-        console.log('sending 0.05 WETH to wallet');
-        await WETHContract.transferFrom(EOA.address, walletAddress, ethers.utils.parseEther('0.05'));
+        console.log('sending 0.05 USDC to wallet');
+        await USDCContract.transfer(walletAddress, ethers.utils.parseEther('0.05'),{
+            from: EOA.address
+        });
     }
 
 
@@ -348,7 +357,7 @@ async function main() {
         guardianDelay,
         EIP4337Lib.Defines.AddressZero,
         packedTokenAndPaymaster,
-        WETHPaymasterAddress,
+        USDCPaymasterAddress,
         0,
         create2Factory,
         ethers.utils
@@ -380,7 +389,7 @@ async function main() {
 
     // #endregion deploy wallet
 
-    // #region send 1wei Weth to wallet
+    // #region send 1wei USDC to wallet
     const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
     let eip1559GasFee: any;
     if (!isLocalTestnet()) {
@@ -394,33 +403,33 @@ async function main() {
       eip1559GasFee = mockGasFee;
     }
 
-    const sendWETHOP = await EIP4337Lib.Tokens.ERC20.transfer(
+    const sendUSDCOP = await EIP4337Lib.Tokens.ERC20.transfer(
         ethers.provider,
         walletAddress,
         nonce,
         EntryPointAddress,
-        WETHPaymasterAddress,
+        USDCPaymasterAddress,
         ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
         ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').toString(),
-        WETHContractAddress,
+        USDCContractAddress,
         EOA.address,
         '1'
     );
-    if (!sendWETHOP) {
-        throw new Error('sendWETHOP is null');
+    if (!sendUSDCOP) {
+        throw new Error('sendUSDCOP is null');
     }
-    const userOpHash = sendWETHOP.getUserOpHash(EntryPointAddress, chainId);
-    sendWETHOP.signWithSignature(
+    const userOpHash = sendUSDCOP.getUserOpHash(EntryPointAddress, chainId);
+    sendUSDCOP.signWithSignature(
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
     );
-    await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPointAddress, sendWETHOP);
+    await EIP4337Lib.RPC.simulateHandleOp(ethers.provider, EntryPointAddress, sendUSDCOP);
     const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    console.log(sendWETHOP);
-    const re = await EntryPoint.handleOps([sendWETHOP], EOA.address);
+    console.log(sendUSDCOP);
+    const re = await EntryPoint.handleOps([sendUSDCOP], EOA.address);
     console.log(re);
 
-    // #endregion send 1wei Weth to wallet
+    // #endregion send 1wei usdc to wallet
 
 
 }

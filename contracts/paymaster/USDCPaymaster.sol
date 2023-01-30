@@ -6,9 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../EntryPoint.sol";
 import "../BasePaymaster.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
-pragma solidity ^0.8.17;
-
 import "./BaseTokenPaymaster.sol";
 import "../interfaces/UserOperation.sol";
 
@@ -32,9 +29,19 @@ contract USDCPaymaster is BaseTokenPaymaster {
         priceFeed = _priceFeed;
     }
 
-    function _calculateTokenGasfee(
-        uint256 etherGasfee
-    ) internal view override returns (uint256) {
-        return etherGasfee;
+    function tokenPrice(
+        uint256 ethers
+    ) public view override returns (uint256) {
+        (
+            /* uint80 roundID */,
+            int price,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = priceFeed.latestRoundData();
+        (price);
+        // TODO
+
+        return ethers;
     }
 }

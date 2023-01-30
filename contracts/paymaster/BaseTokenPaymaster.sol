@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../EntryPoint.sol";
 import "../interfaces/UserOperation.sol";
 import "../BasePaymaster.sol";
+import "hardhat/console.sol";
 
 abstract contract BaseTokenPaymaster is BasePaymaster {
 
@@ -110,8 +111,8 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
         ERC20Token.transfer(to, balance);
     }
 
-    function _calculateTokenGasfee(uint256 etherGasfee) internal view virtual returns (uint256) {
-        (etherGasfee);
+    function tokenPrice(uint256 ethers) public view virtual returns (uint256) {
+        (ethers);
         revert("must override");
     }
 
@@ -128,13 +129,14 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
         bytes32 /*userOpHash*/,
         uint256 requiredPreFund
     ) external view override returns (bytes memory context, uint256 deadline) {
+
         require(!isPaused, "Paymaster: paused");
         require(
             userOp.verificationGasLimit > 45000,
             "Paymaster: gas too low for postOp"
         );
 
-        uint256 tokenRequiredPreFund = _calculateTokenGasfee(requiredPreFund);
+        uint256 tokenRequiredPreFund = tokenPrice(requiredPreFund);
 
         address sender = userOp.getSender();
 
@@ -143,14 +145,19 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >= tokenRequiredPreFund,
-                "WETHPaymaster: not enough allowance"
+                "Paymaster: not enough allowance"
             );
         }
 
         require(
             ERC20Token.balanceOf(sender) >= tokenRequiredPreFund,
-            "WETHPaymaster: not enough balance"
+            "Paymaster: not enough balance"
         );
+
+        uint size;
+        assembly {
+            size := extcodesize(sender)
+        }
 
         return (abi.encode(sender, userOp.gasPrice()), 0);
     }
@@ -250,7 +257,7 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
                     i++;
                 }
             }
-            require(found, "Paymaster: must approve WETH Token");
+            require(found, "Paymaster: must approve Token");
         }
     }
 
@@ -274,5 +281,9 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
             address(this),
             actualGasCost + (COST_OF_POST * gasPrice)
         );
+         uint size;
+        assembly {
+            size := extcodesize(sender)
+        }
     }
 }

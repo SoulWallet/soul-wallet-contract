@@ -6129,8 +6129,8 @@
   "resolved" "https://registry.npmjs.org/solidity-string-utils/-/solidity-string-utils-0.0.8-0.tgz"
   "version" "0.0.8-0"
 
-"soul-wallet-lib@file:scripts/lib":
-  "resolved" "file:scripts/lib"
+"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.1":
+  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#006e42707e7bcfa0661f1a31b36bc115cb6ac237"
   "version" "0.0.1"
   dependencies:
     "axios" "^0.27.2"

@@ -4,13 +4,12 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 21:13:10
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-03 09:29:12
+ * @LastEditTime: 2023-01-28 19:37:39
  */
 
 import { IContract } from './icontract';
 
 const ABI: any = 
-
 [
 	{
 		"inputs": [],
@@ -58,15 +57,9 @@ const ABI: any =
 			},
 			{
 				"indexed": false,
-				"internalType": "address",
-				"name": "erc20token",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "paymaster",
-				"type": "address"
+				"internalType": "bytes",
+				"name": "tokenAndPaymaster",
+				"type": "bytes"
 			}
 		],
 		"name": "AccountInitialized",
@@ -552,14 +545,9 @@ const ABI: any =
 				"type": "address"
 			},
 			{
-				"internalType": "contract IERC20",
-				"name": "_erc20token",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_paymaster",
-				"type": "address"
+				"internalType": "bytes",
+				"name": "_tokenAndPaymaster",
+				"type": "bytes"
 			}
 		],
 		"name": "initialize",
@@ -662,6 +650,118 @@ const ABI: any =
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC1155BatchReceived",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC1155Received",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "onERC721Received",
+		"outputs": [
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "newImplementation",
 				"type": "address"
 			}
@@ -724,7 +824,7 @@ const ABI: any =
 		"inputs": [
 			{
 				"internalType": "bytes4",
-				"name": "interfaceId",
+				"name": "_interfaceID",
 				"type": "bytes4"
 			}
 		],
@@ -737,6 +837,44 @@ const ABI: any =
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "tokensReceived",
+		"outputs": [],
+		"stateMutability": "pure",
 		"type": "function"
 	},
 	{

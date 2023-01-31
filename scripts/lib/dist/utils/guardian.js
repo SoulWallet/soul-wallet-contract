@@ -5,7 +5,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-09-21 20:28:54
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-28 10:07:26
+ * @LastEditTime: 2023-01-28 10:17:34
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -29,6 +29,7 @@ class Guaridian {
     static getInitializeData(guardians, threshold) {
         // function initialize(address[] calldata _guardians, uint16 _threshold)
         // order by guardians asc
+        // For user experience, guardian cannot rely on the order of address
         guardians.sort((a, b) => {
             const aBig = ethers_1.BigNumber.from(a);
             const bBig = ethers_1.BigNumber.from(b);

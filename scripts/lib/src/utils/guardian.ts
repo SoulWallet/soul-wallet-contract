@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-09-21 20:28:54
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-28 10:07:26
+ * @LastEditTime: 2023-01-28 10:17:34
  */
 
 import { UserOperation } from "../entity/userOperation";
@@ -22,6 +22,7 @@ export class Guaridian {
     private static getInitializeData(guardians: string[], threshold: number) {
         // function initialize(address[] calldata _guardians, uint16 _threshold)
         // order by guardians asc
+        // For user experience, guardian cannot rely on the order of address
         guardians.sort((a, b) => {
             const aBig = BigNumber.from(a);
             const bBig = BigNumber.from(b);

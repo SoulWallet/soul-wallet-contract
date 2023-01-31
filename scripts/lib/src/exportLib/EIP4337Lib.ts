@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-08-05 16:08:23
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-15 23:07:12
+ * @LastEditTime: 2023-01-28 20:04:45
  */
 
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -21,6 +21,7 @@ import { Converter } from "../utils/converter";
 import { ethers } from "ethers";
 import { NumberLike } from "../defines/numberLike";
 import { CodefiGasFees } from '../utils/gasFee';
+import { TokenAndPaymaster } from '../utils/tokenAndPaymaster';
 
 export class EIP4337Lib {
 
@@ -28,7 +29,8 @@ export class EIP4337Lib {
         getNonce: EIP4337Lib.getNonce,
         DecodeCallData: DecodeCallData,
         fromTransaction: Converter.fromTransaction,
-        suggestedGasFee: CodefiGasFees
+        suggestedGasFee: CodefiGasFees,
+        tokenAndPaymaster: TokenAndPaymaster
     }
 
     public static Defines = {
@@ -59,8 +61,8 @@ export class EIP4337Lib {
      * @param ownerAddress the owner address 
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param guardianAddress the guardian contract address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @returns inithex
      */
     private static getInitializeData(
@@ -69,12 +71,12 @@ export class EIP4337Lib {
         upgradeDelay: number,
         guardianDelay: number,
         guardianAddress: string,
-        tokenAddress: string,
-        payMasterAddress: string) {
+        tokenAndPaymaster: string
+    ) {
         // function initialize(IEntryPoint anEntryPoint, address anOwner,  IERC20 token,address paymaster)
         // encodeFunctionData
         let iface = new ethers.utils.Interface(SimpleWalletContract.ABI);
-        let initializeData = iface.encodeFunctionData("initialize", [entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress]);
+        let initializeData = iface.encodeFunctionData("initialize", [entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster]);
         return initializeData;
     }
 
@@ -85,12 +87,12 @@ export class EIP4337Lib {
      * @param ownerAddress the owner address
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param guardianAddress the guardian contract address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @returns the wallet code hex string  
      */
-    public static getWalletCode(walletLogicAddress: string, entryPointAddress: string, ownerAddress: string, upgradeDelay: number, guardianDelay: number, guardianAddress: string, tokenAddress: string, payMasterAddress: string): string {
-        const initializeData = EIP4337Lib.getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+    public static getWalletCode(walletLogicAddress: string, entryPointAddress: string, ownerAddress: string, upgradeDelay: number, guardianDelay: number, guardianAddress: string, tokenAndPaymaster: string): string {
+        const initializeData = EIP4337Lib.getInitializeData(entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const factory = new ethers.ContractFactory(WalletProxyContract.ABI, WalletProxyContract.bytecode);
         const walletBytecode = factory.getDeployTransaction(walletLogicAddress, initializeData).data;
         return walletBytecode as string;
@@ -104,8 +106,7 @@ export class EIP4337Lib {
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
      * @param guardianAddress the guardian contract address
-     * @param tokenAddress the WETH token address
-     * @param payMasterAddress the payMaster address
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
      * @param salt the salt number,default is 0
      * @param create2Factory create2factory address defined in EIP-2470
      * @returns 
@@ -117,10 +118,10 @@ export class EIP4337Lib {
         upgradeDelay: number,
         guardianDelay: number,
         guardianAddress: string,
-        tokenAddress: string, payMasterAddress: string,
+        tokenAndPaymaster: string,
         salt: number,
         create2Factory: string) {
-        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const initCodeHash = keccak256(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);
         return walletAddress;
@@ -135,11 +136,12 @@ export class EIP4337Lib {
      * @param upgradeDelay the upgrade delay time
      * @param guardianDelay the guardian delay time
      * @param guardianAddress the guardian contract address
-     * @param tokenAddress WETH address
-     * @param maxFeePerGas 
-     * @param maxPriorityFeePerGas 
-     * @param salt 
-     * @param create2Factory 
+     * @param tokenAndPaymaster the packed token and paymaster (bytes)
+     * @param payMasterAddress the paymaster address
+     * @param salt the salt number,default is 0
+     * @param create2Factory create2factory address 
+     * @param maxFeePerGas the max fee per gas
+     * @param maxPriorityFeePerGas the max priority fee per gas
      */
     public static activateWalletOp(
         walletLogicAddress: string,
@@ -148,13 +150,13 @@ export class EIP4337Lib {
         upgradeDelay: number,
         guardianDelay: number,
         guardianAddress: string,
-        tokenAddress: string,
+        tokenAndPaymaster: string,
         payMasterAddress: string,
         salt: number,
         create2Factory: string,
         maxFeePerGas: NumberLike,
         maxPriorityFeePerGas: NumberLike) {
-        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAddress, payMasterAddress);
+        const initCodeWithArgs = EIP4337Lib.getWalletCode(walletLogicAddress, entryPointAddress, ownerAddress, upgradeDelay, guardianDelay, guardianAddress, tokenAndPaymaster);
         const initCodeHash = keccak256(initCodeWithArgs);
         const walletAddress = EIP4337Lib.calculateWalletAddressByCodeHash(initCodeHash, salt, create2Factory);
         let userOperation: UserOperation = new UserOperation();

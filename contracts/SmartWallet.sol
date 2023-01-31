@@ -50,11 +50,8 @@ contract SmartWallet is
         uint32 upgradeDelay,
         uint32 guardianDelay,
         address guardian,
-        address erc20token,
-        address paymaster
+        bytes tokenAndPaymaster
     );
-
-
 
     constructor() {
         _disableInitializers();
@@ -67,8 +64,7 @@ contract SmartWallet is
         uint32 _upgradeDelay,
         uint32 _guardianDelay,
         address _guardian,
-        IERC20 _erc20token,
-        address _paymaster
+        bytes memory _tokenAndPaymaster
     ) public initializer {
         // set owner
         require(_owner != address(0), "Owner cannot be zero");
@@ -93,8 +89,22 @@ contract SmartWallet is
         }
 
         // approve paymaster to transfer tokens from this wallet on deploy
-        if (address(_erc20token) != address(0) && _paymaster != address(0)) {
-            _erc20token.approve(_paymaster, type(uint).max);
+        require(_tokenAndPaymaster.length % 40 == 0, "invalid length");
+        uint256 numTokens = _tokenAndPaymaster.length / 40;
+        uint256 i;
+        for (i = 0; i < numTokens;) {
+            address token;
+            address paymaster;
+            assembly {
+                token := mload(add(add(_tokenAndPaymaster, 20),mul(i, 40)))
+                paymaster := mload(
+                    add(add(_tokenAndPaymaster, 20), add(20, mul(i, 40)))
+                )
+            }
+            try IERC20(token).approve(paymaster, type(uint).max) {} catch {}
+            unchecked {
+                i++;
+            }
         }
 
         emit AccountInitialized(
@@ -104,8 +114,7 @@ contract SmartWallet is
             _upgradeDelay,
             _guardianDelay,
             _guardian,
-            address(_erc20token),
-            _paymaster
+            _tokenAndPaymaster
         );
     }
 

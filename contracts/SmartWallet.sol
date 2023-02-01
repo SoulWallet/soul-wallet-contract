@@ -49,8 +49,7 @@ contract SmartWallet is
         address owner,
         uint32 upgradeDelay,
         uint32 guardianDelay,
-        address guardian,
-        bytes tokenAndPaymaster
+        address guardian
     );
 
     constructor() {
@@ -63,8 +62,7 @@ contract SmartWallet is
         address _owner,
         uint32 _upgradeDelay,
         uint32 _guardianDelay,
-        address _guardian,
-        bytes memory _tokenAndPaymaster
+        address _guardian
     ) public initializer {
         // set owner
         require(_owner != address(0), "Owner cannot be zero");
@@ -88,33 +86,13 @@ contract SmartWallet is
             _setGuardian(guardianLayout, _guardian);
         }
 
-        // approve paymaster to transfer tokens from this wallet on deploy
-        require(_tokenAndPaymaster.length % 40 == 0, "invalid length");
-        uint256 numTokens = _tokenAndPaymaster.length / 40;
-        uint256 i;
-        for (i = 0; i < numTokens;) {
-            address token;
-            address paymaster;
-            assembly {
-                token := mload(add(add(_tokenAndPaymaster, 20),mul(i, 40)))
-                paymaster := mload(
-                    add(add(_tokenAndPaymaster, 20), add(20, mul(i, 40)))
-                )
-            }
-            try IERC20(token).approve(paymaster, type(uint).max) {} catch {}
-            unchecked {
-                i++;
-            }
-        }
-
         emit AccountInitialized(
             address(this),
             address(_entryPoint),
             _owner,
             _upgradeDelay,
             _guardianDelay,
-            _guardian,
-            _tokenAndPaymaster
+            _guardian
         );
     }
 
@@ -335,6 +313,14 @@ contract SmartWallet is
             userOpHash.toEthSignedMessageHash(),
             signatureData.signature
         );
+    }
+
+    /**
+     * @dev approve a token
+     */
+    function tokenApprove(IERC20 token, address spender, uint256 amount) external returns (bool){
+         _requireFromEntryPoint();
+         return token.approve(spender, amount);
     }
 
     function getVersion() external pure returns (uint) {

@@ -4,13 +4,13 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-30 16:27:10
+ * @LastEditTime: 2023-02-01 16:02:05
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
-import { EIP4337Lib, UserOperation, ITokenAndPaymaster } from 'soul-wallet-lib';
+import { EIP4337Lib, UserOperation } from 'soul-wallet-lib';
 import { SmartWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
 
@@ -163,7 +163,7 @@ describe("SoulWalletContract", function () {
         }
 
         const guardianSalt = 'saltText<text or bytes32>';
-        const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
+        const gurdianAddressAndInitCode = EIP4337Lib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
         log('guardian address ==> ' + gurdianAddressAndInitCode.address);
         {
             // test guardian order (For user experience, guardian cannot rely on the order of address)
@@ -172,7 +172,7 @@ describe("SoulWalletContract", function () {
             _guardiansAddress[0] = _guardiansAddress[1];
             _guardiansAddress[1] = _guardianTmpItem;
 
-            const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
+            const gurdianAddressAndInitCode = EIP4337Lib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
             expect(gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
 
         }
@@ -184,7 +184,6 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            '0x',
             0,
             SingletonFactory
         );
@@ -210,7 +209,6 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            '0x',
             '0x',
             0,
             SingletonFactory,
@@ -240,7 +238,7 @@ describe("SoulWalletContract", function () {
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
-        let guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
+        let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
 
         expect(guardianInfo?.currentGuardian).to.equal(gurdianAddressAndInitCode.address);
 
@@ -278,7 +276,7 @@ describe("SoulWalletContract", function () {
         }
 
         const guardianSalt = 'saltText<text or bytes32>(USDC)';
-        const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
+        const gurdianAddressAndInitCode = EIP4337Lib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
         log('guardian address ==> ' + gurdianAddressAndInitCode.address);
         {
             // test guardian order (For user experience, guardian cannot rely on the order of address)
@@ -287,18 +285,10 @@ describe("SoulWalletContract", function () {
             _guardiansAddress[0] = _guardiansAddress[1];
             _guardiansAddress[1] = _guardianTmpItem;
 
-            const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
+            const gurdianAddressAndInitCode = EIP4337Lib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt, SingletonFactory);
             expect(gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
 
         }
-
-        const tokenAndPaymaster = [
-            {
-                token: USDC.contract.address,
-                paymaster: USDCPaymaster.contract.address
-            }
-        ];
-        const packedTokenAndPaymaster = EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster);
 
         const walletAddress = await EIP4337Lib.calculateWalletAddress(
             SoulWalletLogic.contract.address,
@@ -307,7 +297,6 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            packedTokenAndPaymaster,
             0,
             SingletonFactory
         );
@@ -327,7 +316,6 @@ describe("SoulWalletContract", function () {
         usdcBalance = await USDC.contract.balanceOf(walletAddress);
         log('usdcBalance: ' + ethers.utils.formatEther(usdcBalance), 'USDC');
         expect(ethers.utils.formatEther(usdcBalance)).to.equal('0.01'); // 0.01 USDC
-
         const activateOp = EIP4337Lib.activateWalletOp(
             SoulWalletLogic.contract.address,
             EntryPoint.contract.address,
@@ -335,13 +323,15 @@ describe("SoulWalletContract", function () {
             upgradeDelay,
             guardianDelay,
             gurdianAddressAndInitCode.address,
-            packedTokenAndPaymaster,
             USDCPaymaster.contract.address,
             0,
             SingletonFactory,
             10000000000,// 100Gwei
             1000000000,// 10Gwei 
         );
+        const approveCallData = await EIP4337Lib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, USDC.contract.address, USDCPaymaster.contract.address, 1e18.toString());
+        activateOp.callData = approveCallData.callData;
+        activateOp.callGasLimit = approveCallData.callGasLimit;
 
 
 
@@ -365,7 +355,7 @@ describe("SoulWalletContract", function () {
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
-        let guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
+        let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
 
         expect(guardianInfo?.currentGuardian).to.equal(gurdianAddressAndInitCode.address);
 
@@ -385,7 +375,7 @@ describe("SoulWalletContract", function () {
 
     async function updateGuardian() {
         const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDCPaymaster } = await activateWallet_WithUSDCPaymaster();
-        let guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
+        let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
 
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
         const guardians: string[] = [];
@@ -393,11 +383,11 @@ describe("SoulWalletContract", function () {
             guardians.push(accounts[i].address);
         }
         const guardianSalt = 'saltText' + Math.random();
-        const gurdianAddressAndInitCode = EIP4337Lib.Guaridian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardians, Math.round(guardians.length / 2), guardianSalt, SingletonFactory);
+        const gurdianAddressAndInitCode = EIP4337Lib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardians, Math.round(guardians.length / 2), guardianSalt, SingletonFactory);
         log('new guardian address ==> ' + gurdianAddressAndInitCode.address);
         const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
 
-        const setGuardianOP = await EIP4337Lib.Guaridian.setGuardian(
+        const setGuardianOP = await EIP4337Lib.Guardian.setGuardian(
             ethers.provider,
             walletAddress,
             gurdianAddressAndInitCode.address,
@@ -414,24 +404,24 @@ describe("SoulWalletContract", function () {
         const setGuardianOPSignature = Utils.signMessage(setGuardianOPuserOpHash, walletOwner.privateKey)
         setGuardianOP.signWithSignature(walletOwner.address, setGuardianOPSignature);
         await EntryPoint.contract.handleOps([setGuardianOP], accounts[0].address);
-        guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
+        guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
         // wait block for guardianDelay 
         await time.increaseTo((await time.latest()) + guardianDelay);
-        guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress, await time.latest());
+        guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress, await time.latest());
         expect(guardianInfo?.currentGuardian).to.equal(gurdianAddressAndInitCode.address);
 
     }
 
     async function recoveryWallet() {
         const { USDC, guardians, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDCPaymaster } = await activateWallet_WithUSDCPaymaster();
-        let guardianInfo = await EIP4337Lib.Guaridian.getGuardian(ethers.provider, walletAddress);
+        let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
 
         const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
 
         const newWalletOwner = await ethers.Wallet.createRandom();
-        const transferOwnerOP = await EIP4337Lib.Guaridian.transferOwner(
+        const transferOwnerOP = await EIP4337Lib.Guardian.transferOwner(
             ethers.provider,
             walletAddress,
             nonce,

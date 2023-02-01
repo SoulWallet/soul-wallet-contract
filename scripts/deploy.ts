@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-01-30 21:15:29
+ * @LastEditTime: 2023-02-01 13:12:37
  */
 
 import { BigNumber } from "ethers";
@@ -57,8 +57,9 @@ async function main() {
       }
 
     // npx hardhat run --network goerli scripts/deploy.ts
+    // npx hardhat run --network ArbGoerli scripts/deploy.ts
 
-    let create2Factory = '';
+    let create2Factory = '0xce0042B868300000d44A59004Da54A005ffdcf9f';
     let USDCContractAddress = '';
     let USDCPriceFeedAddress = '';
 
@@ -69,13 +70,17 @@ async function main() {
 
     if (network.name === "mainnet") {
 
-      create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
       USDCContractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
       
     } else if (network.name === "goerli") {
 
-      create2Factory = "0xce0042B868300000d44A59004Da54A005ffdcf9f";
       USDCContractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+
+    } else if(network.name ==="ArbGoerli"){
+
+      USDCContractAddress = "0xe34a90dF83c29c28309f58773C41122d4E8C757A";
+      //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=arbitrum
+      USDCPriceFeedAddress = "0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08";
 
     } else if (isLocalTestnet()) {
       let create2 = await new Create2Factory__factory(EOA).deploy();
@@ -142,6 +147,7 @@ async function main() {
           }
         }
     } else {
+      console.log("EntryPoint already deployed at:" + EntryPointAddress);
     }
 
     // #endregion Entrypoint
@@ -296,14 +302,6 @@ async function main() {
 
     // #region deploy wallet
 
-    const tokenAndPaymaster = [
-      {
-          token: USDCContractAddress,
-          paymaster: USDCPaymasterAddress
-      }
-    ];
-    const packedTokenAndPaymaster = EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster);
-
     const upgradeDelay = 10;
     const guardianDelay = 10;
     const walletAddress = await EIP4337Lib.calculateWalletAddress(
@@ -313,7 +311,6 @@ async function main() {
         upgradeDelay,
         guardianDelay,
         EIP4337Lib.Defines.AddressZero,
-        packedTokenAndPaymaster,
         0,
         create2Factory
     );
@@ -356,7 +353,6 @@ async function main() {
         upgradeDelay,
         guardianDelay,
         EIP4337Lib.Defines.AddressZero,
-        packedTokenAndPaymaster,
         USDCPaymasterAddress,
         0,
         create2Factory,
@@ -370,6 +366,10 @@ async function main() {
           )
           .toString()
       );
+
+      const approveCallData = await EIP4337Lib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, USDCContractAddress, USDCPaymasterAddress, 1e18.toString());
+      activateOp.callData = approveCallData.callData;
+      activateOp.callGasLimit = approveCallData.callGasLimit;
 
       const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
 

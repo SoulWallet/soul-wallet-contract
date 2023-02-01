@@ -135,7 +135,6 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
             userOp.verificationGasLimit > 45000,
             "Paymaster: gas too low for postOp"
         );
-
         uint256 tokenRequiredPreFund = tokenPrice(requiredPreFund);
 
         address sender = userOp.getSender();
@@ -177,7 +176,7 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
                 bytes memory _tokenAndPaymaster
             )
         */
-
+return;
         bytes32 bytecodeHash = keccak256(
             userOp.initCode[0:SOULPROXY_BYTECODE_LEN]
         );

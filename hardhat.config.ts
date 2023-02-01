@@ -4,8 +4,10 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2022-12-27 09:53:10
+ * @LastEditTime: 2023-02-01 13:11:38
  */
+import * as dotenv from 'dotenv'
+dotenv.config()
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 const GOERLI_PRIVATE_KEY =
@@ -14,6 +16,9 @@ const GOERLI_PRIVATE_KEY =
 const MAINNET_PRIVATE_KEY =
   process.env.MAINNET_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
+const ARBGOERLI_PRIVATE_KEY =
+  process.env.ARBGOERLI_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
@@ -68,10 +73,18 @@ const config: HardhatUserConfig = {
       accounts: [MAINNET_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
+    },
+    ArbGoerli:{
+      url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+      accounts: [ARBGOERLI_PRIVATE_KEY],
+      gasPrice: "auto",
+      timeout: 1000000
     }
   },
   etherscan: {
-    apiKey: "<>"
+    apiKey: {
+      arbitrumGoerli: process.env.ARBGOERLI_API_KEY || ""
+    }
   },
   paths: {
     sources: "./contracts",

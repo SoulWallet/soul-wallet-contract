@@ -315,14 +315,6 @@ contract SmartWallet is
         );
     }
 
-    /**
-     * @dev approve a token
-     */
-    function tokenApprove(IERC20 token, address spender, uint256 amount) external returns (bool){
-         _requireFromEntryPoint();
-         return token.approve(spender, amount);
-    }
-
     function getVersion() external pure returns (uint) {
         return 1;
     }

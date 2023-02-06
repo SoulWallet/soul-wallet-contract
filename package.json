@@ -33,6 +33,6 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.0.2"
+    "soul-wallet-lib": "github:davidinsuomi/soulwalletlib#main"
   }
 }

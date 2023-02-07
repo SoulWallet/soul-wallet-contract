@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "./interfaces/IPriceOracle.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "./interfaces/IERC20.sol";
 
 contract PriceOracle is IPriceOracle {
     /**
@@ -19,23 +20,15 @@ contract PriceOracle is IPriceOracle {
 
     function exchangePrice(
         address token
-    ) external view override returns (uint256) {
+    ) external view override returns (int256 price, uint8 priceDecimal, uint256 missingDecimal) {
         
-        // TODO
-        //require(supportedToken[token], "unsupported token");
-
         (
             /* uint80 roundID */,
-            int price,
+            int256 price,
             /*uint startedAt*/,
             /*uint timeStamp*/,
             /*uint80 answeredInRound*/
         ) = priceFeed.latestRoundData();
-
-        (price, token);
-        // TODO
-
-
-        return 1e18;
+        return (price, priceFeed.decimals(), uint256(18) - (IERC20(token).decimals()));
     }
 }

@@ -18,4 +18,7 @@ contract MockOracle {
 	return (92233720368547799018,161542070000, 1675661279,1675661279,92233720368547799018);
 
     }
+   function decimals() external view returns (uint8){
+        return 8;
+    }
 }

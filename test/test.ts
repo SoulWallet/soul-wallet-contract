@@ -56,6 +56,7 @@ describe("SoulWalletContract", function () {
                 expect(await ethers.provider.getCode(SingletonFactory)).to.not.equal('0x');
             }
         }
+        log("SingletonFactory:", SingletonFactory);
 
 
         // #endregion
@@ -97,24 +98,23 @@ describe("SoulWalletContract", function () {
         };
         // #endregion
 
-        // #region PriceOracle
-           const MockValidator = {
-            contract: await (await ethers.getContractFactory("Validator")).deploy()
+
+        // #region wallet factory
+        const WalletFactory = {
+            contract: await (await ethers.getContractFactory("SmartWalletFactory")).deploy(SoulWalletLogic.contract.address, SingletonFactory)
         };
+        log("SmartWalletFactory:", WalletFactory.contract.address);
         // #endregion
-
-
 
         // #region TokenPaymaster
         const TokenPaymaster = {
             contract: await (await ethers.getContractFactory("TokenPaymaster")).deploy(
                 EntryPoint.contract.address,
-                accounts[0].address
+                accounts[0].address,
+                WalletFactory.contract.address
             )
         };
         await TokenPaymaster.contract.setToken([USDC.contract.address], [PriceOracle.contract.address]);
-
-        await TokenPaymaster.contract.setValidator(MockValidator.contract.address);
 
         const _paymasterStake = '' + Math.pow(10, 17);
         await TokenPaymaster.contract.addStake(
@@ -136,14 +136,6 @@ describe("SoulWalletContract", function () {
             contract: await (await ethers.getContractFactory("GuardianMultiSigWallet")).deploy()
         }
         log("GuardianLogic:", GuardianLogic.contract.address);
-
-        // #endregion
-
-        // #region wallet factory
-        const WalletFactory = {
-            contract: await (await ethers.getContractFactory("SmartWalletFactory")).deploy(SoulWalletLogic.contract.address, SingletonFactory)
-        };
-        log("SmartWalletFactory:", WalletFactory.contract.address);
 
         // #endregion
 
@@ -392,9 +384,9 @@ describe("SoulWalletContract", function () {
         };
     }
 
-    async function activateWallet_WithUSDCPaymaster() {
+    async function activateWallet_WithUSDCPaymasterWalletFactory() {
         //describe("activate wallet", async () => {
-        const { chainId, accounts, SingletonFactory, walletOwner, SoulWalletLogic, EntryPoint, USDC, TokenPaymaster, GuardianLogic } = await loadFixture(deployFixture);
+        const { chainId, accounts, SingletonFactory, walletOwner, SoulWalletLogic, EntryPoint, USDC, TokenPaymaster, GuardianLogic , WalletFactory} = await loadFixture(deployFixture);
 
         const upgradeDelay = 10;
         const guardianDelay = 10;
@@ -446,16 +438,16 @@ describe("SoulWalletContract", function () {
         log('usdcBalance: ' + ethers.utils.formatEther(usdcBalance), 'USDC');
         // #endregion
 
-        // send 0.01 USDC to wallet
-        await USDC.contract.transfer(walletAddress, ethers.utils.parseEther('0.01'));
+        // send 1000 USDC to wallet
+        await USDC.contract.transfer(walletAddress, ethers.utils.parseEther('1000'));
         // get balance of USDC
         usdcBalance = await USDC.contract.balanceOf(walletAddress);
         log('usdcBalance: ' + ethers.utils.formatEther(usdcBalance), 'USDC');
-        expect(ethers.utils.formatEther(usdcBalance)).to.equal('0.01'); // 0.01 USDC
+        expect(ethers.utils.formatEther(usdcBalance)).to.equal('1000.0'); // 1000 USDC
         let paymasterAndData = EIP4337Lib.getPaymasterData(TokenPaymaster.contract.address, USDC.contract.address, 1);
         log("paymasterAndData: ", paymasterAndData)
-        const activateOp = EIP4337Lib.activateWalletOp(
-            SoulWalletLogic.contract.address,
+        const activateOp = EIP4337Lib.activateWalletOpUsingWalletFactory(
+            walletAddress,
             EntryPoint.contract.address,
             walletOwner.address,
             upgradeDelay,
@@ -463,13 +455,14 @@ describe("SoulWalletContract", function () {
             gurdianAddressAndInitCode.address,
             paymasterAndData,
             0,
-            SingletonFactory,
+            WalletFactory.contract.address,
             10000000000,// 100Gwei
             1000000000,// 10Gwei 
         );
         const approveCallData = await EIP4337Lib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, USDC.contract.address, TokenPaymaster.contract.address, 1e32.toLocaleString('fullwide', {useGrouping:false}));
         activateOp.callData = approveCallData.callData;
         activateOp.callGasLimit = approveCallData.callGasLimit;
+        log("init code", activateOp.initCode);
 
 
 
@@ -511,7 +504,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function updateGuardian() {
-        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster , USDC} = await activateWallet_WithUSDCPaymaster();
+        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster , USDC} = await activateWallet_WithUSDCPaymasterWalletFactory();
         let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
 
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
@@ -553,7 +546,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function recoveryWallet() {
-        const { USDC, guardians, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster } = await activateWallet_WithUSDCPaymaster();
+        const { USDC, guardians, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster } = await activateWallet_WithUSDCPaymasterWalletFactory();
         let guardianInfo = await EIP4337Lib.Guardian.getGuardian(ethers.provider, walletAddress);
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
 
@@ -603,7 +596,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function interfaceResolver() {
-        const { walletAddress } = await activateWallet_WithUSDCPaymaster();
+        const { walletAddress } = await activateWallet_WithUSDCPaymasterWalletFactory();
         const walletContract = new ethers.Contract(
             walletAddress,
             SmartWallet__factory.abi,
@@ -643,7 +636,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function coverageTest() {
-        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDC } = await activateWallet_WithUSDCPaymaster();
+        const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDC } = await activateWallet_WithUSDCPaymasterWalletFactory();
         const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
 
         // getVersion
@@ -656,7 +649,7 @@ describe("SoulWalletContract", function () {
     describe("wallet test", async function () {
         it("activate wallet(ETH)", activateWallet_withETH);
         it("activate wallet(ETH)", activateWallet_withETHUsingWalletFactory);
-        it("activate wallet(USDC)", activateWallet_WithUSDCPaymaster);
+        it("activate wallet(USDC)", activateWallet_WithUSDCPaymasterWalletFactory);
         it("update guardian", updateGuardian);
         it("recovery wallet", recoveryWallet);
         it("interface resolver", interfaceResolver);

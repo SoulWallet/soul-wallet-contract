@@ -5,32 +5,29 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ITokenPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./interfaces/IPriceOracle.sol";
-import "./interfaces/IValidator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenPaymaster is ITokenPaymaster, Ownable {
     using UserOperationLib for UserOperation;
 
-    /**
-     * @dev Emitted when Validator is set.
-     */
-    event ValidatorSet(IValidator validator);
 
-    IEntryPoint private immutable _IEntryPoint;
+    IEntryPoint public immutable _IEntryPoint;
+    address public immutable walletFactory;
 
     mapping(address => IPriceOracle) private supportedToken;
-
-    IValidator private validator;
 
     //calculated cost of the postOp
     uint256 private COST_OF_POST = 20000;
 
-    constructor(IEntryPoint _entryPoint, address _owner) {
+    constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) {
+        require(address(_entryPoint) != address(0), "invalid etnrypoint addr");
         _IEntryPoint = _entryPoint;
 
         if (_owner != address(0)) {
             _transferOwnership(_owner);
         }
+        require(address(_walletFactory) != address(0), "invalid etnrypoint addr");
+        walletFactory = _walletFactory;
     }
 
     /**
@@ -55,9 +52,10 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function exchangePrice(
         address _token
     ) external view override returns (uint256) {
-        uint256 price = supportedToken[_token].exchangePrice(_token);
-        require(price > 0, "unsupported token");
-        return price;
+        (int256 oraclePrice, uint8 priceDecimal, uint256 missingDecimal) = supportedToken[_token].exchangePrice(_token);
+        require(oraclePrice > 0, "unsupported token");
+        uint256 valueOfEth = uint256((uint256(oraclePrice) / (10 ** priceDecimal)) / (10 ** missingDecimal));
+        return uint256(valueOfEth);
     }
 
     /**
@@ -87,14 +85,6 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
                 emit TokenAdded(token);
             }
         }
-    }
-
-    /**
-     * @dev set the validator.
-     */
-    function setValidator(IValidator _validator) external onlyOwner {
-        validator = _validator;
-        emit ValidatorSet(_validator);
     }
 
     function validatePaymasterUserOp(
@@ -134,16 +124,12 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         );
         IERC20 ERC20Token = IERC20(token);
 
-        uint256 price = this.exchangePrice(token);
-        require(price >= lowestPrice, "Paymaster: price too low");
-
-        uint256 tokenRequiredPreFund = (requiredPreFund * price) / 1e18;
-
+        uint256 valueOfEth = this.exchangePrice(token);
+        require(valueOfEth >= lowestPrice, "Paymaster: price too low");
+        uint256 tokenRequiredPreFund = (requiredPreFund * valueOfEth);
         if (userOp.initCode.length != 0) {
-            require(
-                validator.validate(userOp),
-                "Paymaster: unknown initCode or callData"
-            );
+            address factory = address(bytes20(userOp.initCode[0 : 20]));
+            require(factory == walletFactory, "unknown wallet factory");
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >=
@@ -157,7 +143,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             "Paymaster: not enough balance"
         );
 
-        return (abi.encode(sender, token, userOp.gasPrice(), price), 0);
+        return (abi.encode(sender, token, userOp.gasPrice(), valueOfEth), 0);
     }
 
     /**
@@ -182,10 +168,10 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             address sender,
             address payable token,
             uint256 gasPrice,
-            uint256 price
+            uint256 valueOfEth
         ) = abi.decode(context, (address, address, uint256, uint256));
         uint256 tokenRequiredFund = ((actualGasCost +
-            (COST_OF_POST * gasPrice)) * price) / 1e18;
+            (COST_OF_POST)) * valueOfEth);
         IERC20(token).transferFrom(sender, address(this), tokenRequiredFund);
     }
 

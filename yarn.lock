@@ -874,9 +874,9 @@
   "resolved" "https://registry.npmjs.org/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-2.0.1.tgz"
   "version" "2.0.1"
 
-"@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.0":
-  "integrity" "sha512-vEF3yKuuzfMHsZecHQcnkUrqm8mnTWfJeEVFHpg+cO+le96xQA4lAJYdUan8pXZohQxv1fSReQsn4QGNuBNuCw=="
-  "resolved" "https://registry.npmjs.org/@nomicfoundation/solidity-analyzer-darwin-arm64/-/solidity-analyzer-darwin-arm64-0.1.0.tgz"
+"@nomicfoundation/solidity-analyzer-darwin-x64@0.1.0":
+  "integrity" "sha512-dlHeIg0pTL4dB1l9JDwbi/JG6dHQaU1xpDK+ugYO8eJ1kxx9Dh2isEUtA4d02cQAl22cjOHTvifAk96A+ItEHA=="
+  "resolved" "https://registry.npmjs.org/@nomicfoundation/solidity-analyzer-darwin-x64/-/solidity-analyzer-darwin-x64-0.1.0.tgz"
   "version" "0.1.0"
 
 "@nomicfoundation/solidity-analyzer@^0.1.0":
@@ -6129,8 +6129,8 @@
   "resolved" "https://registry.npmjs.org/solidity-string-utils/-/solidity-string-utils-0.0.8-0.tgz"
   "version" "0.0.8-0"
 
-"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.2":
-  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#1bee435f6166088cdd04b064ba2e3451e40802ea"
+"soul-wallet-lib@github:davidinsuomi/soulwalletlib#main":
+  "resolved" "git+ssh://git@github.com/davidinsuomi/soulwalletlib.git#b541897dc0f20252517aeb1624f43d166e66a4dd"
   "version" "0.0.1"
   dependencies:
     "axios" "^0.27.2"
@@ -6644,7 +6644,7 @@
   "resolved" "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   "version" "0.0.6"
 
-"typescript@*", "typescript@^4.7.4", "typescript@^4.9.4", "typescript@>=2.7", "typescript@>=3.7.0", "typescript@>=4.3.0", "typescript@>=4.5.0":
+"typescript@*", "typescript@^4.9.4", "typescript@>=2.7", "typescript@>=3.7.0", "typescript@>=4.3.0", "typescript@>=4.5.0":
   "integrity" "sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg=="
   "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.9.4.tgz"
   "version" "4.9.4"

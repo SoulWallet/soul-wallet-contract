@@ -128,9 +128,9 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         address sender = userOp.getSender();
 
         // paymasterAndData: [paymaster, token, lowest]
-        (, /* paymaster */ address token, uint256 lowestPrice) = abi.decode(
-            userOp.paymasterAndData,
-            (address, address, uint256)
+        (address token, uint256 lowestPrice) = abi.decode(
+            userOp.paymasterAndData[20:],
+            (address, uint256)
         );
         IERC20 ERC20Token = IERC20(token);
 

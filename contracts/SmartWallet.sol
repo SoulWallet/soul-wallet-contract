@@ -178,11 +178,12 @@ contract SmartWallet is
      */
     function execBatch(
         address[] calldata dest,
+        uint256[] calldata value,
         bytes[] calldata func
     ) external onlyOwner {
         require(dest.length == func.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
-            _call(dest[i], 0, func[i]);
+            _call(dest[i], value[i], func[i]);
         }
     }
 
@@ -195,6 +196,19 @@ contract SmartWallet is
         _requireFromEntryPoint();
         _call(dest, value, func);
     }
+
+    function execFromEntryPoint(
+        address[] calldata dest,
+        uint256[] calldata value,
+        bytes[] calldata func
+    ) external {
+        _requireFromEntryPoint();
+         require(dest.length == func.length, "wrong array lengths");
+        for (uint256 i = 0; i < dest.length; i++) {
+            _call(dest[i], value[i], func[i]);
+        }
+    }
+
 
     /// implement template method of BaseWallet
     function _validateAndUpdateNonce(

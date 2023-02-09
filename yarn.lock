@@ -874,9 +874,9 @@
   "resolved" "https://registry.npmjs.org/@nomicfoundation/hardhat-toolbox/-/hardhat-toolbox-2.0.1.tgz"
   "version" "2.0.1"
 
-"@nomicfoundation/solidity-analyzer-darwin-x64@0.1.0":
-  "integrity" "sha512-dlHeIg0pTL4dB1l9JDwbi/JG6dHQaU1xpDK+ugYO8eJ1kxx9Dh2isEUtA4d02cQAl22cjOHTvifAk96A+ItEHA=="
-  "resolved" "https://registry.npmjs.org/@nomicfoundation/solidity-analyzer-darwin-x64/-/solidity-analyzer-darwin-x64-0.1.0.tgz"
+"@nomicfoundation/solidity-analyzer-darwin-arm64@0.1.0":
+  "integrity" "sha512-vEF3yKuuzfMHsZecHQcnkUrqm8mnTWfJeEVFHpg+cO+le96xQA4lAJYdUan8pXZohQxv1fSReQsn4QGNuBNuCw=="
+  "resolved" "https://registry.npmjs.org/@nomicfoundation/solidity-analyzer-darwin-arm64/-/solidity-analyzer-darwin-arm64-0.1.0.tgz"
   "version" "0.1.0"
 
 "@nomicfoundation/solidity-analyzer@^0.1.0":
@@ -2603,10 +2603,15 @@
   "resolved" "https://registry.npmjs.org/dom-walk/-/dom-walk-0.1.2.tgz"
   "version" "0.1.2"
 
-"dotenv@^16.0.3", "dotenv@8.6.0":
+"dotenv@^16.0.3":
   "integrity" "sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ=="
   "resolved" "https://registry.npmjs.org/dotenv/-/dotenv-16.0.3.tgz"
   "version" "16.0.3"
+
+"dotenv@8.6.0":
+  "integrity" "sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g=="
+  "resolved" "https://registry.npmjs.org/dotenv/-/dotenv-8.6.0.tgz"
+  "version" "8.6.0"
 
 "duplexer3@^0.1.4":
   "integrity" "sha512-1A8za6ws41LQgv9HrE/66jyC5yuSjQ3L/KOpFtoBilsAK2iA2wuS5rTt1OCzIvtS2V7nVmedsUU+DGRcjBmOYA=="
@@ -6129,8 +6134,8 @@
   "resolved" "https://registry.npmjs.org/solidity-string-utils/-/solidity-string-utils-0.0.8-0.tgz"
   "version" "0.0.8-0"
 
-"soul-wallet-lib@github:davidinsuomi/soulwalletlib#main":
-  "resolved" "git+ssh://git@github.com/davidinsuomi/soulwalletlib.git#b541897dc0f20252517aeb1624f43d166e66a4dd"
+"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.3":
+  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#8e94fd8990ab0fedaa676502c4a4e23e053b0ac9"
   "version" "0.0.1"
   dependencies:
     "axios" "^0.27.2"

@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-10 00:52:26
+ * @LastEditTime: 2023-02-10 11:25:58
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -23,14 +23,18 @@ const ARBGOERLI_PRIVATE_KEY =
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.17',
-    settings: {
-      evmVersion: "london",
-      optimizer: {
-        enabled: true,
-        runs: 2000
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000
+          }
+        }
       }
-    },
+
+    ],
     overrides: {
       "contracts/SoulWalletProxy.sol": {
         version: '0.8.17',

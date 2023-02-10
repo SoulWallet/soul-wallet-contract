@@ -14,18 +14,18 @@ The user who has a lot of money and doesn't want their friends to know how much 
 
 ## Goal achievement
 
-- smart contract guardain do not have publicly known.
-- guardain don't know each other guadain identities.
-- only reveal guardain when recovery needed.
+- smart contract guardian do not have publicly known.
+- guardian don't know each other guadain identities.
+- only reveal guardian when recovery needed.
 
 
 ## Implementation
 
 ### Add guardian
 
-* the guardain moduel is a separate smart contract, the main functionality is a multi sig wallet which store the list of guardains for social recovery of the erc4337 wallet.
+* the guardian module is a separate smart contract, the main functionality is a multi sig wallet which stores the list of guardians for social recovery of the erc4337 wallet.
 * this contract expose ```function isValidSignature(bytes calldata _data, bytes calldata _signature) ```**(erc1271 interface)** to the public for signature verfication.
-* inside the **isValidSignature** function, it accept signature which comes from guardains and perform the verification with threshold, for example, 3/5 or 4/7 multi sig verification. [gnosis code reference](https://github.com/safe-global/safe-contracts/blob/c36bcab46578a442862d043e12a83fec41143dec/contracts/GnosisSafe.sol#L240).
+* inside the **isValidSignature** function, it accepts signature which comes from guardians and performs the verification with threshold, for example, 3/5 or 4/7 multi sig verification. [gnosis code reference](https://github.com/safe-global/safe-contracts/blob/c36bcab46578a442862d043e12a83fec41143dec/contracts/GnosisSafe.sol#L240).
 
 
 

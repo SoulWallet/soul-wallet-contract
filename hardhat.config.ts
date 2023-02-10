@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-01 13:11:38
+ * @LastEditTime: 2023-02-10 11:25:58
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -23,7 +23,18 @@ const ARBGOERLI_PRIVATE_KEY =
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.17',
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000
+          }
+        }
+      }
+
+    ],
     overrides: {
       "contracts/SoulWalletProxy.sol": {
         version: '0.8.17',
@@ -34,11 +45,14 @@ const config: HardhatUserConfig = {
           },
         },
       },
-    },
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 2000
+      "contracts/SmartWalletFactory.sol": {
+        version: '0.8.17',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1
+          },
+        }
       }
     }
   },
@@ -74,7 +88,7 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       timeout: 1000000
     },
-    ArbGoerli:{
+    ArbGoerli: {
       url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
       accounts: [ARBGOERLI_PRIVATE_KEY],
       gasPrice: "auto",

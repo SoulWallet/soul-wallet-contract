@@ -6135,7 +6135,7 @@
   "version" "0.0.8-0"
 
 "soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.3":
-  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#8e94fd8990ab0fedaa676502c4a4e23e053b0ac9"
+  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#d3936c84066914fbb2e16684561d8f8d6f80bc10"
   "version" "0.0.1"
   dependencies:
     "axios" "^0.27.2"

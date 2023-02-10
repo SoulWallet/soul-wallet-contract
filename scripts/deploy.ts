@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-10 00:57:05
+ * @LastEditTime: 2023-02-10 11:07:31
  */
 
 import { BigNumber } from "ethers";
@@ -395,8 +395,8 @@ async function main() {
       const bundlerUrl = "https://bundler-arb-goerli.soulwallets.me/rpc";
       const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
       //await bundler.init(); // run init to check bundler is alivable
-      await bundler.simulateValidation(EntryPointAddress, activateOp);
-      await bundler.simulateHandleOp(EntryPointAddress, activateOp);
+      await bundler.simulateValidation(activateOp);
+      await bundler.simulateHandleOp(activateOp);
       if (true) {
         const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
         const re = await EntryPoint.handleOps([activateOp], EOA.address);

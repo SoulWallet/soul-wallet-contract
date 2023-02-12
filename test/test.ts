@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-10 11:07:18
+ * @LastEditTime: 2023-02-12 23:19:05
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -43,7 +43,6 @@ describe("SoulWalletContract", function () {
             expect(code).to.not.equal('0x');
         }
         const soulWalletLib = new SoulWalletLib(SingletonFactory);
-
 
         // #endregion
 
@@ -213,7 +212,7 @@ describe("SoulWalletContract", function () {
         const userOpHash = activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
         {
             // test toJson and fromJson
-            const _activateOp = UserOperation.fromJSON(activateOp.toJSON(), soulWalletLib.singletonFactory);
+            const _activateOp = UserOperation.fromJSON(activateOp.toJSON());
             const _userOpHash = _activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
             expect(_userOpHash).to.equal(userOpHash);
         }
@@ -241,8 +240,16 @@ describe("SoulWalletContract", function () {
             Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
 
-
+        //const activateOp = UserOperation.fromJSON(activateOp.toJSON());
+        const validation = await bundler.simulateValidation(activateOp);
+        if (validation.status !== 0) {
+            throw new Error(`error code:${validation.status}`);
+        }
         const simulate = await bundler.simulateHandleOp(activateOp);
+        if (simulate.status !== 0) {
+            throw new Error(`error code:${simulate.status}`);
+        }
+
         log(`simulateHandleOp result:`, simulate);
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
@@ -353,7 +360,7 @@ describe("SoulWalletContract", function () {
         const userOpHash = activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
         {
             // test toJson and fromJson
-            const _activateOp = UserOperation.fromJSON(activateOp.toJSON(), soulWalletLib.singletonFactory);
+            const _activateOp = UserOperation.fromJSON(activateOp.toJSON());
             const _userOpHash = _activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
             expect(_userOpHash).to.equal(userOpHash);
         }
@@ -365,8 +372,16 @@ describe("SoulWalletContract", function () {
             walletOwner.address,
             Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
+
+        const validation = await bundler.simulateValidation(activateOp);
+        if (validation.status !== 0) {
+            throw new Error(`error code:${validation.status}`);
+        }
         const simulate = await bundler.simulateHandleOp(activateOp);
-        log(`simulateHandleOp result:`, simulate);
+        if (simulate.status !== 0) {
+            throw new Error(`error code:${simulate.status}`);
+        }
+
         await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
@@ -485,8 +500,16 @@ describe("SoulWalletContract", function () {
         const signature = soulWalletLib.Guardian.packGuardiansSignByInitCode(guardian, guardianSignArr, 0, guardianInitcode);
         transferOwnerOP.signature = signature;
 
+        const validation = await bundler.simulateValidation(transferOwnerOP);
+        if (validation.status !== 0) {
+            throw new Error(`error code:${validation.status}`);
+        }
         const simulate = await bundler.simulateHandleOp(transferOwnerOP);
-        log(`simulateHandleOp result:`, simulate);
+        if (simulate.status !== 0) {
+            throw new Error(`error code:${simulate.status}`);
+        }
+
+
         const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
         await EntryPoint.contract.handleOps([transferOwnerOP], accounts[0].address);

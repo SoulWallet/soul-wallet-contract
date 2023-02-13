@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-12 23:25:45
+ * @LastEditTime: 2023-02-13 17:02:33
  */
 
 import { BigNumber } from "ethers";
@@ -433,9 +433,9 @@ async function main() {
         EntryPointAddress,
         SoulWalletLib.Defines.AddressZero,
         ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
-        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').mul(2).toString(),
+        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').mul(3).toString(),
         EOA.address,
-        '1'
+        '2'
       );
       if (!sendETHOP) {
         throw new Error("sendETHOP is null");
@@ -494,6 +494,9 @@ async function main() {
       bundlerEvent.on('timeout', () => {
         console.log('timeout');
       });
+      while(true){
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     }
 
 

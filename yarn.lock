@@ -6117,9 +6117,9 @@
   "resolved" "https://registry.npmjs.org/solidity-string-utils/-/solidity-string-utils-0.0.8-0.tgz"
   "version" "0.0.8-0"
 
-"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.8":
-  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#f2ad9fa358450b06808f6ed866f9b105479b3587"
-  "version" "0.0.8"
+"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.0.9":
+  "resolved" "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#ff955a0399561835f77b07fe5635b59f7784975e"
+  "version" "0.0.9"
   dependencies:
     "dotenv" "8.6.0"
     "ethereumjs-util" "^7.1.5"

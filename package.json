@@ -29,7 +29,7 @@
     "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.2",
     "solidity-string-utils": "^0.0.8-0",
-    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.0.8",
+    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.0.9",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.9.4"

@@ -20,15 +20,18 @@ contract PriceOracle is IPriceOracle {
 
     function exchangePrice(
         address token
-    ) external view override returns (int256 price, uint8 priceDecimal, uint256 missingDecimal) {
-        
+    ) external view override returns (uint256 price, uint8 decimals) {
+        (token);
         (
             /* uint80 roundID */,
-            int256 price,
+            int256 _price,
             /*uint startedAt*/,
             /*uint timeStamp*/,
             /*uint80 answeredInRound*/
         ) = priceFeed.latestRoundData();
-        return (price, priceFeed.decimals(), uint256(18) - (IERC20(token).decimals()));
+        //  price -> uint256
+        require(_price >= 0, "price is negative");
+        price = uint256(_price);
+        decimals = priceFeed.decimals();
     }
 }

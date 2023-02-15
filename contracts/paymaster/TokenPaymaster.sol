@@ -140,6 +140,12 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         if (userOp.initCode.length != 0) {
             address factory = address(bytes20(userOp.initCode[0 : 20]));
             require(factory == walletFactory, "unknown wallet factory");
+            // #TODO Verify user Token approve
+
+
+
+
+            
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >=

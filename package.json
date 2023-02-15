@@ -4,7 +4,8 @@
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
-    "deploy": "npx hardhat run scripts/deploy.ts"
+    "deploy": "npx hardhat run scripts/deploy.ts",
+    "deploy:ArbGoerli": "npx hardhat run scripts/deploy.ts --network ArbGoerli"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.0",
@@ -28,7 +29,7 @@
     "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.2",
     "solidity-string-utils": "^0.0.8-0",
-    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.0.3",
+    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.1.0-alpha.1",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.9.4"

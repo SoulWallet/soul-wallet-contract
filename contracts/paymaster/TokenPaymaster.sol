@@ -5,7 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ITokenPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./interfaces/IPriceOracle.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/IERC20.sol";
+import "hardhat/console.sol";
 
 contract TokenPaymaster is ITokenPaymaster, Ownable {
     using UserOperationLib for UserOperation;
@@ -51,11 +52,9 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
      */
     function exchangePrice(
         address _token
-    ) external view override returns (uint256) {
-        (int256 oraclePrice, uint8 priceDecimal, uint256 missingDecimal) = supportedToken[_token].exchangePrice(_token);
-        require(oraclePrice > 0, "unsupported token");
-        uint256 valueOfEth = uint256((uint256(oraclePrice) / (10 ** priceDecimal)) / (10 ** missingDecimal));
-        return uint256(valueOfEth);
+    ) external view override returns (uint256 price,uint8 decimals) {
+        (price, decimals) = supportedToken[_token].exchangePrice(_token);
+        price = price * 99 / 100; // 1% conver chainlink `Deviation threshold`
     }
 
     /**
@@ -108,7 +107,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function _validatePaymasterUserOp(
         UserOperation calldata userOp,
         bytes32 /*userOpHash*/,
-        uint256 requiredPreFund
+        uint256 requiredPreFund   // 50U  , 20U   , 50U 
     ) private view returns (bytes memory context, uint256 deadline) {
         require(
             userOp.verificationGasLimit > 45000,
@@ -117,16 +116,27 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
 
         address sender = userOp.getSender();
 
-        // paymasterAndData: [paymaster, token, lowest]
-        (address token, uint256 lowestPrice) = abi.decode(
+        // paymasterAndData: [paymaster, token, maxCost]
+        (address token, uint256 maxCost) = abi.decode(
             userOp.paymasterAndData[20:],
             (address, uint256)
         );
         IERC20 ERC20Token = IERC20(token);
 
-        uint256 valueOfEth = this.exchangePrice(token);
-        require(valueOfEth >= lowestPrice, "Paymaster: price too low");
-        uint256 tokenRequiredPreFund = (requiredPreFund * valueOfEth);
+        (uint256 _price,uint8 _decimals) = this.exchangePrice(token);
+        uint8 tokenDecimals = IERC20(token).decimals();
+
+        // #risk: overflow
+        // exchangeRate = ( _price * 10^tokenDecimals ) / 10^_decimals / 10^18 
+        uint256 exchangeRate = ( _price * 10**tokenDecimals ) / 10**_decimals; // ./10^18
+        // tokenRequiredPreFund = requiredPreFund * exchangeRate / 10^18
+
+        uint256 costOfPost = userOp.gasPrice() * COST_OF_POST;
+
+        uint256 tokenRequiredPreFund = ((requiredPreFund + costOfPost) * exchangeRate) / 10**18;
+        
+        require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
+
         if (userOp.initCode.length != 0) {
             address factory = address(bytes20(userOp.initCode[0 : 20]));
             require(factory == walletFactory, "unknown wallet factory");
@@ -143,7 +153,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             "Paymaster: not enough balance"
         );
 
-        return (abi.encode(sender, token, userOp.gasPrice(), valueOfEth), 0);
+        return (abi.encode(sender, token, costOfPost, exchangeRate), 0);
     }
 
     /**
@@ -167,11 +177,10 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         (
             address sender,
             address payable token,
-            uint256 gasPrice,
-            uint256 valueOfEth
+            uint256 costOfPost,
+            uint256 exchangeRate
         ) = abi.decode(context, (address, address, uint256, uint256));
-        uint256 tokenRequiredFund = ((actualGasCost +
-            (COST_OF_POST)) * valueOfEth);
+        uint256 tokenRequiredFund = (actualGasCost + costOfPost) * exchangeRate / 10**18;
         IERC20(token).transferFrom(sender, address(this), tokenRequiredFund);
     }
 

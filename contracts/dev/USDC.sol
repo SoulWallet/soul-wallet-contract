@@ -11,6 +11,10 @@ contract USDCoin is ERC20, Ownable, ERC20Permit {
         _mint(owner(), type(uint104).max);
     }
 
+    function decimals() public view override returns (uint8) {
+        return 6;
+    }
+
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
@@ -24,6 +28,7 @@ contract USDCoin is ERC20, Ownable, ERC20Permit {
         _approve(owner, spender, amount);
         return true;
     }
+
     function transferFrom(
         address from,
         address to,

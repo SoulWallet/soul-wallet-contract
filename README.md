@@ -8,9 +8,9 @@
 **Test**
 
 ```shell
-npx hardhat test
+npm run test
 ```
 
 ```shell
-npx hardhat --network goerli  run scripts/deploy.ts
+npm run deploy:ArbGoerli
 ```

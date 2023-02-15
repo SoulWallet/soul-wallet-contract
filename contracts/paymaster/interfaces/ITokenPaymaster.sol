@@ -31,7 +31,7 @@ interface ITokenPaymaster is IPaymaster, IERC165 {
     /**
      * @dev Returns the exchange price of the token in wei.
      */
-    function exchangePrice(address _token) external view returns (uint256);
+    function exchangePrice(address _token) external view returns (uint256,uint8);
 
 
 }

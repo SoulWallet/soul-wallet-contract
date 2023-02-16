@@ -203,7 +203,7 @@ contract SmartWallet is
         bytes[] calldata func
     ) external {
         _requireFromEntryPoint();
-         require(dest.length == func.length, "wrong array lengths");
+        require(dest.length == func.length && dest.length == value.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], value[i], func[i]);
         }

@@ -23,3 +23,4 @@ artifacts
 .DS_Store
 build
 src/types
+remix-compiler.config.js

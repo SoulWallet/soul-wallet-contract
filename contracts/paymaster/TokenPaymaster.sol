@@ -11,7 +11,6 @@ import "hardhat/console.sol";
 contract TokenPaymaster is ITokenPaymaster, Ownable {
     using UserOperationLib for UserOperation;
 
-
     IEntryPoint public immutable _IEntryPoint;
     address public immutable walletFactory;
 
@@ -44,6 +43,10 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function isSupportedToken(
         address _token
     ) external view override returns (bool) {
+        return _isSupportedToken(_token);
+    }
+
+    function _isSupportedToken(address _token) private view returns (bool) {
         return address(supportedToken[_token]) != address(0);
     }
 
@@ -52,9 +55,9 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
      */
     function exchangePrice(
         address _token
-    ) external view override returns (uint256 price,uint8 decimals) {
+    ) external view override returns (uint256 price, uint8 decimals) {
         (price, decimals) = supportedToken[_token].exchangePrice(_token);
-        price = price * 99 / 100; // 1% conver chainlink `Deviation threshold`
+        price = (price * 99) / 100; // 1% conver chainlink `Deviation threshold`
     }
 
     /**
@@ -104,10 +107,56 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         _postOp(mode, context, actualGasCost);
     }
 
+    function _decodeApprove(
+        bytes memory func
+    ) private pure returns (address spender, uint256 value) {
+        // 0x095ea7b3 approve(address,uint256)
+        // 0x095ea7b3000000000000000000000000       address            uint256
+        // _______________16_________________|_________20______|__________32__
+
+        require(bytes4(func) == bytes4(0x095ea7b3), "invalid approve func");
+        assembly {
+            spender := mload(add(func, 36))
+            value := mload(add(func, 68))
+        }
+    }
+
+    function _validateConstructor(
+        UserOperation calldata userOp,
+        address token,
+        uint256 tokenRequiredPreFund 
+    ) internal view {
+        address factory = address(bytes20(userOp.initCode));
+        require(factory == walletFactory, "unknown wallet factory");
+        require(
+            bytes4(userOp.callData) == bytes4(0x2763604f /* 0x2763604f execFromEntryPoint(address[],uint256[],bytes[]) */ ),
+            "invalid callData"
+        );
+        (
+            address[] memory dest,
+            uint256[] memory value,
+            bytes[] memory func
+        ) = abi.decode(userOp.callData[4:], (address[], uint256[], bytes[]));
+        require(dest.length == value.length && dest.length == func.length, "invalid callData");
+
+        for (uint256 i = 0; i < dest.length; i++) {
+            address destAddr = dest[i];
+            require(_isSupportedToken(destAddr), "unsupported token");
+            if (destAddr == token) {
+                (address spender, uint256 amount) = _decodeApprove(func[i]);
+                require(spender == address(this), "invalid spender");
+                require(
+                    amount >= tokenRequiredPreFund,
+                    "not enough approve"
+                );
+            }
+        }
+    }
+
     function _validatePaymasterUserOp(
         UserOperation calldata userOp,
         bytes32 /*userOpHash*/,
-        uint256 requiredPreFund   // 50U  , 20U   , 50U 
+        uint256 requiredPreFund
     ) private view returns (bytes memory context, uint256 deadline) {
         require(
             userOp.verificationGasLimit > 45000,
@@ -123,29 +172,23 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         );
         IERC20 ERC20Token = IERC20(token);
 
-        (uint256 _price,uint8 _decimals) = this.exchangePrice(token);
+        (uint256 _price, uint8 _decimals) = this.exchangePrice(token);
         uint8 tokenDecimals = IERC20(token).decimals();
 
         // #risk: overflow
-        // exchangeRate = ( _price * 10^tokenDecimals ) / 10^_decimals / 10^18 
-        uint256 exchangeRate = ( _price * 10**tokenDecimals ) / 10**_decimals; // ./10^18
+        // exchangeRate = ( _price * 10^tokenDecimals ) / 10^_decimals / 10^18
+        uint256 exchangeRate = (_price * 10 ** tokenDecimals) / 10 ** _decimals; // ./10^18
         // tokenRequiredPreFund = requiredPreFund * exchangeRate / 10^18
 
         uint256 costOfPost = userOp.gasPrice() * COST_OF_POST;
 
-        uint256 tokenRequiredPreFund = ((requiredPreFund + costOfPost) * exchangeRate) / 10**18;
-        
+        uint256 tokenRequiredPreFund = ((requiredPreFund + costOfPost) *
+            exchangeRate) / 10 ** 18;
+
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
 
         if (userOp.initCode.length != 0) {
-            address factory = address(bytes20(userOp.initCode[0 : 20]));
-            require(factory == walletFactory, "unknown wallet factory");
-            // #TODO Verify user Token approve
-
-
-
-
-            
+            _validateConstructor(userOp,token,tokenRequiredPreFund);
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >=
@@ -186,7 +229,8 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             uint256 costOfPost,
             uint256 exchangeRate
         ) = abi.decode(context, (address, address, uint256, uint256));
-        uint256 tokenRequiredFund = (actualGasCost + costOfPost) * exchangeRate / 10**18;
+        uint256 tokenRequiredFund = ((actualGasCost + costOfPost) *
+            exchangeRate) / 10 ** 18;
         IERC20(token).transferFrom(sender, address(this), tokenRequiredFund);
     }
 

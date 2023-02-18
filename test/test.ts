@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-14 18:18:18
+ * @LastEditTime: 2023-02-16 17:01:04
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -112,7 +112,9 @@ describe("SoulWalletContract", function () {
                 WalletFactory.contract.address
             )
         };
-        await TokenPaymaster.contract.setToken([USDC.contract.address], [PriceOracle.contract.address]);
+        await TokenPaymaster.contract.setToken(
+            [USDC.contract.address,DAI.contract.address],
+            [PriceOracle.contract.address,PriceOracle.contract.address]);
 
         const _paymasterStake = '' + Math.pow(10, 17);
         await TokenPaymaster.contract.addStake(

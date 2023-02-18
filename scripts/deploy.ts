@@ -4,14 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-14 19:30:51
+ * @LastEditTime: 2023-02-15 22:27:55
  */
 
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
 import { IApproveToken, IUserOpReceipt, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
-import { USDCoin__factory, TokenPaymaster__factory, Create2Factory__factory, EntryPoint__factory, ERC20__factory } from "../src/types/index";
+import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, EntryPoint__factory, ERC20__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
 
 function isLocalTestnet() {
@@ -74,7 +74,7 @@ async function main() {
 
 
   if (isLocalTestnet()) {
-    let create2 = await new Create2Factory__factory(EOA).deploy();
+    let create2 = await new SingletonFactory__factory(EOA).deploy();
     soulWalletLib = new SoulWalletLib(create2.address);
     let usdc = await new USDCoin__factory(EOA).deploy();
     USDCContractAddress = usdc.address;
@@ -124,7 +124,7 @@ async function main() {
       return ethers.BigNumber.from(Math.pow(10, 7) + '');
       //return estimatedGasLimit.mul(10)  // 10x gas
     }
-    const create2FactoryContract = Create2Factory__factory.connect(soulWalletLib.singletonFactory, EOA);
+    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(EntryPointFactoryBytecode, salt);
     const tx = await create2FactoryContract.deploy(EntryPointFactoryBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
     console.log("EntryPoint tx:", tx.hash);
@@ -164,7 +164,7 @@ async function main() {
       return ethers.BigNumber.from(Math.pow(10, 7) + '');
       //return estimatedGasLimit.mul(10)  // 10x gas
     }
-    const create2FactoryContract = Create2Factory__factory.connect(soulWalletLib.singletonFactory, EOA);
+    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(WalletLogicBytecode, salt);
     const tx = await create2FactoryContract.deploy(WalletLogicBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
     console.log("WalletLogic tx:", tx.hash);
@@ -258,7 +258,7 @@ async function main() {
       return ethers.BigNumber.from(Math.pow(10, 7) + '');
       //return estimatedGasLimit.mul(10)  // 10x gas
     }
-    const create2FactoryContract = Create2Factory__factory.connect(soulWalletLib.singletonFactory, EOA);
+    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(PriceOracleBytecode, salt);
     const tx = await create2FactoryContract.deploy(PriceOracleBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
     console.log("EntryPoint tx:", tx.hash);
@@ -305,7 +305,7 @@ async function main() {
       return ethers.BigNumber.from(Math.pow(10, 7) + '');
       //return estimatedGasLimit.mul(10)  // 10x gas
     }
-    const create2FactoryContract = Create2Factory__factory.connect(soulWalletLib.singletonFactory, EOA);
+    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(TokenPaymasterBytecode, salt);
     const tx = await create2FactoryContract.deploy(TokenPaymasterBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
     console.log("EntryPoint tx:", tx.hash);
@@ -366,7 +366,7 @@ async function main() {
       return ethers.BigNumber.from(Math.pow(10, 7) + '');
       //return estimatedGasLimit.mul(10)  // 10x gas
     }
-    const create2FactoryContract = Create2Factory__factory.connect(soulWalletLib.singletonFactory, EOA);
+    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(GuardianLogicBytecode, salt);
     const tx = await create2FactoryContract.deploy(GuardianLogicBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
     console.log("GuardianLogic tx:", tx.hash);

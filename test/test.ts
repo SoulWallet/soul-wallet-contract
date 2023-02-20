@@ -11,7 +11,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { IApproveToken, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
-import { SmartWallet__factory } from "../src/types/index";
+import { SoulWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
 
 const log_on = false;
@@ -48,7 +48,7 @@ describe("SoulWalletContract", function () {
 
         // #region SoulWalletLogic
         const SoulWalletLogic = {
-            contract: await (await ethers.getContractFactory("SmartWallet")).deploy()
+            contract: await (await ethers.getContractFactory("SoulWallet")).deploy()
         };
         log("SoulWalletLogic:", SoulWalletLogic.contract.address);
         // get SoulWalletLogic contract code
@@ -93,9 +93,9 @@ describe("SoulWalletContract", function () {
         const _walletFactoryAddress = await soulWalletLib.Utils.deployFactory.deploy(SoulWalletLogic.contract.address, ethers.provider, accounts[0]);
 
         const WalletFactory = {
-            contract: await ethers.getContractAt("SmartWalletFactory", _walletFactoryAddress)
+            contract: await ethers.getContractAt("SoulWalletFactory", _walletFactoryAddress)
         };
-        log("SmartWalletFactory:", WalletFactory.contract.address);
+        log("SoulWalletFactory:", WalletFactory.contract.address);
 
 
         // #endregion
@@ -515,7 +515,7 @@ describe("SoulWalletContract", function () {
         }
 
 
-        const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
+        const walletContract = new ethers.Contract(walletAddress, SoulWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
         await EntryPoint.contract.handleOps([transferOwnerOP], accounts[0].address);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(false);
@@ -527,13 +527,16 @@ describe("SoulWalletContract", function () {
         const { walletAddress } = await activateWallet_WithUSDCPaymaster();
         const walletContract = new ethers.Contract(
             walletAddress,
-            SmartWallet__factory.abi,
+            SoulWallet__factory.abi,
             ethers.provider
         );
 
         const SUPPORT_INTERFACE_ID = "0x01ffc9a7";
         const ERC721_INTERFACE_ID = "0x150b7a02";
         const ERC1155_INTERFACE_ID = "0x4e2312e0";
+        const AccessControl_Enumerable_INTERFACE_ID = "0x5a05180f";
+        const NO_SUPPORT_ID = "0xffffffff";
+        const RANDOM_NO_SUPPORT_ID = "0x1fffffff";
 
         let support = await walletContract.supportsInterface(
             SUPPORT_INTERFACE_ID
@@ -543,6 +546,12 @@ describe("SoulWalletContract", function () {
         expect(support).to.equal(true);
         support = await walletContract.supportsInterface(ERC1155_INTERFACE_ID);
         expect(support).to.equal(true);
+        support = await walletContract.supportsInterface(AccessControl_Enumerable_INTERFACE_ID);
+        expect(support).to.equal(true);
+        support = await walletContract.supportsInterface(NO_SUPPORT_ID);
+        expect(support).to.equal(false);
+        support = await walletContract.supportsInterface(RANDOM_NO_SUPPORT_ID);
+        expect(support).to.equal(false);
         await expect(
             await walletContract.callStatic.onERC1155Received(
                 SoulWalletLib.Defines.AddressZero,
@@ -565,7 +574,7 @@ describe("SoulWalletContract", function () {
 
     async function coverageTest() {
         const { walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDC } = await activateWallet_WithUSDCPaymaster();
-        const walletContract = new ethers.Contract(walletAddress, SmartWallet__factory.abi, ethers.provider);
+        const walletContract = new ethers.Contract(walletAddress, SoulWallet__factory.abi, ethers.provider);
 
         // getVersion
         const version = await walletContract.getVersion();

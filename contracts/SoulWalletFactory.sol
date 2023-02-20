@@ -6,13 +6,13 @@ pragma solidity ^0.8.17;
 /* solhint-disable reason-string */
 
 import "./SoulWalletProxy.sol";
-import "./SmartWallet.sol";
+import "./SoulWallet.sol";
 import "./interfaces/ICreate2Deployer.sol";
 
 /*
     a factory contract for create soul wallet
 */
-contract SmartWalletFactory {
+contract SoulWalletFactory {
     address public immutable walletImpl;
     address public immutable singletonFactory;
     string public constant VERSION = "0.0.1";
@@ -45,7 +45,7 @@ contract SmartWalletFactory {
             abi.encode(
                 walletImpl,
                 abi.encodeCall(
-                    SmartWallet.initialize,
+                    SoulWallet.initialize,
                     (
                         IEntryPoint(_entryPoint),
                         _owner,
@@ -80,7 +80,7 @@ contract SmartWalletFactory {
             abi.encode(
                 walletImpl,
                 abi.encodeCall(
-                    SmartWallet.initialize,
+                    SoulWallet.initialize,
                     (
                         IEntryPoint(_entryPoint),
                         _owner,

@@ -24,7 +24,7 @@ import "./utils/upgradeable/Initializable.sol";
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SmartWallet is
+contract SoulWallet is
     BaseAccount,
     Initializable,
     GuardianControl,
@@ -339,12 +339,12 @@ contract SmartWallet is
     ) external view returns (bytes4) {
         require(
             isOwner(hash.recover(signature)),
-            "SmartWallet: Invalid signature"
+            "SoulWallet: Invalid signature"
         );
         return IERC1271.isValidSignature.selector;
     }
 
     function supportsInterface(bytes4 _interfaceID) public view override(DefaultCallbackHandler, AccessControlEnumerable) returns (bool) {
-         return super.supportsInterface(_interfaceID);
+        return super.supportsInterface(_interfaceID);
     }
 }

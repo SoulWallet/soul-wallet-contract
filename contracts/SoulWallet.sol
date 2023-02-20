@@ -17,6 +17,9 @@ import "./ACL.sol";
 import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
+import "./diamond/DiamondCutFacet.sol";
+import "./diamond/DiamondFallback.sol";
+import "./diamond/DiamondLoupeFacet.sol";
 
 /**
  * minimal wallet.
@@ -30,7 +33,10 @@ contract SoulWallet is
     GuardianControl,
     LogicUpgradeControl,
     ACL,
-    DefaultCallbackHandler
+    DefaultCallbackHandler,
+    DiamondCutFacet,
+    DiamondFallback,
+    DiamondLoupeFacet
 {
     using AccountStorage for AccountStorage.Layout;
 
@@ -282,6 +288,14 @@ contract SoulWallet is
         require(newOwner != address(0), "Owner cannot be zero");
         _revokeRole(DEFAULT_ADMIN_ROLE, getRoleMember(DEFAULT_ADMIN_ROLE, 0));
         _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
+    }
+
+    function diamondCut(
+        FacetCut[] memory facetCuts,
+        address target,
+        bytes memory data
+    )  public override onlyOwnerOrFromEntryPoint{
+        _diamondCut(facetCuts, target, data);
     }
 
     /**

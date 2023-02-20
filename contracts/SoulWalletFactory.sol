@@ -67,6 +67,13 @@ contract SoulWalletFactory {
         return proxy;
     }
 
+    function proxyCode() external pure returns (bytes memory) {
+        return _proxyCode();
+    }
+    function _proxyCode() private pure returns (bytes memory) {
+        return type(SoulWalletProxy).creationCode;
+    }
+
     function getWalletAddress(
         address _entryPoint,
         address _owner,
@@ -76,7 +83,7 @@ contract SoulWalletFactory {
         bytes32 _salt
     ) public view returns (address) {
         bytes memory deploymentData = abi.encodePacked(
-            type(SoulWalletProxy).creationCode,
+            _proxyCode(),
             abi.encode(
                 walletImpl,
                 abi.encodeCall(

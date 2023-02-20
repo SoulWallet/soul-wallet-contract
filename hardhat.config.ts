@@ -4,12 +4,14 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-10 11:25:58
+ * @LastEditTime: 2023-02-21 00:35:46
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
-import { HardhatUserConfig } from "hardhat/config";
+
+import 'solidity-coverage';
 import "@nomicfoundation/hardhat-toolbox";
+import { HardhatUserConfig } from "hardhat/config";
 const GOERLI_PRIVATE_KEY =
   process.env.GOERLI_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
@@ -29,32 +31,12 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 2000
-          }
+            runs: 1000000
+          },
+          viaIR: true
         }
       }
-
-    ],
-    overrides: {
-      "contracts/SoulWalletProxy.sol": {
-        version: '0.8.17',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1
-          },
-        },
-      },
-      "contracts/SoulWalletFactory.sol": {
-        version: '0.8.17',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1
-          },
-        }
-      }
-    }
+    ]
   },
   typechain: {
     outDir: 'src/types',
@@ -77,7 +59,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     goerli: {
-      url: process.env.ETH_GOERLI_PROVIDER || "",
+      url: process.env.ETH_GOERLI_PROVIDER,
       accounts: [GOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
@@ -89,7 +71,7 @@ const config: HardhatUserConfig = {
       timeout: 1000000
     },
     ArbGoerli: {
-      url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+      url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://goerli-rollup.arbitrum.io/rpc",
       accounts: [ARBGOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
@@ -97,7 +79,8 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      arbitrumGoerli: process.env.ARBGOERLI_API_KEY || ""
+      arbitrumGoerli: process.env.ARBGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      goerli: process.env.GOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
     }
   },
   paths: {
@@ -106,6 +89,11 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     artifacts: "./artifacts"
   },
+  gasReporter: {
+    currency: 'USD',
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY || "",
+    enabled: true
+  }
 };
 
 export default config;

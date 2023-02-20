@@ -24,3 +24,4 @@ artifacts
 build
 src/types
 remix-compiler.config.js
+compiler_config.json

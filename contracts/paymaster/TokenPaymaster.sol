@@ -291,6 +291,23 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         require(msg.sender == address(_IEntryPoint));
     }
 
+    function _withdrawToken(address token, address to, uint256 amount) private {
+        IERC20(token).transfer(to, amount);
+    }
+
+    // withdraw token from this contract
+    function withdrawToken(address token, address to, uint256 amount) external onlyOwner {
+        _withdrawToken(token, to, amount);
+    }
+
+    // withdraw token from this contract
+    function withdrawToken(address[] calldata token, address to, uint256[] calldata amount) external onlyOwner {
+        require(token.length == amount.length, "length mismatch");
+        for (uint256 i = 0; i < token.length; i++) {
+            _withdrawToken(token[i], to, amount[i]);
+        }
+    }
+
     /**
      * @dev See {IERC165-supportsInterface}.
      */

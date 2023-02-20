@@ -13,4 +13,6 @@ npm run test
 
 ```shell
 npm run deploy:ArbGoerli
+npm run deploy:goerli
+
 ```

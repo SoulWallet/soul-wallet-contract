@@ -152,7 +152,7 @@ async function main() {
 
   // #region WalletLogic 
 
-  const WalletLogicFactory = await ethers.getContractFactory("SmartWallet");
+  const WalletLogicFactory = await ethers.getContractFactory("SoulWallet");
   const WalletLogicBytecode = WalletLogicFactory.bytecode;
   const WalletLogicInitCodeHash = keccak256(WalletLogicBytecode);
   const WalletLogicAddress = getCreate2Address(soulWalletLib.singletonFactory, salt, WalletLogicInitCodeHash);
@@ -211,7 +211,7 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("walletFactory deployed, verifying...");
       try {
-        // verify contract/SmartWalletFactory.sol:SmartWalletFactory at walletFactoryAddress
+        // verify contract/SoulWalletFactory.sol:SoulWalletFactory at walletFactoryAddress
         {
           // npx hardhat verify --network ArbGoerli 0xb8EE53678Ffc1fcc1Bec87dEF082dB4Afc72c92B 0xaD1021AD721cb98E682F51489b1aD84395F3e495 0xce0042B868300000d44A59004Da54A005ffdcf9f 
           console.log("walletFactoryAddress:", walletFactoryAddress);
@@ -234,7 +234,7 @@ async function main() {
   }
 
   const WalletFactory = {
-    contract: await ethers.getContractAt("SmartWalletFactory", walletFactoryAddress)
+    contract: await ethers.getContractAt("SoulWalletFactory", walletFactoryAddress)
   };
 
 

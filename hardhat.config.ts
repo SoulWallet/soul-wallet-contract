@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
           },
         },
       },
-      "contracts/SmartWalletFactory.sol": {
+      "contracts/SoulWalletFactory.sol": {
         version: '0.8.17',
         settings: {
           optimizer: {

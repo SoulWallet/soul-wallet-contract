@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-21 00:35:46
+ * @LastEditTime: 2023-02-21 17:43:13
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -31,12 +31,24 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
+            runs: 50000
+          },
+          viaIR: true
+        }
+      }
+    ],
+    overrides: {
+      "contracts/EntryPoint.sol": {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
             runs: 1000000
           },
           viaIR: true
         }
       }
-    ]
+    }
   },
   typechain: {
     outDir: 'src/types',

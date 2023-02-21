@@ -11,7 +11,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { IApproveToken, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
-import { SoulWallet__factory, HelloWorldFacet__factory } from "../src/types/index";
+import { SoulWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
 
 const log_on = false;
@@ -28,7 +28,7 @@ describe("SoulWalletContract", function () {
         const accounts = await ethers.getSigners();
 
         // new account
-        const walletOwner = await ethers.Wallet.createRandom().connect(ethers.provider);
+        const walletOwner = await ethers.Wallet.createRandom();
 
         let chainId = await (await ethers.provider.getNetwork()).chainId;
         log("chainId:", chainId);
@@ -582,47 +582,6 @@ describe("SoulWalletContract", function () {
 
     }
 
-    async function diamondFacetTest() {
-        const { walletAddress, walletOwner, accounts } =
-          await activateWallet_withETH();
-        await accounts[0].sendTransaction({
-          to: walletOwner.address,
-          value: ethers.utils.parseEther("10"),
-        });
-        const walletContract = new ethers.Contract(
-          walletAddress,
-          SoulWallet__factory.abi,
-          walletOwner
-        );
-        const helloFacetContract = new ethers.Contract(
-          walletAddress,
-          HelloWorldFacet__factory.abi,
-          walletOwner
-        );
-        const HelloworldFacet = {
-          contract: await (
-            await ethers.getContractFactory("HelloWorldFacet")
-          ).deploy(),
-        };
-        log("HelloworldFacet:", HelloworldFacet.contract.address);
-        const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
-        await walletContract.diamondCut(
-          [
-            {
-              target: HelloworldFacet.contract.address,
-              action: FacetCutAction.Add,
-              selectors: [
-                HelloworldFacet.contract.interface.getSighash("sayHello()"),
-              ],
-            },
-          ],
-          ethers.constants.AddressZero,
-          "0x"
-        );
-        let result = await helloFacetContract.callStatic.sayHello();
-        expect(result).to.equal("hello world");
-      }
-
 
     describe("wallet test", async function () {
         it("activate wallet(ETH)", activateWallet_withETH);
@@ -631,7 +590,6 @@ describe("SoulWalletContract", function () {
         it("recovery wallet", recoveryWallet);
         it("interface resolver", interfaceResolver);
         it("other coverage test", coverageTest);
-        it("diamond test", diamondFacetTest);
     });
 
 

@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-16 17:01:04
+ * @LastEditTime: 2023-02-20 22:32:20
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -113,8 +113,8 @@ describe("SoulWalletContract", function () {
             )
         };
         await TokenPaymaster.contract.setToken(
-            [USDC.contract.address,DAI.contract.address],
-            [PriceOracle.contract.address,PriceOracle.contract.address]);
+            [USDC.contract.address, DAI.contract.address],
+            [PriceOracle.contract.address, PriceOracle.contract.address]);
 
         const _paymasterStake = '' + Math.pow(10, 17);
         await TokenPaymaster.contract.addStake(
@@ -355,9 +355,9 @@ describe("SoulWalletContract", function () {
         log('exchangePrice: ' + ethers.utils.formatUnits(exchangePrice.price, exchangePrice.decimals), 'USDC/ETH');
         // get required USDC : (requiredPrefund/10^18) * (exchangePrice.price/10^exchangePrice.decimals)
         const requiredUSDC = requiredPrefund.mul(exchangePrice.price)
-                                            .mul(BigNumber.from(10).pow(tokenDecimals))
-                                            .div(BigNumber.from(10).pow(exchangePrice.decimals))
-                                            .div(BigNumber.from(10).pow(18));
+            .mul(BigNumber.from(10).pow(tokenDecimals))
+            .div(BigNumber.from(10).pow(exchangePrice.decimals))
+            .div(BigNumber.from(10).pow(18));
         log('requiredUSDC: ' + ethers.utils.formatUnits(requiredUSDC, tokenDecimals), 'USDC');
         const maxUSDC = requiredUSDC.mul(110).div(100); // 10% more
         let paymasterAndData = soulWalletLib.getPaymasterData(TokenPaymaster.contract.address, USDC.contract.address, maxUSDC);
@@ -369,7 +369,7 @@ describe("SoulWalletContract", function () {
             const usdcBalance = await USDC.contract.balanceOf(walletAddress);
             log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USDC');
         }
-        
+
         const approveData: IApproveToken[] = [
             {
                 token: USDC.contract.address,
@@ -439,7 +439,7 @@ describe("SoulWalletContract", function () {
         const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardians, Math.round(guardians.length / 2), guardianSalt);
         log('new guardian address ==> ' + gurdianAddressAndInitCode.address);
         const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
-      
+
         const setGuardianOP = await soulWalletLib.Guardian.setGuardian(
             ethers.provider,
             walletAddress,

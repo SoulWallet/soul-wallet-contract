@@ -1,4 +1,5 @@
-pragma solidity ^0.8.12;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 import "./GuardianMultiSigProxy.sol";
 import "../interfaces/IGuardianMultiSigWallet.sol";
 

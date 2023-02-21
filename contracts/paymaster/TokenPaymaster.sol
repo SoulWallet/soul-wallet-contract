@@ -111,13 +111,13 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         bytes memory func
     ) private pure returns (address spender, uint256 value) {
         // 0x095ea7b3 approve(address,uint256)
-        // 0x095ea7b3000000000000000000000000       address            uint256
-        // _______________16_________________|_________20______|__________32__
+        // 0x095ea7b3   address  uint256
+        // ____4_____|____32___|___32__
 
         require(bytes4(func) == bytes4(0x095ea7b3), "invalid approve func");
         assembly {
-            spender := mload(add(func, 36))
-            value := mload(add(func, 68))
+            spender := mload(add(func, 36)) // 32 + 4
+            value := mload(add(func, 68)) // 32 + 4 +32
         }
     }
 
@@ -289,6 +289,23 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     /// validate the call is made from a valid entrypoint
     function _requireFromEntryPoint() private view {
         require(msg.sender == address(_IEntryPoint));
+    }
+
+    function _withdrawToken(address token, address to, uint256 amount) private {
+        IERC20(token).transfer(to, amount);
+    }
+
+    // withdraw token from this contract
+    function withdrawToken(address token, address to, uint256 amount) external onlyOwner {
+        _withdrawToken(token, to, amount);
+    }
+
+    // withdraw token from this contract
+    function withdrawToken(address[] calldata token, address to, uint256[] calldata amount) external onlyOwner {
+        require(token.length == amount.length, "length mismatch");
+        for (uint256 i = 0; i < token.length; i++) {
+            _withdrawToken(token[i], to, amount[i]);
+        }
     }
 
     /**

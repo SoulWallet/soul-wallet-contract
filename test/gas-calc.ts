@@ -179,7 +179,12 @@ describe("SoulWalletContract", function () {
             EIP1559Gas.maxFeePerGas,
             EIP1559Gas.maxPriorityFeePerGas,
             undefined,
-            WalletFactory.contract.address
+            WalletFactory.contract.address,
+            SingletonFactory,
+            {
+                contractInterface: SoulWalletProxy__factory.abi,
+                bytecode: proxyCode
+            }
         );
         const userOpHash = activateOp.getUserOpHash(EntryPoint.contract.address, chainId);
         const requiredPrefund = activateOp.requiredPrefund();
@@ -219,33 +224,86 @@ describe("SoulWalletContract", function () {
         expect(code).to.not.equal('0x');
 
 
-        //#region
+        // send eth
+        const sendETHOP = await soulWalletLib.Tokens.ETH.transfer(
+            ethers.provider,
+            walletAddress,
+            0,
+            EntryPoint.contract.address,
+            SoulWalletLib.Defines.AddressZero,
+            EIP1559Gas.maxFeePerGas,
+            EIP1559Gas.maxPriorityFeePerGas,
+            accounts[3].address,
+            '0xf'
+        );
+        if (!sendETHOP) {
+            throw new Error("sendETHOP is null");
+        }
+
+        const sendETHOPHash = sendETHOP.getUserOpHash(EntryPoint.contract.address, chainId);
+
+        sendETHOP.signWithSignature(
+            walletOwner.address,
+            Utils.signMessage(sendETHOPHash, walletOwner.privateKey)
+        );
+
+        const sendETHOPValidation = await bundler.simulateValidation(sendETHOP);
+        if (sendETHOPValidation.status !== 0) {
+            throw new Error(`error code:${sendETHOPValidation.status}`);
+        }
+        // get balance of accounts[0].address
+        const sendETHOP_balance_before = await ethers.provider.getBalance(accounts[0].address);
+        await EntryPoint.contract.handleOps([sendETHOP], accounts[1].address, {
+            gasLimit: gasCost.mul(2),
+            gasPrice: gasPrice
+        });
+        const sendETHOP_balance_after = await ethers.provider.getBalance(accounts[0].address);
+        const sendETHOP_cost_eth = sendETHOP_balance_before.sub(sendETHOP_balance_after);
+        const sendETHOP_cost_gas = sendETHOP_cost_eth.div(gasPrice);
+
 
         return {
-            gasCost,
-            requiredPrefund
+            activateGas: cost_gas,
+            requiredPrefund,
+            transferGas: sendETHOP_cost_gas,
         };
 
     }
     async function activateWallet_withETH() {
-        const runTimes = 30;
-        let minGas: BigNumber = BigNumber.from('0xfffffffffffffffffffffffffffffff');
-        let maxGas: BigNumber = BigNumber.from(0);
-        let totalGas: BigNumber = BigNumber.from(0);
+        const runTimes = 10;
+        let activateMinGas: BigNumber = BigNumber.from('0xfffffffffffffffffffffffffffffff');
+        let activateMaxGas: BigNumber = BigNumber.from(0);
+        let activateTotalGas: BigNumber = BigNumber.from(0);
+
+        let transferMinGas: BigNumber = BigNumber.from('0xfffffffffffffffffffffffffffffff');
+        let transferMaxGas: BigNumber = BigNumber.from(0);
+        let transferTotalGas: BigNumber = BigNumber.from(0);
+
         for (let index = 0; index < runTimes; index++) {
-            const gas = await (await _activateWallet_withETH()).gasCost;
-            totalGas = totalGas.add(gas);
-            if (gas.lt(minGas)) {
-                minGas = gas;
+            const cost = await _activateWallet_withETH();
+            activateTotalGas = activateTotalGas.add(cost.activateGas);
+            transferTotalGas = transferTotalGas.add(cost.transferGas);
+            if (cost.activateGas.lt(activateMinGas)) {
+                activateMinGas = cost.activateGas;
             }
-            if (gas.gt(maxGas)) {
-                maxGas = gas;
+            if (cost.activateGas.gt(activateMaxGas)) {
+                activateMaxGas = cost.activateGas;
             }
+            if (cost.transferGas.lt(transferMinGas)) {
+                transferMinGas = cost.transferGas;
+            }
+            if (cost.transferGas.gt(transferMaxGas)) {
+                transferMaxGas = cost.transferGas;
+            }
+
         }
-        console.log('minGas: ', minGas.toString(), 'gas');
-        console.log('maxGas: ', maxGas.toString(), 'gas');
-        console.log('avgGas: ', totalGas.div(runTimes).toString(), 'gas');
-        console.log('requiredPrefund: ', ethers.utils.formatEther(await (await _activateWallet_withETH()).requiredPrefund), 'ETH');
+        console.log('activate wallet with ETH');
+        console.log('activateMinGas: ', activateMinGas.toString(), 'gas');
+        console.log('activateMaxGas: ', activateMaxGas.toString(), 'gas');
+        console.log('activateAvgGas: ', activateTotalGas.div(runTimes).toString(), 'gas');
+        console.log('transferMinGas: ', transferMinGas.toString(), 'gas');
+        console.log('transferMaxGas: ', transferMaxGas.toString(), 'gas');
+        console.log('transferAvgGas: ', transferTotalGas.div(runTimes).toString(), 'gas');
     }
 
 
@@ -295,7 +353,12 @@ describe("SoulWalletContract", function () {
             EIP1559Gas.maxFeePerGas,
             EIP1559Gas.maxPriorityFeePerGas,
             undefined,
-            WalletFactory.contract.address
+            WalletFactory.contract.address,
+            SingletonFactory,
+            {
+                contractInterface: SoulWalletProxy__factory.abi,
+                bytecode: proxyCode
+            }
         );
         const requiredPrefund = activateOp.requiredPrefund();
         // get USDC exchangeRate
@@ -371,7 +434,7 @@ describe("SoulWalletContract", function () {
     }
 
     async function activateWallet_WithUSDCPaymaster() {
-        const runTimes = 30;
+        const runTimes = 10;
         let minGas: BigNumber = BigNumber.from('0xfffffffffffffffffffffffffffffff');
         let maxGas: BigNumber = BigNumber.from(0);
         let totalGas: BigNumber = BigNumber.from(0);
@@ -385,9 +448,9 @@ describe("SoulWalletContract", function () {
                 maxGas = gas;
             }
         }
-        console.log('minGas: ', minGas.toString(), 'gas');
-        console.log('maxGas: ', maxGas.toString(), 'gas');
-        console.log('avgGas: ', totalGas.div(runTimes).toString(), 'gas');
+        console.log('activateMinGas: ', minGas.toString(), 'gas');
+        console.log('activateMaxGas: ', maxGas.toString(), 'gas');
+        console.log('activateAvgGas: ', totalGas.div(runTimes).toString(), 'gas');
         console.log('requiredPrefund: ', ethers.utils.formatEther(await (await _activateWallet_WithUSDCPaymaster()).requiredPrefund), 'ETH');
     }
 

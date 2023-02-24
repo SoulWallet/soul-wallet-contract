@@ -4,15 +4,17 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-20 22:32:20
+ * @LastEditTime: 2023-02-24 15:36:04
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { IApproveToken, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
+import { IApproveToken, ITransaction, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
 import { SoulWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
+import * as ethUtil from 'ethereumjs-util';
+
 
 const log_on = false;
 const log = (message?: any, ...optionalParams: any[]) => { if (log_on) console.log(message, ...optionalParams) };
@@ -259,7 +261,7 @@ describe("SoulWalletContract", function () {
         }
 
         log(`simulateHandleOp result:`, simulate);
-        await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
+        await EntryPoint.contract.handleOps([activateOp.getStruct()], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
         let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress);
@@ -280,9 +282,6 @@ describe("SoulWalletContract", function () {
             USDC
         };
     }
-
-
-
 
     async function activateWallet_WithUSDCPaymaster() {
         //describe("activate wallet", async () => {
@@ -385,6 +384,8 @@ describe("SoulWalletContract", function () {
         ];
         const approveCallData = await soulWalletLib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, approveData);
         activateOp.callData = approveCallData.callData;
+        const decoder = soulWalletLib.Utils.DecodeCallData.new();
+        const decoded = await decoder.decode(approveCallData.callData);
         activateOp.callGasLimit = approveCallData.callGasLimit;
         log("init code", activateOp.initCode);
 
@@ -404,7 +405,7 @@ describe("SoulWalletContract", function () {
             throw new Error(`error code:${simulate.status}`);
         }
 
-        await EntryPoint.contract.handleOps([activateOp], accounts[0].address);
+        await EntryPoint.contract.handleOps([activateOp.getStruct()], accounts[0].address);
         const code = await ethers.provider.getCode(walletAddress);
         expect(code).to.not.equal('0x');
         let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress);
@@ -424,6 +425,97 @@ describe("SoulWalletContract", function () {
             guardianDelay,
             USDC
         };
+    }
+
+    async function transferToken() {
+        const { soulWalletLib, walletAddress, walletOwner, bundler, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster, USDC } = await activateWallet_withETH();
+
+        let nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
+
+        const sendETHOP = await soulWalletLib.Tokens.ETH.transfer(
+            ethers.provider,
+            walletAddress,
+            nonce,
+            EntryPoint.contract.address,
+            '0x',
+            10000000000,// 100Gwei
+            1000000000,// 10Gwei
+            accounts[1].address,
+            ethers.utils.parseEther('0.0001').toHexString()
+        );
+        if (!sendETHOP) {
+            throw new Error('setGuardianOP is null');
+        }
+        const sendETHOPuserOpHash = sendETHOP.getUserOpHash(EntryPoint.contract.address, chainId);
+        const sendETHOPSignature = Utils.signMessage(sendETHOPuserOpHash, walletOwner.privateKey)
+        sendETHOP.signWithSignature(walletOwner.address, sendETHOPSignature);
+
+        let validation = await bundler.simulateValidation(sendETHOP);
+        if (validation.status !== 0) {
+            throw new Error(`error code:${validation.status}`);
+        }
+        let simulate = await bundler.simulateHandleOp(sendETHOP);
+        if (simulate.status !== 0) {
+            throw new Error(`error code:${simulate.status}`);
+        }
+
+        // get balance of accounts[1].address
+        const balanceBefore = await ethers.provider.getBalance(accounts[1].address);
+        await EntryPoint.contract.handleOps([sendETHOP.getStruct()], accounts[0].address);
+        // get balance of accounts[1].address
+        const balanceAfter = await ethers.provider.getBalance(accounts[1].address);
+        expect(balanceAfter.sub(balanceBefore).toString()).to.equal(ethers.utils.parseEther('0.0001').toString());
+
+        nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
+        const rawtx: ITransaction[] = [{
+            from: walletAddress,
+            to: accounts[1].address,
+            value: ethers.utils.parseEther('0.0001').toHexString(),
+            data: '0x'
+        }, {
+            from: walletAddress,
+            to: accounts[2].address,
+            value: ethers.utils.parseEther('0.0002').toHexString(),
+            data: '0x'
+        }, {
+            from: walletAddress,
+            to: accounts[2].address,
+            value: ethers.utils.parseEther('0.0001').toHexString(),
+            data: '0x'
+        }];
+        const ConvertedOP = await soulWalletLib.Utils.fromTransaction(
+            ethers.provider,
+            EntryPoint.contract.address,
+            rawtx,
+            nonce,
+            10000000000,// 100Gwei
+            1000000000// 10Gwei
+        );
+        if (!ConvertedOP) {
+            throw new Error('setGuardianOP is null');
+        }
+        const ConvertedOPuserOpHash = ConvertedOP.getUserOpHash(EntryPoint.contract.address, chainId);
+        const ConvertedOPSignature = Utils.signMessage(ConvertedOPuserOpHash, walletOwner.privateKey)
+        ConvertedOP.signWithSignature(walletOwner.address, ConvertedOPSignature);
+        validation = await bundler.simulateValidation(ConvertedOP);
+        if (validation.status !== 0) {
+            throw new Error(`error code:${validation.status}`);
+        }
+        simulate = await bundler.simulateHandleOp(ConvertedOP);
+        if (simulate.status !== 0) {
+            throw new Error(`error code:${simulate.status}`);
+        }
+        // get balance of accounts[1].address
+        const balanceBefore2 = await ethers.provider.getBalance(accounts[1].address);
+        const balanceBefore3 = await ethers.provider.getBalance(accounts[2].address);
+        await EntryPoint.contract.handleOps([ConvertedOP.getStruct()], accounts[0].address);
+        // get balance of accounts[1].address
+        const balanceAfter2 = await ethers.provider.getBalance(accounts[1].address);
+        const balanceAfter3 = await ethers.provider.getBalance(accounts[2].address);
+        expect(balanceAfter2.sub(balanceBefore2).toString()).to.equal(ethers.utils.parseEther('0.0001').toString());
+        expect(balanceAfter3.sub(balanceBefore3).toString()).to.equal(ethers.utils.parseEther('0.0003').toString());
+
+
     }
 
     async function updateGuardian() {
@@ -456,7 +548,7 @@ describe("SoulWalletContract", function () {
         const setGuardianOPuserOpHash = setGuardianOP.getUserOpHash(EntryPoint.contract.address, chainId);
         const setGuardianOPSignature = Utils.signMessage(setGuardianOPuserOpHash, walletOwner.privateKey)
         setGuardianOP.signWithSignature(walletOwner.address, setGuardianOPSignature);
-        await EntryPoint.contract.handleOps([setGuardianOP], accounts[0].address);
+        await EntryPoint.contract.handleOps([setGuardianOP.getStruct()], accounts[0].address);
         guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress);
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
         // wait block for guardianDelay 
@@ -517,7 +609,7 @@ describe("SoulWalletContract", function () {
 
         const walletContract = new ethers.Contract(walletAddress, SoulWallet__factory.abi, ethers.provider);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(true);
-        await EntryPoint.contract.handleOps([transferOwnerOP], accounts[0].address);
+        await EntryPoint.contract.handleOps([transferOwnerOP.getStruct()], accounts[0].address);
         expect(await walletContract.isOwner(walletOwner.address)).to.equal(false);
         expect(await walletContract.isOwner(newWalletOwner.address)).to.equal(true);
 
@@ -580,12 +672,30 @@ describe("SoulWalletContract", function () {
         const version = await walletContract.getVersion();
         expect(version).to.equal(1);
 
-    }
+        const isOwner = await walletContract.isOwner(walletOwner.address);
 
+        // test isValidSignature() function
+
+        const msg = "0x40e146fb1960313f694b3fcfd04b8b469e19936864b618e0f4b6cb504fbf4fae";
+        const messageHex = Buffer.from(ethers.utils.arrayify(msg));
+        const _privateKey = Buffer.from(walletOwner.privateKey.substring(2), "hex");
+        // import * as ethUtil from 'ethereumjs-util';
+        const _signature = ethUtil.ecsign(messageHex, _privateKey);
+        const signature = ethUtil.toRpcSig(_signature.v, _signature.r, _signature.s);
+        const selector = await walletContract.isValidSignature(
+            msg,
+            signature
+        );
+        expect(selector).to.equal('0x1626ba7e');
+
+
+
+    }
 
     describe("wallet test", async function () {
         it("activate wallet(ETH)", activateWallet_withETH);
         it("activate wallet(USDC)", activateWallet_WithUSDCPaymaster);
+        it("transferToken", transferToken);
         it("update guardian", updateGuardian);
         it("recovery wallet", recoveryWallet);
         it("interface resolver", interfaceResolver);

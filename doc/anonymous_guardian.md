@@ -2,7 +2,7 @@
 
 ## Why anonymous guardian
 
-The user who has a lot of money and doesn't want their friends to know how much they have unless the emergency actually comes up. in this case, the user doesn't want to store the guardian list on the chain. because others can easily see the list which results in poor privacy.
+If the user has a lot of money and doesn't want their friends to know how much they have unless there is an emergency, they may not want to store the list of guardians on the blockchain because others can easily see the list, which would result in poor privacy.
 
 ## Related background
 
@@ -14,50 +14,35 @@ The user who has a lot of money and doesn't want their friends to know how much 
 
 ## Goal achievement
 
-- smart contract guardian do not have publicly known.
-- guardian don't know each other guadain identities.
-- only reveal guardian when recovery needed.
+- The identities of the smart contract guardians are not publicly known.
+- Each guardian is unaware of the identities of the other guardians.
+- The guardians are only revealed when recovery is needed.
 
 
 ## Implementation
 
 ### Add guardian
 
-* the guardian module is a separate smart contract, the main functionality is a multi sig wallet which stores the list of guardians for social recovery of the erc4337 wallet.
-* this contract expose ```function isValidSignature(bytes calldata _data, bytes calldata _signature) ```**(erc1271 interface)** to the public for signature verfication.
-* inside the **isValidSignature** function, it accepts signature which comes from guardians and performs the verification with threshold, for example, 3/5 or 4/7 multi sig verification. [gnosis code reference](https://github.com/safe-global/safe-contracts/blob/c36bcab46578a442862d043e12a83fec41143dec/contracts/GnosisSafe.sol#L240).
+1. The Guardian module is a separate smart contract. The main functionality is a multi-sig wallet which stores the list of guardians for social recovery of the soul wallet.
+2. This contract exposes the ```function isValidSignature(bytes calldata _data, bytes calldata _signature)``` **(ERC1271 interface)** to the public for signature verification.
+3.  Inside the **isValidSignature** function, it accepts signatures which come from guardians and performs verification with a threshold, for example, a 3/5 or 4/7 multi-sig verification. [Gnosis code reference](https://github.com/safe-global/safe-contracts/blob/c36bcab46578a442862d043e12a83fec41143dec/contracts/GnosisSafe.sol#L240)
 
 
 
-![](https://hackmd.io/_uploads/HyrunBANo.png)
-
+<p align="center">
+  <img src="./images//add_guardian_diagram.png" />
+</p>
 
 ### Using guardian for social recovery
 
 
-* When users want to replace the signing key using social recovery, the user needs to provide the guardian's list to the security center, the security center will generate the init code with the user-provided guardian list and compute the create2 address. the security center will give back the calculated address for the user to verify if the address equal to the guardian address setting on the erc4337 smart contract wallet.
-* If users succeed to regenerate the guardian address for the erc4337 wallet, the user will ask the security center to deploy the contract for him.
-* Users will compose a replace sign key user operation, and ask guardians to sign it.
-* Once the user collects enough signatures from guardians, the user will send this user operation on the chain.
-* The erc4337 smart contract checks if the user operation is a replacement key function with guardians. for the signature verification, it will call the guardian address with  ```function isValidSignature(bytes calldata _data, bytes calldata _signature) ```  
-* Inside the ```isValidSignature``` in the guardian smart contract, it will perform the multi-sig check for the guardians.
+1. When users want to replace the signing key using social recovery, the user needs to provide the guardian's list to the security center. The security center will generate the init code with the user-provided guardian list and compute the guardian multi-sig address by using singleton factory. The security center will give back the calculated address for the user to verify if the address is equal to the guardian address setting on the soul wallet contract.
+2. Users will compose a ```transferOwner``` operation and ask guardians to sign it.
+3. Once the user collects enough signatures from guardians, the user will send this ```transferOwner``` operation on the chain.
+4. The soul wallet contract has a module called **GuardianControl** which includes a function called ```_validateGuardiansSignatureCallData```. This function deploys the Guardian Multi-Sig contract on the fly and then verifies the signature of the guardians using the function  ```isValidSignature(bytes calldata _data, bytes calldata _signature)```.
+5. Inside the ```isValidSignature``` function in the Guardian Multi-Sig contract, the multi-sig check for the guardians is performed.
+6. If all the checks are passed, the soulwallet smart contract will call the ```transferOwner``` function and replace the signing key with the new one.
 
-
-![](https://hackmd.io/_uploads/S1OviLC4o.png)
-
-
-#### Sequence diagram
-
-
-
-![](https://hackmd.io/_uploads/BknPSI0Ej.png)
-
-
-### Modify guardian
-
-* Because the guardian address is set on the erc4337 smart contract wallet based on the guardian list and guardian smart contract bytecode. if the user wants to add/remove a guardian, the guardian address needs to be recalculated on-chain which means the user has to provide the full guardian list and recompute the new guardian address.
-* the guardian list must sort descending in order to generate a deterministic guardian contract address.
-* the user has to remember the guardian list. **should we store the guardian list somewhere or every time we ask users to provide the guardian list if they want to update the guardian?**
-
- 
-![](https://hackmd.io/_uploads/SJFLEwJro.png)
+<p align="center">
+  <img src="./images//recovery_diagram.png" />
+</p>

@@ -4,21 +4,34 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-21 16:13:52
+ * @LastEditTime: 2023-02-24 15:30:00
  */
-
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
 import { IApproveToken, IUserOpReceipt, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
-import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, EntryPoint__factory, ERC20__factory } from "../src/types/index";
+import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, EntryPoint__factory, ERC20__factory, SoulWalletFactory__factory, SoulWallet__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
 
 function isLocalTestnet() {
   return ['localhost', 'hardhat'].includes(network.name);
 }
 
+/**
+ * run activateWallet test
+ */
+let activateWalletTest= false;
+
+/**
+ * run activateWalletWithPaymaster test
+ */
+let activateWalletWithPaymasterTest = false;
+
 async function main() {
+
+  console.log("network.name:", network.name);
+
+  // #region mock gas fee
 
   let mockGasFee = {
     "low": {
@@ -51,9 +64,9 @@ async function main() {
     "baseFeeTrend": "down"
   }
 
-  // npx hardhat run --network hardhat scripts/deploy.ts
-  // npx hardhat run --network ArbGoerli scripts/deploy.ts
+  // #endregion mock gas fee
 
+  // #region prepare
 
   let EOA = (await ethers.getSigners())[0];
 
@@ -69,7 +82,9 @@ async function main() {
   let soulWalletLib;
 
   const networkBundler: Map<string, string> = new Map();
-  networkBundler.set('ArbGoerli', 'https://bundler-arb-goerli.soulwallets.me/rpc');
+  networkBundler.set('goerli', 'https://bundler-eth-goerli.soulwallets.me/rpc');
+  networkBundler.set('arbitrumGoerli', 'https://bundler-arb-goerli.soulwallets.me/rpc');
+  networkBundler.set('optimisticGoerli', 'https://bundler-op-goerli.soulwallets.me/rpc');
 
 
   const chainId = await (await ethers.provider.getNetwork()).chainId;
@@ -79,28 +94,51 @@ async function main() {
     soulWalletLib = new SoulWalletLib(create2.address);
     let usdc = await new USDCoin__factory(EOA).deploy();
     USDCContractAddress = usdc.address;
-    USDCPriceFeedAddress = await (await (await ethers.getContractFactory("USDCPriceFeed")).deploy()).address;
+    USDCPriceFeedAddress = await (await (await ethers.getContractFactory("MockOracle")).deploy()).address;
     eip1559GasFee = mockGasFee;
   } else {
     soulWalletLib = new SoulWalletLib();
-    // if (["mainnet", "goerli"].includes(network.name)) {
-    //   USDCContractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-    //  eip1559GasFee = await EIP4337Lib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
-    // } else 
-    if (network.name === "ArbGoerli") {
+    if (network.name === "arbitrumGoerli") {
+
       USDCContractAddress = "0xe34a90dF83c29c28309f58773C41122d4E8C757A";
+
       //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=arbitrum
       USDCPriceFeedAddress = "0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08";
+
       eip1559GasFee = mockGasFee;
+
     } else if (network.name === "goerli") {
+
       USDCContractAddress = "0x55dFb37E7409c4e2B114f8893E67D4Ff32783b35";
+
       //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=ethereum
       USDCPriceFeedAddress = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
+
       eip1559GasFee = await soulWalletLib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
       if (!eip1559GasFee) {
         throw new Error("getEIP1559GasFees failed");
       }
-    } else {
+
+    } else if (network.name === 'optimisticGoerli') {
+
+      USDCContractAddress = "0x7627e9FA4C4FfaeFb144c81a6892B2c33cfF3c88";
+
+      https://docs.chain.link/data-feeds/price-feeds/addresses/?network=optimism
+      USDCPriceFeedAddress = "0x57241A37733983F97C4Ab06448F244A1E0Ca0ba8";
+
+      eip1559GasFee = mockGasFee;
+      const gasPrice = (await ethers.provider.getGasPrice()).mul(150).div(100).toString();
+      const gasPriceGwei = ethers.utils.formatUnits(gasPrice, 'gwei');
+
+      eip1559GasFee.high.suggestedMaxFeePerGas = gasPriceGwei;
+      eip1559GasFee.medium.suggestedMaxFeePerGas = gasPriceGwei;
+      eip1559GasFee.low.suggestedMaxFeePerGas = gasPriceGwei;
+      eip1559GasFee.high.suggestedMaxPriorityFeePerGas = gasPriceGwei;
+      eip1559GasFee.medium.suggestedMaxPriorityFeePerGas = gasPriceGwei;
+      eip1559GasFee.low.suggestedMaxPriorityFeePerGas = gasPriceGwei;
+
+    }
+    else {
       throw new Error("network not support");
     }
   }
@@ -115,6 +153,8 @@ async function main() {
 
 
   const salt = hexZeroPad(hexlify(0), 32);
+
+  // #endregion prepare
 
   // #region Entrypoint 
 
@@ -142,6 +182,7 @@ async function main() {
     }
     if (!isLocalTestnet()) {
       console.log("EntryPoint deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: EntryPointAddress,
@@ -156,7 +197,6 @@ async function main() {
   }
 
   // #endregion Entrypoint
-
 
   // #region WalletLogic 
 
@@ -183,6 +223,7 @@ async function main() {
 
     if (!isLocalTestnet()) {
       console.log("WalletLogic deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: WalletLogicAddress,
@@ -200,13 +241,19 @@ async function main() {
 
   // #region WalletFactory
 
-  const walletFactoryAddress = soulWalletLib.Utils.deployFactory.getAddress(WalletLogicAddress);
+  const walletFactoryAddress = soulWalletLib.Utils.deployFactory.getAddress(WalletLogicAddress, undefined, undefined, {
+    contractInterface: SoulWalletFactory__factory.abi,
+    bytecode: SoulWalletFactory__factory.bytecode
+  });
   console.log("walletFactoryAddress:", walletFactoryAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(walletFactoryAddress) === '0x') {
     console.log("walletFactory not deployed, deploying...");
 
-    await soulWalletLib.Utils.deployFactory.deploy(WalletLogicAddress, ethers.provider, EOA);
+    const walletFactoryAddress_online = await soulWalletLib.Utils.deployFactory.deploy(WalletLogicAddress, ethers.provider, EOA);
+    if (walletFactoryAddress_online !== walletFactoryAddress) {
+      throw new Error("walletFactoryAddress_online not match");
+    }
 
     while (await ethers.provider.getCode(walletFactoryAddress) === '0x') {
       console.log("walletFactory not deployed, waiting...");
@@ -215,6 +262,7 @@ async function main() {
 
     if (!isLocalTestnet()) {
       console.log("walletFactory deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: walletFactoryAddress,
@@ -267,6 +315,7 @@ async function main() {
 
     if (!isLocalTestnet()) {
       console.log("PriceOracle deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: PriceOracleAddress,
@@ -331,6 +380,7 @@ async function main() {
 
     if (!isLocalTestnet()) {
       console.log("TokenPaymaster deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: TokenPaymasterAddress,
@@ -373,6 +423,7 @@ async function main() {
     }
     if (!isLocalTestnet()) {
       console.log("GuardianLogic deployed, verifying...");
+      await new Promise(r => setTimeout(r, 5000));
       try {
         await run("verify:verify", {
           address: GuardianLogicAddress,
@@ -388,7 +439,7 @@ async function main() {
   // #endregion GuardianLogic
 
   // #region deploy wallet without paymaster
-  if (true) {
+  if (activateWalletTest) {
 
     const upgradeDelay = 10;
     const guardianDelay = 10;
@@ -401,6 +452,19 @@ async function main() {
       guardianDelay,
       SoulWalletLib.Defines.AddressZero
     );
+    {
+      const walletAddress_online = await WalletFactory.contract.getWalletAddress(
+        EntryPointAddress,
+        walletOwner,
+        guardianDelay,
+        upgradeDelay,
+        SoulWalletLib.Defines.AddressZero,
+        SoulWalletLib.Defines.bytes32_zero
+      );
+      if (walletAddress_online !== walletAddress) {
+        throw new Error('walletAddress_online !== walletAddress');
+      }
+    }
 
     console.log('walletAddress: ' + walletAddress);
 
@@ -456,7 +520,7 @@ async function main() {
 
       if (true) {
         const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-        const re = await EntryPoint.handleOps([activateOp], EOA.address);
+        const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
         console.log(re);
         // check if wallet is activated (deployed)
         const code = await ethers.provider.getCode(walletAddress);
@@ -464,10 +528,29 @@ async function main() {
           throw new Error("wallet not activated");
         } else {
           console.log("wallet activated");
+          {
+            // verify wallet
+            if (!isLocalTestnet()) {
+
+              let iface = new ethers.utils.Interface(SoulWallet__factory.abi);
+              let initializeData = iface.encodeFunctionData("initialize", [EntryPointAddress, walletOwner, upgradeDelay, guardianDelay, SoulWalletLib.Defines.AddressZero,]);
+
+              await new Promise(r => setTimeout(r, 5000));
+              try {
+                await run("verify:verify", {
+                  address: walletAddress,
+                  constructorArguments: [WalletLogicAddress, initializeData],
+                });
+              } catch (error) {
+                console.log("WalletLogic verify failed:", error);
+              }
+            }
+          }
         }
       }
 
     } else {
+
       // bundler test
       const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
       let sendETHOP = await soulWalletLib.Tokens.ETH.transfer(
@@ -549,14 +632,12 @@ async function main() {
 
   // #endregion deploy wallet
 
-
-
   // #region deploy wallet with paymaster
-  if (false) {
+  if (activateWalletWithPaymasterTest) {
 
     const upgradeDelay = 10;
     const guardianDelay = 10;
-    const salt = 1;
+    const salt = 5;
     const walletAddress = await soulWalletLib.calculateWalletAddress(
       WalletLogicAddress,
       EntryPointAddress,
@@ -598,12 +679,15 @@ async function main() {
       // print price now
       console.log('exchangePrice: ' + ethers.utils.formatUnits(exchangePrice.price, exchangePrice.decimals), 'USDC/ETH');
       // get required USDC : (requiredPrefund/10^18) * (exchangePrice.price/10^exchangePrice.decimals)
-      const requiredUSDC = requiredPrefund.mul(exchangePrice.price)
+      let requiredUSDC = requiredPrefund.mul(exchangePrice.price)
         .mul(BigNumber.from(10).pow(tokenDecimals))
         .div(BigNumber.from(10).pow(exchangePrice.decimals))
         .div(BigNumber.from(10).pow(18));
+      if (requiredUSDC.eq(0)) {
+        requiredUSDC = BigNumber.from(Math.pow(1, tokenDecimals));
+      }
       console.log('requiredUSDC: ' + ethers.utils.formatUnits(requiredUSDC, tokenDecimals), 'USDC');
-      const maxUSDC = requiredUSDC.mul(110).div(100); // 10% more
+      const maxUSDC = requiredUSDC.mul(150).div(100); // 10% more
       let paymasterAndData = soulWalletLib.getPaymasterData(TokenPaymasterAddress, USDCContractAddress, maxUSDC);
       activateOp.paymasterAndData = paymasterAndData;
       if (true) {
@@ -631,11 +715,14 @@ async function main() {
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
+
+      const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
       const bundlerUrl = networkBundler.get(network.name);
       if (!bundlerUrl) {
         throw new Error(`bundler rpc not found for network ${network.name}`);
       }
       const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
+      // const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
       //await bundler.init(); // run init to check bundler is alivable
       const validation = await bundler.simulateValidation(activateOp);
       if (validation.status !== 0) {
@@ -665,14 +752,11 @@ async function main() {
     }
   }
 
-
   // #endregion deploy wallet
-
 
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
+
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

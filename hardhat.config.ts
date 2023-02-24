@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-21 17:43:13
+ * @LastEditTime: 2023-02-24 14:40:27
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -21,6 +21,10 @@ const MAINNET_PRIVATE_KEY =
 const ARBGOERLI_PRIVATE_KEY =
   process.env.ARBGOERLI_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const OPGOERLI_PRIVATE_KEY =
+  process.env.OPGOERLI_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
@@ -82,17 +86,24 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       timeout: 1000000
     },
-    ArbGoerli: {
+    arbitrumGoerli: {
       url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://goerli-rollup.arbitrum.io/rpc",
       accounts: [ARBGOERLI_PRIVATE_KEY],
+      gasPrice: "auto",
+      timeout: 1000000
+    },
+    optimisticGoerli:{
+      url: process.env.OPTIMISM_GOERLI_PROVIDER || "https://endpoints.omniatech.io/v1/op/goerli/public",
+      accounts: [OPGOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
     }
   },
   etherscan: {
     apiKey: {
+      optimisticGoerli: process.env.OPGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       arbitrumGoerli: process.env.ARBGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
-      goerli: process.env.GOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      goerli: process.env.GOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || ""
     }
   },
   paths: {

@@ -54,7 +54,7 @@ npm run test
 ```
 
 ```shell
-npm run deploy:ArbGoerli
+npm run deploy:optimisticGoerli
 ```
 ## Disclaimer
 This project is provided "as is" with no warranties or guarantees of any kind, express or implied. The developers make no claims about the suitability, reliability, availability, timeliness, security or accuracy of the software or its related documentation. The use of this software is at your own risk.

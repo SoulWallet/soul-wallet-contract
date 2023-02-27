@@ -18,12 +18,14 @@ import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
 
+
 /**
- * minimal wallet.
- *  this is sample minimal wallet.
- *  has execute, eth handling methods
- *  has a single signer that can send requests through the entryPoint.
+ * @author  soulwallet team.
+ * @title   an implementation of the ERC4337 smart contract wallet.
+ * @dev     this is the implementation contract of the soul wallet. The contract support ERC4337 which can be called by the entrypoint contract with UserOperation.
+ * @notice  .
  */
+
 contract SoulWallet is
     BaseAccount,
     Initializable,
@@ -32,6 +34,7 @@ contract SoulWallet is
     ACL,
     DefaultCallbackHandler
 {
+    // all state variables are stored in AccountStorage.Layout with specific storage slot to avoid storage collision
     using AccountStorage for AccountStorage.Layout;
 
     using ECDSA for bytes32;
@@ -52,11 +55,23 @@ contract SoulWallet is
         address guardian
     );
 
+    /**
+     * @dev this prevents initialization of the implementation contract itself
+     */
     constructor() {
         _disableInitializers();
         // solhint-disable-previous-line no-empty-blocks
     }
 
+    /**
+     * @notice  initialized function to setup the soul wallet contract.
+     * @dev     .
+     * @param   _entryPoint  trused entrypoint.
+     * @param   _owner  wallet sign key address.
+     * @param   _upgradeDelay  upgrade delay which update take effect.
+     * @param   _guardianDelay  guardian delay which update guardian take effect.
+     * @param   _guardian  multi-sig address.
+     */
     function initialize(
         IEntryPoint _entryPoint,
         address _owner,
@@ -99,14 +114,28 @@ contract SoulWallet is
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
+    /**
+     * @notice  return the contract nonce.
+     * @dev     preventing replay attacks by ensuring that old tx are not being reused.
+     * @return  uint256  .
+     */
     function nonce() public view virtual override returns (uint256) {
         return AccountStorage.layout().nonce;
     }
 
+    /**
+     * @notice  return the entrypoint address.
+     * @dev     should .
+     * @return  IEntryPoint  .
+     */
     function entryPoint() public view virtual override returns (IEntryPoint) {
         return AccountStorage.layout().entryPoint;
     }
 
+    /**
+     * @notice  only owner modifier.
+     * @dev     .
+     */
     modifier onlyOwner() {
         require(
             isOwner(msg.sender) || msg.sender == address(this),
@@ -115,6 +144,10 @@ contract SoulWallet is
         _;
     }
 
+    /**
+     * @notice  modifier can be called by the owner or from the entrypoint.
+     * @dev     .
+     */
     modifier onlyOwnerOrFromEntryPoint() {
         require(
             isOwner(msg.sender) ||
@@ -148,6 +181,12 @@ contract SoulWallet is
         _preUpgradeTo(newImplementation);
     }
 
+    /**
+     * @notice  ensure guardians can only be used for social recovery and cannot call other method.
+     * @dev     .
+     * @param   op  .
+     * @return  bool .
+     */
     function isGuardianActionAllowed(
         UserOperation calldata op
     ) internal pure returns (bool) {
@@ -156,14 +195,21 @@ contract SoulWallet is
     }
 
     /**
-     * transfer eth value to a destination address
+     * @notice  transfer eth value to a destination address.
+     * @dev     .
+     * @param   dest  .
+     * @param   amount  .
      */
     function transfer(address payable dest, uint256 amount) external onlyOwner {
         dest.transfer(amount);
     }
 
     /**
-     * execute a transaction (called directly from owner, not by entryPoint)
+     * @notice  execute a transaction (called directly from owner, not by entryPoint).
+     * @dev     .
+     * @param   dest  .
+     * @param   value  .
+     * @param   func  .
      */
     function exec(
         address dest,
@@ -174,20 +220,30 @@ contract SoulWallet is
     }
 
     /**
-     * execute a sequence of transaction
+     * @notice  Batch multiple calls with a single operation.
+     * @dev     .
+     * @param   dest  .
+     * @param   value  .
+     * @param   func  .
      */
     function execBatch(
         address[] calldata dest,
         uint256[] calldata value,
         bytes[] calldata func
     ) external onlyOwner {
-        require(dest.length == func.length, "wrong array lengths");
+        require(dest.length == func.length && func.length == value.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], value[i], func[i]);
         }
     }
 
-    // called by entryPoint, only after validateUserOp succeeded.
+    /**
+     * @notice  called from entrypoint and execute arbitrary call.
+     * @dev     called by entryPoint, only after validateUserOp succeeded.
+     * @param   dest  addresses to call.
+     * @param   value  value for the call.
+     * @param   func  calldata for dest address.
+     */
     function execFromEntryPoint(
         address dest,
         uint256 value,
@@ -197,6 +253,13 @@ contract SoulWallet is
         _call(dest, value, func);
     }
 
+    /**
+     * @notice  called from entrypoint and execute arbitrary batch call.
+     * @dev     called by entryPoint, only after validateUserOp succeeded.
+     * @param   dest  List of addresses to call.
+     * @param   value  List of values for each subcall.
+     * @param   func  call data for each `dest` address.
+     */
     function execFromEntryPoint(
         address[] calldata dest,
         uint256[] calldata value,
@@ -276,6 +339,11 @@ contract SoulWallet is
         require(req);
     }
 
+    /**
+     * @notice  change the soulwallet sign key.
+     * @dev     used for social recovery.
+     * @param   newOwner  .
+     */
     function transferOwner(
         address newOwner
     ) external override onlyOwnerOrFromEntryPoint {
@@ -333,17 +401,30 @@ contract SoulWallet is
         return 1;
     }
 
+    /**
+     * @notice  support ERC1271,  verifies whether the provided signature is valid with respect to the provided data.
+     * @dev     return the correct magic value if the signature provided is valid for the provided data.
+     * @param   hash  .
+     * @param   signature  .
+     * @return  bytes4  .
+     */
     function isValidSignature(
         bytes32 hash,
         bytes memory signature
     ) external view returns (bytes4) {
-        require(
-            isOwner(hash.recover(signature)),
-            "SoulWallet: Invalid signature"
-        );
-        return IERC1271.isValidSignature.selector;
+        if(isOwner(hash.recover(signature))) {
+            return IERC1271.isValidSignature.selector;
+        } else {
+            return 0xffffffff;
+        }
     }
 
+    /**
+     * @notice  support ERC165, query if a contract implements an interface.
+     * @dev     .
+     * @param   _interfaceID  .
+     * @return  bool  .
+     */
     function supportsInterface(bytes4 _interfaceID) public view override(DefaultCallbackHandler, AccessControlEnumerable) returns (bool) {
         return super.supportsInterface(_interfaceID);
     }

@@ -9,9 +9,13 @@ import "./SoulWalletProxy.sol";
 import "./SoulWallet.sol";
 import "./interfaces/ICreate2Deployer.sol";
 
-/*
-    a factory contract for create soul wallet
-*/
+/**
+ * @author  soulwallet team.
+ * @title   A factory contract to create soul wallet.
+ * @dev     it is called by the entrypoint which call the "initCode" factory to create and return the sender wallet address.
+ * @notice  .
+ */
+
 contract SoulWalletFactory {
     address public immutable walletImpl;
     address public immutable singletonFactory;
@@ -32,6 +36,17 @@ contract SoulWalletFactory {
         singletonFactory = _singletonFactory;
     }
 
+    /**
+     * @notice  deploy the soul wallet contract using proxy and returns the address of the proxy.
+     * @dev     should be called by entrypoint with useropeartoin.initcode > 0
+     * @param   _entryPoint  .
+     * @param   _owner  .
+     * @param   _upgradeDelay  .
+     * @param   _guardianDelay  .
+     * @param   _guardian  .
+     * @param   _salt  .
+     * @return  address  .
+     */
     function createWallet(
         address _entryPoint,
         address _owner,
@@ -67,13 +82,35 @@ contract SoulWalletFactory {
         return proxy;
     }
 
+    /**
+     * @notice  returns the proxy creationCode external method.
+     * @dev     used by soulwalletlib to calcudate the soul wallet address.
+     * @return  bytes  .
+     */
     function proxyCode() external pure returns (bytes memory) {
         return _proxyCode();
     }
+
+    /**
+     * @notice  returns the proxy creationCode private method.
+     * @dev     .
+     * @return  bytes  .
+     */
     function _proxyCode() private pure returns (bytes memory) {
         return type(SoulWalletProxy).creationCode;
     }
 
+    /**
+     * @notice  return the counterfactual address of soul wallet as it would be return by createWallet()
+     * @dev     .
+     * @param   _entryPoint  entrypoint address.
+     * @param   _owner  wallet sign key address.
+     * @param   _upgradeDelay  the delay which update take effect.
+     * @param   _guardianDelay  the delay which update guardian take effect.
+     * @param   _guardian  the guardian multi sig address.
+     * @param   _salt  salt used by create2 opcode.
+     * @return  address  return computed soul wallet address.
+     */
     function getWalletAddress(
         address _entryPoint,
         address _owner,
@@ -103,8 +140,12 @@ contract SoulWalletFactory {
     }
 
     /**
-     * @dev Returns the address where a contract will be stored if deployed via {deploy} from a contract located at
-     * `deployer`. If `deployer` is this contract's address, returns the same value as {computeAddress}.
+     * @notice  return the contract address by create2 op code.
+     * @dev     .
+     * @param   salt  .
+     * @param   bytecodeHash  .
+     * @param   deployer  .
+     * @return  addr  return contract by using create2 opcode.
      */
     function computeAddress(
         bytes32 salt,

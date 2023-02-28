@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-24 15:30:00
+ * @LastEditTime: 2023-02-28 21:48:04
  */
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -20,12 +20,21 @@ function isLocalTestnet() {
 /**
  * run activateWallet test
  */
-let activateWalletTest= false;
+let activateWalletTest = true;
+
+/**
+ * run recoverWallet test
+ */
+let recoverWalletTest = false;
 
 /**
  * run activateWalletWithPaymaster test
  */
 let activateWalletWithPaymasterTest = false;
+
+
+let useBundler = false;
+
 
 async function main() {
 
@@ -74,7 +83,7 @@ async function main() {
   console.log("EOA Address:", EOA.address);
 
 
-  let USDCContractAddress = '';
+  let USDCContractAddresses: string[] = [];
   let USDCPriceFeedAddress = '';
 
   let eip1559GasFee;
@@ -93,15 +102,14 @@ async function main() {
     let create2 = await new SingletonFactory__factory(EOA).deploy();
     soulWalletLib = new SoulWalletLib(create2.address);
     let usdc = await new USDCoin__factory(EOA).deploy();
-    USDCContractAddress = usdc.address;
+    USDCContractAddresses = [usdc.address];
     USDCPriceFeedAddress = await (await (await ethers.getContractFactory("MockOracle")).deploy()).address;
     eip1559GasFee = mockGasFee;
   } else {
     soulWalletLib = new SoulWalletLib();
     if (network.name === "arbitrumGoerli") {
 
-      USDCContractAddress = "0xe34a90dF83c29c28309f58773C41122d4E8C757A";
-
+      USDCContractAddresses = ["0xe34a90dF83c29c28309f58773C41122d4E8C757A"];
       //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=arbitrum
       USDCPriceFeedAddress = "0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08";
 
@@ -109,7 +117,7 @@ async function main() {
 
     } else if (network.name === "goerli") {
 
-      USDCContractAddress = "0x55dFb37E7409c4e2B114f8893E67D4Ff32783b35";
+      USDCContractAddresses = ["0x55dFb37E7409c4e2B114f8893E67D4Ff32783b35"];
 
       //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=ethereum
       USDCPriceFeedAddress = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
@@ -121,7 +129,7 @@ async function main() {
 
     } else if (network.name === 'optimisticGoerli') {
 
-      USDCContractAddress = "0x7627e9FA4C4FfaeFb144c81a6892B2c33cfF3c88";
+      USDCContractAddresses = ["0x7627e9FA4C4FfaeFb144c81a6892B2c33cfF3c88"];
 
       https://docs.chain.link/data-feeds/price-feeds/addresses/?network=optimism
       USDCPriceFeedAddress = "0x57241A37733983F97C4Ab06448F244A1E0Ca0ba8";
@@ -136,6 +144,30 @@ async function main() {
       eip1559GasFee.high.suggestedMaxPriorityFeePerGas = gasPriceGwei;
       eip1559GasFee.medium.suggestedMaxPriorityFeePerGas = gasPriceGwei;
       eip1559GasFee.low.suggestedMaxPriorityFeePerGas = gasPriceGwei;
+
+    } else if (network.name === 'optimistic') {
+
+      USDCContractAddresses = [
+        '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1', // DAI
+        '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58', // USDT
+        '0x7F5c764cBc14f9669B88837ca1490cCa17c31607'  // USDC
+      ];
+
+      https://docs.chain.link/data-feeds/price-feeds/addresses/?network=optimism
+      USDCPriceFeedAddress = "0x13e3Ee699D1909E989722E753853AE30b17e08c5";
+
+      eip1559GasFee = mockGasFee;
+
+      const legacyGasPrice = await soulWalletLib.Utils.suggestedGasFee.getLegacyGasPrices(chainId);
+      if (!legacyGasPrice) {
+        throw new Error("getLegacyGasPrices failed");
+      }
+      eip1559GasFee.high.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
+      eip1559GasFee.medium.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
+      eip1559GasFee.low.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
+      eip1559GasFee.high.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
+      eip1559GasFee.medium.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
+      eip1559GasFee.low.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
 
     }
     else {
@@ -360,11 +392,14 @@ async function main() {
       await new Promise(r => setTimeout(r, 3000));
     }
     {
-      const _paymasterStake = '' + Math.pow(10, 17);
+      const _paymasterStake = '' + Math.pow(10, 15);
       const TokenPaymaster = await TokenPaymaster__factory.connect(TokenPaymasterAddress, EOA);
       console.log(await TokenPaymaster.owner());
-
-      await TokenPaymaster.setToken([USDCContractAddress], [PriceOracleAddress]);
+      let PriceOracleAddresses = [];
+      for (let index = 0; index < USDCContractAddresses.length; index++) {
+        PriceOracleAddresses.push(PriceOracleAddress);
+      }
+      await TokenPaymaster.setToken(USDCContractAddresses, PriceOracleAddresses);
 
       console.log('adding stake');
       await TokenPaymaster.addStake(
@@ -441,6 +476,45 @@ async function main() {
   // #region deploy wallet without paymaster
   if (activateWalletTest) {
 
+    let bundlerUrl;
+    if (useBundler) {
+      bundlerUrl = networkBundler.get(network.name);
+      if (!bundlerUrl) {
+        throw new Error(`bundler rpc not found for network ${network.name}`);
+      }
+    }
+
+    const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
+    if (useBundler) {
+      await bundler.init();
+    }
+
+
+    const guardianWallet = [
+      new ethers.Wallet("0x8d369779012545b04428bb23096d3937751dca4a51294b1f2e7a0eda56883773"),
+      new ethers.Wallet("0x482611376d5e5b26d4b55ab6cf7b62124d27cfd5a84f43b4b37c58c182fcc12e"),
+      new ethers.Wallet("0x742b9b2cc7d11fe6ea993506eca80b252987c47a791e90f8c0ef604b24776d67"),
+      new ethers.Wallet("0xab62380f7a76b00a063a38a238e7341ee53896f339083a4f8ddf2c4cca8d0990"),
+      new ethers.Wallet("0xad1b2410af8acd299ff66eed245158037a30804ea22354943f448efe79076d29"),
+      new ethers.Wallet("0x6151a95f877c324b4ec0cfbb4d3c52092b63986a75f4e9bc92ed23514c550df2"),
+      new ethers.Wallet("0x9271136613f8696f95ff3dabfdedb9d84b3e657b01ded330a97531c7189a8348"),
+      new ethers.Wallet("0xd7161d46a0a52748a99b62eafe1dd802a51664e18fe4165a70663befce21d2f8")
+    ];
+    const guardians = [];
+    const guardiansAddress = [];
+
+    for (let i = 0; i < guardianWallet.length; i++) {
+      const _account = guardianWallet[i];
+      guardians.push({
+        address: _account.address,
+        privateKey: _account.privateKey
+      });
+      guardiansAddress.push(_account.address);
+    }
+
+    const guardianSalt = 'saltText <text or bytes32>';
+    const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogicAddress, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
+
     const upgradeDelay = 10;
     const guardianDelay = 10;
 
@@ -450,7 +524,7 @@ async function main() {
       walletOwner,
       upgradeDelay,
       guardianDelay,
-      SoulWalletLib.Defines.AddressZero
+      gurdianAddressAndInitCode.address || SoulWalletLib.Defines.AddressZero
     );
     {
       const walletAddress_online = await WalletFactory.contract.getWalletAddress(
@@ -458,7 +532,7 @@ async function main() {
         walletOwner,
         guardianDelay,
         upgradeDelay,
-        SoulWalletLib.Defines.AddressZero,
+        gurdianAddressAndInitCode.address || SoulWalletLib.Defines.AddressZero,
         SoulWalletLib.Defines.bytes32_zero
       );
       if (walletAddress_online !== walletAddress) {
@@ -470,6 +544,7 @@ async function main() {
 
     // check if wallet is activated (deployed) 
     const code = await ethers.provider.getCode(walletAddress);
+
     if (code === "0x") {
 
       const activateOp = soulWalletLib.activateWalletOp(
@@ -478,7 +553,7 @@ async function main() {
         walletOwner,
         upgradeDelay,
         guardianDelay,
-        SoulWalletLib.Defines.AddressZero,
+        gurdianAddressAndInitCode.address || SoulWalletLib.Defines.AddressZero,
         '0x',
         ethers.utils
           .parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei")
@@ -487,8 +562,11 @@ async function main() {
           .parseUnits(eip1559GasFee.high.suggestedMaxPriorityFeePerGas, "gwei")
           .toString()
       );
+      //await activateOp.calcL2GasPrice(ethers.provider);
 
-      const requiredPrefund = activateOp.requiredPrefund(ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei"));
+      const requiredPrefund = activateOp.requiredPrefund(
+        ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei").mul(120).div(100)
+      );
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
       // send `requiredPrefund` ETH to wallet
       const _balance = await ethers.provider.getBalance(walletAddress);
@@ -501,14 +579,12 @@ async function main() {
           from: EOA.address
         });
       }
-
+      
       const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
       activateOp.signWithSignature(
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
-      const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, '');
-      //await bundler.init(); // run init to check bundler is alivable
       const validation = await bundler.simulateValidation(activateOp);
       if (validation.status !== 0) {
         throw new Error(`error code:${validation.status}`);
@@ -519,7 +595,7 @@ async function main() {
       }
 
       if (true) {
-        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+        const EntryPoint =  EntryPoint__factory.connect(EntryPointAddress, EOA);
         const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
         console.log(re);
         // check if wallet is activated (deployed)
@@ -549,81 +625,76 @@ async function main() {
         }
       }
 
-    } else {
+    }
 
-      // bundler test
+    if (recoverWalletTest) {
       const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
-      let sendETHOP = await soulWalletLib.Tokens.ETH.transfer(
+      const newWalletOwner = new ethers.Wallet("0x42e227223702c6a3f7a5834df80b01b814c811f16267f17990145461bc63820b");
+      const transferOwnerOP = await soulWalletLib.Guardian.transferOwner(
         ethers.provider,
         walletAddress,
         nonce,
         EntryPointAddress,
-        SoulWalletLib.Defines.AddressZero,
-        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, 'gwei').toString(),
-        ethers.utils.parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, 'gwei').mul(3).toString(),
-        EOA.address,
-        '2'
+        '0x',
+        ethers.utils
+          .parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(eip1559GasFee.high.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        newWalletOwner.address
       );
-      if (!sendETHOP) {
-        throw new Error("sendETHOP is null");
+      if (!transferOwnerOP) {
+        throw new Error('transferOwnerOP is null');
       }
 
+      const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHash(EntryPointAddress, chainId);
+      const guardianSignArr: any[] = [];
+      for (let index = 0; index < Math.round(guardians.length / 2); index++) {
+        const _guardian = guardians[index];
+        const _address = _guardian.address;
+        const _privateKey = _guardian.privateKey;
+        guardianSignArr.push(
+          {
+            contract: false,
+            address: _address,
+            signature: Utils.signMessage(transferOwnerOPuserOpHash, _privateKey)
+          }
+        );
+      }
+      const signature = soulWalletLib.Guardian.packGuardiansSignByInitCode(gurdianAddressAndInitCode.address, guardianSignArr, 0, gurdianAddressAndInitCode.initCode);
+      transferOwnerOP.signature = signature;
 
-      const requiredPrefund = sendETHOP.requiredPrefund(ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei"));
-      console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
-      // send `requiredPrefund` ETH to wallet
-      const _balance = await ethers.provider.getBalance(walletAddress);
-      if (_balance.lt(requiredPrefund)) {
-        const _requiredfund = requiredPrefund.sub(_balance);
-        console.log('sending ' + ethers.utils.formatEther(_requiredfund) + ' ETH to wallet');
-        await EOA.sendTransaction({
-          to: walletAddress,
-          value: _requiredfund,
-          from: EOA.address
-        });
+      {
+        const requiredPrefund = transferOwnerOP.requiredPrefund(
+          ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei").mul(120).div(100)
+        );
+        console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
+        // send `requiredPrefund` ETH to wallet
+        const _balance = await ethers.provider.getBalance(walletAddress);
+        if (_balance.lt(requiredPrefund)) {
+          const _requiredfund = requiredPrefund.sub(_balance);
+          console.log('sending ' + ethers.utils.formatEther(_requiredfund) + ' ETH to wallet');
+          await EOA.sendTransaction({
+            to: walletAddress,
+            value: _requiredfund,
+            from: EOA.address
+          });
+        }
+
       }
 
-      const userOpHash = sendETHOP.getUserOpHash(EntryPointAddress, chainId);
-
-      sendETHOP.signWithSignature(
-        walletOwner,
-        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-      );
-
-      const bundlerUrl = networkBundler.get(network.name);
-      if (!bundlerUrl) {
-        throw new Error(`bundler rpc not found for network ${network.name}`);
-      }
-      const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
-      await bundler.init();
-
-      const validation = await bundler.simulateValidation(sendETHOP);
+      const validation = await bundler.simulateValidation(transferOwnerOP);
       if (validation.status !== 0) {
         throw new Error(`error code:${validation.status}`);
       }
-      const simulate = await bundler.simulateHandleOp(sendETHOP);
+      const simulate = await bundler.simulateHandleOp(transferOwnerOP);
       if (simulate.status !== 0) {
         throw new Error(`error code:${simulate.status}`);
       }
 
-      const receipt: IUserOpReceipt | null = await bundler.eth_getUserOperationReceipt('0xf54c61c780e9c0324147e3f6214d8a007051c90df035a20891bcdb807d4ef71e');
 
-      const bundlerEvent = bundler.sendUserOperation(sendETHOP, 1000 * 60 * 3);
-      bundlerEvent.on('error', (err: any) => {
-        console.log(err);
-      });
-      bundlerEvent.on('send', (userOpHash: string) => {
-        console.log('send: ' + userOpHash);
-      });
-      bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
-        console.log('receipt: ' + receipt);
-      });
-      bundlerEvent.on('timeout', () => {
-        console.log('timeout');
-      });
-      while (true) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+
     }
 
 
@@ -674,7 +745,7 @@ async function main() {
       const requiredPrefund = activateOp.requiredPrefund(ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei"));
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
       // get USDC exchangeRate
-      const exchangePrice = await soulWalletLib.getPaymasterExchangePrice(ethers.provider, TokenPaymasterAddress, USDCContractAddress, true);
+      const exchangePrice = await soulWalletLib.getPaymasterExchangePrice(ethers.provider, TokenPaymasterAddress, USDCContractAddresses[0], true);
       const tokenDecimals = exchangePrice.tokenDecimals || 6;
       // print price now
       console.log('exchangePrice: ' + ethers.utils.formatUnits(exchangePrice.price, exchangePrice.decimals), 'USDC/ETH');
@@ -688,10 +759,10 @@ async function main() {
       }
       console.log('requiredUSDC: ' + ethers.utils.formatUnits(requiredUSDC, tokenDecimals), 'USDC');
       const maxUSDC = requiredUSDC.mul(150).div(100); // 10% more
-      let paymasterAndData = soulWalletLib.getPaymasterData(TokenPaymasterAddress, USDCContractAddress, maxUSDC);
+      let paymasterAndData = soulWalletLib.getPaymasterData(TokenPaymasterAddress, USDCContractAddresses[0], maxUSDC);
       activateOp.paymasterAndData = paymasterAndData;
       if (true) {
-        const USDCContract = await ethers.getContractAt("USDCoin", USDCContractAddress);
+        const USDCContract = await ethers.getContractAt("USDCoin", USDCContractAddresses[0]);
         // send maxUSDC USDC to wallet
         await USDCContract.transfer(walletAddress, maxUSDC);
         // get balance of USDC
@@ -701,7 +772,7 @@ async function main() {
 
       const approveData: IApproveToken[] = [
         {
-          token: USDCContractAddress,
+          token: USDCContractAddresses[0],
           spender: TokenPaymasterAddress,
           value: ethers.utils.parseEther('100').toString()
         }

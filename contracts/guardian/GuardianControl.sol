@@ -56,7 +56,7 @@ contract GuardianControl is IGuardianControl {
         IGuardianControl.GuardianLayout storage layout
     ) private returns (bool) {
         if (
-            layout.activateTime != 0 && layout.activateTime >= block.timestamp
+            layout.activateTime != 0 && layout.activateTime <= block.timestamp
         ) {
             layout.activateTime = 0;
             _setGuardian(layout, layout.pendingGuardian);

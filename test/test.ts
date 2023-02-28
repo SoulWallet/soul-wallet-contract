@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-24 15:36:04
+ * @LastEditTime: 2023-02-28 22:50:01
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -14,6 +14,7 @@ import { IApproveToken, ITransaction, SoulWalletLib, UserOperation } from 'soul-
 import { SoulWallet__factory } from "../src/types/index";
 import { Utils } from "./Utils";
 import * as ethUtil from 'ethereumjs-util';
+import { Bundler } from "soul-wallet-lib/dist/utils/bundler";
 
 
 const log_on = false;
@@ -25,7 +26,6 @@ describe("SoulWalletContract", function () {
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
     async function deployFixture() {
-
         // get accounts
         const accounts = await ethers.getSigners();
 
@@ -163,8 +163,8 @@ describe("SoulWalletContract", function () {
         //describe("activate wallet", async () => {
         const { soulWalletLib, bundler, chainId, accounts, SingletonFactory, walletOwner, SoulWalletLogic, EntryPoint, USDC, TokenPaymaster, GuardianLogic } = await loadFixture(deployFixture);
 
-        const upgradeDelay = 10;
-        const guardianDelay = 10;
+        const upgradeDelay = 30;
+        const guardianDelay = 30;
 
         const guardians = [];
         const guardiansAddress = [];
@@ -188,9 +188,8 @@ describe("SoulWalletContract", function () {
             _guardiansAddress[0] = _guardiansAddress[1];
             _guardiansAddress[1] = _guardianTmpItem;
 
-            const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
-            expect(gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
-
+            const _gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
+            expect(_gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
         }
 
         const walletAddress = await soulWalletLib.calculateWalletAddress(
@@ -312,9 +311,8 @@ describe("SoulWalletContract", function () {
             _guardiansAddress[0] = _guardiansAddress[1];
             _guardiansAddress[1] = _guardianTmpItem;
 
-            const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
-            expect(gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
-
+            const _gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
+            expect(_gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
         }
 
         const walletAddress = await soulWalletLib.calculateWalletAddress(
@@ -519,16 +517,22 @@ describe("SoulWalletContract", function () {
     }
 
     async function updateGuardian() {
-        const { soulWalletLib, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster, USDC } = await activateWallet_withETH();
+        const { soulWalletLib, bundler, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, EntryPoint } = await activateWallet_withETH();
         let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress);
 
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
-        const guardians: string[] = [];
-        for (let i = 0; i < accounts.length; i++) {
-            guardians.push(accounts[i].address);
+        const guardians = [];
+        const guardiansAddress = [];
+        for (let i = 0; i < 10; i++) {
+            const _guardian = await ethers.Wallet.createRandom();
+            guardians.push({
+                address: _guardian.address,
+                privateKey: _guardian.privateKey
+            });
+            guardiansAddress.push(_guardian.address);
         }
         const guardianSalt = 'saltText' + Math.random();
-        const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardians, Math.round(guardians.length / 2), guardianSalt);
+        const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardians.length / 2), guardianSalt);
         log('new guardian address ==> ' + gurdianAddressAndInitCode.address);
         const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
 
@@ -556,11 +560,20 @@ describe("SoulWalletContract", function () {
         guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress, await time.latest());
         expect(guardianInfo?.currentGuardian).to.equal(gurdianAddressAndInitCode.address);
 
+        // test recoveryWallet
+        await _recoveryWallet(soulWalletLib, bundler, guardians, gurdianAddressAndInitCode.initCode, walletAddress, walletOwner, gurdianAddressAndInitCode.address, chainId, accounts, GuardianLogic, EntryPoint);
+
+
+
     }
 
     async function recoveryWallet() {
-        const { soulWalletLib, bundler, USDC, guardians, guardianSalt, guardianInitcode, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, TokenPaymaster } = await activateWallet_withETH();
-        let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress);
+        const { soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint } = await activateWallet_withETH();
+        await _recoveryWallet(soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint);
+    }
+    async function _recoveryWallet(soulWalletLib: SoulWalletLib, bundler: Bundler, guardians: any[], guardianInitcode: any, walletAddress: string, walletOwner: any, guardian: string, chainId: number, accounts: any[], GuardianLogic: any, EntryPoint: any) {
+
+        let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress,await time.latest());
         expect(guardianInfo?.currentGuardian).to.equal(guardian);
 
         const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
@@ -586,11 +599,14 @@ describe("SoulWalletContract", function () {
             const _guardian = guardians[index];
             const _address = _guardian.address;
             const _privateKey = _guardian.privateKey;
+            const _signature = Utils.signMessage(transferOwnerOPuserOpHash, _privateKey);
+            const _recoverAddress = Utils.recoverAddress(transferOwnerOPuserOpHash, _signature);
+            expect(_recoverAddress.toLowerCase()).to.equal(_address.toLowerCase());
             guardianSignArr.push(
                 {
                     contract: false,
                     address: _address,
-                    signature: Utils.signMessage(transferOwnerOPuserOpHash, _privateKey)
+                    signature: _signature
                 }
             );
         }

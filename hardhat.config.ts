@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-24 14:40:27
+ * @LastEditTime: 2023-02-28 00:18:49
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -23,6 +23,10 @@ const ARBGOERLI_PRIVATE_KEY =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const OPGOERLI_PRIVATE_KEY =
   process.env.OPGOERLI_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+
+const OPTIMISM_PRIVATE_KEY =
+  process.env.OPTIMISM_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 
@@ -97,11 +101,19 @@ const config: HardhatUserConfig = {
       accounts: [OPGOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
+    },
+    optimistic:{
+      url: process.env.OPTIMISM_MAINNET_PROVIDER || "https://mainnet.optimism.io",
+      accounts: [OPTIMISM_PRIVATE_KEY],
+      gasPrice: "auto",
+      timeout: 1000000
     }
+
   },
   etherscan: {
     apiKey: {
-      optimisticGoerli: process.env.OPGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      optimisticEthereum: process.env.OPTIMISM_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      optimisticGoerli: process.env.OPTIMISM_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       arbitrumGoerli: process.env.ARBGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       goerli: process.env.GOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || ""
     }

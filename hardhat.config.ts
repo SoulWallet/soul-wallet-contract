@@ -30,6 +30,21 @@ const OPTIMISM_PRIVATE_KEY =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 
+  const optimizedComilerSettings = {
+    version: '0.8.17',
+    settings: {
+      optimizer: { enabled: true, runs: 1000000 },
+      viaIR: true
+    }
+  }
+  const entrypointRelatedComilerSettings = {
+    version: '0.8.15',
+    settings: {
+      optimizer: { enabled: true, runs: 1000000 },
+      viaIR: true
+    }
+  }
+
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
   solidity: {
@@ -46,16 +61,11 @@ const config: HardhatUserConfig = {
       }
     ],
     overrides: {
-      "contracts/EntryPoint.sol": {
-        version: "0.8.17",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1000000
-          },
-          viaIR: true
-        }
-      }
+      "contracts/entrypoint/EntryPoint.sol": optimizedComilerSettings,
+      "contracts/utils/Exec.sol": entrypointRelatedComilerSettings,
+      "contracts/entrypoint/StakeManager.sol": entrypointRelatedComilerSettings,
+      "contracts/entrypoint/SenderCreator.sol": entrypointRelatedComilerSettings,
+      "contracts/entrypoint/Helpers.sol": entrypointRelatedComilerSettings,
     }
   },
   typechain: {

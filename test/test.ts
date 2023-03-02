@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-03-02 18:28:43
+ * @LastEditTime: 2023-03-02 18:33:52
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -728,9 +728,9 @@ describe("SoulWalletContract", function () {
         it("activate wallet(USDC)", activateWallet_WithUSDCPaymaster);
         it("transferToken", transferToken);
         it("update guardian", updateGuardian);
-        // it("recovery wallet", recoveryWallet);
-        // it("interface resolver", interfaceResolver);
-        // it("other coverage test", coverageTest);
+        it("recovery wallet", recoveryWallet);
+        it("interface resolver", interfaceResolver);
+        it("other coverage test", coverageTest);
     });
 
 

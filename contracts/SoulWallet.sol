@@ -18,7 +18,6 @@ import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
 
-
 /**
  * @author  soulwallet team.
  * @title   an implementation of the ERC4337 smart contract wallet.
@@ -41,7 +40,6 @@ contract SoulWallet is
     using UserOperationLib for UserOperation;
     using Signatures for UserOperation;
     using Calldata for bytes;
-
 
     /**
      * @dev Emitted when `Account` is initialized.
@@ -168,8 +166,10 @@ contract SoulWallet is
     /**
      * @dev see guardian/GuardianControl.sol for more details
      */
-    function cancelGuardian(address guardian) external onlyOwnerOrFromEntryPoint {
-        _cancelGuardian(guardian); 
+    function cancelGuardian(
+        address guardian
+    ) external onlyOwnerOrFromEntryPoint {
+        _cancelGuardian(guardian);
     }
 
     /**
@@ -231,7 +231,10 @@ contract SoulWallet is
         uint256[] calldata value,
         bytes[] calldata func
     ) external onlyOwner {
-        require(dest.length == func.length && func.length == value.length, "wrong array lengths");
+        require(
+            dest.length == func.length && func.length == value.length,
+            "wrong array lengths"
+        );
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], value[i], func[i]);
         }
@@ -266,12 +269,14 @@ contract SoulWallet is
         bytes[] calldata func
     ) external {
         _requireFromEntryPoint();
-        require(dest.length == func.length && dest.length == value.length, "wrong array lengths");
+        require(
+            dest.length == func.length && dest.length == value.length,
+            "wrong array lengths"
+        );
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], value[i], func[i]);
         }
     }
-
 
     /// implement template method of BaseWallet
     function _validateAndUpdateNonce(
@@ -284,35 +289,36 @@ contract SoulWallet is
     }
 
     /**
-     * validate the signature is valid for this message.
-     * @param userOp validate the userOp.signature field
-     * @param userOpHash convenient field: the hash of the request, to check the signature against
-     *          (also hashes the entrypoint and chain-id)
-     * @param aggregator the current aggregator. can be ignored by accounts that don't use aggregators
-     * @return deadline the last block timestamp this operation is valid, or zero if it is valid indefinitely.
-     *      Note that the validation code cannot use block.timestamp (or block.number) directly.
+     * @notice  validate the signature is valid for this message.
+     * @dev     .
+     * @param   userOp validate the userOp.signature field.
+     * @param   userOpHash convenient field: the hash of the request, to check the signature against.
+     * @return  validationData  returns a uint256, with is created by `_packedValidationData` and parsed by `_parseValidationData`.
      */
     function _validateSignature(
         UserOperation calldata userOp,
-        bytes32 userOpHash,
-        address aggregator
-    ) internal virtual override returns (uint256 deadline) {
-        (aggregator);
+        bytes32 userOpHash
+    ) internal virtual override returns (uint256 validationData) {
         SignatureData memory signatureData = userOp.decodeSignature();
 
-        bytes32 _hash;
-        if (signatureData.deadline == 0) {
-            _hash = userOpHash;
+        bytes32 _hash = userOpHash;
+        if (signatureData.mode == SignatureMode.owner) {
+            if (_validateOwnerSignature(signatureData, _hash)) {
+                return _packValidationData(false, signatureData.validUntil, signatureData.validAfter);
+            } else {
+                // equivalent to _packValidationData(true,0,0);
+                return SIG_VALIDATION_FAILED;
+            }
         } else {
-            _hash = keccak256(
-                abi.encodePacked(userOpHash, signatureData.deadline)
-            );
+            if (
+                _validateGuardiansSignature(signatureData, userOp, _hash)
+            ) {
+                return _packValidationData(false,signatureData.validUntil,signatureData.validAfter);
+            } else {
+                //  equivalent to _packValidationData(true,0,0);
+                return SIG_VALIDATION_FAILED;
+            }
         }
-        signatureData.mode == SignatureMode.owner
-            ? _validateOwnerSignature(signatureData, _hash)
-            : _validateGuardiansSignature(signatureData, userOp, _hash);
-
-        return signatureData.deadline;
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
@@ -367,17 +373,15 @@ contract SoulWallet is
     function _validateOwnerSignature(
         SignatureData memory signatureData,
         bytes32 userOpHash
-    ) internal view {
+    ) internal view returns (bool success) {
         require(isOwner(signatureData.signer), "Signer not an owner");
 
-        require(
+        return
             SignatureChecker.isValidSignatureNow(
                 signatureData.signer,
                 userOpHash.toEthSignedMessageHash(),
                 signatureData.signature
-            ),
-            "Wallet: Invalid owner sig"
-        );
+            );
     }
 
     /**
@@ -387,14 +391,15 @@ contract SoulWallet is
         SignatureData memory signatureData,
         UserOperation calldata op,
         bytes32 userOpHash
-    ) internal {
+    ) internal returns (bool success) {
         require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
 
-        _validateGuardiansSignatureCallData(
-            signatureData.signer,
-            userOpHash.toEthSignedMessageHash(),
-            signatureData.signature
-        );
+        return
+            _validateGuardiansSignatureCallData(
+                signatureData.signer,
+                userOpHash.toEthSignedMessageHash(),
+                signatureData.signature
+            );
     }
 
     function getVersion() external pure returns (uint) {
@@ -412,7 +417,7 @@ contract SoulWallet is
         bytes32 hash,
         bytes memory signature
     ) external view returns (bytes4) {
-        if(isOwner(hash.recover(signature))) {
+        if (isOwner(hash.recover(signature))) {
             return IERC1271.isValidSignature.selector;
         } else {
             return 0xffffffff;
@@ -425,7 +430,14 @@ contract SoulWallet is
      * @param   _interfaceID  .
      * @return  bool  .
      */
-    function supportsInterface(bytes4 _interfaceID) public view override(DefaultCallbackHandler, AccessControlEnumerable) returns (bool) {
+    function supportsInterface(
+        bytes4 _interfaceID
+    )
+        public
+        view
+        override(DefaultCallbackHandler, AccessControlEnumerable)
+        returns (bool)
+    {
         return super.supportsInterface(_interfaceID);
     }
 }

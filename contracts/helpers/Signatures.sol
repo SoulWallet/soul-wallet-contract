@@ -11,7 +11,8 @@ import "../interfaces/UserOperation.sol";
 struct SignatureData {
     SignatureMode mode;
     address signer;
-    uint64 deadline;
+    uint48 validAfter;
+    uint48 validUntil;
     bytes signature;
 }
 
@@ -42,9 +43,10 @@ library Signatures {
         (
             SignatureMode _mode,
             address _singer,
-            uint64 _deadline,
+            uint48 _validAfter,
+            uint48 _validUntil,
             bytes memory _signature
-        ) = abi.decode(signature, (SignatureMode, address, uint64, bytes));
-        return SignatureData(_mode, _singer, _deadline, _signature);
+        ) = abi.decode(signature, (SignatureMode, address, uint48, uint48, bytes));
+        return SignatureData(_mode, _singer, _validAfter, _validUntil, _signature);
     }
 }

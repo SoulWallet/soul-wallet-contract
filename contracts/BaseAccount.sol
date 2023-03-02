@@ -7,6 +7,7 @@ pragma solidity ^0.8.12;
 
 import "./interfaces/IAccount.sol";
 import "./interfaces/IEntryPoint.sol";
+import "./entrypoint/Helpers.sol";
 
 /**
  * Basic account implementation.
@@ -16,7 +17,8 @@ import "./interfaces/IEntryPoint.sol";
 abstract contract BaseAccount is IAccount {
     using UserOperationLib for UserOperation;
 
-    //return value in case of signature failure.
+    //return value in case of signature failure, with no time-range.
+    // equivalent to _packValidationData(true,0,0);
     uint256 constant internal SIG_VALIDATION_FAILED = 1;
 
     /**
@@ -35,10 +37,10 @@ abstract contract BaseAccount is IAccount {
      * Validate user's signature and nonce.
      * subclass doesn't need to override this method. Instead, it should override the specific internal validation methods.
      */
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, address aggregator, uint256 missingAccountFunds)
-    external override virtual returns (uint256 deadline) {
+    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+    external override virtual returns (uint256 validationData) {
         _requireFromEntryPoint();
-        deadline = _validateSignature(userOp, userOpHash, aggregator);
+        validationData = _validateSignature(userOp, userOpHash);
         if (userOp.initCode.length == 0) {
             _validateAndUpdateNonce(userOp);
         }
@@ -56,14 +58,17 @@ abstract contract BaseAccount is IAccount {
      * validate the signature is valid for this message.
      * @param userOp validate the userOp.signature field
      * @param userOpHash convenient field: the hash of the request, to check the signature against
-     *          (also hashes the entrypoint and chain-id)
-     * @param aggregator the current aggregator. can be ignored by accounts that don't use aggregators
-     * @return deadline the last block timestamp this operation is valid, or zero if it is valid indefinitely.
-     *      return SIG_VALIDATION_FAILED in case signature fails
+     *          (also hashes the entrypoint and chain id)
+     * @return validationData signature and time-range of this operation
+     *      <20-byte> sigAuthorizer - 0 for valid signature, 1 to mark signature failure,
+     *         otherwise, an address of an "authorizer" contract.
+     *      <6-byte> validUntil - last timestamp this operation is valid. 0 for "indefinite"
+     *      <6-byte> validAfter - first timestamp this operation is valid
+     *      If the account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.
      *      Note that the validation code cannot use block.timestamp (or block.number) directly.
      */
-    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash, address aggregator)
-    internal virtual returns (uint256 deadline);
+    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
+    internal virtual returns (uint256 validationData);
 
     /**
      * validate the current nonce matches the UserOperation nonce.

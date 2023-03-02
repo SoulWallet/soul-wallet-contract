@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "../interfaces/IGuardianControl.sol";
-import "../SenderCreator.sol";
+import "../entrypoint/SenderCreator.sol";
 import "../AccountStorage.sol";
 
 contract GuardianControl is IGuardianControl {
@@ -124,7 +124,7 @@ contract GuardianControl is IGuardianControl {
         address signer,
         bytes32 hash,
         bytes memory guardianSignature
-    ) internal {
+    ) internal returns (bool success){
         GuardianCallData memory guardianCallData = decodeGuardianCallData(
             guardianSignature
         );
@@ -145,13 +145,10 @@ contract GuardianControl is IGuardianControl {
             );
         }
 
-        require(
-            SignatureChecker.isValidSignatureNow(
+        return SignatureChecker.isValidSignatureNow(
                 guardian,
                 hash,
                 guardianCallData.signature
-            ),
-            "GuardianControl: invalid signature"
-        );
+            );
     }
 }

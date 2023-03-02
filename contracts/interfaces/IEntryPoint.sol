@@ -20,10 +20,10 @@ interface IEntryPoint is IStakeManager {
      * @param userOpHash - unique identifier for the request (hash its entire content, except signature).
      * @param sender - the account that generates this request.
      * @param paymaster - if non-null, the paymaster that pays for this request.
-     * @param nonce - the nonce value from the request
-     * @param actualGasCost - actual amount paid (by account or paymaster) for this UserOperation
-     * @param actualGasUsed - total gas used by this UserOperation (including preVerification, creation, validation and execution)
+     * @param nonce - the nonce value from the request.
      * @param success - true if the sender transaction succeeded, false if reverted.
+     * @param actualGasCost - actual amount paid (by account or paymaster) for this UserOperation.
+     * @param actualGasUsed - total gas used by this UserOperation (including preVerification, creation, validation and execution).
      */
     event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed);
 
@@ -48,24 +48,57 @@ interface IEntryPoint is IStakeManager {
     /**
      * signature aggregator used by the following UserOperationEvents within this bundle.
      */
-    event SignatureAggregatorChanged(address aggregator);
+    event SignatureAggregatorChanged(address indexed aggregator);
 
     /**
      * a custom revert error of handleOps, to identify the offending op.
      *  NOTE: if simulateValidation passes successfully, there should be no reason for handleOps to fail on it.
      *  @param opIndex - index into the array of ops to the failed one (in simulateValidation, this is always zero)
-     *  @param paymaster - if paymaster.validatePaymasterUserOp fails, this will be the paymaster's address. if validateUserOp failed,
-     *       this value will be zero (since it failed before accessing the paymaster)
      *  @param reason - revert reason
+     *      The string starts with a unique code "AAmn", where "m" is "1" for factory, "2" for account and "3" for paymaster issues,
+     *      so a failure can be attributed to the correct entity.
      *   Should be caught in off-chain handleOps simulation and not happen on-chain.
-     *   Useful for mitigating DoS attempts against batchers or for troubleshooting of account/paymaster reverts.
+     *   Useful for mitigating DoS attempts against batchers or for troubleshooting of factory/account/paymaster reverts.
      */
-    error FailedOp(uint256 opIndex, address paymaster, string reason);
+    error FailedOp(uint256 opIndex, string reason);
 
     /**
      * error case when a signature aggregator fails to verify the aggregated signature it had created.
      */
     error SignatureValidationFailed(address aggregator);
+
+    /**
+     * Successful result from simulateValidation.
+     * @param returnInfo gas and time-range returned values
+     * @param senderInfo stake information about the sender
+     * @param factoryInfo stake information about the factory (if any)
+     * @param paymasterInfo stake information about the paymaster (if any)
+     */
+    error ValidationResult(ReturnInfo returnInfo,
+        StakeInfo senderInfo, StakeInfo factoryInfo, StakeInfo paymasterInfo);
+
+    /**
+     * Successful result from simulateValidation, if the account returns a signature aggregator
+     * @param returnInfo gas and time-range returned values
+     * @param senderInfo stake information about the sender
+     * @param factoryInfo stake information about the factory (if any)
+     * @param paymasterInfo stake information about the paymaster (if any)
+     * @param aggregatorInfo signature aggregation info (if the account requires signature aggregator)
+     *      bundler MUST use it to verify the signature, or reject the UserOperation
+     */
+    error ValidationResultWithAggregation(ReturnInfo returnInfo,
+        StakeInfo senderInfo, StakeInfo factoryInfo, StakeInfo paymasterInfo,
+        AggregatorStakeInfo aggregatorInfo);
+
+    /**
+     * return value of getSenderAddress
+     */
+    error SenderAddressResult(address sender);
+
+    /**
+     * return value of simulateHandleOp
+     */
+    error ExecutionResult(uint256 preOpGas, uint256 paid, uint48 validAfter, uint48 validUntil, bool targetSuccess, bytes targetResult);
 
     //UserOps handled, per aggregator
     struct UserOpsPerAggregator {
@@ -80,7 +113,7 @@ interface IEntryPoint is IStakeManager {
     /**
      * Execute a batch of UserOperation.
      * no signature aggregator is used.
-     * if any account requires an aggregator (that is, it returned an "actualAggregator" when
+     * if any account requires an aggregator (that is, it returned an aggregator when
      * performing simulateValidation), then handleAggregatedOps() must be used instead.
      * @param ops the operations to execute
      * @param beneficiary the address to receive the fees
@@ -112,42 +145,20 @@ interface IEntryPoint is IStakeManager {
     function simulateValidation(UserOperation calldata userOp) external;
 
     /**
-     * Successful result from simulateValidation.
-     * @param returnInfo gas and deadlines returned values
-     * @param senderInfo stake information about the sender
-     * @param factoryInfo stake information about the factor (if any)
-     * @param paymasterInfo stake information about the paymaster (if any)
-     */
-    error ValidationResult(ReturnInfo returnInfo,
-        StakeInfo senderInfo, StakeInfo factoryInfo, StakeInfo paymasterInfo);
-
-
-    /**
-     * Successful result from simulateValidation, if the account returns a signature aggregator
-     * @param returnInfo gas and deadlines returned values
-     * @param senderInfo stake information about the sender
-     * @param factoryInfo stake information about the factor (if any)
-     * @param paymasterInfo stake information about the paymaster (if any)
-     * @param aggregatorInfo signature aggregation info (if the account requires signature aggregator)
-     *      bundler MUST use it to verify the signature, or reject the UserOperation
-     */
-    error ValidationResultWithAggregation(ReturnInfo returnInfo,
-        StakeInfo senderInfo, StakeInfo factoryInfo, StakeInfo paymasterInfo,
-        AggregatorStakeInfo aggregatorInfo);
-
-    /**
-     * gas and deadlines returned during simulation
+     * gas and return values during simulation
      * @param preOpGas the gas used for validation (including preValidationGas)
      * @param prefund the required prefund for this operation
-     * @param deadline validateUserOp's deadline (or SIG_VALIDATION_FAILED for signature failure)
-     * @param paymasterDeadline validatePaymasterUserOp's deadline (or SIG_VALIDATION_FAILED for signature failure)
+     * @param sigFailed validateUserOp's (or paymaster's) signature check failed
+     * @param validAfter - first timestamp this UserOp is valid (merging account and paymaster time-range)
+     * @param validUntil - last timestamp this UserOp is valid (merging account and paymaster time-range)
      * @param paymasterContext returned by validatePaymasterUserOp (to be passed into postOp)
      */
     struct ReturnInfo {
         uint256 preOpGas;
         uint256 prefund;
-        uint256 deadline;
-        uint256 paymasterDeadline;
+        bool sigFailed;
+        uint48 validAfter;
+        uint48 validUntil;
         bytes paymasterContext;
     }
 
@@ -156,7 +167,7 @@ interface IEntryPoint is IStakeManager {
      * the aggregator returned by the account, and its current stake.
      */
     struct AggregatorStakeInfo {
-        address actualAggregator;
+        address aggregator;
         StakeInfo stakeInfo;
     }
 
@@ -168,21 +179,20 @@ interface IEntryPoint is IStakeManager {
      */
     function getSenderAddress(bytes memory initCode) external;
 
-    /**
-     * return value of getSenderAddress
-     */
-    error SenderAddressResult(address sender);
-
 
     /**
      * simulate full execution of a UserOperation (including both validation and target execution)
-     * this method will always revert. it performs full validation of the UserOperation, but ignores
-     * signature error.
+     * this method will always revert with "ExecutionResult".
+     * it performs full validation of the UserOperation, but ignores signature error.
+     * an optional target address is called after the userop succeeds, and its value is returned
+     * (before the entire call is reverted)
      * Note that in order to collect the the success/failure of the target call, it must be executed
      * with trace enabled to track the emitted events.
+     * @param op the UserOperation to simulate
+     * @param target if nonzero, a target address to call after userop simulation. If called, the targetSuccess and targetResult
+     *        are set to the return from that call.
+     * @param targetCallData callData to pass to target address
      */
-    function simulateHandleOp(UserOperation calldata op) external;
-
-    error ExecutionResult(uint256 preOpGas, uint256 paid, uint256 deadline, uint256 paymasterDeadline);
+    function simulateHandleOp(UserOperation calldata op, address target, bytes calldata targetCallData) external;
 }
 

@@ -7,8 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "hardhat/console.sol";
 
 contract USDCoin is ERC20, Ownable, ERC20Permit {
-    constructor() ERC20("USD Coin", "USDC") ERC20Permit("USD Coin") {
-        _mint(owner(), type(uint104).max);
+    constructor() ERC20("USD Mock Coin", "USDMC") ERC20Permit("USD Coin") {
+       _mint(owner(), type(uint64).max);
     }
 
     function decimals() public view override returns (uint8) {

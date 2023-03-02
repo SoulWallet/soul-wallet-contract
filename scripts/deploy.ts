@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-28 21:48:04
+ * @LastEditTime: 2023-03-01 15:01:56
  */
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -30,10 +30,7 @@ let recoverWalletTest = false;
 /**
  * run activateWalletWithPaymaster test
  */
-let activateWalletWithPaymasterTest = false;
-
-
-let useBundler = false;
+let activateWalletWithPaymasterTest = true;
 
 
 async function main() {
@@ -94,6 +91,7 @@ async function main() {
   networkBundler.set('goerli', 'https://bundler-eth-goerli.soulwallets.me/rpc');
   networkBundler.set('arbitrumGoerli', 'https://bundler-arb-goerli.soulwallets.me/rpc');
   networkBundler.set('optimisticGoerli', 'https://bundler-op-goerli.soulwallets.me/rpc');
+  networkBundler.set('arbitrum', 'https://bundler-arb-main.soulwallets.me/rpc');
 
 
   const chainId = await (await ethers.provider.getNetwork()).chainId;
@@ -107,13 +105,33 @@ async function main() {
     eip1559GasFee = mockGasFee;
   } else {
     soulWalletLib = new SoulWalletLib();
-    if (network.name === "arbitrumGoerli") {
+    if (network.name === "arbitrum") {
+
+      USDCContractAddresses = [
+        '0x8Da746c5641a8720b641685E3679F4B7f294df2C', // USD Mock Coin
+        '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1', // DAI
+        '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', // USDC
+        '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', // USDT
+      ];
+      //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=arbitrum
+      USDCPriceFeedAddress = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612";
+
+      eip1559GasFee = await soulWalletLib.Utils.suggestedGasFee.getEIP1559GasFees(chainId);
+      if (!eip1559GasFee) {
+        throw new Error("getEIP1559GasFees failed");
+      }
+
+    } else if (network.name === "arbitrumGoerli") {
 
       USDCContractAddresses = ["0xe34a90dF83c29c28309f58773C41122d4E8C757A"];
       //https://docs.chain.link/data-feeds/price-feeds/addresses/?network=arbitrum
       USDCPriceFeedAddress = "0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08";
 
       eip1559GasFee = mockGasFee;
+      //  Max Fee per Gas 1.62 Gwei
+      //  Gas Price 0.1 Gwei
+      eip1559GasFee.high.suggestedMaxFeePerGas = "1.62";
+      eip1559GasFee.high.suggestedMaxPriorityFeePerGas = "0.1";
 
     } else if (network.name === "goerli") {
 
@@ -139,11 +157,7 @@ async function main() {
       const gasPriceGwei = ethers.utils.formatUnits(gasPrice, 'gwei');
 
       eip1559GasFee.high.suggestedMaxFeePerGas = gasPriceGwei;
-      eip1559GasFee.medium.suggestedMaxFeePerGas = gasPriceGwei;
-      eip1559GasFee.low.suggestedMaxFeePerGas = gasPriceGwei;
       eip1559GasFee.high.suggestedMaxPriorityFeePerGas = gasPriceGwei;
-      eip1559GasFee.medium.suggestedMaxPriorityFeePerGas = gasPriceGwei;
-      eip1559GasFee.low.suggestedMaxPriorityFeePerGas = gasPriceGwei;
 
     } else if (network.name === 'optimistic') {
 
@@ -163,11 +177,7 @@ async function main() {
         throw new Error("getLegacyGasPrices failed");
       }
       eip1559GasFee.high.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
-      eip1559GasFee.medium.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
-      eip1559GasFee.low.suggestedMaxFeePerGas = legacyGasPrice.ProposeGasPrice;
       eip1559GasFee.high.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
-      eip1559GasFee.medium.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
-      eip1559GasFee.low.suggestedMaxPriorityFeePerGas = legacyGasPrice.ProposeGasPrice;
 
     }
     else {
@@ -201,7 +211,12 @@ async function main() {
   if (await ethers.provider.getCode(EntryPointAddress) === '0x') {
     console.log("EntryPoint not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return BigNumber.from(7000000);
+
+      let gasLimit = BigNumber.from(7000000);
+      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+        gasLimit = gasLimit.mul(40);
+      }
+      return gasLimit;
       //return estimatedGasLimit.mul(10)
     }
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
@@ -227,7 +242,6 @@ async function main() {
   } else {
     console.log("EntryPoint already deployed at:" + EntryPointAddress);
   }
-
   // #endregion Entrypoint
 
   // #region WalletLogic 
@@ -241,7 +255,11 @@ async function main() {
   if (await ethers.provider.getCode(WalletLogicAddress) === '0x') {
     console.log("WalletLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return BigNumber.from(7000000);
+      let gasLimit = BigNumber.from(7000000);
+      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+        gasLimit = gasLimit.mul(40);
+      }
+      return gasLimit;
       //return estimatedGasLimit.mul(10)
     }
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
@@ -268,7 +286,6 @@ async function main() {
   } else {
     console.log("WalletLogic already deployed at:" + WalletLogicAddress);
   }
-
   // #endregion WalletLogic
 
   // #region WalletFactory
@@ -281,8 +298,11 @@ async function main() {
   // if not deployed, deploy
   if (await ethers.provider.getCode(walletFactoryAddress) === '0x') {
     console.log("walletFactory not deployed, deploying...");
-
-    const walletFactoryAddress_online = await soulWalletLib.Utils.deployFactory.deploy(WalletLogicAddress, ethers.provider, EOA);
+    let gasLimit = BigNumber.from(6000000);
+    if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+      gasLimit = gasLimit.mul(40);
+    }
+    const walletFactoryAddress_online = await soulWalletLib.Utils.deployFactory.deploy(WalletLogicAddress, ethers.provider, EOA, undefined, undefined, undefined, gasLimit);
     if (walletFactoryAddress_online !== walletFactoryAddress) {
       throw new Error("walletFactoryAddress_online not match");
     }
@@ -333,7 +353,11 @@ async function main() {
   if (await ethers.provider.getCode(PriceOracleAddress) === '0x') {
     console.log("PriceOracle not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return BigNumber.from(400000);
+      let gasLimit = BigNumber.from(400000);
+      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+        gasLimit = gasLimit.mul(40);
+      }
+      return gasLimit;
       //return estimatedGasLimit.mul(10)
     }
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
@@ -380,7 +404,11 @@ async function main() {
   if (await ethers.provider.getCode(TokenPaymasterAddress) === '0x') {
     console.log("TokenPaymaster not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return BigNumber.from(3000000);
+      let gasLimit = BigNumber.from(3000000);
+      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+        gasLimit = gasLimit.mul(40);
+      }
+      return gasLimit;
       //return estimatedGasLimit.mul(10)
     }
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
@@ -445,7 +473,11 @@ async function main() {
   if (await ethers.provider.getCode(GuardianLogicAddress) === '0x') {
     console.log("GuardianLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return BigNumber.from(2000000);
+      let gasLimit = BigNumber.from(2000000);
+      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+        gasLimit = gasLimit.mul(40);
+      }
+      return gasLimit;
       //return estimatedGasLimit.mul(10)
     }
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
@@ -475,19 +507,12 @@ async function main() {
 
   // #region deploy wallet without paymaster
   if (activateWalletTest) {
-
-    let bundlerUrl;
-    if (useBundler) {
-      bundlerUrl = networkBundler.get(network.name);
-      if (!bundlerUrl) {
-        throw new Error(`bundler rpc not found for network ${network.name}`);
-      }
+    let bundlerUrl = networkBundler.get(network.name);
+    if (!bundlerUrl) {
+      throw new Error(`bundler rpc not found for network ${network.name}`);
     }
 
     const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
-    if (useBundler) {
-      await bundler.init();
-    }
 
 
     const guardianWallet = [
@@ -579,7 +604,7 @@ async function main() {
           from: EOA.address
         });
       }
-      
+
       const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
       activateOp.signWithSignature(
         walletOwner,
@@ -595,7 +620,7 @@ async function main() {
       }
 
       if (true) {
-        const EntryPoint =  EntryPoint__factory.connect(EntryPointAddress, EOA);
+        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
         const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
         console.log(re);
         // check if wallet is activated (deployed)
@@ -708,7 +733,7 @@ async function main() {
 
     const upgradeDelay = 10;
     const guardianDelay = 10;
-    const salt = 5;
+    const salt = 0;
     const walletAddress = await soulWalletLib.calculateWalletAddress(
       WalletLogicAddress,
       EntryPointAddress,
@@ -757,26 +782,31 @@ async function main() {
       if (requiredUSDC.eq(0)) {
         requiredUSDC = BigNumber.from(Math.pow(1, tokenDecimals));
       }
-      console.log('requiredUSDC: ' + ethers.utils.formatUnits(requiredUSDC, tokenDecimals), 'USDC');
-      const maxUSDC = requiredUSDC.mul(150).div(100); // 10% more
+      const maxUSDC = requiredUSDC.mul(500).div(100); // 10% more
+      console.log('requiredUSDC: ' + ethers.utils.formatUnits(maxUSDC, tokenDecimals), 'USDC');
       let paymasterAndData = soulWalletLib.getPaymasterData(TokenPaymasterAddress, USDCContractAddresses[0], maxUSDC);
       activateOp.paymasterAndData = paymasterAndData;
-      if (true) {
-        const USDCContract = await ethers.getContractAt("USDCoin", USDCContractAddresses[0]);
-        // send maxUSDC USDC to wallet
+
+
+      const USDCContract = await ethers.getContractAt("USDCoin", USDCContractAddresses[0]);
+      const _balance = await USDCContract.balanceOf(walletAddress);
+      if (_balance.lt(maxUSDC)) {
+        const _requiredfund = maxUSDC.sub(_balance);
+        console.log('sending ' + ethers.utils.formatUnits(_requiredfund, exchangePrice.tokenDecimals) + ' USD to wallet');
+        
         await USDCContract.transfer(walletAddress, maxUSDC);
         // get balance of USDC
         const usdcBalance = await USDCContract.balanceOf(walletAddress);
-        console.log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USDC');
+        console.log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USD');
       }
-
-      const approveData: IApproveToken[] = [
-        {
-          token: USDCContractAddresses[0],
+      const approveData=[];
+      for (let i = 0; i < USDCContractAddresses.length; i++) {
+        approveData.push({
+          token: USDCContractAddresses[i],
           spender: TokenPaymasterAddress,
           value: ethers.utils.parseEther('100').toString()
-        }
-      ];
+        });
+      }
       const approveCallData = await soulWalletLib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, approveData);
       activateOp.callData = approveCallData.callData;
       activateOp.callGasLimit = approveCallData.callGasLimit;

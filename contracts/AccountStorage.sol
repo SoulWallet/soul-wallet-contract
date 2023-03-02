@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./utils/upgradeable/Initializable.sol";
 
 library AccountStorage {
-    bytes32 private constant ACCOUNT_SLOT = keccak256("ERC4337_ACCOUNT_SLOT");
+    bytes32 private constant ACCOUNT_SLOT = keccak256("soulwallet.contracts.AccountStorage");
 
     struct RoleData {
         mapping(address => bool) members;

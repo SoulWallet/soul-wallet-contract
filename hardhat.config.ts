@@ -4,7 +4,7 @@
  * @Autor: daivd.ding
  * @Date: 2022-10-21 11:06:42
  * @LastEditors: cejay
- * @LastEditTime: 2023-02-28 00:18:49
+ * @LastEditTime: 2023-03-01 11:15:03
  */
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -18,13 +18,15 @@ const GOERLI_PRIVATE_KEY =
 const MAINNET_PRIVATE_KEY =
   process.env.MAINNET_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
-const ARBGOERLI_PRIVATE_KEY =
-  process.env.ARBGOERLI_PRIVATE_KEY! ||
+  const ARBGOERLI_ONE_PRIVATE_KEY =
+  process.env.ARBGOERLI_ONE_PRIVATE_KEY! ||
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  const ARBGOERLI_GOERLI_PRIVATE_KEY =
+  process.env.ARBGOERLI_GOERLI_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const OPGOERLI_PRIVATE_KEY =
   process.env.OPGOERLI_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-
 const OPTIMISM_PRIVATE_KEY =
   process.env.OPTIMISM_PRIVATE_KEY! ||
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -100,9 +102,15 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       timeout: 1000000
     },
+    arbitrum: {
+      url: process.env.ARBITRUM_ONE_PROVIDER || "https://arb1.arbitrum.io/rpc",
+      accounts: [ARBGOERLI_ONE_PRIVATE_KEY],
+      gasPrice: "auto",
+      timeout: 1000000
+    },
     arbitrumGoerli: {
       url: process.env.ARBITRUM_GOERLI_PROVIDER || "https://goerli-rollup.arbitrum.io/rpc",
-      accounts: [ARBGOERLI_PRIVATE_KEY],
+      accounts: [ARBGOERLI_GOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
     },
@@ -124,6 +132,7 @@ const config: HardhatUserConfig = {
     apiKey: {
       optimisticEthereum: process.env.OPTIMISM_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+      arbitrumOne: process.env.ARBGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       arbitrumGoerli: process.env.ARBGOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || "",
       goerli: process.env.GOERLI_API_KEY || process.env.ETHERSCAN_API_KEY || ""
     }

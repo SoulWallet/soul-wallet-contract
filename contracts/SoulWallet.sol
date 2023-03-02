@@ -18,6 +18,7 @@ import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
 
+
 /**
  * @author  soulwallet team.
  * @title   an implementation of the ERC4337 smart contract wallet.
@@ -301,10 +302,11 @@ contract SoulWallet is
     ) internal virtual override returns (uint256 validationData) {
         SignatureData memory signatureData = userOp.decodeSignature();
 
-        bytes32 _hash = userOpHash;
+        bytes32 _hash = keccak256(abi.encodePacked(userOpHash,signatureData.validAfter, signatureData.validUntil));
+
         if (signatureData.mode == SignatureMode.owner) {
             if (_validateOwnerSignature(signatureData, _hash)) {
-                return _packValidationData(false, signatureData.validUntil, signatureData.validAfter);
+                return _packValidationData(false,signatureData.validUntil,signatureData.validAfter);
             } else {
                 // equivalent to _packValidationData(true,0,0);
                 return SIG_VALIDATION_FAILED;
@@ -375,7 +377,6 @@ contract SoulWallet is
         bytes32 userOpHash
     ) internal view returns (bool success) {
         require(isOwner(signatureData.signer), "Signer not an owner");
-
         return
             SignatureChecker.isValidSignatureNow(
                 signatureData.signer,

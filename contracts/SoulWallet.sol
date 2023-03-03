@@ -43,6 +43,17 @@ contract SoulWallet is
     using Calldata for bytes;
 
     /**
+     * @dev EIP-1271 magic value returned if the signature times out.
+     */
+    bytes4 constant SIGNATURE_OUT_OF_TIMERANGE = 0xffffffff;
+
+    /**
+     * @dev EIP-1271 magic value returned if the signature is invalid.
+     */
+    bytes4 constant SIGNATURE_INVALID = 0xfffffffe;
+
+
+    /**
      * @dev Emitted when `Account` is initialized.
      */
     event AccountInitialized(
@@ -418,10 +429,24 @@ contract SoulWallet is
         bytes32 hash,
         bytes memory signature
     ) external view returns (bytes4) {
+        if(signature.length > 65){
+            // signature with validAfter and validUntil
+            (bytes memory _signature,uint48 _validAfter,uint48 _validUntil) = abi.decode(signature, (bytes, uint48, uint48));
+            hash = keccak256(abi.encodePacked(hash, _validAfter, _validUntil));
+            if (_validUntil == 0) {
+                _validUntil = type(uint48).max;
+            }
+            bool outOfTimeRange =(block.timestamp > _validUntil) || (block.timestamp < _validAfter);
+            if(outOfTimeRange){
+                return SIGNATURE_OUT_OF_TIMERANGE;
+            }
+            signature = _signature;
+        }
+        
         if (isOwner(hash.recover(signature))) {
             return IERC1271.isValidSignature.selector;
         } else {
-            return 0xffffffff;
+            return SIGNATURE_INVALID;
         }
     }
 

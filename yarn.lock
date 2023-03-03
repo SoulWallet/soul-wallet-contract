@@ -6018,9 +6018,9 @@ solidity-string-utils@^0.0.8-0:
   resolved "https://registry.npmjs.org/solidity-string-utils/-/solidity-string-utils-0.0.8-0.tgz"
   integrity sha512-AHyYRuySlm71vk/rzat5YkP/H+xr5g3a0THHljH2DFSilMnsbLNusSUXVfbU1A3IZrfnaocAx1FSM01/mtchzg==
 
-"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib":
-  version "v0.1.0-alpha.19"
-  resolved "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#e899e70d964c9886dd9b58b9d121bb9dbd7b247b"
+"soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.1.0-alpha.21":
+  version "v0.1.0-alpha.21"
+  resolved "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#ffdfc478a491e1b7c9e58f84dfac7b94c0ab5fb0"
   dependencies:
     dotenv "8.6.0"
     ethereumjs-util "^7.1.5"

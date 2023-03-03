@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-03-01 15:01:56
+ * @LastEditTime: 2023-03-03 11:18:26
  */
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
@@ -199,48 +199,56 @@ async function main() {
   // #endregion prepare
 
   // #region Entrypoint 
-
-  const EntryPointFactory = await ethers.getContractFactory("EntryPoint");
-  // get EntryPointFactory deployed bytecode
-  const EntryPointFactoryBytecode = EntryPointFactory.bytecode;
-  // get create2 address
-  const EntryPointInitCodeHash = keccak256(EntryPointFactoryBytecode);
-  const EntryPointAddress = getCreate2Address(soulWalletLib.singletonFactory, salt, EntryPointInitCodeHash);
-  console.log("EntryPointAddress:", EntryPointAddress);
-  // if not deployed, deploy
+  let EntryPointAddress = '0x0576a174D229E3cFA37253523E645A78A0C91B57';
   if (await ethers.provider.getCode(EntryPointAddress) === '0x') {
-    console.log("EntryPoint not deployed, deploying...");
-    const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-
-      let gasLimit = BigNumber.from(7000000);
-      if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
-        gasLimit = gasLimit.mul(40);
-      }
-      return gasLimit;
-      //return estimatedGasLimit.mul(10)
-    }
-    const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
-    const estimatedGas = await create2FactoryContract.estimateGas.deploy(EntryPointFactoryBytecode, salt);
-    const tx = await create2FactoryContract.deploy(EntryPointFactoryBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
-    console.log("EntryPoint tx:", tx.hash);
-    while (await ethers.provider.getCode(EntryPointAddress) === '0x') {
-      console.log("EntryPoint not deployed, waiting...");
-      await new Promise(r => setTimeout(r, 3000));
-    }
     if (!isLocalTestnet()) {
-      console.log("EntryPoint deployed, verifying...");
-      await new Promise(r => setTimeout(r, 5000));
-      try {
-        await run("verify:verify", {
-          address: EntryPointAddress,
-          constructorArguments: [],
-        });
-      } catch (error) {
-        console.log("EntryPoint verify failed:", error);
-      }
+      debugger;
     }
-  } else {
-    console.log("EntryPoint already deployed at:" + EntryPointAddress);
+    const EntryPointFactory = await ethers.getContractFactory("EntryPoint");
+    // get EntryPointFactory deployed bytecode
+    const EntryPointFactoryBytecode = EntryPointFactory.bytecode;
+    // get create2 address
+    const EntryPointInitCodeHash = keccak256(EntryPointFactoryBytecode);
+    EntryPointAddress = getCreate2Address(soulWalletLib.singletonFactory, salt, EntryPointInitCodeHash);
+    console.log("EntryPointAddress:", EntryPointAddress);
+    // if not deployed, deploy
+    if (await ethers.provider.getCode(EntryPointAddress) === '0x') {
+      console.log("EntryPoint not deployed, deploying...");
+      const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
+
+        let gasLimit = BigNumber.from(7000000);
+        if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
+          gasLimit = gasLimit.mul(40);
+        }
+        return gasLimit;
+        //return estimatedGasLimit.mul(10)
+      }
+      const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
+      const estimatedGas = await create2FactoryContract.estimateGas.deploy(EntryPointFactoryBytecode, salt);
+      const tx = await create2FactoryContract.deploy(EntryPointFactoryBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
+      console.log("EntryPoint tx:", tx.hash);
+      while (await ethers.provider.getCode(EntryPointAddress) === '0x') {
+        console.log("EntryPoint not deployed, waiting...");
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      if (!isLocalTestnet()) {
+        console.log("EntryPoint deployed, verifying...");
+        await new Promise(r => setTimeout(r, 5000));
+        if (!isLocalTestnet()) {
+          debugger;
+        }
+        try {
+          await run("verify:verify", {
+            address: EntryPointAddress,
+            constructorArguments: [],
+          });
+        } catch (error) {
+          console.log("EntryPoint verify failed:", error);
+        }
+      }
+    } else {
+      console.log("EntryPoint already deployed at:" + EntryPointAddress);
+    }
   }
   // #endregion Entrypoint
 
@@ -253,6 +261,7 @@ async function main() {
   console.log("WalletLogicAddress:", WalletLogicAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(WalletLogicAddress) === '0x') {
+    debugger;
     console.log("WalletLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
       let gasLimit = BigNumber.from(7000000);
@@ -274,6 +283,9 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("WalletLogic deployed, verifying...");
       await new Promise(r => setTimeout(r, 5000));
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       try {
         await run("verify:verify", {
           address: WalletLogicAddress,
@@ -297,6 +309,7 @@ async function main() {
   console.log("walletFactoryAddress:", walletFactoryAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(walletFactoryAddress) === '0x') {
+    debugger;
     console.log("walletFactory not deployed, deploying...");
     let gasLimit = BigNumber.from(6000000);
     if (network.name === 'arbitrum' || network.name === 'arbitrumGoerli') {
@@ -315,6 +328,9 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("walletFactory deployed, verifying...");
       await new Promise(r => setTimeout(r, 5000));
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       try {
         await run("verify:verify", {
           address: walletFactoryAddress,
@@ -351,6 +367,7 @@ async function main() {
   console.log("PriceOracleAddress:", PriceOracleAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(PriceOracleAddress) === '0x') {
+    debugger;
     console.log("PriceOracle not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
       let gasLimit = BigNumber.from(400000);
@@ -372,6 +389,9 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("PriceOracle deployed, verifying...");
       await new Promise(r => setTimeout(r, 5000));
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       try {
         await run("verify:verify", {
           address: PriceOracleAddress,
@@ -402,6 +422,7 @@ async function main() {
   console.log("TokenPaymasterAddress:", TokenPaymasterAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(TokenPaymasterAddress) === '0x') {
+    debugger;
     console.log("TokenPaymaster not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
       let gasLimit = BigNumber.from(3000000);
@@ -420,7 +441,7 @@ async function main() {
       await new Promise(r => setTimeout(r, 3000));
     }
     {
-      const _paymasterStake = '' + Math.pow(10, 15);
+      const _paymasterStake = '' + Math.pow(10, 16);
       const TokenPaymaster = await TokenPaymaster__factory.connect(TokenPaymasterAddress, EOA);
       console.log(await TokenPaymaster.owner());
       let PriceOracleAddresses = [];
@@ -430,6 +451,9 @@ async function main() {
       await TokenPaymaster.setToken(USDCContractAddresses, PriceOracleAddresses);
 
       console.log('adding stake');
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       await TokenPaymaster.addStake(
         1, {
         from: EOA.address,
@@ -444,6 +468,9 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("TokenPaymaster deployed, verifying...");
       await new Promise(r => setTimeout(r, 5000));
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       try {
         await run("verify:verify", {
           address: TokenPaymasterAddress,
@@ -471,6 +498,7 @@ async function main() {
   console.log("GuardianLogicAddress:", GuardianLogicAddress);
   // if not deployed, deploy
   if (await ethers.provider.getCode(GuardianLogicAddress) === '0x') {
+    debugger;
     console.log("GuardianLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
       let gasLimit = BigNumber.from(2000000);
@@ -491,6 +519,9 @@ async function main() {
     if (!isLocalTestnet()) {
       console.log("GuardianLogic deployed, verifying...");
       await new Promise(r => setTimeout(r, 5000));
+      if (!isLocalTestnet()) {
+        debugger;
+      }
       try {
         await run("verify:verify", {
           address: GuardianLogicAddress,
@@ -506,13 +537,20 @@ async function main() {
   // #endregion GuardianLogic
 
   // #region deploy wallet without paymaster
-  if (activateWalletTest) {
-    let bundlerUrl = networkBundler.get(network.name);
-    if (!bundlerUrl) {
-      throw new Error(`bundler rpc not found for network ${network.name}`);
-    }
+  let bundlerUrl = networkBundler.get(network.name);
+  if (!bundlerUrl && !isLocalTestnet()) {
+    debugger;
+    //throw new Error(`bundler rpc not found for network ${network.name}`);
+  }
+  const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
+  let bundlerInit = false;
+  if (bundlerUrl) {
+    await bundler.init();
+    bundlerInit = true;
+  }
 
-    const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
+
+  if (activateWalletTest) {
 
 
     const guardianWallet = [
@@ -571,7 +609,7 @@ async function main() {
     const code = await ethers.provider.getCode(walletAddress);
 
     if (code === "0x") {
-
+      debugger;
       const activateOp = soulWalletLib.activateWalletOp(
         WalletLogicAddress,
         EntryPointAddress,
@@ -590,7 +628,7 @@ async function main() {
       //await activateOp.calcL2GasPrice(ethers.provider);
 
       const requiredPrefund = activateOp.requiredPrefund(
-        ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei").mul(120).div(100)
+        /*ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei").mul(120).div(100)*/
       );
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
       // send `requiredPrefund` ETH to wallet
@@ -605,24 +643,29 @@ async function main() {
         });
       }
 
-      const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+      const userOpHash = activateOp.getUserOpHashWithTimeRange(EntryPointAddress, chainId);
       activateOp.signWithSignature(
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
       const validation = await bundler.simulateValidation(activateOp);
       if (validation.status !== 0) {
+        debugger;
         throw new Error(`error code:${validation.status}`);
       }
       const simulate = await bundler.simulateHandleOp(activateOp);
       if (simulate.status !== 0) {
+        debugger;
         throw new Error(`error code:${simulate.status}`);
       }
 
       if (true) {
         const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-        const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
-        console.log(re);
+        try {
+          const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
+        } catch (error) {
+          debugger;
+        }
         // check if wallet is activated (deployed)
         const code = await ethers.provider.getCode(walletAddress);
         if (code === "0x") {
@@ -637,6 +680,7 @@ async function main() {
               let initializeData = iface.encodeFunctionData("initialize", [EntryPointAddress, walletOwner, upgradeDelay, guardianDelay, SoulWalletLib.Defines.AddressZero,]);
 
               await new Promise(r => setTimeout(r, 5000));
+              debugger;
               try {
                 await run("verify:verify", {
                   address: walletAddress,
@@ -653,6 +697,7 @@ async function main() {
     }
 
     if (recoverWalletTest) {
+      debugger;
       const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
       const newWalletOwner = new ethers.Wallet("0x42e227223702c6a3f7a5834df80b01b814c811f16267f17990145461bc63820b");
       const transferOwnerOP = await soulWalletLib.Guardian.transferOwner(
@@ -673,7 +718,7 @@ async function main() {
         throw new Error('transferOwnerOP is null');
       }
 
-      const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHash(EntryPointAddress, chainId);
+      const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHashWithTimeRange(EntryPointAddress, chainId);
       const guardianSignArr: any[] = [];
       for (let index = 0; index < Math.round(guardians.length / 2); index++) {
         const _guardian = guardians[index];
@@ -687,7 +732,7 @@ async function main() {
           }
         );
       }
-      const signature = soulWalletLib.Guardian.packGuardiansSignByInitCode(gurdianAddressAndInitCode.address, guardianSignArr, 0, gurdianAddressAndInitCode.initCode);
+      const signature = soulWalletLib.Guardian.packGuardiansSignByInitCode(gurdianAddressAndInitCode.address, guardianSignArr, gurdianAddressAndInitCode.initCode);
       transferOwnerOP.signature = signature;
 
       {
@@ -711,10 +756,12 @@ async function main() {
 
       const validation = await bundler.simulateValidation(transferOwnerOP);
       if (validation.status !== 0) {
+        debugger;
         throw new Error(`error code:${validation.status}`);
       }
       const simulate = await bundler.simulateHandleOp(transferOwnerOP);
       if (simulate.status !== 0) {
+        debugger;
         throw new Error(`error code:${simulate.status}`);
       }
 
@@ -730,7 +777,7 @@ async function main() {
 
   // #region deploy wallet with paymaster
   if (activateWalletWithPaymasterTest) {
-
+    debugger;
     const upgradeDelay = 10;
     const guardianDelay = 10;
     const salt = 0;
@@ -767,7 +814,7 @@ async function main() {
       );
 
       // calculate eth cost
-      const requiredPrefund = activateOp.requiredPrefund(ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei"));
+      const requiredPrefund = activateOp.requiredPrefund(/*ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei")*/);
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
       // get USDC exchangeRate
       const exchangePrice = await soulWalletLib.getPaymasterExchangePrice(ethers.provider, TokenPaymasterAddress, USDCContractAddresses[0], true);
@@ -793,13 +840,13 @@ async function main() {
       if (_balance.lt(maxUSDC)) {
         const _requiredfund = maxUSDC.sub(_balance);
         console.log('sending ' + ethers.utils.formatUnits(_requiredfund, exchangePrice.tokenDecimals) + ' USD to wallet');
-        
+
         await USDCContract.transfer(walletAddress, maxUSDC);
         // get balance of USDC
         const usdcBalance = await USDCContract.balanceOf(walletAddress);
         console.log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USD');
       }
-      const approveData=[];
+      const approveData = [];
       for (let i = 0; i < USDCContractAddresses.length; i++) {
         approveData.push({
           token: USDCContractAddresses[i],
@@ -811,49 +858,58 @@ async function main() {
       activateOp.callData = approveCallData.callData;
       activateOp.callGasLimit = approveCallData.callGasLimit;
 
-      const userOpHash = activateOp.getUserOpHash(EntryPointAddress, chainId);
+      const userOpHash = activateOp.getUserOpHashWithTimeRange(EntryPointAddress, chainId);
       activateOp.signWithSignature(
         walletOwner,
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
-
-      const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-      const bundlerUrl = networkBundler.get(network.name);
-      if (!bundlerUrl) {
-        throw new Error(`bundler rpc not found for network ${network.name}`);
-      }
-      const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
-      // const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
-      //await bundler.init(); // run init to check bundler is alivable
       const validation = await bundler.simulateValidation(activateOp);
       if (validation.status !== 0) {
+        debugger;
         throw new Error(`error code:${validation.status}`);
       }
       const simulate = await bundler.simulateHandleOp(activateOp);
       if (simulate.status !== 0) {
+        debugger;
         throw new Error(`error code:${simulate.status}`);
       }
-      const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
-      bundlerEvent.on('error', (err: any) => {
-        console.log(err);
-      });
-      bundlerEvent.on('send', (userOpHash: string) => {
-        console.log('send: ' + userOpHash);
-      });
-      bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
-        console.log('receipt: ' + receipt);
-      });
-      bundlerEvent.on('timeout', () => {
-        console.log('timeout');
-      });
-      while (true) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (bundlerInit) {
+        const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
+        bundlerEvent.on('error', (err: any) => {
+          console.log(err);
+          debugger;
+        });
+        bundlerEvent.on('send', (userOpHash: string) => {
+          console.log('send: ' + userOpHash);
+        });
+        bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
+          console.log('receipt: ' + receipt);
+          debugger;
+        });
+        bundlerEvent.on('timeout', () => {
+          console.log('timeout');
+        });
+        while (true) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      } else {
+
+        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+        try {
+          const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
+          console.log(re);
+        } catch (error) {
+          debugger;
+        }
       }
+
 
     }
   }
 
   // #endregion deploy wallet
+
 
 }
 

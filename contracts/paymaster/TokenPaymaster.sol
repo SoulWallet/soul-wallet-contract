@@ -56,6 +56,22 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function exchangePrice(
         address _token
     ) external view override returns (uint256 price, uint8 decimals) {
+ 
+ 
+     //
+     //    ⚠️
+     //    +-----------------------------------------------------------------------------------+
+     //    |                                                                                   |
+     //    |   Note that this is not fully EIP4337 compliant (reads data from other account    |
+     //    |   storage), but it is too 'heavy' to build a price oracle (Either centralized     |
+     //    |   and decentralized) for the pre-alpha version, and we will also add a            |
+     //    |   special rule to the bundler so that specific paymasters can access the          |
+     //    |   'trusted' external storage slot in a specific form                              |
+     //    |                                                                                   |
+     //    +-----------------------------------------------------------------------------------+
+     //
+ 
+ 
         (price, decimals) = supportedToken[_token].exchangePrice(_token);
         price = (price * 99) / 100; // 1% conver chainlink `Deviation threshold`
     }

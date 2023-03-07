@@ -39,7 +39,9 @@ contract SoulWallet is
 
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
-    using Signatures for UserOperation;
+    using Signatures for bytes;
+    using Signatures for bytes32;
+    using Signatures for uint256;
     using Calldata for bytes;
 
     /**
@@ -311,27 +313,16 @@ contract SoulWallet is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        SignatureData memory signatureData = userOp.decodeSignature();
-
-        bytes32 _hash = keccak256(abi.encodePacked(userOpHash,signatureData.validAfter, signatureData.validUntil));
-
+        SignatureData memory signatureData = userOp.signature.decodeSignature();
+        require(uint160(signatureData.validationData)==0 , "wallet: aggregator not supported");
+        bytes32 _hash = userOpHash.packSignatureHash(signatureData);
+        bool _sigValid;
         if (signatureData.mode == SignatureMode.owner) {
-            if (_validateOwnerSignature(signatureData, _hash)) {
-                return _packValidationData(false,signatureData.validUntil,signatureData.validAfter);
-            } else {
-                // equivalent to _packValidationData(true,0,0);
-                return SIG_VALIDATION_FAILED;
-            }
+            _sigValid = _validateOwnerSignature(signatureData, _hash);
         } else {
-            if (
-                _validateGuardiansSignature(signatureData, userOp, _hash)
-            ) {
-                return _packValidationData(false,signatureData.validUntil,signatureData.validAfter);
-            } else {
-                //  equivalent to _packValidationData(true,0,0);
-                return SIG_VALIDATION_FAILED;
-            }
+            _sigValid = _validateGuardiansSignature(signatureData, userOp, _hash);
         }
+        return signatureData.validationData | (_sigValid ? 0 : SIG_VALIDATION_FAILED);
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
@@ -429,25 +420,18 @@ contract SoulWallet is
         bytes32 hash,
         bytes memory signature
     ) external view returns (bytes4) {
-        if(signature.length > 65){
-            // signature with validAfter and validUntil
-            (bytes memory _signature,uint48 _validAfter,uint48 _validUntil) = abi.decode(signature, (bytes, uint48, uint48));
-            hash = keccak256(abi.encodePacked(hash, _validAfter, _validUntil));
-            if (_validUntil == 0) {
-                _validUntil = type(uint48).max;
-            }
-            bool outOfTimeRange =(block.timestamp > _validUntil) || (block.timestamp < _validAfter);
-            if(outOfTimeRange){
-                return SIGNATURE_OUT_OF_TIMERANGE;
-            }
-            signature = _signature;
-        }
-        
-        if (isOwner(hash.recover(signature))) {
-            return IERC1271.isValidSignature.selector;
-        } else {
+        SignatureData memory signatureData = signature.decodeSignature();
+        bytes32 _hash = hash.packSignatureHash(signatureData);
+        bool _sigValid = _validateOwnerSignature(signatureData, _hash);
+        if(!_sigValid){
             return SIGNATURE_INVALID;
         }
+        ValidationData memory validationData = signatureData.validationData.decodeValidationData();
+        bool outOfTimeRange =(block.timestamp > validationData.validUntil) || (block.timestamp < validationData.validAfter);
+        if(outOfTimeRange){
+            return SIGNATURE_OUT_OF_TIMERANGE;
+        }
+        return IERC1271.isValidSignature.selector;
     }
 
     /**

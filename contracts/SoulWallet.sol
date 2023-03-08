@@ -6,7 +6,6 @@ pragma solidity ^0.8.17;
 /* solhint-disable reason-string */
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "./BaseAccount.sol";
 import "./helpers/Signatures.sol";

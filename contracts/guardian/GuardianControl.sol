@@ -125,6 +125,16 @@ contract GuardianControl is IGuardianControl {
         bytes32 hash,
         bytes memory guardianSignature
     ) internal returns (bool success){
+
+        /*
+
+            In fact, no signature is performed on guardianInitCode, because no 
+            matter how guardianInitCode is tampered with and changed, as long as 
+            `senderCreator.createSender(guardianCallData.initCode) == guardian`
+            is guaranteed, it meets the expectation，so we don't need to verify.
+
+         */
+        
         GuardianCallData memory guardianCallData = decodeGuardianCallData(
             guardianSignature
         );
@@ -136,6 +146,13 @@ contract GuardianControl is IGuardianControl {
 
         address guardian = layout.guardian;
         require(guardian == signer, "signer not guardian");
+
+        /*
+            During social recovery, create2 is used during execution validation,
+            which means that the bundler need to allow known guardian contracts 
+            to use create2 once when guardianInitCode.length > 0, and need to 
+            allow to access known guardian contracts storage.
+         */
 
         if (guardianCallData.initCode.length > 0) {
             require(

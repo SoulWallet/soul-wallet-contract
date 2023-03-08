@@ -3,7 +3,6 @@ pragma solidity ^0.8.17;
 
 import "./interfaces/IPriceOracle.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "./interfaces/IERC20.sol";
 
 contract PriceOracle is IPriceOracle {
     /**

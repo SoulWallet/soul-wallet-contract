@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ITokenPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./interfaces/IPriceOracle.sol";
-import "./interfaces/IERC20.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract TokenPaymaster is ITokenPaymaster, Ownable {
     using UserOperationLib for UserOperation;
+    using SafeERC20 for IERC20;
 
     IEntryPoint public immutable _IEntryPoint;
     address public immutable walletFactory;
@@ -179,7 +181,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         IERC20 ERC20Token = IERC20(token);
 
         (uint256 _price, uint8 _decimals) = this.exchangePrice(token);
-        uint8 tokenDecimals = IERC20(token).decimals();
+        uint8 tokenDecimals = IERC20Metadata(token).decimals();
 
         // #risk: overflow
         // exchangeRate = ( _price * 10^tokenDecimals ) / 10^_decimals / 10^18
@@ -237,7 +239,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         ) = abi.decode(context, (address, address, uint256, uint256));
         uint256 tokenRequiredFund = ((actualGasCost + costOfPost) *
             exchangeRate) / 10 ** 18;
-        IERC20(token).transferFrom(sender, address(this), tokenRequiredFund);
+        IERC20(token).safeTransferFrom(sender, address(this), tokenRequiredFund);
     }
 
     /**

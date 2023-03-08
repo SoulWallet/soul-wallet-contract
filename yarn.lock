@@ -6020,7 +6020,7 @@ solidity-string-utils@^0.0.8-0:
 
 "soul-wallet-lib@github:proofofsoulprotocol/soulwalletlib#v0.1.0-alpha.signaturetest.01":
   version "v0.1.0-alpha.25"
-  resolved "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#2645bb56ac811fec80ffe3c7195f11ec15bf0803"
+  resolved "git+ssh://git@github.com/proofofsoulprotocol/soulwalletlib.git#ca19a70db1ea2c2375ec42339980de02588753aa"
   dependencies:
     dotenv "8.6.0"
     ethereumjs-util "^7.1.5"

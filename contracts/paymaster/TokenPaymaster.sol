@@ -56,6 +56,15 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function exchangePrice(
         address _token
     ) external view override returns (uint256 price, uint8 decimals) {
+
+        /*
+
+            Note the current alpha version of paymaster is using storage other than 
+            `account storage`, bundler needs to whitelist the current paymaster.
+            (this means that the bundler has to take some risk itself)
+
+        */
+
         (price, decimals) = supportedToken[_token].exchangePrice(_token);
         price = (price * 99) / 100; // 1% conver chainlink `Deviation threshold`
     }
@@ -124,7 +133,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function _validateConstructor(
         UserOperation calldata userOp,
         address token,
-        uint256 tokenRequiredPreFund 
+        uint256 tokenRequiredPreFund
     ) internal view {
         address factory = address(bytes20(userOp.initCode));
         require(factory == walletFactory, "unknown wallet factory");
@@ -145,10 +154,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             if (destAddr == token) {
                 (address spender, uint256 amount) = _decodeApprove(func[i]);
                 require(spender == address(this), "invalid spender");
-                require(
-                    amount >= tokenRequiredPreFund,
-                    "not enough approve"
-                );
+                require(amount >= tokenRequiredPreFund, "not enough approve");
             }
         }
     }
@@ -188,7 +194,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
 
         if (userOp.initCode.length != 0) {
-            _validateConstructor(userOp,token,tokenRequiredPreFund);
+            _validateConstructor(userOp, token, tokenRequiredPreFund);
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >=

@@ -26,7 +26,7 @@ enum SignatureMode {
 
 library Signatures {
     /**
-     * @dev Decode a signature
+     * @dev Decode a signature from bytes
      * @param signature encoded signature data
      * @return SignatureData
      */
@@ -325,7 +325,7 @@ library Signatures {
     }
 
     /**
-     * @dev pack userOpHash with signatureData
+     * @dev pack hash message with `signatureData.mode`,`signatureData.signer`,`signatureData.validationData`
      */
     function packSignatureHash(bytes32 hash, SignatureData memory signatureData) internal pure returns (bytes32) {
         bytes32 _hash = keccak256(abi.encodePacked(hash,signatureData.mode,signatureData.signer,signatureData.validationData));

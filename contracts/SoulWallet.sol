@@ -18,7 +18,6 @@ import "./DefaultCallbackHandler.sol";
 import "./utils/upgradeable/logicUpgradeControl.sol";
 import "./utils/upgradeable/Initializable.sol";
 
-
 /**
  * @author  soulwallet team.
  * @title   an implementation of the ERC4337 smart contract wallet.
@@ -304,7 +303,6 @@ contract SoulWallet is
 
     /**
      * @notice  validate the signature is valid for this message.
-     * @dev     .
      * @param   userOp validate the userOp.signature field.
      * @param   userOpHash convenient field: the hash of the request, to check the signature against.
      * @return  validationData  returns a uint256, with is created by `_packedValidationData` and parsed by `_parseValidationData`.
@@ -313,15 +311,36 @@ contract SoulWallet is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
+        // decode a signature from bytes
         SignatureData memory signatureData = userOp.signature.decodeSignature();
+
+        // aggregator in signatureData.validationData must be address(0)
         require(uint160(signatureData.validationData)==0 , "wallet: aggregator not supported");
+
+        // pack userOpHash with `signatureData.mode`,`signatureData.signer`,`signatureData.validationData`
         bytes32 _hash = userOpHash.packSignatureHash(signatureData);
+
         bool _sigValid;
+
+        /*
+
+            Note that although EIP-1271 is supported when verifying signatures, 
+            but if you access storage in another contract that is not relevant 
+            to you during verification, will be rejected by bundler.
+
+         */
+
         if (signatureData.mode == SignatureMode.owner) {
+            // owner signature
             _sigValid = _validateOwnerSignature(signatureData, _hash);
         } else {
+            // guardian signature
             _sigValid = _validateGuardiansSignature(signatureData, userOp, _hash);
         }
+
+        // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
+        // validUntil and validAfter is already packed in signatureData.validationData,
+        // and aggregator is address(0), so we just need to add sigFailed flag.
         return signatureData.validationData | (_sigValid ? 0 : SIG_VALIDATION_FAILED);
     }
 
@@ -376,13 +395,13 @@ contract SoulWallet is
 
     function _validateOwnerSignature(
         SignatureData memory signatureData,
-        bytes32 userOpHash
+        bytes32 signMessageHash
     ) internal view returns (bool success) {
         require(isOwner(signatureData.signer), "Signer not an owner");
         return
             SignatureChecker.isValidSignatureNow(
                 signatureData.signer,
-                userOpHash.toEthSignedMessageHash(),
+                signMessageHash.toEthSignedMessageHash(),
                 signatureData.signature
             );
     }
@@ -393,14 +412,14 @@ contract SoulWallet is
     function _validateGuardiansSignature(
         SignatureData memory signatureData,
         UserOperation calldata op,
-        bytes32 userOpHash
+        bytes32 signMessageHash
     ) internal returns (bool success) {
         require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
 
         return
             _validateGuardiansSignatureCallData(
                 signatureData.signer,
-                userOpHash.toEthSignedMessageHash(),
+                signMessageHash.toEthSignedMessageHash(),
                 signatureData.signature
             );
     }
@@ -412,25 +431,33 @@ contract SoulWallet is
     /**
      * @notice  support ERC1271,  verifies whether the provided signature is valid with respect to the provided data.
      * @dev     return the correct magic value if the signature provided is valid for the provided data.
-     * @param   hash  .
-     * @param   signature  .
-     * @return  bytes4  .
      */
     function isValidSignature(
         bytes32 hash,
         bytes memory signature
     ) external view returns (bytes4) {
+        // decode a signature from bytes
         SignatureData memory signatureData = signature.decodeSignature();
+
+        // pack userOpHash with `signatureData.mode`,`signatureData.signer`,`signatureData.validationData`
         bytes32 _hash = hash.packSignatureHash(signatureData);
+
+        // check signature
         bool _sigValid = _validateOwnerSignature(signatureData, _hash);
+
         if(!_sigValid){
             return SIGNATURE_INVALID;
         }
-        ValidationData memory validationData = signatureData.validationData.decodeValidationData();
-        bool outOfTimeRange =(block.timestamp > validationData.validUntil) || (block.timestamp < validationData.validAfter);
-        if(outOfTimeRange){
-            return SIGNATURE_OUT_OF_TIMERANGE;
+
+        if (signatureData.validationData > 0){
+            // check time range if validationData is not 0 ( 0 means no time range )
+            ValidationData memory validationData = signatureData.validationData.decodeValidationData();
+            bool outOfTimeRange = (block.timestamp > validationData.validUntil) || (block.timestamp < validationData.validAfter);
+            if(outOfTimeRange){
+                return SIGNATURE_OUT_OF_TIMERANGE;
+            }
         }
+
         return IERC1271.isValidSignature.selector;
     }
 

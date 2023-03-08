@@ -3,9 +3,8 @@ pragma solidity ^0.8.17;
 
 import "../helpers/Signatures.sol";
 import "../entrypoint/Helpers.sol";
-import "hardhat/console.sol";
 
-contract SignatureHelperTest {
+contract SignatureTest {
     using Signatures for bytes;
     using Signatures for uint256;
 
@@ -15,7 +14,7 @@ contract SignatureHelperTest {
         bytes memory _bytes
     )
         public
-        view
+        pure
         returns (
             SignatureData memory signatureData,
             ValidationData memory validationData
@@ -23,13 +22,5 @@ contract SignatureHelperTest {
     {
         signatureData = _bytes.decodeSignature();
         validationData = signatureData.validationData.decodeValidationData();
-        console.log("_signer", signatureData.signer);
-        console.logUint(uint256(signatureData.mode));
-        console.logUint(signatureData.validationData);
-        console.logBytes(signatureData.signature);
-        console.log("aggregator: %s", validationData.aggregator);
-        console.log("validAfter: %s", validationData.validAfter);
-        console.log("validUntil: %s", validationData.validUntil);
     }
-
 }

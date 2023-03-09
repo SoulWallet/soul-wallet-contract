@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ITokenPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./interfaces/IPriceOracle.sol";
-import "./interfaces/IERC20.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract TokenPaymaster is ITokenPaymaster, Ownable {
     using UserOperationLib for UserOperation;
+    using SafeERC20 for IERC20;
 
     IEntryPoint public immutable _IEntryPoint;
     address public immutable walletFactory;
@@ -56,6 +58,15 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function exchangePrice(
         address _token
     ) external view override returns (uint256 price, uint8 decimals) {
+
+        /*
+
+            Note the current alpha version of paymaster is using storage other than 
+            `account storage`, bundler needs to whitelist the current paymaster.
+            (this means that the bundler has to take some risk itself)
+
+        */
+
         (price, decimals) = supportedToken[_token].exchangePrice(_token);
         price = (price * 99) / 100; // 1% conver chainlink `Deviation threshold`
     }
@@ -124,7 +135,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
     function _validateConstructor(
         UserOperation calldata userOp,
         address token,
-        uint256 tokenRequiredPreFund 
+        uint256 tokenRequiredPreFund
     ) internal view {
         address factory = address(bytes20(userOp.initCode));
         require(factory == walletFactory, "unknown wallet factory");
@@ -145,10 +156,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
             if (destAddr == token) {
                 (address spender, uint256 amount) = _decodeApprove(func[i]);
                 require(spender == address(this), "invalid spender");
-                require(
-                    amount >= tokenRequiredPreFund,
-                    "not enough approve"
-                );
+                require(amount >= tokenRequiredPreFund, "not enough approve");
             }
         }
     }
@@ -173,7 +181,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         IERC20 ERC20Token = IERC20(token);
 
         (uint256 _price, uint8 _decimals) = this.exchangePrice(token);
-        uint8 tokenDecimals = IERC20(token).decimals();
+        uint8 tokenDecimals = IERC20Metadata(token).decimals();
 
         // #risk: overflow
         // exchangeRate = ( _price * 10^tokenDecimals ) / 10^_decimals / 10^18
@@ -188,7 +196,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
 
         if (userOp.initCode.length != 0) {
-            _validateConstructor(userOp,token,tokenRequiredPreFund);
+            _validateConstructor(userOp, token, tokenRequiredPreFund);
         } else {
             require(
                 ERC20Token.allowance(sender, address(this)) >=
@@ -231,7 +239,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         ) = abi.decode(context, (address, address, uint256, uint256));
         uint256 tokenRequiredFund = ((actualGasCost + costOfPost) *
             exchangeRate) / 10 ** 18;
-        IERC20(token).transferFrom(sender, address(this), tokenRequiredFund);
+        IERC20(token).safeTransferFrom(sender, address(this), tokenRequiredFund);
     }
 
     /**

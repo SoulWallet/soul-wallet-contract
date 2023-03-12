@@ -4,13 +4,14 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-03-08 18:29:29
+ * @LastEditTime: 2023-03-12 22:54:24
  */
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
-import { IApproveToken, IUserOpReceipt, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
-import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, EntryPoint__factory, ERC20__factory, SoulWalletFactory__factory, SoulWallet__factory, EstimateGasHelper__factory } from "../src/types/index";
+import { Bundler, IUserOpReceipt, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
+import { toNumber } from "soul-wallet-lib/dist/defines/numberLike";
+import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, SoulWalletFactory__factory, SoulWallet__factory, EstimateGasHelper__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
 
 function isLocalTestnet() {
@@ -20,7 +21,7 @@ function isLocalTestnet() {
 /**
  * run activateWallet test
  */
-let activateWalletTest = false;
+let activateWalletTest = true;
 
 /**
  * run recoverWallet test
@@ -31,6 +32,17 @@ let recoverWalletTest = false;
  * run activateWalletWithPaymaster test
  */
 let activateWalletWithPaymasterTest = true;
+
+
+async function estimateUserOperationGas(bundler: Bundler, userOp: UserOperation) {
+  const estimateData = await bundler.eth_estimateUserOperationGas(userOp);
+  if (toNumber(userOp.callGasLimit) === 0) {
+    userOp.callGasLimit = estimateData.callGasLimit;
+  }
+  userOp.preVerificationGas = estimateData.preVerificationGas;
+  userOp.verificationGasLimit = estimateData.verificationGas;
+}
+
 
 
 async function main() {
@@ -76,10 +88,6 @@ async function main() {
 
   let EOA = (await ethers.getSigners())[0];
 
-  // print EOA Address
-  console.log("EOA Address:", EOA.address);
-
-
   let USDCContractAddresses: string[] = [];
   let USDCPriceFeedAddress = '';
 
@@ -96,6 +104,10 @@ async function main() {
 
   const chainId = await (await ethers.provider.getNetwork()).chainId;
 
+
+  // create EOA account
+  const bundlerEOA = await ethers.Wallet.createRandom();
+
   if (isLocalTestnet()) {
     let create2 = await new SingletonFactory__factory(EOA).deploy();
     soulWalletLib = new SoulWalletLib(create2.address);
@@ -103,6 +115,8 @@ async function main() {
     USDCContractAddresses = [usdc.address];
     USDCPriceFeedAddress = await (await (await ethers.getContractFactory("MockOracle")).deploy()).address;
     eip1559GasFee = mockGasFee;
+    await EOA.sendTransaction({ to: bundlerEOA.address, value: ethers.utils.parseEther("10") });
+
   } else {
     soulWalletLib = new SoulWalletLib();
     if (network.name === "arbitrum") {
@@ -582,12 +596,8 @@ async function main() {
     debugger;
     //throw new Error(`bundler rpc not found for network ${network.name}`);
   }
-  const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl);
-  let bundlerInit = false;
-  if (bundlerUrl) {
-    await bundler.init();
-    bundlerInit = true;
-  }
+  const bundler = new soulWalletLib.Bundler(EntryPointAddress, ethers.provider, bundlerUrl || bundlerEOA.privateKey);
+  await bundler.init();
 
   if (activateWalletTest) {
 
@@ -614,7 +624,7 @@ async function main() {
       guardiansAddress.push(_account.address);
     }
 
-    const guardianSalt = 'guardianSaltText<text or bytes32> <1>';
+    const guardianSalt = 'guardianSaltText <text or bytes32>';
     const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogicAddress, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
 
     const upgradeDelay = 10;
@@ -665,26 +675,12 @@ async function main() {
           .toString()
       );
 
-      // get baseFee
-      const fee = await ethers.provider.getFeeData();
-      const baseFee = fee.gasPrice ? fee.gasPrice.toHexString() : '0x0';
-      // for L2, call calcL2GasPrice to get the correct gas price, Must before call requiredPrefund!!!
-      await activateOp.calcL2GasPrice(
-        ethers.provider,
-        baseFee,
-        ethers.utils.parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei").toHexString(),
-        ethers.utils.parseUnits(eip1559GasFee.high.suggestedMaxPriorityFeePerGas, "gwei").toHexString(),
-        EntryPointAddress,
-        EstimateGasHelperAddress
-      );
-      // print gas price now
-      console.log('maxFeePerGas: ' + ethers.utils.formatUnits(activateOp.maxFeePerGas, "gwei") + ' gwei');
-      console.log('maxPriorityFeePerGas: ' + ethers.utils.formatUnits(activateOp.maxPriorityFeePerGas, "gwei") + ' gwei');
+      await estimateUserOperationGas(bundler, activateOp);
 
-      const requiredPrefund = activateOp.requiredPrefund(
-        /*ethers.utils.parseUnits(eip1559GasFee.estimatedBaseFee, "gwei").mul(120).div(100)*/
-      );
+      const _requiredPrefund = await activateOp.requiredPrefund(ethers.provider, EntryPointAddress);
+      const requiredPrefund = _requiredPrefund.requiredPrefund.sub(_requiredPrefund.deposit);
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
+
       // send `requiredPrefund` ETH to wallet
       const _balance = await ethers.provider.getBalance(walletAddress);
       if (_balance.lt(requiredPrefund)) {
@@ -714,34 +710,24 @@ async function main() {
         throw new Error(`error code:${simulate.status}`);
       }
       let activated = false;
-      if (bundlerInit) {
-        const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
-        bundlerEvent.on('error', (err: any) => {
-          console.log(err);
-          debugger;
-        });
-        bundlerEvent.on('send', (userOpHash: string) => {
-          console.log('send: ' + userOpHash);
-        });
-        bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
-          console.log('receipt: ' + receipt);
-          activated = true;
-          debugger;
-        });
-        bundlerEvent.on('timeout', () => {
-          console.log('timeout');
-        });
-      } else {
-        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-        try {
-          const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
-          //console.log(re);
-          activated = true;
-          console.log('activate wallet success')
-        } catch (error) {
-          debugger;
-        }
-      }
+
+      const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
+      bundlerEvent.on('error', (err: any) => {
+        console.log(err);
+        debugger;
+      });
+      bundlerEvent.on('send', (userOpHash: string) => {
+        console.log('send: ' + userOpHash);
+      });
+      bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
+        console.log('receipt: ' + receipt);
+        activated = true;
+        debugger;
+      });
+      bundlerEvent.on('timeout', () => {
+        console.log('timeout');
+      });
+
 
 
       while (!activated) {
@@ -773,10 +759,8 @@ async function main() {
       const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
       const newWalletOwner = new ethers.Wallet("0x42e227223702c6a3f7a5834df80b01b814c811f16267f17990145461bc63820b");
       const transferOwnerOP = await soulWalletLib.Guardian.transferOwner(
-        ethers.provider,
         walletAddress,
         nonce,
-        EntryPointAddress,
         '0x',
         ethers.utils
           .parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei")
@@ -786,9 +770,7 @@ async function main() {
           .toString(),
         newWalletOwner.address
       );
-      if (!transferOwnerOP) {
-        throw new Error('transferOwnerOP is null');
-      }
+      await estimateUserOperationGas(bundler, transferOwnerOP);
 
       const transferOwnerOPuserOpHash = transferOwnerOP.getUserOpHashWithTimeRange(EntryPointAddress, chainId, walletOwner);
       const guardianSignArr: any[] = [];
@@ -808,8 +790,10 @@ async function main() {
       transferOwnerOP.signature = signature;
 
       {
-        const requiredPrefund = transferOwnerOP.requiredPrefund();
+        const _requiredPrefund = await transferOwnerOP.requiredPrefund(ethers.provider, EntryPointAddress);
+        const requiredPrefund = _requiredPrefund.requiredPrefund.sub(_requiredPrefund.deposit);
         console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
+
         // send `requiredPrefund` ETH to wallet
         const _balance = await ethers.provider.getBalance(walletAddress);
         if (_balance.lt(requiredPrefund)) {
@@ -850,7 +834,7 @@ async function main() {
     debugger;
     const upgradeDelay = 10;
     const guardianDelay = 10;
-    const salt = 2;
+    const salt = 0;
     const walletAddress = await soulWalletLib.calculateWalletAddress(
       WalletLogicAddress,
       EntryPointAddress,
@@ -882,24 +866,24 @@ async function main() {
           .toString()
         , salt
       );
+      const approveData = [];
+      for (let i = 0; i < USDCContractAddresses.length; i++) {
+        approveData.push({
+          token: USDCContractAddresses[i],
+          spender: TokenPaymasterAddress,
+          value: ethers.utils.parseEther('100').toString()
+        });
+      }
+      const approveCallData = soulWalletLib.Tokens.ERC20.getApproveCallData(approveData);
+      activateOp.callData = approveCallData.callData;
+      activateOp.callGasLimit = approveCallData.callGasLimit;
 
-      // get baseFee
-      const fee = await ethers.provider.getFeeData();
-      const maxFeePerGas = fee.maxFeePerGas || ethers.utils.parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei");
-      const maxPriorityFeePerGas = fee.maxPriorityFeePerGas || ethers.utils.parseUnits(eip1559GasFee.high.suggestedMaxPriorityFeePerGas, "gwei");
-      const baseFee = fee.gasPrice ? fee.gasPrice : BigNumber.from(0);
-      // for L2, call calcL2GasPrice to get the correct gas price, Must before call requiredPrefund!!!
-      await activateOp.calcL2GasPrice(
-        ethers.provider,
-        baseFee.toHexString(),
-        maxFeePerGas.toHexString(),
-        maxPriorityFeePerGas.toHexString(),
-        EntryPointAddress,
-        EstimateGasHelperAddress
-      );
+      await estimateUserOperationGas(bundler, activateOp);
+
 
       // calculate eth cost
-      const requiredPrefund = activateOp.requiredPrefund();
+      const _requiredPrefund = await activateOp.requiredPrefund(ethers.provider, EntryPointAddress);
+      const requiredPrefund = _requiredPrefund.requiredPrefund.sub(_requiredPrefund.deposit);
       console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
       // get USDC exchangeRate
       const exchangePrice = await soulWalletLib.getPaymasterExchangePrice(ethers.provider, TokenPaymasterAddress, USDCContractAddresses[0], true);
@@ -931,17 +915,7 @@ async function main() {
         const usdcBalance = await USDCContract.balanceOf(walletAddress);
         console.log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USD');
       }
-      const approveData = [];
-      for (let i = 0; i < USDCContractAddresses.length; i++) {
-        approveData.push({
-          token: USDCContractAddresses[i],
-          spender: TokenPaymasterAddress,
-          value: ethers.utils.parseEther('100').toString()
-        });
-      }
-      const approveCallData = await soulWalletLib.Tokens.ERC20.getApproveCallData(ethers.provider, walletAddress, approveData);
-      activateOp.callData = approveCallData.callData;
-      activateOp.callGasLimit = approveCallData.callGasLimit;
+      
 
       const userOpHash = activateOp.getUserOpHashWithTimeRange(EntryPointAddress, chainId, walletOwner);
       activateOp.signWithSignature(
@@ -958,37 +932,32 @@ async function main() {
         debugger;
         throw new Error(`error code:${simulate.status}`);
       }
+      let finish = false;
+      const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
+      bundlerEvent.on('error', (err: any) => {
+        console.log(err);
+        finish = true;
+        debugger;
+      });
+      bundlerEvent.on('send', (userOpHash: string) => {
+        console.log('send: ' + userOpHash);
+      });
+      bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
+        console.log('receipt: ' + receipt);
+        finish = true;
+        debugger;
+      });
+      bundlerEvent.on('timeout', () => {
+        finish = true;
+        console.log('timeout');
+      });
 
-      if (bundlerInit) {
-        const bundlerEvent = bundler.sendUserOperation(activateOp, 1000 * 60 * 3);
-        bundlerEvent.on('error', (err: any) => {
-          console.log(err);
-          debugger;
-        });
-        bundlerEvent.on('send', (userOpHash: string) => {
-          console.log('send: ' + userOpHash);
-        });
-        bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
-          console.log('receipt: ' + receipt);
-          debugger;
-        });
-        bundlerEvent.on('timeout', () => {
-          console.log('timeout');
-        });
-        while (true) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      } else {
-
-        const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-        try {
-          const re = await EntryPoint.handleOps([activateOp.getStruct()], EOA.address);
-          //console.log(re);
-          console.log('activate wallet with paymaster success')
-        } catch (error) {
-          debugger;
-        }
+      while (!finish) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
+
+
+
 
 
     }

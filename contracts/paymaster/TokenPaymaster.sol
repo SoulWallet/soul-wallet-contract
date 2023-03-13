@@ -18,8 +18,12 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
 
     mapping(address => IPriceOracle) private supportedToken;
 
-    //calculated cost of the postOp
-    uint256 private COST_OF_POST = 20000;
+    // calculated cost of the postOp
+    uint256 private constant COST_OF_POST = 40000;
+
+    // Trusted token approve gas cost
+    uint256 private constant SAFE_APPROVE_GAS_COST = 50000;
+
 
     constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) {
         require(address(_entryPoint) != address(0), "invalid etnrypoint addr");
@@ -150,6 +154,7 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
         ) = abi.decode(userOp.callData[4:], (address[], uint256[], bytes[]));
         require(dest.length == value.length && dest.length == func.length, "invalid callData");
 
+        address _destAddress = address(0);
         for (uint256 i = 0; i < dest.length; i++) {
             address destAddr = dest[i];
             require(_isSupportedToken(destAddr), "unsupported token");
@@ -158,7 +163,15 @@ contract TokenPaymaster is ITokenPaymaster, Ownable {
                 require(spender == address(this), "invalid spender");
                 require(amount >= tokenRequiredPreFund, "not enough approve");
             }
+            require(destAddr > _destAddress, "duplicate");
+            _destAddress = destAddr;
         }
+        // callGasLimit
+        uint256 callGasLimit = dest.length * SAFE_APPROVE_GAS_COST;
+        require(
+            userOp.callGasLimit >= callGasLimit,
+            "Paymaster: gas too low for postOp"
+        );
     }
 
     function _validatePaymasterUserOp(

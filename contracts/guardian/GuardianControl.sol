@@ -145,7 +145,10 @@ contract GuardianControl is IGuardianControl {
         _guardianProcess(layout);
 
         address guardian = layout.guardian;
-        require(guardian == signer, "signer not guardian");
+        
+        if(guardian != signer){
+            return false;
+        }
 
         /*
             During social recovery, create2 is used during execution validation,
@@ -155,11 +158,11 @@ contract GuardianControl is IGuardianControl {
          */
 
         if (guardianCallData.initCode.length > 0) {
-            require(
-                senderCreator.createSender(guardianCallData.initCode) ==
-                    guardian,
-                "guardian contract not deployed"
-            );
+            bool deployed = senderCreator.createSender(guardianCallData.initCode) == guardian;
+            if(!deployed){
+                //guardian contract not deployed
+                return false;
+            }
         }
 
         return SignatureChecker.isValidSignatureNow(

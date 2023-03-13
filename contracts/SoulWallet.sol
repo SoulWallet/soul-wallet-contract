@@ -396,13 +396,12 @@ contract SoulWallet is
         SignatureData memory signatureData,
         bytes32 signMessageHash
     ) internal view returns (bool success) {
-        require(isOwner(signatureData.signer), "Signer not an owner");
-        return
-            SignatureChecker.isValidSignatureNow(
+        return isOwner(signatureData.signer) && 
+               SignatureChecker.isValidSignatureNow(
                 signatureData.signer,
                 signMessageHash.toEthSignedMessageHash(),
                 signatureData.signature
-            );
+               );
     }
 
     /**
@@ -413,14 +412,12 @@ contract SoulWallet is
         UserOperation calldata op,
         bytes32 signMessageHash
     ) internal returns (bool success) {
-        require(isGuardianActionAllowed(op), "Wallet: Invalid guardian action");
-
-        return
-            _validateGuardiansSignatureCallData(
+        return isGuardianActionAllowed(op) &&  
+               _validateGuardiansSignatureCallData(
                 signatureData.signer,
                 signMessageHash.toEthSignedMessageHash(),
                 signatureData.signature
-            );
+               );
     }
 
     function getVersion() external pure returns (uint) {

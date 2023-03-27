@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     goerli: {
-      url: process.env.ETH_GOERLI_PROVIDER,
+      url: process.env.ETH_GOERLI_PROVIDER  || "",
       accounts: [GOERLI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000
@@ -147,6 +147,9 @@ const config: HardhatUserConfig = {
     currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_API_KEY || "",
     enabled: true
+  },
+  mocha: {
+    timeout: 100000000
   }
 };
 

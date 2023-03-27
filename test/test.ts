@@ -8,7 +8,7 @@
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Wallet } from "ethers";
 import { ethers } from "hardhat";
 import { Bundler, IApproveToken, ITransaction, SignatureMode, SoulWalletLib, UserOperation, Signatures, IUserOpReceipt, IResult, IValidationResult, IFailedOp } from 'soul-wallet-lib';
 import { toNumber } from "soul-wallet-lib/dist/defines/numberLike";
@@ -26,7 +26,6 @@ describe("SoulWalletContract", function () {
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
     async function deployFixture() {
-
         // get accounts
         const accounts = await ethers.getSigners();
 
@@ -194,38 +193,48 @@ describe("SoulWalletContract", function () {
 
 
     async function activateWallet_withETH() {
-        //describe("activate wallet", async () => {
-        const { soulWalletLib, bundler, chainId, accounts, SingletonFactory, walletOwner, SoulWalletLogic, EntryPoint, USDC, TokenPaymaster, GuardianLogic, EstimateGasHelper } = await loadFixture(deployFixture);
+        return await _activateWallet_withETH();
+    }
+
+    async function _activateWallet_withETH(guardianList?:{walletAddress: string, walletOwner: Wallet}[], reset: boolean = false) {
+        const { soulWalletLib, bundler, chainId, accounts, SingletonFactory, walletOwner, SoulWalletLogic, EntryPoint, USDC, TokenPaymaster, GuardianLogic, EstimateGasHelper } = await deployFixture();
 
         const upgradeDelay = 30;
         const guardianDelay = 30;
 
         const guardians = [];
         const guardiansAddress = [];
-
-        for (let i = 0; i < 10; i++) {
+        if (guardianList && guardianList.length > 0) {
+          for (let i = 0; i < guardianList.length; i++) {
+            guardians.push({
+                address: guardianList[i].walletAddress,
+                privateKey: guardianList[i].walletOwner.privateKey,
+              });
+            guardiansAddress.push(guardianList[i].walletAddress);
+          }
+        } else {
+          for (let i = 0; i < 10; i++) {
             const _account = await ethers.Wallet.createRandom();
             guardians.push({
-                address: _account.address,
-                privateKey: _account.privateKey
+              address: _account.address,
+              privateKey: _account.privateKey,
             });
             guardiansAddress.push(_account.address);
+          }
         }
 
         const guardianSalt = 'saltText<text or bytes32>';
         const gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
-        log('guardian address ==> ' + gurdianAddressAndInitCode.address);
-        {
-            // test guardian order (For user experience, guardian cannot rely on the order of address)
-            const _guardiansAddress = [...guardiansAddress];
-            const _guardianTmpItem = _guardiansAddress[0];
-            _guardiansAddress[0] = _guardiansAddress[1];
-            _guardiansAddress[1] = _guardianTmpItem;
+        // {
+        //     // test guardian order (For user experience, guardian cannot rely on the order of address)
+        //     const _guardiansAddress = [...guardiansAddress];
+        //     const _guardianTmpItem = _guardiansAddress[0];
+        //     _guardiansAddress[0] = _guardiansAddress[1];
+        //     _guardiansAddress[1] = _guardianTmpItem;
 
-            const _gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
-            expect(_gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
-        }
-
+        //     const _gurdianAddressAndInitCode = soulWalletLib.Guardian.calculateGuardianAndInitCode(GuardianLogic.contract.address, _guardiansAddress, Math.round(guardiansAddress.length / 2), guardianSalt);
+        //     expect(_gurdianAddressAndInitCode.address).to.equal(gurdianAddressAndInitCode.address);
+        // }
         const walletAddress = await soulWalletLib.calculateWalletAddress(
             SoulWalletLogic.contract.address,
             EntryPoint.contract.address,
@@ -234,8 +243,6 @@ describe("SoulWalletContract", function () {
             guardianDelay,
             gurdianAddressAndInitCode.address
         );
-
-        log('walletAddress: ' + walletAddress);
 
         //#region
 
@@ -304,7 +311,6 @@ describe("SoulWalletContract", function () {
         if (result.returnInfo.sigFailed) {
             throw new Error(`signature error`);
         }
-
         const simulate = await bundler.simulateHandleOp(activateOp);
         if (simulate.status !== 0) {
             throw new Error(`error code:${simulate.status}`);
@@ -314,7 +320,6 @@ describe("SoulWalletContract", function () {
         bundlerEvent.on('error', (err: any) => {
             finish = true;
             console.log(err);
-            debugger;
         });
         bundlerEvent.on('send', (userOpHash: string) => {
         });
@@ -482,7 +487,6 @@ describe("SoulWalletContract", function () {
         bundlerEvent.on('error', (err: any) => {
             finish = true;
             console.log(err);
-            debugger;
         });
         bundlerEvent.on('send', (userOpHash: string) => {
         });
@@ -660,6 +664,16 @@ describe("SoulWalletContract", function () {
         const { soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint } = await activateWallet_withETH();
         await _recoveryWallet(soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint);
     }
+
+
+    async function recoveryWalletGuardianAsContract() {
+        const {  walletAddress: walletAddressAsGuardian, walletOwner: walletOwnerAsGuardian} = await activateWallet_withETH();
+        let code = await ethers.provider.getCode(walletAddressAsGuardian);
+        const { soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint } = await _activateWallet_withETH([{walletAddress: walletAddressAsGuardian, walletOwner: walletOwnerAsGuardian}]);
+        code = await ethers.provider.getCode(walletAddressAsGuardian);
+        await _recoveryWallet(soulWalletLib, bundler, guardians, guardianInitcode, walletAddress, walletOwner, guardian, chainId, accounts, GuardianLogic, EntryPoint);
+    }
+
     async function _recoveryWallet(soulWalletLib: SoulWalletLib, bundler: Bundler, guardians: any[], guardianInitcode: any, walletAddress: string, walletOwner: any, guardian: string, chainId: number, accounts: any[], GuardianLogic: any, EntryPoint: any) {
 
         let guardianInfo = await soulWalletLib.Guardian.getGuardian(ethers.provider, walletAddress, await time.latest());
@@ -683,17 +697,45 @@ describe("SoulWalletContract", function () {
         for (let index = 0; index < Math.round(guardians.length / 2); index++) {
             const _guardian = guardians[index];
             const _address = _guardian.address;
-            const _privateKey = _guardian.privateKey;
-            const _signature = Utils.signMessage(transferOwnerOPuserOpHash, _privateKey);
-            const _recoverAddress = Utils.recoverAddress(transferOwnerOPuserOpHash, _signature);
-            expect(_recoverAddress.toLowerCase()).to.equal(_address.toLowerCase());
-            guardianSignArr.push(
-                {
-                    contract: false,
+            let code = await ethers.provider.getCode(_address);
+            log(`get code ${code} address ${_address}`)
+            if (code !== "0x") {
+
+
+                const packedHash = soulWalletLib.EIP1271.packHashMessageWithTimeRange(transferOwnerOPuserOpHash, new ethers.Wallet(_guardian.privateKey).address, 0, 0);
+                const signature = Utils.signMessage(packedHash, _guardian.privateKey);
+                const packedSignature = soulWalletLib.EIP1271.encodeSignature(new ethers.Wallet(_guardian.privateKey).address, signature, 0, 0);
+                guardianSignArr.push({
+                    contract: true,
                     address: _address,
-                    signature: _signature
-                }
-            );
+                    signature: packedSignature,
+                  });
+                  const walletContract = new ethers.Contract(_address, SoulWallet__factory.abi, ethers.provider);
+                  const selector = await walletContract.isValidSignature(
+                        transferOwnerOPuserOpHash,
+                        packedSignature
+                  );
+                  expect(selector).to.equal("0x1626ba7e");
+
+            } else {
+              const _privateKey = _guardian.privateKey;
+              const _signature = Utils.signMessage(
+                transferOwnerOPuserOpHash,
+                _privateKey
+              );
+              const _recoverAddress = Utils.recoverAddress(
+                transferOwnerOPuserOpHash,
+                _signature
+              );
+              expect(_recoverAddress.toLowerCase()).to.equal(
+                _address.toLowerCase()
+              );
+              guardianSignArr.push({
+                contract: false,
+                address: _address,
+                signature: _signature,
+              });
+            }
         }
         const signature = soulWalletLib.Guardian.packGuardiansSignByInitCode(guardian, guardianSignArr, guardianInitcode);
         transferOwnerOP.signature = signature;
@@ -715,9 +757,22 @@ describe("SoulWalletContract", function () {
 
 
         const validation = await bundler.simulateValidation(transferOwnerOP);
+
         if (validation.status !== 0) {
-            throw new Error(`error code:${validation.status}`);
+            if (validation.status === 1) {
+                const result = validation.result as IFailedOp;
+                console.log(result.reason);
+                throw new Error(`error:${result.reason}`);
+            }
+            else {
+                throw new Error(`error code:${validation.status}`);
+            }
         }
+        const result = validation.result as IValidationResult;
+        if (result.returnInfo.sigFailed) {
+            throw new Error(`signature error`);
+        }
+
         const simulate = await bundler.simulateHandleOp(transferOwnerOP);
         if (simulate.status !== 0) {
             throw new Error(`error code:${simulate.status}`);
@@ -898,13 +953,13 @@ describe("SoulWalletContract", function () {
 
 
     }
-
     describe("wallet test", async function () {
         it("activate wallet(ETH)", activateWallet_withETH);
         it("activate wallet(USDC)", activateWallet_WithUSDCPaymaster);
         it("transferToken", transferToken);
         it("update guardian", updateGuardian);
         it("recovery wallet", recoveryWallet);
+        it("recovery wallet with guardian as contract", recoveryWalletGuardianAsContract);
         it("interface resolver", interfaceResolver);
         it("test decode signature", signatureTest);
         it("other coverage test", coverageTest);

@@ -158,9 +158,8 @@ contract GuardianMultiSigWallet is
                     "contract signature invalid"
                 );
             } else {
-                // Default is the ecrecover flow with the provided data hash
-                // Use ecrecover with the messageHash for EOA signatures
-                currentOwner = ecrecover(dataHash, v, r, s);
+                // EOA guardian reccover follow the eth_sign flow, the messageHash with the Ethereum message prefix before applying ecrecover
+                currentOwner = ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)), v, r, s);
             }
             require(
                 currentOwner > lastOwner && isGuardian[currentOwner],

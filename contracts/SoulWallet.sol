@@ -412,10 +412,14 @@ contract SoulWallet is
         UserOperation calldata op,
         bytes32 signMessageHash
     ) internal returns (bool success) {
+        /* check if the guardian is valid
+        * the sign message hash is the hash of the user operation
+        * the validate hash not add the prefix "Ethereum Signed Message". it will done in guardian multisig contract
+        */
         return isGuardianActionAllowed(op) &&  
                _validateGuardiansSignatureCallData(
                 signatureData.signer,
-                signMessageHash.toEthSignedMessageHash(),
+                signMessageHash,
                 signatureData.signature
                );
     }

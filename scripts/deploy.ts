@@ -4,15 +4,17 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-26 23:06:27
  * @LastEditors: cejay
- * @LastEditTime: 2023-03-12 22:54:24
+ * @LastEditTime: 2023-03-28 15:31:51
  */
 import { BigNumber } from "ethers";
 import { getCreate2Address, hexlify, hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ethers, network, run } from "hardhat";
-import { Bundler, IUserOpReceipt, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
+import { Bundler, IFailedOp, IUserOpReceipt, IValidationResult, SoulWalletLib, UserOperation } from 'soul-wallet-lib';
 import { toNumber } from "soul-wallet-lib/dist/defines/numberLike";
 import { USDCoin__factory, TokenPaymaster__factory, SingletonFactory__factory, SoulWalletFactory__factory, SoulWallet__factory, EstimateGasHelper__factory } from "../src/types/index";
 import { Utils } from "../test/Utils";
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 function isLocalTestnet() {
   return ['localhost', 'hardhat'].includes(network.name);
@@ -96,7 +98,6 @@ async function main() {
   let soulWalletLib;
 
   const networkBundler: Map<string, string> = new Map();
-  networkBundler.set('goerli', 'https://bundler-eth-goerli.soulwallets.me/rpc');
   networkBundler.set('arbitrumGoerli', 'https://bundler-arb-goerli.soulwallets.me/rpc');
   networkBundler.set('optimisticGoerli', 'https://bundler-op-goerli.soulwallets.me/rpc');
   networkBundler.set('arbitrum', 'https://bundler-arb-main.soulwallets.me/rpc');
@@ -106,7 +107,7 @@ async function main() {
 
 
   // create EOA account
-  const bundlerEOA = await ethers.Wallet.createRandom();
+  let bundlerEOA = await ethers.Wallet.createRandom();
 
   if (isLocalTestnet()) {
     let create2 = await new SingletonFactory__factory(EOA).deploy();
@@ -148,6 +149,8 @@ async function main() {
       eip1559GasFee.high.suggestedMaxPriorityFeePerGas = "0.1";
 
     } else if (network.name === "goerli") {
+      const bundlerEOAPrivateKey: string = process.env.GOERLI_PRIVATE_KEY || '';
+      bundlerEOA = new ethers.Wallet(bundlerEOAPrivateKey);
 
       USDCContractAddresses = ["0x55dFb37E7409c4e2B114f8893E67D4Ff32783b35"];
 
@@ -430,7 +433,7 @@ async function main() {
     const create2FactoryContract = SingletonFactory__factory.connect(soulWalletLib.singletonFactory, EOA);
     const estimatedGas = await create2FactoryContract.estimateGas.deploy(PriceOracleBytecode, salt);
     const tx = await create2FactoryContract.deploy(PriceOracleBytecode, salt, { gasLimit: increaseGasLimit(estimatedGas) })
-    console.log("EntryPoint tx:", tx.hash);
+    console.log("PriceOracle tx:", tx.hash);
     while (await ethers.provider.getCode(PriceOracleAddress) === '0x') {
       console.log("PriceOracle not deployed, waiting...");
       await new Promise(r => setTimeout(r, 3000));
@@ -700,9 +703,25 @@ async function main() {
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
       const validation = await bundler.simulateValidation(activateOp);
-      if (validation.status !== 0) {
-        debugger;
-        throw new Error(`error code:${validation.status}`);
+      if (validation.status === 0) {
+        const result = validation.result as IValidationResult;
+        if (result.returnInfo.sigFailed) {
+          // signature error
+          throw new Error(`signature error`);
+        } else {
+          // signature ok
+        }
+      } else {
+        if (validation.status === 1) {
+          // validation failed with reason
+          const result = validation.result as IFailedOp;
+          console.log(result.reason);
+          throw new Error(`error:${result.reason}`);
+        }
+        else {
+          // validation failed without reason
+          throw new Error(`error code:${validation.status}`);
+        }
       }
       const simulate = await bundler.simulateHandleOp(activateOp);
       if (simulate.status !== 0) {
@@ -752,6 +771,94 @@ async function main() {
           console.log("WalletLogic verify failed:", error);
         }
       }
+    } else {
+      let iface = new ethers.utils.Interface(SoulWallet__factory.abi);
+      let initializeData = iface.encodeFunctionData("initialize", [EntryPointAddress, walletOwner, upgradeDelay, guardianDelay, SoulWalletLib.Defines.AddressZero,]);
+ 
+      try {
+        await run("verify:verify", {
+          address: walletAddress,
+          constructorArguments: [WalletLogicAddress, initializeData],
+        });
+      } catch (error) {
+        console.log("WalletLogic verify failed:", error);
+      }
+      // transfer ETH test
+      const nonce = await soulWalletLib.Utils.getNonce(walletAddress, ethers.provider);
+      const transferETHOp = soulWalletLib.Tokens.ETH.transfer(
+        walletAddress,
+        nonce,
+        '0xffffffffffffffffffffffffffffffffffffffff',
+        ethers.utils
+          .parseUnits(eip1559GasFee.high.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(eip1559GasFee.high.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        '0x8f63d7dD6A3F5938616Ef06016BBf25BD6023315',
+        ethers.utils.parseEther('0.0001').toHexString()
+      );
+      await estimateUserOperationGas(bundler, transferETHOp);
+      const _requiredPrefund = await transferETHOp.requiredPrefund(ethers.provider, EntryPointAddress);
+      const requiredPrefund = _requiredPrefund.requiredPrefund.sub(_requiredPrefund.deposit);
+      console.log('requiredPrefund: ' + ethers.utils.formatEther(requiredPrefund) + ' ETH');
+
+      
+
+      const userOpHash = transferETHOp.getUserOpHashWithTimeRange(EntryPointAddress, chainId, walletOwner);
+      transferETHOp.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+
+      const validation = await bundler.simulateValidation(transferETHOp);
+      if (validation.status === 0) {
+        const result = validation.result as IValidationResult;
+        if (result.returnInfo.sigFailed) {
+          // signature error
+          throw new Error(`signature error`);
+        } else {
+          // signature ok
+        }
+      } else {
+        if (validation.status === 1) {
+          // validation failed with reason
+          const result = validation.result as IFailedOp;
+          console.log(result.reason);
+          throw new Error(`error:${result.reason}`);
+        }
+        else {
+          // validation failed without reason
+          throw new Error(`error code:${validation.status}`);
+        }
+      }
+
+      let sent = false;
+
+      const bundlerEvent = bundler.sendUserOperation(transferETHOp, 1000 * 60 * 3);
+      bundlerEvent.on('error', (err: any) => {
+        console.log(err);
+        debugger;
+      });
+      bundlerEvent.on('send', (userOpHash: string) => {
+        console.log('send: ' + userOpHash);
+      });
+      bundlerEvent.on('receipt', (receipt: IUserOpReceipt) => {
+        console.log('receipt: ' + receipt);
+        sent = true;
+        debugger;
+      });
+      bundlerEvent.on('timeout', () => {
+        console.log('timeout');
+      });
+
+
+
+      while (!sent) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+
     }
 
     if (recoverWalletTest) {
@@ -809,9 +916,25 @@ async function main() {
       }
 
       const validation = await bundler.simulateValidation(transferOwnerOP);
-      if (validation.status !== 0) {
-        debugger;
-        throw new Error(`error code:${validation.status}`);
+      if (validation.status === 0) {
+        const result = validation.result as IValidationResult;
+        if (result.returnInfo.sigFailed) {
+          // signature error
+          throw new Error(`signature error`);
+        } else {
+          // signature ok
+        }
+      } else {
+        if (validation.status === 1) {
+          // validation failed with reason
+          const result = validation.result as IFailedOp;
+          console.log(result.reason);
+          throw new Error(`error:${result.reason}`);
+        }
+        else {
+          // validation failed without reason
+          throw new Error(`error code:${validation.status}`);
+        }
       }
       const simulate = await bundler.simulateHandleOp(transferOwnerOP);
       if (simulate.status !== 0) {
@@ -915,7 +1038,7 @@ async function main() {
         const usdcBalance = await USDCContract.balanceOf(walletAddress);
         console.log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USD');
       }
-      
+
 
       const userOpHash = activateOp.getUserOpHashWithTimeRange(EntryPointAddress, chainId, walletOwner);
       activateOp.signWithSignature(
@@ -923,9 +1046,25 @@ async function main() {
         Utils.signMessage(userOpHash, walletOwnerPrivateKey)
       );
       const validation = await bundler.simulateValidation(activateOp);
-      if (validation.status !== 0) {
-        debugger;
-        throw new Error(`error code:${validation.status}`);
+      if (validation.status === 0) {
+        const result = validation.result as IValidationResult;
+        if (result.returnInfo.sigFailed) {
+          // signature error
+          throw new Error(`signature error`);
+        } else {
+          // signature ok
+        }
+      } else {
+        if (validation.status === 1) {
+          // validation failed with reason
+          const result = validation.result as IFailedOp;
+          console.log(result.reason);
+          throw new Error(`error:${result.reason}`);
+        }
+        else {
+          // validation failed without reason
+          throw new Error(`error code:${validation.status}`);
+        }
       }
       const simulate = await bundler.simulateHandleOp(activateOp);
       if (simulate.status !== 0) {

@@ -4,7 +4,7 @@
  * @Autor: z.cejay@gmail.com
  * @Date: 2022-12-24 14:24:47
  * @LastEditors: cejay
- * @LastEditTime: 2023-03-12 20:05:39
+ * @LastEditTime: 2023-03-28 05:27:54
  */
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
@@ -26,6 +26,7 @@ describe("SoulWalletContract", function () {
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
     async function deployFixture() {
+
         // get accounts
         const accounts = await ethers.getSigners();
 
@@ -297,13 +298,23 @@ describe("SoulWalletContract", function () {
 
         //const activateOp = UserOperation.fromJSON(activateOp.toJSON());
         const validation = await bundler.simulateValidation(activateOp);
-        if (validation.status !== 0) {
+        if (validation.status === 0) {
+            const result = validation.result as IValidationResult;
+            if (result.returnInfo.sigFailed) {
+                // signature error
+                throw new Error(`signature error`);
+            } else {
+                // signature ok
+            }
+        } else {
             if (validation.status === 1) {
+                // validation failed with reason
                 const result = validation.result as IFailedOp;
                 console.log(result.reason);
                 throw new Error(`error:${result.reason}`);
             }
             else {
+                // validation failed without reason
                 throw new Error(`error code:${validation.status}`);
             }
         }
@@ -433,6 +444,8 @@ describe("SoulWalletContract", function () {
         const approveCallData = soulWalletLib.Tokens.ERC20.getApproveCallData(approveData);
         activateOp.callData = approveCallData.callData;
         activateOp.callGasLimit = approveCallData.callGasLimit;
+
+
         await estimateUserOperationGas(bundler, activateOp);
 
         let requiredPrefund: BigNumber;
@@ -462,8 +475,7 @@ describe("SoulWalletContract", function () {
             const usdcBalance = await USDC.contract.balanceOf(walletAddress);
             log('usdcBalance: ' + ethers.utils.formatUnits(usdcBalance, exchangePrice.tokenDecimals), 'USDC');
         }
-        const decoder = soulWalletLib.Utils.DecodeCallData.new();
-        const decoded = await decoder.decode(activateOp.callData);
+
         log("init code", activateOp.initCode);
 
         const userOpHash = activateOp.getUserOpHashWithTimeRange(EntryPoint.contract.address, chainId, walletOwner.address);
@@ -472,10 +484,26 @@ describe("SoulWalletContract", function () {
             walletOwner.address,
             Utils.signMessage(userOpHash, walletOwner.privateKey)
         );
-
         const validation = await bundler.simulateValidation(activateOp);
-        if (validation.status !== 0) {
-            throw new Error(`error code:${validation.status}`);
+        if (validation.status === 0) {
+            const result = validation.result as IValidationResult;
+            if (result.returnInfo.sigFailed) {
+                // signature error
+                throw new Error(`signature error`);
+            } else {
+                // signature ok
+            }
+        } else {
+            if (validation.status === 1) {
+                // validation failed with reason
+                const result = validation.result as IFailedOp;
+                console.log(result.reason);
+                throw new Error(`error:${result.reason}`);
+            }
+            else {
+                // validation failed without reason
+                throw new Error(`error code:${validation.status}`);
+            }
         }
         const simulate = await bundler.simulateHandleOp(activateOp);
         if (simulate.status !== 0) {
@@ -700,8 +728,6 @@ describe("SoulWalletContract", function () {
             let code = await ethers.provider.getCode(_address);
             log(`get code ${code} address ${_address}`)
             if (code !== "0x") {
-
-
                 const packedHash = soulWalletLib.EIP1271.packHashMessageWithTimeRange(transferOwnerOPuserOpHash, new ethers.Wallet(_guardian.privateKey).address, 0, 0);
                 const signature = Utils.signMessage(packedHash, _guardian.privateKey);
                 const packedSignature = soulWalletLib.EIP1271.encodeSignature(new ethers.Wallet(_guardian.privateKey).address, signature, 0, 0);
@@ -716,7 +742,6 @@ describe("SoulWalletContract", function () {
                         packedSignature
                   );
                   expect(selector).to.equal("0x1626ba7e");
-
             } else {
               const _privateKey = _guardian.privateKey;
               const _signature = Utils.signMessage(
@@ -887,6 +912,58 @@ describe("SoulWalletContract", function () {
 
     }
 
+    async function calldataDecoder() {
+        const { soulWalletLib, accounts } = await loadFixture(deployFixture);
+        const decoder = soulWalletLib.Utils.DecodeCallData.new();
+
+        {
+            const approveData: IApproveToken[] = [
+                {
+                    token: accounts[0].address,
+                    spender: accounts[1].address,
+                    value: ethers.utils.parseEther('1').toString()
+                }
+            ];
+            const approveCallData = soulWalletLib.Tokens.ERC20.getApproveCallData(approveData);
+            const decoded = await decoder.decode(approveCallData.callData);
+            expect(decoded.length).to.equal(1);
+            expect(decoded[0].to.toLowerCase()).to.equal(approveData[0].token.toLowerCase());
+            expect(decoded[0].params[0].toLowerCase()).to.equal(approveData[0].spender.toLowerCase());
+            expect(BigNumber.from(approveData[0].value).eq(decoded[0].params[1])).to.equal(true);
+        }
+        {
+            // IANA_prefixCheck(uint128,uint8,uint256)	0x5a412a89 (online)
+            const encodeABI = new ethers.utils.Interface(["function IANA_prefixCheck(uint128,uint8,uint256)"]).encodeFunctionData("IANA_prefixCheck", [
+                1,
+                2,
+                3
+            ]);
+            const decoded = await decoder.decode(encodeABI);
+            expect(decoded.length).to.equal(1);
+            expect(decoded[0].functionName).to.equal("IANA_prefixCheck");
+            expect(BigNumber.from(1).eq(decoded[0].params[0])).to.equal(true);
+            expect(decoded[0].params[1]).to.equal(2);
+            expect(BigNumber.from(3).eq(decoded[0].params[2])).to.equal(true);
+        }
+        {
+            // random function signature
+            const functionName = "randomFunction_" + Math.floor(Math.random() * 1000000);
+            const encodeABI = new ethers.utils.Interface(["function " + functionName + "(uint128)"]).encodeFunctionData(functionName, [
+                1
+            ]);
+            const decoded = await decoder.decode(encodeABI);
+            expect(decoded.length).to.equal(0);
+        }
+        {
+            // swap()
+            const encodeABI = new ethers.utils.Interface(["function swap()"]).encodeFunctionData("swap", []);
+            const decoded = await decoder.decode(encodeABI);
+            expect(decoded.length).to.equal(1);
+            expect(decoded[0].functionName).to.equal("swap");
+        }
+
+    }
+
     async function coverageTest() {
         const { soulWalletLib, walletAddress, walletOwner, guardian, guardianDelay, chainId, accounts, GuardianLogic, SingletonFactory, EntryPoint, USDC } = await activateWallet_WithUSDCPaymaster();
         const walletContract = new ethers.Contract(walletAddress, SoulWallet__factory.abi, ethers.provider);
@@ -962,6 +1039,7 @@ describe("SoulWalletContract", function () {
         it("recovery wallet with guardian as contract", recoveryWalletGuardianAsContract);
         it("interface resolver", interfaceResolver);
         it("test decode signature", signatureTest);
+        it("calldata decoder", calldataDecoder);
         it("other coverage test", coverageTest);
     });
 

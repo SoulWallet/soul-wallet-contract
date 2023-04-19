@@ -1,0 +1,4 @@
+[submodule "account-abstraction"]
+	path = account-abstraction
+	url = https://github.com/proofofsoulprotocol/account-abstraction
+	branch = ver0.6.0

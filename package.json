@@ -1,18 +1,9 @@
 {
   "name": "soulwallet-contract",
   "scripts": {
-    "compile": "npx hardhat compile",
-    "test": "npx hardhat test test/test.ts",
-    "coverage": "npx hardhat coverage",
-    "deploy": "npx hardhat run scripts/deploy.ts",
-    "deploy:goerli": "npx hardhat run scripts/deploy.ts --network goerli",
-    "deploy:arbitrum": "npx hardhat run scripts/deploy.ts --network arbitrum",
-    "deploy:arbitrumGoerli": "npx hardhat run scripts/deploy.ts --network arbitrumGoerli",
-    "deploy:optimisticGoerli": "npx hardhat run scripts/deploy.ts --network optimisticGoerli",
-    "deploy:optimistic": "npx hardhat run scripts/deploy.ts --network optimistic"
+    "compile": "npx hardhat compile"
   },
   "devDependencies": {
-    "@chainlink/contracts": "^0.6.0",
     "@ethersproject/abi": "^5.6.4",
     "@ethersproject/providers": "^5.6.8",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
@@ -33,7 +24,6 @@
     "solidity-bytes-utils": "^0.8.0",
     "solidity-coverage": "^0.8.2",
     "solidity-string-utils": "^0.0.8-0",
-    "soul-wallet-lib": "github:proofofsoulprotocol/soulwalletlib#v0.1.0-alpha.31",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.9.4"

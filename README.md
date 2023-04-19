@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">SoulWallet Contracts</h1>
+  <h1 align="center">SoulWallet Contracts [draft version]</h1>
 </div>
 
 <div align="center">

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "./AccountManager.sol";
-import "../libraries/SafeLock.sol";
 
 abstract contract GuardianManager is AccountManager {
 

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
+import "./IFallbackModule.sol";
 
-interface IModule {
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-    function supportsStaticCall(bytes4 methodId) external view returns (bool);
+interface IModule is IFallbackModule {
     function supportsDelegateCall(bytes4 methodId) external view returns (bool);
     function supportsHook(bytes4 hookId) external view returns (bool);
     function delegateCallBeforeExecution(address target, uint256 value, bytes memory data) external;

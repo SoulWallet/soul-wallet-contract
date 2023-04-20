@@ -2,11 +2,13 @@
 pragma solidity ^0.8.17;
 
 import "./AccountManager.sol";
-import "../interfaces/IModule.sol";
 import "./ModuleManager.sol";
 import "./ReceiveManager.sol";
 
 abstract contract ExecutionManager is AccountManager, ModuleManager, ReceiveManager {
+
+    constructor(uint64 _safeLockPeriod, ITrustedModuleManager _trustedModuleManager) ModuleManager(_safeLockPeriod, _trustedModuleManager){}
+
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
@@ -42,5 +44,9 @@ abstract contract ExecutionManager is AccountManager, ModuleManager, ReceiveMana
             }
         }
         afterExecution(target, value, data);
+    }
+
+    function _beforeFallback() internal virtual override {
+        super._beforeFallback();
     }
 }

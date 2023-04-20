@@ -28,12 +28,12 @@ contract SoulWallet is
 
     constructor(
         IEntryPoint anEntryPoint,
-        uint256 aSafeLockTime,
+        uint64 safeLockPeriod,
+        ITrustedModuleManager trustedModuleManager,
         address anOwner
-    ) public ImmediateOperand(anEntryPoint) {
+    ) public ImmediateOperand(anEntryPoint) ExecutionManager(safeLockPeriod, trustedModuleManager) {
         AccountStorage.Layout storage layout = AccountStorage.layout();
         layout.owner = anOwner;
-        layout.safeLockTime = aSafeLockTime;
 
         _disableInitializers();
     }
@@ -53,4 +53,10 @@ contract SoulWallet is
     ) internal virtual override returns (uint256 validationData) {
         return SignatureValidator.isValid(userOp, userOpHash);
     }
+
+    fallback() external payable {
+        super._beforeFallback();
+    }
+
+
 }

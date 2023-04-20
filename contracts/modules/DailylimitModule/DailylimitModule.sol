@@ -2,71 +2,55 @@
 pragma solidity ^0.8.17;
 
 import "./IDailylimitModule.sol";
+import "../../libraries/CallHelper.sol";
 
 contract DailylimitModule is IDailylimitModule {
     mapping(address => mapping(address => uint)) private dailyLimit;
     mapping(address => mapping(address => uint)) private spentToday;
 
+
+    bytes4 private constant _methodId1 = bytes4(keccak256("setDailyLimit(address,uint256)"));
+    bytes4 private constant _methodId2 = bytes4(keccak256("resetSpentToday(address)"));
+    bytes4 private constant _methodId3 = bytes4(keccak256("getDailyLimit(address)"));
+    bytes4 private constant _methodId4 = bytes4(keccak256("getSpentToday(address)"));
+
     constructor() {}
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override returns (bool) {
+    ) public view returns (bool) {
         return interfaceId == type(IModule).interfaceId;
     }
 
-    function supportsStaticCall(
+    function supportsMethod(
         bytes4 methodId
-    ) public view virtual override returns (bool) {
-        (methodId);
-        return false;
+    ) public view returns (CallHelper.CallType) {
+
+        if( methodId == _methodId1 ||
+            methodId == _methodId2 ||
+            methodId == _methodId3 ||
+            methodId == _methodId4) {
+            return CallHelper.CallType.CALL;
+        }
+        return CallHelper.CallType.UNKNOWN;
     }
 
-    function supportsDelegateCall(
-        bytes4 methodId
-    ) public view virtual override returns (bool) {
-        (methodId);
-        return false;
+    function supportsHook(HookType hookType) external view returns (CallHelper.CallType) {
+        return CallHelper.CallType.CALL;
     }
 
-    function supportsHook(
-        bytes4 hookId
-    ) public view virtual override returns (bool) {
-        (hookId);
-        return false;
-    }
-
-    function delegateCallBeforeExecution(
+    function preHook(
         address target,
         uint256 value,
         bytes memory data
-    ) public virtual override {
-        (target, value, data);
-    }
+    ) external {}
 
-    function delegateCallAfterExecution(
+    function postHook(
         address target,
         uint256 value,
         bytes memory data
-    ) public virtual override {
-        (target, value, data);
-    }
+    ) external {}
 
-    function staticCallBeforeExecution(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) public view virtual override {
-        (target, value, data);
-    }
-
-    function staticCallAfterExecution(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) public view virtual override {
-        (target, value, data);
-    }
 
     function setDailyLimit(address token, uint256 limit) external {
         dailyLimit[msg.sender][token] = limit;

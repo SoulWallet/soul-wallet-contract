@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
-abstract contract ImmediateOperand {
+abstract contract ImmediateEntryPoint {
     
     IEntryPoint private immutable __entryPoint;
 

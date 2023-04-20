@@ -6,9 +6,10 @@ import "../interfaces/IModuleManager.sol";
 import "../interfaces/IModule.sol";
 import "../libraries/DecodeCalldata.sol";
 import "../trustedModuleManager/ITrustedModuleManager.sol";
-import "./FallbackModuleManager.sol";
+import "./AccountManager.sol";
+import "../libraries/CallHelper.sol";
 
-abstract contract ModuleManager is IModuleManager,SafeLock,FallbackModuleManager {
+abstract contract ModuleManager is IModuleManager,SafeLock,AccountManager {
     using DecodeCalldata for bytes;
     ITrustedModuleManager public immutable trustedModuleManager;
     bytes32 private constant MODULE_TIMELOCK_TAG = keccak256("soulwallet.contracts.ModuleManager.MODULE_TIMELOCK_TAG");
@@ -17,43 +18,64 @@ abstract contract ModuleManager is IModuleManager,SafeLock,FallbackModuleManager
         trustedModuleManager = _trustedModuleManager;
     }
 
-    function addModule(
-        IModule module,
-        bytes4[] calldata staticCallMethodId,
-        bytes4[] calldata delegateCallMethodId,
-        bytes4[] calldata hookId,
-        bytes memory data
-    ) public {
-        (module, staticCallMethodId, delegateCallMethodId, hookId, data);
-        require(trustedModuleManager.isTrustedModule(address(module)), "not trusted module");
+    function addModule(ModuleInfo calldata module) external {
+        _requireFromEntryPointOrOwner();
+
+        // check if the module is trusted
+        if(trustedModuleManager.isTrustedModule(address(module.module)) == false){
+            // check if the module is no side-effect
+            require(
+                module.postHook == false &&
+                module.preHook == false &&
+                module.methodsInfo.length > 0
+            );
+            for(uint i = 0; i < module.methodsInfo.length; i++){
+                require(module.methodsInfo[i].callType == CallHelper.CallType.STATICCALL, "not static call");
+            }
+        }
+
+        // #ADD MODULE TO STORAGE
+
+        emit ModuleAdded(address(module.module), module.preHook, module.postHook, module.methodsInfo);
+
     }
 
-    function _getTimeLockTag(address module) private view returns (bytes32) {
+    function _getTimeLockTag(address module) private pure returns (bytes32) {
         return keccak256(abi.encodePacked(MODULE_TIMELOCK_TAG, module));
     }
 
-    function removeModule(address module) public {
-        (module);
-        lock(_getTimeLockTag(module));
+    function removeModule(address module) external {
+        _requireFromEntryPointOrOwner();
+
+        bool pureModule = true;
+        if(pureModule){
+            // can removeModule directly if the module is `pure module`
+            emit ModuleRemoved(module);
+        }else{
+            // if the module is not `pure module`, need ues safeLock to removeModule
+            lock(_getTimeLockTag(module));
+            emit ModuleRemove(module);
+        }
     }
-    function confirmremoveModule(address module) public {
-        (module);
+
+    function cancelRemoveModule(address module) external {
+        _requireFromEntryPointOrOwner();
+        cancelLock(_getTimeLockTag(module));
+        emit ModuleCancelRemoved(module);
+    }
+
+    function confirmRemoveModule(address module) external {
+        _requireFromEntryPointOrOwner();
         unlock(_getTimeLockTag(module));
+        emit ModuleRemoved(module);
     }
 
-    function getModules() public view returns (address[] memory modules) {
-        return new address[](0);
+    function getModules() external view override returns (ModuleInfo[] memory modules) {
+         
     }
 
-    function getModulesBeforeExecution()
-        public
-        view
-        returns (address[] memory modules, bool[] memory isStatic)
-    {
-        return (new address[](0), new bool[](0));
-    }
 
-    function beforeExecution(
+    function preHook(
         address target,
         uint256 value,
         bytes memory data
@@ -61,59 +83,27 @@ abstract contract ModuleManager is IModuleManager,SafeLock,FallbackModuleManager
         (target, value, data);
     }
 
-    function getModulesAfterExecution()
-        public
-        view
-        returns (address[] memory modules, bool[] memory isStatic)
-    {
-        return (new address[](0), new bool[](0));
-    }
-
-    function afterExecution(
+    function postHook(
         address target,
         uint256 value,
         bytes memory data
     ) internal {
         (target, value, data);
     }
+
 
     function _getModulesByMethodId(
         bytes4 methodId
-    ) private view returns (address module, bool isStatic) {
+    ) private view returns (address module, CallHelper.CallType callType) {
         (methodId);
-        return (address(0), false);
+        revert("not implemented");
     }
 
-    function _beforeFallback() internal virtual override {
-        super._beforeFallback();
+
+    function _beforeFallback() internal virtual { 
         bytes4 methodId = msg.data.decodeMethodId();
-        (address module, bool isStatic) = _getModulesByMethodId(methodId);
-        if (module != address(0)) {
-            if (isStatic) {
-                (bool success, bytes memory result) = module.staticcall(
-                    msg.data
-                );
-                if (!success) {
-                    assembly {
-                        revert(add(result, 32), mload(result))
-                    }
-                }
-                assembly {
-                    return(add(result, 32), mload(result))
-                }
-            } else {
-                (bool success, bytes memory result) = module.delegatecall(
-                    msg.data
-                );
-                if (!success) {
-                    assembly {
-                        revert(add(result, 32), mload(result))
-                    }
-                }
-                assembly {
-                    return(add(result, 32), mload(result))
-                }
-            }
-        }
+        (address module, CallHelper.CallType callType) = _getModulesByMethodId(methodId);
+        CallHelper.callWithoutReturnData(callType, module, msg.data);
     }
+    
 }

@@ -2,14 +2,26 @@
 pragma solidity ^0.8.17;
 
 import "./IModule.sol";
+import "../libraries/CallHelper.sol";
 
 interface IModuleManager {
-    event ModuleAdded(address module, bytes4[] staticCallMethodId, bytes4[] delegateCallMethodId, bytes4[] hookId);
-    event ModuleRemoved(address module);
-    function addModule(IModule module, bytes4[] calldata staticCallMethodId, bytes4[] calldata delegateCallMethodId, bytes4[] calldata hookId, bytes memory data) external;
+    struct MethodsInfo{
+        bytes4 methodId;
+        CallHelper.CallType callType;
+    }
+    struct ModuleInfo {
+        IModule module;
+        bool preHook;
+        bool postHook;
+        MethodsInfo[] methodsInfo;
+    }
+    event ModuleAdded(address indexed module, bool preHook, bool postHook, MethodsInfo[] methodsInfo);
+    event ModuleRemove(address indexed module);
+    event ModuleCancelRemoved(address indexed module);
+    event ModuleRemoved(address indexed module);
+    function addModule(ModuleInfo calldata module) external;
     function removeModule(address module) external;
-    function confirmremoveModule(address module) external;
-    function getModules() external view returns (address[] memory modules);
-    function getModulesBeforeExecution() external view returns (address[] memory modules,bool[] memory isStatic);
-    function getModulesAfterExecution() external view returns (address[] memory modules,bool[] memory isStatic);
+    function cancelRemoveModule(address module) external;
+    function confirmRemoveModule(address module) external;
+    function getModules() external view returns (ModuleInfo[] memory modules);
 }

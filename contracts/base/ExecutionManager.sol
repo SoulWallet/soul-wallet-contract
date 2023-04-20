@@ -36,14 +36,14 @@ abstract contract ExecutionManager is AccountManager, ModuleManager, ReceiveMana
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
-        beforeExecution(target, value, data);
+        preHook(target, value, data);
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
             assembly {
                 revert(add(result, 32), mload(result))
             }
         }
-        afterExecution(target, value, data);
+        postHook(target, value, data);
     }
 
     function _beforeFallback() internal virtual override {

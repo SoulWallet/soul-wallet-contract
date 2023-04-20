@@ -20,11 +20,13 @@ contract TrustedModuleManager is ITrustedModuleManager, Ownable {
     function addTrustedModule(address[] memory modules) external onlyOwner {
         for(uint i = 0; i < modules.length; i++){
             trustedModules[modules[i]] = true;
+            emit TrustedModuleAdded(modules[i]);
         }
     }
     function removeTrustedModule(address[] memory modules) external onlyOwner {
         for(uint i = 0; i < modules.length; i++){
             trustedModules[modules[i]] = false;
+            emit TrustedModuleRemoved(modules[i]);
         }
     }
 }

@@ -9,9 +9,10 @@ import "./libraries/AccountStorage.sol";
 import "./base/EntryPointBase.sol";
 import "./base/DepositManager.sol";
 import "./base/ExecutionManager.sol";
-import "./base/ImmediateOperand.sol";
+import "./base/ImmediateEntryPoint.sol";
 import "./base/GuardianManager.sol";
 import "./libraries/SignatureValidator.sol";
+import "./guardian/IGuardian.sol";
 
 // Draft
 contract SoulWallet is
@@ -21,17 +22,23 @@ contract SoulWallet is
     TokenCallbackHandler,
     DepositManager,
     ExecutionManager,
-    ImmediateOperand,
+    ImmediateEntryPoint,
     GuardianManager
 {
     using AccountStorage for AccountStorage.Layout;
 
     constructor(
         IEntryPoint anEntryPoint,
-        uint64 safeLockPeriod,
         ITrustedModuleManager trustedModuleManager,
+        IGuardian guardianLogic,
+        uint64 safeLockPeriod,
         address anOwner
-    ) public ImmediateOperand(anEntryPoint) ExecutionManager(safeLockPeriod, trustedModuleManager) {
+    )
+        public
+        ImmediateEntryPoint(anEntryPoint)
+        ExecutionManager(safeLockPeriod, trustedModuleManager)
+        GuardianManager(guardianLogic)
+    {
         AccountStorage.Layout storage layout = AccountStorage.layout();
         layout.owner = anOwner;
 
@@ -44,7 +51,7 @@ contract SoulWallet is
         override(BaseAccount, EntryPointBase)
         returns (IEntryPoint)
     {
-        return ImmediateOperand._getEntryPoint();
+        return ImmediateEntryPoint._getEntryPoint();
     }
 
     function _validateSignature(
@@ -57,6 +64,4 @@ contract SoulWallet is
     fallback() external payable {
         super._beforeFallback();
     }
-
-
 }

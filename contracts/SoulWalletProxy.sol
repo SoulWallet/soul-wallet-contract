@@ -10,24 +10,13 @@ contract SoulWalletProxy {
 
 
     /**
-     * @dev Initializes the contract setting the implementation,
-     * `data` turn some parameters into immediate operand to reduce the gas consumption.
+     * @dev Initializes the contract setting the implementation
      * 
      * @param logic Address of the initial implementation.
-     * @param data all data to be passed to the implementation
      */
-    constructor(address logic, bytes memory data) {
+    constructor(address logic) {
         assembly {
             sstore(_IMPLEMENTATION_SLOT, logic)
-            let result := delegatecall(gas(), logic, add(data, 0x20), mload(data), 0, 0)
-            returndatacopy(0, 0, returndatasize())
-            switch result
-            case 0 {
-                revert(0, returndatasize())
-            }
-            default {
-                return(0, returndatasize())
-            }
         }
     }
     

@@ -31,14 +31,18 @@ contract SoulWallet is
         IEntryPoint anEntryPoint,
         ITrustedModuleManager trustedModuleManager,
         IGuardian guardianLogic,
-        uint64 safeLockPeriod,
-        address anOwner
+        uint64 safeLockPeriod
     )
         public
         ImmediateEntryPoint(anEntryPoint)
         ExecutionManager(safeLockPeriod, trustedModuleManager)
         GuardianManager(guardianLogic)
     {
+    }
+
+    function initialize(
+        address anOwner
+    ) public initializer {
         AccountStorage.Layout storage layout = AccountStorage.layout();
         layout.owner = anOwner;
 

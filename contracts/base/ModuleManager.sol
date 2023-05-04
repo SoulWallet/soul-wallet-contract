@@ -1,109 +1,47 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../safeLock/SafeLock.sol";
-import "../interfaces/IModuleManager.sol";
+import "../libraries/AccountStorage.sol";
+import "./ImmediateEntryPoint.sol";
 import "../interfaces/IModule.sol";
-import "../libraries/DecodeCalldata.sol";
-import "../trustedModuleManager/ITrustedModuleManager.sol";
-import "./AccountManager.sol";
-import "../libraries/CallHelper.sol";
 
-abstract contract ModuleManager is IModuleManager,SafeLock,AccountManager {
-    using DecodeCalldata for bytes;
-    ITrustedModuleManager public immutable trustedModuleManager;
-    bytes32 private constant MODULE_TIMELOCK_TAG = keccak256("soulwallet.contracts.ModuleManager.MODULE_TIMELOCK_TAG");
+abstract contract ModuleManager is ImmediateEntryPoint {
 
-    constructor(uint64 _safeLockPeriod, ITrustedModuleManager _trustedModuleManager) SafeLock("soulwallet.contracts.ModuleManager.slot", _safeLockPeriod){
-        trustedModuleManager = _trustedModuleManager;
-    }
-
-    function addModule(ModuleInfo calldata module) external {
-        _requireFromEntryPointOrOwner();
-
-        // check if the module is trusted
-        if(trustedModuleManager.isTrustedModule(address(module.module)) == false){
-            // check if the module is no side-effect
-            require(
-                module.postHook == false &&
-                module.preHook == false &&
-                module.methodsInfo.length > 0
-            );
-            for(uint i = 0; i < module.methodsInfo.length; i++){
-                require(module.methodsInfo[i].callType == CallHelper.CallType.STATICCALL, "not static call");
-            }
+    function requireFromAuthorizedModule(bytes4 selector) public view {
+        if (address(_getEntryPoint()) == msg.sender) {
+            return;
         }
-
-        // #ADD MODULE TO STORAGE
-
-        emit ModuleAdded(address(module.module), module.preHook, module.postHook, module.methodsInfo);
-
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        require(layout.moduleMethodAllowed[msg.sender][selector], "methods not allowed");
     }
 
-    function _getTimeLockTag(address module) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(MODULE_TIMELOCK_TAG, module));
-    }
-
-    function removeModule(address module) external {
-        _requireFromEntryPointOrOwner();
-
-        bool pureModule = true;
-        if(pureModule){
-            // can removeModule directly if the module is `pure module`
-            emit ModuleRemoved(module);
-        }else{
-            // if the module is not `pure module`, need ues safeLock to removeModule
-            lock(_getTimeLockTag(module));
-            emit ModuleRemove(module);
+    function _authorizeModule(address module) external {
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        require(msg.sender == address(this));
+        bytes4[] memory methods = IModule(module).allowedMethods();
+        require(methods.length > 0);
+        require(!layout.moduleAuthorized[module]);
+        // TODO: require module is contract, require methods is in support list
+        // TODO: require is in whitelist
+        // TODO: add timelock
+        layout.moduleAuthorized[module] = true;
+        for (uint i = 0; i < methods.length; i++) {
+            layout.moduleMethodAllowed[module][methods[i]] = true;
         }
+        // TODO: IModule(module).init();
     }
 
-    function cancelRemoveModule(address module) external {
-        _requireFromEntryPointOrOwner();
-        cancelLock(_getTimeLockTag(module));
-        emit ModuleCancelRemoved(module);
+    function _revokeModule(address module) external {
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        require(msg.sender == address(this));
+        bytes4[] memory methods = IModule(module).allowedMethods();
+        require(methods.length > 0);
+        // TODO: add timelock
+
+        for (uint i = 0; i < methods.length; i++) {
+            delete layout.moduleMethodAllowed[module][methods[i]];
+        }
+        delete layout.moduleAuthorized[module];
+        // TODO: IModule(module).deinit();
     }
-
-    function confirmRemoveModule(address module) external {
-        _requireFromEntryPointOrOwner();
-        unlock(_getTimeLockTag(module));
-        emit ModuleRemoved(module);
-    }
-
-    function getModules() external view override returns (ModuleInfo[] memory modules) {
-         
-    }
-
-
-    function preHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
-        (target, value, data);
-    }
-
-    function postHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
-        (target, value, data);
-    }
-
-
-    function _getModulesByMethodId(
-        bytes4 methodId
-    ) private view returns (address module, CallHelper.CallType callType) {
-        (methodId);
-        revert("not implemented");
-    }
-
-
-    function _beforeFallback() internal virtual { 
-        bytes4 methodId = msg.data.decodeMethodId();
-        (address module, CallHelper.CallType callType) = _getModulesByMethodId(methodId);
-        CallHelper.callWithoutReturnData(callType, module, msg.data);
-    }
-    
 }

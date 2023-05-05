@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "../authority/EntryPointAuth.sol";
 
-abstract contract ImmediateEntryPoint {
-    
+abstract contract EntryPointManager is EntryPointAuth {
     IEntryPoint private immutable __entryPoint;
 
     constructor(IEntryPoint anEntryPoint) {
         __entryPoint = anEntryPoint;
     }
 
-    function _getEntryPoint() internal view returns (IEntryPoint) {
+    function _entryPoint() internal view override returns (IEntryPoint) {
         return __entryPoint;
     }
-
 }

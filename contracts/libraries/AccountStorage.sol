@@ -6,13 +6,18 @@ import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
 library AccountStorage {
     bytes32 private constant ACCOUNT_SLOT =
         keccak256("soulwallet.contracts.AccountStorage");
+    address internal constant SENTINEL_OWNERS = address(0x1);
 
     struct Layout {
         /// ┌───────────────────┐
         /// │     base data     │
-        address owner; // owner slot [unused]
+        mapping(address => address) owners;
+        uint256 ownerCount;
         uint256[50] __gap_0;
         /// └───────────────────┘
+
+        mapping(address => address) modules;
+        mapping(address => mapping(bytes4 => bytes4)) moduleSelectors;
 
         //#TODO
     }

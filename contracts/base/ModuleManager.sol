@@ -1,109 +1,90 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../safeLock/SafeLock.sol";
+import "../libraries/AccountStorage.sol";
+import "../authority/Authority.sol";
+import "../authority/ModuleAuth.sol";
 import "../interfaces/IModuleManager.sol";
-import "../interfaces/IModule.sol";
-import "../libraries/DecodeCalldata.sol";
-import "../trustedModuleManager/ITrustedModuleManager.sol";
-import "./AccountManager.sol";
-import "../libraries/CallHelper.sol";
+import "../authority/SafeModuleManagerAuth.sol";
 
-abstract contract ModuleManager is IModuleManager,SafeLock,AccountManager {
-    using DecodeCalldata for bytes;
-    ITrustedModuleManager public immutable trustedModuleManager;
-    bytes32 private constant MODULE_TIMELOCK_TAG = keccak256("soulwallet.contracts.ModuleManager.MODULE_TIMELOCK_TAG");
+abstract contract ModuleManager is
+    IModuleManager,
+    SafeModuleManagerAuth,
+    ModuleAuth
+{
+    address public immutable safeModuleManager;
 
-    constructor(uint64 _safeLockPeriod, ITrustedModuleManager _trustedModuleManager) SafeLock("soulwallet.contracts.ModuleManager.slot", _safeLockPeriod){
-        trustedModuleManager = _trustedModuleManager;
+    bytes4 private constant SENTINEL_SELECTOR = 0x00000001;
+    address private constant SENTINEL_MODULE = address(1);
+
+    constructor(address aSafeModuleManager) {
+        safeModuleManager = aSafeModuleManager;
     }
 
-    function addModule(ModuleInfo calldata module) external {
-        _requireFromEntryPointOrOwner();
-
-        // check if the module is trusted
-        if(trustedModuleManager.isTrustedModule(address(module.module)) == false){
-            // check if the module is no side-effect
-            require(
-                module.postHook == false &&
-                module.preHook == false &&
-                module.methodsInfo.length > 0
-            );
-            for(uint i = 0; i < module.methodsInfo.length; i++){
-                require(module.methodsInfo[i].callType == CallHelper.CallType.STATICCALL, "not static call");
-            }
-        }
-
-        // #ADD MODULE TO STORAGE
-
-        emit ModuleAdded(address(module.module), module.preHook, module.postHook, module.methodsInfo);
-
-    }
-
-    function _getTimeLockTag(address module) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(MODULE_TIMELOCK_TAG, module));
-    }
-
-    function removeModule(address module) external {
-        _requireFromEntryPointOrOwner();
-
-        bool pureModule = true;
-        if(pureModule){
-            // can removeModule directly if the module is `pure module`
-            emit ModuleRemoved(module);
-        }else{
-            // if the module is not `pure module`, need ues safeLock to removeModule
-            lock(_getTimeLockTag(module));
-            emit ModuleRemove(module);
-        }
-    }
-
-    function cancelRemoveModule(address module) external {
-        _requireFromEntryPointOrOwner();
-        cancelLock(_getTimeLockTag(module));
-        emit ModuleCancelRemoved(module);
-    }
-
-    function confirmRemoveModule(address module) external {
-        _requireFromEntryPointOrOwner();
-        unlock(_getTimeLockTag(module));
-        emit ModuleRemoved(module);
-    }
-
-    function getModules() external view override returns (ModuleInfo[] memory modules) {
-         
-    }
-
-
-    function preHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
-        (target, value, data);
-    }
-
-    function postHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
-        (target, value, data);
-    }
-
-
-    function _getModulesByMethodId(
-        bytes4 methodId
-    ) private view returns (address module, CallHelper.CallType callType) {
-        (methodId);
+    function _moduleSelectorAuth(
+        bytes4 selector
+    ) internal view override returns (bool) {
         revert("not implemented");
     }
 
-
-    function _beforeFallback() internal virtual { 
-        bytes4 methodId = msg.data.decodeMethodId();
-        (address module, CallHelper.CallType callType) = _getModulesByMethodId(methodId);
-        CallHelper.callWithoutReturnData(callType, module, msg.data);
+    function _safeModuleManager() internal view override returns (address) {
+        return safeModuleManager;
     }
-    
+
+    function addModule(
+        address module,
+        bytes4[] calldata selectors
+    ) external override _onlySafeModuleManager {
+        require(selectors.length > 0, "selectors empty");
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        require(layout.modules[module] == address(0), "module already added");
+        address _module = layout.modules[SENTINEL_MODULE];
+        if (_module == address(0)) {
+            _module = SENTINEL_MODULE;
+        }
+        layout.modules[SENTINEL_MODULE] = module;
+        layout.modules[module] = _module;
+
+        mapping(bytes4 => bytes4) storage moduleSelectors = layout
+            .moduleSelectors[module];
+
+        bytes4 firstSelector = selectors[0];
+        require(firstSelector > SENTINEL_SELECTOR, "selector error");
+        moduleSelectors[SENTINEL_SELECTOR] = firstSelector;
+        bytes4 _selector = firstSelector;
+
+        for (uint i = 1; i < selectors.length; i++) {
+            bytes4 current = selectors[i];
+            require(current > _selector, "selectors not sorted");
+
+            moduleSelectors[_selector] = current;
+
+            _selector = current;
+        }
+
+        moduleSelectors[_selector] = SENTINEL_SELECTOR;
+
+        emit ModuleAdded(module, selectors);
+    }
+
+    function removeModule(
+        address module
+    ) external override _onlySafeModuleManager {
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        mapping(address => address) storage modules = layout.modules;
+        require(modules[module] != address(0), "module not added");
+
+        //#TODO
+
+        emit ModuleRemoved(module);
+    }
+
+    function listModule()
+        external
+        view
+        override
+        returns (address[] memory modules, bytes4[][] memory selectors)
+    {
+        revert("not implemented");
+    }
 }

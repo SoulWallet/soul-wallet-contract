@@ -1,27 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "./IModule.sol";
+import "./IPlugin.sol";
 import "../libraries/CallHelper.sol";
 
-interface IModuleManager {
-    struct MethodsInfo{
-        bytes4 methodId;
-        CallHelper.CallType callType;
-    }
-    struct ModuleInfo {
-        IModule module;
-        bool preHook;
-        bool postHook;
-        MethodsInfo[] methodsInfo;
-    }
-    event ModuleAdded(address indexed module, bool preHook, bool postHook, MethodsInfo[] methodsInfo);
-    event ModuleRemove(address indexed module);
-    event ModuleCancelRemoved(address indexed module);
-    event ModuleRemoved(address indexed module);
-    function addModule(ModuleInfo calldata module) external;
-    function removeModule(address module) external;
-    function cancelRemoveModule(address module) external;
-    function confirmRemoveModule(address module) external;
-    function getModules() external view returns (ModuleInfo[] memory modules);
+interface IPluginManager {
+    event PluginAdded(IPlugin indexed plugin);
+    event PluginRemoved(IPlugin indexed plugin);
+    function addPlugin(IPlugin plugin) external;
+    function removePlugin(IPlugin plugin) external;
+    function listPlugin() external view returns (IPlugin[] memory plugins);
+    function execDelegateCall(IPlugin target,bytes memory data) external;
 }

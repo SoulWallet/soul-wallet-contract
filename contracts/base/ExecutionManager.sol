@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "./AccountManager.sol";
-import "./ModuleManager.sol";
-import "./ReceiveManager.sol";
+import "../authority/Authority.sol";
+import "./PluginManager.sol";
+import "../interfaces/IExecutionManager.sol";
 
-abstract contract ExecutionManager is AccountManager, ModuleManager, ReceiveManager {
-
-    constructor(uint64 _safeLockPeriod, ITrustedModuleManager _trustedModuleManager) ModuleManager(_safeLockPeriod, _trustedModuleManager){}
-
+abstract contract ExecutionManager is
+    IExecutionManager,
+    Authority,
+    PluginManager
+{
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
@@ -44,9 +45,5 @@ abstract contract ExecutionManager is AccountManager, ModuleManager, ReceiveMana
             }
         }
         postHook(target, value, data);
-    }
-
-    function _beforeFallback() internal virtual override {
-        super._beforeFallback();
     }
 }

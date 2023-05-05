@@ -2,33 +2,36 @@
 pragma solidity ^0.8.17;
 
 import "../libraries/AccountStorage.sol";
-import "./ModuleManager.sol";
+import "../authority/OwnerAuth.sol";
+import "../interfaces/IOwnerManager.sol";
 
-abstract contract OwnerManager is ModuleManager {
-    function _addOwner(address _add) external {
-        requireFromAuthorizedModule(this._addOwner.selector);
-        (_add);
+abstract contract OwnerManager is IOwnerManager, OwnerAuth {
+    function _isOwner(address addr) internal view override returns (bool) {
+        (addr);
+        revert("not implemented");
     }
 
-    function _removeOwner(address _delete) external {
-        requireFromAuthorizedModule(this._addOwner.selector);
-        (_delete);
+    function isOwner(address addr) external view returns (bool) {
+        return _isOwner(addr);
     }
 
-    function _resetOwner(
-        address[] calldata _add,
-        address[] calldata _delete
-    ) external {
-        requireFromAuthorizedModule(this._addOwner.selector);
-        (_add, _delete);
+    function resetOwner(address newOwner) external {
+        (newOwner);
+        emit OwnerCleared();
+        emit OwnerAdded(newOwner);
     }
 
-    function isOwner(address addr) public view returns (bool) {
-        return false;
+    function addOwner(address owner) public {
+        (owner);
+        emit OwnerAdded(owner);
     }
 
-    function owners() public view returns (address[] memory) {
-        address[] memory allOwners;
-        return allOwners;
+    function removeOwner(address owner) external {
+        (owner);
+        emit OwnerRemoved(owner);
+    }
+
+    function listOwner() external view returns (address[] memory owners) {
+        revert("not implemented");
     }
 }

@@ -2,19 +2,25 @@
 pragma solidity ^0.8.17;
 
 import "../libraries/CallHelper.sol";
+import "../../account-abstraction/contracts/interfaces/UserOperation.sol";
 
 interface IPlugin {
+
     enum HookType {
-        PreHook,
-        PostHook,
         GuardHook,
-        DelegateCallHook,
-        CallbackHook
+        PreHook,
+        PostHook
     }
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-    function supportsMethod(bytes4 methodId) external view returns (CallHelper.CallType);
-    function supportsHook(HookType hookType) external view returns (CallHelper.CallType);
-    function preHook(address target, uint256 value, bytes memory data) external;
-    function postHook(address target, uint256 value, bytes memory data) external;
+    struct SupportsHook {
+        CallHelper.CallType guardHook;
+        CallHelper.CallType preHook;
+        CallHelper.CallType postHook;
+    }
+
+    function supportsHook() external view returns (SupportsHook memory);
+    
+    function guardHook(UserOperation calldata userOp) external;
+    function preHook(address target, uint256 value, bytes calldata data) external;
+    function postHook(address target, uint256 value, bytes calldata data) external;
 }

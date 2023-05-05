@@ -2,24 +2,22 @@
 pragma solidity ^0.8.17;
 
 import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "../interfaces/IDepositManager.sol";
+import "../authority/Authority.sol";
 
-import "./EntryPointBase.sol";
-import "./AccountManager.sol";
-
-abstract contract DepositManager is EntryPointBase, AccountManager {
-
+abstract contract DepositManager is IDepositManager, Authority {
     /**
      * check current account deposit in the entryPoint
      */
-    function getDeposit() public view returns (uint256) {
-        return entryPoint().balanceOf(address(this));
+    function getDeposit() external view returns (uint256) {
+        return _entryPoint().balanceOf(address(this));
     }
 
     /**
      * deposit more funds for this account in the entryPoint
      */
-    function addDeposit() public payable {
-        entryPoint().depositTo{value: msg.value}(address(this));
+    function addDeposit() external payable {
+        _entryPoint().depositTo{value: msg.value}(address(this));
     }
 
     /**
@@ -30,8 +28,9 @@ abstract contract DepositManager is EntryPointBase, AccountManager {
     function withdrawDepositTo(
         address payable withdrawAddress,
         uint256 amount
-    ) public {
-        _requireFromOwner();
-        entryPoint().withdrawTo(withdrawAddress, amount);
+    ) external {
+        _requireFromEntryPointOrOwner();
+
+        _entryPoint().withdrawTo(withdrawAddress, amount);
     }
 }

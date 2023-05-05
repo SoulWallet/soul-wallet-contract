@@ -13,12 +13,11 @@ library AccountStorage {
         /// │     base data     │
         mapping(address => address) owners;
         uint256 ownerCount;
-
-        mapping(address => mapping(bytes4 => bool)) moduleMethodAllowed;
-        mapping(address => bool) moduleAuthorized;
-
         uint256[50] __gap_0;
         /// └───────────────────┘
+
+        mapping(address => address) modules;
+        mapping(address => mapping(bytes4 => bytes4)) moduleSelectors;
 
         //#TODO
     }

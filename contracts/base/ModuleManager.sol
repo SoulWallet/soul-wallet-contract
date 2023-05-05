@@ -2,46 +2,89 @@
 pragma solidity ^0.8.17;
 
 import "../libraries/AccountStorage.sol";
-import "./ImmediateEntryPoint.sol";
-import "../interfaces/IModule.sol";
+import "../authority/Authority.sol";
+import "../authority/ModuleAuth.sol";
+import "../interfaces/IModuleManager.sol";
+import "../authority/SafeModuleManagerAuth.sol";
 
-abstract contract ModuleManager is ImmediateEntryPoint {
+abstract contract ModuleManager is
+    IModuleManager,
+    SafeModuleManagerAuth,
+    ModuleAuth
+{
+    address public immutable safeModuleManager;
 
-    function requireFromAuthorizedModule(bytes4 selector) public view {
-        if (address(_getEntryPoint()) == msg.sender) {
-            return;
-        }
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        require(layout.moduleMethodAllowed[msg.sender][selector], "methods not allowed");
+    bytes4 private constant SENTINEL_SELECTOR = 0x00000001;
+    address private constant SENTINEL_MODULE = address(1);
+
+    constructor(address aSafeModuleManager) {
+        safeModuleManager = aSafeModuleManager;
     }
 
-    function _authorizeModule(address module) external {
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        require(msg.sender == address(this));
-        bytes4[] memory methods = IModule(module).allowedMethods();
-        require(methods.length > 0);
-        require(!layout.moduleAuthorized[module]);
-        // TODO: require module is contract, require methods is in support list
-        // TODO: require is in whitelist
-        // TODO: add timelock
-        layout.moduleAuthorized[module] = true;
-        for (uint i = 0; i < methods.length; i++) {
-            layout.moduleMethodAllowed[module][methods[i]] = true;
-        }
-        // TODO: IModule(module).init();
+    function _moduleSelectorAuth(
+        bytes4 selector
+    ) internal view override returns (bool) {
+        revert("not implemented");
     }
 
-    function _revokeModule(address module) external {
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        require(msg.sender == address(this));
-        bytes4[] memory methods = IModule(module).allowedMethods();
-        require(methods.length > 0);
-        // TODO: add timelock
+    function _safeModuleManager() internal view override returns (address) {
+        return safeModuleManager;
+    }
 
-        for (uint i = 0; i < methods.length; i++) {
-            delete layout.moduleMethodAllowed[module][methods[i]];
+    function addModule(
+        address module,
+        bytes4[] calldata selectors
+    ) external override _onlySafeModuleManager {
+        require(selectors.length > 0, "selectors empty");
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        require(layout.modules[module] == address(0), "module already added");
+        address _module = layout.modules[SENTINEL_MODULE];
+        if (_module == address(0)) {
+            _module = SENTINEL_MODULE;
         }
-        delete layout.moduleAuthorized[module];
-        // TODO: IModule(module).deinit();
+        layout.modules[SENTINEL_MODULE] = module;
+        layout.modules[module] = _module;
+
+        mapping(bytes4 => bytes4) storage moduleSelectors = layout
+            .moduleSelectors[module];
+
+        bytes4 firstSelector = selectors[0];
+        require(firstSelector > SENTINEL_SELECTOR, "selector error");
+        moduleSelectors[SENTINEL_SELECTOR] = firstSelector;
+        bytes4 _selector = firstSelector;
+
+        for (uint i = 1; i < selectors.length; i++) {
+            bytes4 current = selectors[i];
+            require(current > _selector, "selectors not sorted");
+
+            moduleSelectors[_selector] = current;
+
+            _selector = current;
+        }
+
+        moduleSelectors[_selector] = SENTINEL_SELECTOR;
+
+        emit ModuleAdded(module, selectors);
+    }
+
+    function removeModule(
+        address module
+    ) external override _onlySafeModuleManager {
+        AccountStorage.Layout storage layout = AccountStorage.layout();
+        mapping(address => address) storage modules = layout.modules;
+        require(modules[module] != address(0), "module not added");
+
+        //#TODO
+
+        emit ModuleRemoved(module);
+    }
+
+    function listModule()
+        external
+        view
+        override
+        returns (address[] memory modules, bytes4[][] memory selectors)
+    {
+        revert("not implemented");
     }
 }

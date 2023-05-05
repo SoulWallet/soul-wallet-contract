@@ -64,7 +64,7 @@ contract SecurityControlModule is IModule {
         bytes4 _func,
         bytes calldata _data,
         uint64 nonce
-    ) public returns (bytes32) {
+    ) public view returns (bytes32) {
         return keccak256(abi.encode(block.chainid, address(this), nonce, _target, _func, _data));
     }
 

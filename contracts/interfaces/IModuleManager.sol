@@ -11,6 +11,8 @@ interface IModuleManager {
 
     function removeModule(address module) external;
 
+    function isAuthorizedModule(address module) external returns (bool);
+
     function listModule()
         external
         view

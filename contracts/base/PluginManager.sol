@@ -1,42 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
-
 import "../interfaces/IPluginManager.sol";
 import "../interfaces/IPlugin.sol";
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
-import "../authority/SafePluginManagerAuth.sol";
 
-abstract contract PluginManager is
-    Authority,
-    IPluginManager,
-    SafePluginManagerAuth
-{
-    address public immutable safePluginManager;
+abstract contract PluginManager is Authority, IPluginManager {
+    bytes4 internal constant FUNC_ADD_PLUGIN =
+        bytes4(keccak256("addPlugin(address,bytes)"));
+    bytes4 internal constant FUNC_REMOVE_PLUGIN =
+        bytes4(keccak256("removePlugin(address)"));
 
-    constructor(address aSafePluginManager) {
-        safePluginManager = aSafePluginManager;
+    function addPlugin(Plugin calldata plugin) internal {
+        emit PluginAdded(plugin.plugin);
     }
 
-    function _safePluginManager() internal view override returns (address) {
-        return safePluginManager;
+    function removePlugin(IPlugin plugin) internal {
+        emit PluginRemoved(plugin);
     }
 
-    function isPlugin(address addr) internal view returns (bool) {
-        (addr);
+    function _isAuthorizedPlugin(address plugin) private returns (bool) {
+        (plugin);
         revert("not implemented");
     }
 
-    function addPlugin(
-        IPlugin plugin
-    ) external override _onlySafePluginManager {
-        emit PluginAdded(plugin);
-    }
-
-    function removePlugin(
-        IPlugin plugin
-    ) external override _onlySafePluginManager {
-        emit PluginRemoved(plugin);
+    function isAuthorizedPlugin(
+        address plugin
+    ) external override returns (bool) {
+        return _isAuthorizedPlugin(plugin);
     }
 
     function listPlugin()
@@ -66,12 +57,12 @@ abstract contract PluginManager is
 
     function execDelegateCall(IPlugin target, bytes memory data) external {
         _requireFromEntryPointOrOwner();
-        isPlugin(address(target));
+        require(_isAuthorizedPlugin(address(target)));
 
         //#TODO
 
         CallHelper.callWithoutReturnData(
-            CallHelper.CallType.DELEGATECALL,
+            CallHelper.CallType.DelegateCall,
             address(target),
             data
         );

@@ -28,9 +28,7 @@ abstract contract DepositManager is IDepositManager, Authority {
     function withdrawDepositTo(
         address payable withdrawAddress,
         uint256 amount
-    ) external {
-        _requireFromEntryPointOrOwner();
-
+    ) external onlyEntryPointOrSelf {
         _entryPoint().withdrawTo(withdrawAddress, amount);
     }
 }

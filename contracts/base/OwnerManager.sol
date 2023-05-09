@@ -2,10 +2,10 @@
 pragma solidity ^0.8.17;
 
 import "../libraries/AccountStorage.sol";
-import "../authority/OwnerAuth.sol";
+import "../authority/Authority.sol";
 import "../interfaces/IOwnerManager.sol";
 
-abstract contract OwnerManager is IOwnerManager, OwnerAuth {
+abstract contract OwnerManager is IOwnerManager, Authority {
     function _isOwner(address addr) internal view override returns (bool) {
         (addr);
         revert("not implemented");
@@ -15,18 +15,18 @@ abstract contract OwnerManager is IOwnerManager, OwnerAuth {
         return _isOwner(addr);
     }
 
-    function resetOwner(address newOwner) external {
+    function resetOwner(address newOwner) public onlyEntryPointOrSelf {
         (newOwner);
         emit OwnerCleared();
         emit OwnerAdded(newOwner);
     }
 
-    function addOwner(address owner) public {
+    function addOwner(address owner) public onlyEntryPointOrSelf {
         (owner);
         emit OwnerAdded(owner);
     }
 
-    function removeOwner(address owner) external {
+    function removeOwner(address owner) public onlyEntryPointOrSelf {
         (owner);
         emit OwnerRemoved(owner);
     }

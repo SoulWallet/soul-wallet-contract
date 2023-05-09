@@ -2,13 +2,13 @@
 pragma solidity ^0.8.17;
 
 import "../interfaces/IFallbackManager.sol";
+import "../authority/Authority.sol";
 
-contract FallbackManager is IFallbackManager {
+abstract contract FallbackManager is Authority, IFallbackManager {
     receive() external payable {}
 
     fallback() external payable {
         // all requests are forwarded to the fallback contract use STATICCALL
-        // to avoid reentrancy
         address fallbackContract = address(1);
         assembly {
             calldatacopy(0, 0, calldatasize())
@@ -31,7 +31,9 @@ contract FallbackManager is IFallbackManager {
         }
     }
 
-    function setFallback(address fallbackContract) external override {
+    function setFallbackHandler(
+        address fallbackContract
+    ) public override onlyEntryPointOrSelf {
         (fallbackContract);
         revert("not implemented");
     }

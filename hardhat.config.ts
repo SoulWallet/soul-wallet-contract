@@ -3,7 +3,24 @@ dotenv.config()
 
 import 'solidity-coverage';
 import "@nomicfoundation/hardhat-toolbox";
-import { HardhatUserConfig } from "hardhat/config"; 
+
+import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from "hardhat/builtin-tasks/task-names";
+import { HardhatUserConfig , subtask } from "hardhat/config";
+import * as path from 'path'
+
+subtask(
+  TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+  async (_, { config }, runSuper) => {
+    const paths = await runSuper();
+
+    return paths
+      .filter((solidityFilePath:any) => {
+        const relativePath = path.relative(config.paths.sources, solidityFilePath)
+        return !relativePath.includes("modules/");
+      })
+  }
+);
+
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {

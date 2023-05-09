@@ -16,5 +16,10 @@ interface IOwnerManager {
 
     function removeOwner(address owner) external;
 
-    function listOwner() external view returns (address[] memory owners);
+    function replaceOwner(address oldOwner, address newOwner) external;
+
+    function listOwner(
+        address from,
+        uint256 limit
+    ) external returns (address[] memory owners);
 }

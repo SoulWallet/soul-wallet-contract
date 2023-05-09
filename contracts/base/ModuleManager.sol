@@ -5,12 +5,14 @@ import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IModuleManager.sol";
 import "./PluginManager.sol";
+import "../libraries/AddressLinkedList.sol";
+import "../libraries/SelectorLinkedList.sol";
 
 abstract contract ModuleManager is IModuleManager, PluginManager {
-    address public immutable defaultModuleManager;
+    using AddressLinkedList for mapping(address => address);
+    using SelectorLinkedList for mapping(bytes4 => bytes4);
 
-    bytes4 private constant SENTINEL_SELECTOR = 0x00000001;
-    address private constant SENTINEL_MODULE = address(1);
+    address public immutable defaultModuleManager;
 
     bytes4 internal constant FUNC_ADD_MODULE =
         bytes4(keccak256("addModule(address,bytes4[],bytes)"));
@@ -21,71 +23,87 @@ abstract contract ModuleManager is IModuleManager, PluginManager {
         defaultModuleManager = _defaultModuleManager;
     }
 
-    function isAuthorizedModule(
+    function modulesMapping()
+        private
+        view
+        returns (mapping(address => address) storage modules)
+    {
+        modules = AccountStorage.layout().modules;
+    }
+
+    function moduleSelectorsMapping()
+        private
+        view
+        returns (
+            mapping(address => mapping(bytes4 => bytes4))
+                storage moduleSelectors
+        )
+    {
+        moduleSelectors = AccountStorage.layout().moduleSelectors;
+    }
+
+    function _isAuthorizedModule(address module) private view returns (bool) {
+        if (defaultModuleManager == module) {
+            return true;
+        }
+        return modulesMapping().isExist(module);
+    }
+
+    function isAuthorizedSelector(
         address module,
         bytes4 selector
-    ) internal view returns (bool) {
+    ) private view returns (bool) {
         if (
             defaultModuleManager == module &&
-            (selector == FUNC_ADD_MODULE || selector == FUNC_REMOVE_MODULE)
+            (selector == FUNC_ADD_MODULE ||
+                selector == FUNC_REMOVE_MODULE ||
+                selector == FUNC_ADD_PLUGIN ||
+                selector == FUNC_REMOVE_PLUGIN)
         ) {
             return true;
         }
-
-        // TODO
-
-        revert("not implemented");
+        if (!modulesMapping().isExist(module)) {
+            return false;
+        }
+        mapping(address => mapping(bytes4 => bytes4))
+            storage moduleSelectors = moduleSelectorsMapping();
+        return moduleSelectors[module].isExist(selector);
     }
 
     function isAuthorizedModule(
         address module
     ) external override returns (bool) {
-        (module);
-        return false;
+        return _isAuthorizedModule(module);
     }
 
-    function addModule(Module calldata aModule) internal {
+    function addModule(Module memory aModule) internal {
         require(aModule.selectors.length > 0, "selectors empty");
         address module = address(aModule.module);
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        require(layout.modules[module] == address(0), "module already added");
-        address _module = layout.modules[SENTINEL_MODULE];
-        if (_module == address(0)) {
-            _module = SENTINEL_MODULE;
-        }
-        layout.modules[SENTINEL_MODULE] = module;
-        layout.modules[module] = _module;
 
-        mapping(bytes4 => bytes4) storage moduleSelectors = layout
-            .moduleSelectors[module];
+        mapping(address => address) storage modules = modulesMapping();
+        modules.add(module);
+        mapping(address => mapping(bytes4 => bytes4))
+            storage moduleSelectors = moduleSelectorsMapping();
+        moduleSelectors[module].add(aModule.selectors);
 
-        bytes4 firstSelector = aModule.selectors[0];
-        require(firstSelector > SENTINEL_SELECTOR, "selector error");
-        moduleSelectors[SENTINEL_SELECTOR] = firstSelector;
-        bytes4 _selector = firstSelector;
-
-        for (uint i = 1; i < aModule.selectors.length; i++) {
-            bytes4 current = aModule.selectors[i];
-            require(current > _selector, "selectors not sorted");
-
-            moduleSelectors[_selector] = current;
-
-            _selector = current;
-        }
-
-        moduleSelectors[_selector] = SENTINEL_SELECTOR;
+        aModule.module.walletInit(aModule.initData);
 
         emit ModuleAdded(module, aModule.selectors);
     }
 
     function removeModule(address module) internal {
-        AccountStorage.Layout storage layout = AccountStorage.layout();
-        mapping(address => address) storage modules = layout.modules;
-        require(modules[module] != address(0), "module not added");
+        mapping(address => address) storage modules = modulesMapping();
+        modules.remove(module);
 
-        //#TODO
+        mapping(address => mapping(bytes4 => bytes4))
+            storage moduleSelectors = moduleSelectorsMapping();
+        moduleSelectors[module].clear();
 
-        emit ModuleRemoved(module);
+        try IModule(module).walletDeInit() {
+            emit ModuleRemoved(module);
+        } catch {
+            emit ModuleRemovedWithError(module);
+        }
     }
 
     function listModule()
@@ -94,30 +112,53 @@ abstract contract ModuleManager is IModuleManager, PluginManager {
         override
         returns (address[] memory modules, bytes4[][] memory selectors)
     {
-        revert("not implemented");
+        mapping(address => address) storage _modules = modulesMapping();
+        modules = _modules.list(
+            AddressLinkedList.SENTINEL_ADDRESS,
+            type(uint8).max
+        );
+
+        mapping(address => mapping(bytes4 => bytes4))
+            storage moduleSelectors = moduleSelectorsMapping();
+
+        for (uint256 i = 0; i < modules.length; i++) {
+            selectors[i] = moduleSelectors[modules[i]].list(
+                SelectorLinkedList.SENTINEL_SELECTOR,
+                type(uint8).max
+            );
+        }
     }
 
     function execFromModule(bytes calldata data) external override {
         // get 4bytes
         bytes4 selector = bytes4(data[0:4]);
         require(
-            isAuthorizedModule(msg.sender, selector),
-            "unauthorized module"
+            isAuthorizedSelector(msg.sender, selector),
+            "unauthorized module selector"
         );
 
         if (selector == FUNC_ADD_MODULE) {
-            //addModule( );
+            // addModule(address,bytes4[],bytes)
+            Module memory _module = abi.decode(data[4:], (Module));
+            addModule(_module);
         } else if (selector == FUNC_REMOVE_MODULE) {
-            //removeModule( );
+            // removeModule(address)
+            address module = abi.decode(data[4:], (address));
+            removeModule(module);
         } else if (selector == FUNC_ADD_PLUGIN) {
-            //addPlugin()
+            // addPlugin(address,bytes)
+            Plugin memory _plugin = abi.decode(data[4:], (Plugin));
+            addPlugin(_plugin);
         } else if (selector == FUNC_REMOVE_PLUGIN) {
-            //removePlugin();
+            // removePlugin(address)
+            address plugin = abi.decode(data[4:], (address));
+            removePlugin(plugin);
         } else {
-            // TODO
+            CallHelper.callWithoutReturnData(
+                CallHelper.CallType.Call,
+                address(this),
+                data
+            );
         }
-
-        (data);
-        revert("not implemented");
     }
 }

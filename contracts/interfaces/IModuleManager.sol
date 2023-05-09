@@ -12,6 +12,7 @@ interface IModuleManager {
 
     event ModuleAdded(address indexed module, bytes4[] selectors);
     event ModuleRemoved(address indexed module);
+    event ModuleRemovedWithError(address indexed module);
 
     // function addModule(Module) external;
     // function removeModule(address module) external;

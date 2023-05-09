@@ -4,6 +4,7 @@ import "../interfaces/IPluginManager.sol";
 import "../interfaces/IPlugin.sol";
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
+import "../libraries/AddressLinkedList.sol";
 
 abstract contract PluginManager is Authority, IPluginManager {
     bytes4 internal constant FUNC_ADD_PLUGIN =
@@ -11,11 +12,11 @@ abstract contract PluginManager is Authority, IPluginManager {
     bytes4 internal constant FUNC_REMOVE_PLUGIN =
         bytes4(keccak256("removePlugin(address)"));
 
-    function addPlugin(Plugin calldata plugin) internal {
-        emit PluginAdded(plugin.plugin);
+    function addPlugin(Plugin memory plugin) internal {
+        emit PluginAdded(address(plugin.plugin));
     }
 
-    function removePlugin(IPlugin plugin) internal {
+    function removePlugin(address plugin) internal {
         emit PluginRemoved(plugin);
     }
 

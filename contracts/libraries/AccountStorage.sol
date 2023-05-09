@@ -12,6 +12,7 @@ library AccountStorage {
         /// │     base data     │
         mapping(address => address) owners;
         uint256 ownerCount;
+        address defaultFallbackContract;
         uint256[50] __gap_0;
         /// └───────────────────┘
 

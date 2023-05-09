@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IOwnerManager.sol";
-import "../libraries/AccountStorage.sol";
 import "../libraries/AddressLinkedList.sol";
 
 abstract contract OwnerManager is IOwnerManager, Authority {

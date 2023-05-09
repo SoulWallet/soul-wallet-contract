@@ -3,9 +3,14 @@ pragma solidity ^0.8.17;
 
 import "../interfaces/IFallbackManager.sol";
 import "../authority/Authority.sol";
+import "../libraries/AccountStorage.sol";
 
 abstract contract FallbackManager is Authority, IFallbackManager {
     receive() external payable {}
+
+    function internalSetFallbackHandler(address fallbackContract) internal {
+       AccountStorage.layout().defaultFallbackContract = fallbackContract;
+    }
 
     fallback() external payable {
         // all requests are forwarded to the fallback contract use STATICCALL
@@ -34,7 +39,7 @@ abstract contract FallbackManager is Authority, IFallbackManager {
     function setFallbackHandler(
         address fallbackContract
     ) public override onlyEntryPointOrSelf {
-        (fallbackContract);
-        revert("not implemented");
+        internalSetFallbackHandler(fallbackContract);
+        emit FallbackChanged(fallbackContract);
     }
 }

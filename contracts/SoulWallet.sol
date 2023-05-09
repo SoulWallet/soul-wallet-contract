@@ -41,7 +41,7 @@ contract SoulWallet is
         Plugin[] calldata plugins
     ) public initializer {
         addOwner(anOwner);
-        setFallbackHandler(defalutCallbackHandler);
+        if (defalutCallbackHandler != address(0)) internalSetFallbackHandler(defalutCallbackHandler);
 
         for (uint256 i = 0; i < modules.length; i++) {
             addModule(modules[i]);

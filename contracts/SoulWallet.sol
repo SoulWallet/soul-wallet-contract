@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../account-abstraction/contracts/core/BaseAccount.sol";
 import "./interfaces/ISoulWallet.sol";
 import "./base/DepositManager.sol";
@@ -30,7 +30,9 @@ contract SoulWallet is
     constructor(
         IEntryPoint anEntryPoint,
         address defaultModuleManager
-    ) EntryPointManager(anEntryPoint) ModuleManager(defaultModuleManager) {}
+    ) EntryPointManager(anEntryPoint) ModuleManager(defaultModuleManager) {
+        _disableInitializers();
+    }
 
     function initialize(
         address anOwner,
@@ -48,7 +50,6 @@ contract SoulWallet is
             addPlugin(plugins[i]);
         }
 
-        _disableInitializers();
     }
 
     function entryPoint()

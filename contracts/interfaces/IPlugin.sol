@@ -4,8 +4,9 @@ pragma solidity ^0.8.17;
 import "../libraries/CallHelper.sol";
 import "../../account-abstraction/contracts/interfaces/UserOperation.sol";
 import "./IPluggable.sol";
+import "../interfaces/IERC165.sol";
 
-interface IPlugin is IPluggable {
+interface IPlugin is IPluggable, IERC165 {
 
     enum HookType {
         GuardHook,
@@ -13,13 +14,8 @@ interface IPlugin is IPluggable {
         PostHook
     }
 
-    struct SupportsHook {
-        CallHelper.CallType guardHook;
-        CallHelper.CallType preHook;
-        CallHelper.CallType postHook;
-    }
-
-    function supportsHook() external view returns (SupportsHook memory);
+    function getHookCallType(HookType hookType) external view returns (CallHelper.CallType calltype);
+    function isHookCall(HookType hookType) external view returns (bool);
     
     function guardHook(UserOperation calldata userOp) external;
     function preHook(address target, uint256 value, bytes calldata data) external;

@@ -18,6 +18,7 @@ library AccountStorage {
 
         mapping(address => address) modules;
         mapping(address => mapping(bytes4 => bytes4)) moduleSelectors;
+        mapping(address => address) plugins;
 
         //#TODO
     }

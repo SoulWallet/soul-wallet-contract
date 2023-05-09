@@ -7,22 +7,42 @@ import "../authority/Authority.sol";
 import "../libraries/AddressLinkedList.sol";
 
 abstract contract PluginManager is Authority, IPluginManager {
+    using AddressLinkedList for mapping(address => address);
     bytes4 internal constant FUNC_ADD_PLUGIN =
         bytes4(keccak256("addPlugin(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_PLUGIN =
         bytes4(keccak256("removePlugin(address)"));
 
-    function addPlugin(Plugin memory plugin) internal {
-        emit PluginAdded(address(plugin.plugin));
+    function pluginsMapping()
+        private
+        view
+        returns (mapping(address => address) storage plugins)
+    {
+        plugins = AccountStorage.layout().plugins;
+    }
+
+    function addPlugin(Plugin memory aPlugin) internal {
+        address plugin = address(aPlugin.plugin);
+        if (plugin != address(0)) {
+            require(
+                IPlugin(plugin).supportsInterface(type(IPlugin).interfaceId),
+                "unknown plugin"
+            );
+        }
+        mapping(address => address) storage plugins = pluginsMapping();
+        plugins.add(plugin);
+        //TODO call initdata necessary?
+        emit PluginAdded(plugin);
     }
 
     function removePlugin(address plugin) internal {
+        mapping(address => address) storage plugins = pluginsMapping();
+        plugins.remove(plugin);
         emit PluginRemoved(plugin);
     }
 
     function _isAuthorizedPlugin(address plugin) private returns (bool) {
-        (plugin);
-        revert("not implemented");
+        return pluginsMapping().isExist(plugin);
     }
 
     function isAuthorizedPlugin(
@@ -35,9 +55,13 @@ abstract contract PluginManager is Authority, IPluginManager {
         external
         view
         override
-        returns (IPlugin[] memory plugins)
+        returns (address[] memory plugins)
     {
-        revert("not implemented");
+        mapping(address => address) storage _plugins = pluginsMapping();
+        plugins = _plugins.list(
+            AddressLinkedList.SENTINEL_ADDRESS,
+            type(uint8).max
+        );
     }
 
     function preHook(
@@ -45,7 +69,23 @@ abstract contract PluginManager is Authority, IPluginManager {
         uint256 value,
         bytes memory data
     ) internal {
-        (target, value, data);
+        mapping(address => address) storage _plugins = pluginsMapping();
+        address[] memory plugins = _plugins.list(
+            AddressLinkedList.SENTINEL_ADDRESS,
+            type(uint8).max
+        );
+        for (uint i = 0; i < plugins.length; i++) {
+            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PreHook)) {
+                //TODO is getHookCallType necessary? call or d`elegatecall?
+                CallHelper.call(
+                    IPlugin(plugins[i]).getHookCallType(
+                        IPlugin.HookType.PreHook
+                    ),
+                    plugins[i],
+                    abi.encodeCall(IPlugin.preHook, (target, value, data))
+                );
+            }
+        }
     }
 
     function postHook(
@@ -53,7 +93,23 @@ abstract contract PluginManager is Authority, IPluginManager {
         uint256 value,
         bytes memory data
     ) internal {
-        (target, value, data);
+        mapping(address => address) storage _plugins = pluginsMapping();
+        address[] memory plugins = _plugins.list(
+            AddressLinkedList.SENTINEL_ADDRESS,
+            type(uint8).max
+        );
+        for (uint i = 0; i < plugins.length; i++) {
+            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PostHook)) {
+                //TODO is getHookCallType necessary? call or d`elegatecall?
+                CallHelper.call(
+                    IPlugin(plugins[i]).getHookCallType(
+                        IPlugin.HookType.PostHook
+                    ),
+                    plugins[i],
+                    abi.encodeCall(IPlugin.postHook, (target, value, data))
+                );
+            }
+        }
     }
 
     function execDelegateCall(IPlugin target, bytes memory data) external {

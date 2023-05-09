@@ -18,7 +18,7 @@ interface IPluginManager {
 
     function isAuthorizedPlugin(address plugin) external returns (bool);
 
-    function listPlugin() external view returns (IPlugin[] memory plugins);
+    function listPlugin() external view returns (address[] memory plugins);
 
     function execDelegateCall(IPlugin target, bytes calldata data) external;
 }

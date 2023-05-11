@@ -4,9 +4,8 @@ pragma solidity ^0.8.17;
 import "../libraries/CallHelper.sol";
 import "../../account-abstraction/contracts/interfaces/UserOperation.sol";
 import "./IPluggable.sol";
-import "../interfaces/IERC165.sol";
 
-interface IPlugin is IPluggable, IERC165 {
+interface IPlugin is IPluggable {
 
     enum HookType {
         GuardHook,

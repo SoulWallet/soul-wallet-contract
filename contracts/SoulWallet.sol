@@ -9,7 +9,7 @@ import "./base/EntryPointManager.sol";
 import "./base/ExecutionManager.sol";
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
-import "./libraries/SignatureValidator.sol";
+import "./helper/SignatureValidator.sol";
 import "./handler/ERC1271Handler.sol";
 import "./base/FallbackManager.sol";
 import "./interfaces/IModule.sol";
@@ -25,7 +25,8 @@ contract SoulWallet is
     DepositManager,
     ExecutionManager,
     FallbackManager,
-    ERC1271Handler
+    ERC1271Handler,
+    SignatureValidator
 {
     constructor(
         IEntryPoint anEntryPoint,
@@ -65,6 +66,6 @@ contract SoulWallet is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        return SignatureValidator.isValid(userOp, userOpHash);
+        return isValidSignature(userOp, userOpHash);
     }
 }

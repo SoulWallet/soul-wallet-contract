@@ -7,8 +7,9 @@ import "../interfaces/IModuleManager.sol";
 import "./PluginManager.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../libraries/SelectorLinkedList.sol";
+import "./InternalExecutionManager.sol";
 
-abstract contract ModuleManager is IModuleManager, PluginManager {
+abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecutionManager {
     using AddressLinkedList for mapping(address => address);
     using SelectorLinkedList for mapping(bytes4 => bytes4);
 
@@ -153,6 +154,28 @@ abstract contract ModuleManager is IModuleManager, PluginManager {
             // removePlugin(address)
             address plugin = abi.decode(data[4:], (address));
             removePlugin(plugin);
+        } else if (selector == FUNC_EXECUTE) {
+            // execute(address,uint256,bytes)
+            (address to, uint256 value, bytes memory _data) = abi.decode(
+                data[4:],
+                (address, uint256, bytes)
+            );
+            _execute(to, value, _data);
+        } else if (selector == FUNC_EXECUTE_BATCH) {
+            // executeBatch(address[],bytes[])
+            (address[] memory tos, bytes[] memory _datas) = abi.decode(
+                data[4:],
+                (address[], bytes[])
+            );
+            _executeBatch(tos, _datas);
+        } else if (selector == FUNC_EXECUTE_BATCH_VALUE) {
+            // executeBatch(address[],uint256[],bytes[])
+            (
+                address[] memory tos,
+                uint256[] memory values,
+                bytes[] memory _datas
+            ) = abi.decode(data[4:], (address[], uint256[], bytes[]));
+            _executeBatch(tos, values, _datas);
         } else {
             CallHelper.callWithoutReturnData(
                 CallHelper.CallType.Call,

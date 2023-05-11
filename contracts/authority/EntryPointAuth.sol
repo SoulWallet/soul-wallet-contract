@@ -10,7 +10,7 @@ abstract contract EntryPointAuth {
         require(addr == address(_entryPoint()), "require entrypoint");
     }
 
-    modifier _onlyEntryPoint() {
+    modifier onlyEntryPoint() {
         _requireFromEntryPoint(msg.sender);
         _;
     }

@@ -23,6 +23,11 @@ abstract contract Authority is EntryPointAuth, OwnerAuth {
         );
     }
 
+    modifier onlyEntryPointOrOwner() {
+        _requireFromEntryPointOrOwner();
+        _;
+    }
+
     modifier onlyEntryPointOrSelf() {
         _requireFromEntryPointOrSelf();
         _;

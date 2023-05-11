@@ -15,18 +15,12 @@ abstract contract ERC1271Handler is IERC1271, SignatureValidator {
         bytes32 hash,
         bytes memory signature
     ) external view override returns (bytes4 magicValue) {
-        (uint256 _validationData, bool sigValid) = isValidateSignature(
-            hash,
-            signature,
-            false
-        );
+        (uint256 _validationData, bool sigValid) = isValidateSignature(hash, signature);
         if (!sigValid) {
             return InvalidID;
         }
         if (_validationData > 0) {
-            ValidationData memory validationData = _parseValidationData(
-                _validationData
-            );
+            ValidationData memory validationData = _parseValidationData(_validationData);
             bool outOfTimeRange = (block.timestamp >
                 validationData.validUntil) ||
                 (block.timestamp < validationData.validAfter);

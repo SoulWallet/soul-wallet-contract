@@ -81,6 +81,26 @@ library AddressLinkedList {
         return self[addr] != address(0);
     }
 
+    function size(
+        mapping(address => address) storage self
+    ) internal view returns (uint256) {
+        uint256 result = 0;
+        for (
+            address addr = self[SENTINEL_ADDRESS];
+            addr != SENTINEL_ADDRESS;
+            addr = self[addr]
+        ) {
+            result++;
+        }
+        return result;
+    }
+
+    function isEmpty(
+        mapping(address => address) storage self
+    ) internal view returns (bool) {
+        return self[SENTINEL_ADDRESS] == address(0);
+    }
+
     function list(
         mapping(address => address) storage self,
         address from,

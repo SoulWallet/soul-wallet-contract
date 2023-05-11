@@ -42,6 +42,7 @@ abstract contract OwnerManager is IOwnerManager, Authority {
 
     function removeOwner(address owner) public override onlyEntryPointOrSelf {
         ownerMapping().remove(owner);
+        require(!ownerMapping().isEmpty(), "no owner");
         emit OwnerRemoved(owner);
     }
 

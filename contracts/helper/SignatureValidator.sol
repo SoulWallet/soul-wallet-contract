@@ -35,7 +35,7 @@ abstract contract SignatureValidator is OwnerAuth, BaseAccount {
             hash,
             signatureData.signature
         );
-        if (error == ECDSA.RecoverError.NoError) {
+        if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
             sigValid = _isOwner(recovered);

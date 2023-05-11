@@ -21,12 +21,12 @@ contract SoulWallet is
     BaseAccount,
     EntryPointManager,
     OwnerManager,
+    SignatureValidator,
     ModuleManager,
     DepositManager,
     ExecutionManager,
     FallbackManager,
-    ERC1271Handler,
-    SignatureValidator
+    ERC1271Handler
 {
     constructor(
         IEntryPoint anEntryPoint,
@@ -66,6 +66,6 @@ contract SoulWallet is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        return isValidSignature(userOp, userOpHash);
+        return isValidUserOpSignature(userOp, userOpHash);
     }
 }

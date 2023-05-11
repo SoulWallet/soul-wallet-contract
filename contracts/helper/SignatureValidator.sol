@@ -25,7 +25,7 @@ abstract contract SignatureValidator is OwnerAuth, BaseAccount {
     function isValidateSignature(
         bytes32 rawHash,
         bytes memory rawSignature
-    ) private view returns (uint256 validationData, bool sigValid) {
+    ) internal view returns (uint256 validationData, bool sigValid) {
         SignatureDecoder.SignatureData memory signatureData = SignatureDecoder
             .decodeSignature(rawSignature);
         validationData = signatureData.validationData;
@@ -42,7 +42,7 @@ abstract contract SignatureValidator is OwnerAuth, BaseAccount {
         }
     }
 
-    function isValidSignature(
+    function isValidUserOpSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal view returns (uint256 validationData) {

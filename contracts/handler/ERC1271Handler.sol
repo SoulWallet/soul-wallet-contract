@@ -66,7 +66,7 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
             "ERC1271Handler: hash already approved"
         );
         hashStatusMap[hash] = 2;
-        emit SignatureApproved(hash);
+        emit ApproveHash(hash);
     }
 
     function rejectHash(bytes32 hash) external override onlyEntryPointOrSelf {
@@ -76,6 +76,6 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
             "ERC1271Handler: hash already rejected"
         );
         hashStatusMap[hash] = 1;
-        emit SignatureRejected(hash);
+        emit RejectHash(hash);
     }
 }

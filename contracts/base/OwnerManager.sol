@@ -61,4 +61,12 @@ abstract contract OwnerManager is IOwnerManager, Authority {
     ) external view override returns (address[] memory owners) {
         owners = ownerMapping().list(from, limit);
     }
+
+    function getNonce(address owner) external view override returns (uint256) {
+        uint192 key;
+        assembly{
+            key := owner
+        }
+        return _entryPoint().getNonce(address(this), key);
+    }
 }

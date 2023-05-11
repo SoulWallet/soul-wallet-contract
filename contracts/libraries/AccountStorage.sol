@@ -8,17 +8,36 @@ library AccountStorage {
         keccak256("soulwallet.contracts.AccountStorage");
 
     struct Layout {
-        /// ┌───────────────────┐
-        /// │     base data     │
+        // ┌───────────────────┐
+        // │     base data     │
         mapping(address => address) owners;
-        uint256 ownerCount;
         address defaultFallbackContract;
         uint256[50] __gap_0;
-        /// └───────────────────┘
+        // └───────────────────┘
 
+
+        // ┌───────────────────┐
+        // │      EIP1271      │
+        mapping(bytes32 => uint256) hashStatus; // 0: not exist, 1: rejected, 2: approved
+        uint256[50] __gap_1;
+        // └───────────────────┘
+
+
+        // ┌───────────────────┐
+        // │       Module      │
         mapping(address => address) modules;
         mapping(address => mapping(bytes4 => bytes4)) moduleSelectors;
+        uint256[50] __gap_2;
+        // └───────────────────┘
+
+        // ┌───────────────────┐
+        // │       Plugin      │
         mapping(address => address) plugins;
+        uint256[50] __gap_3;
+        // └───────────────────┘
+
+
+
 
         //#TODO
     }

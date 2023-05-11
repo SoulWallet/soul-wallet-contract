@@ -17,7 +17,8 @@ abstract contract ERC1271Handler is IERC1271, SignatureValidator {
     ) external view override returns (bytes4 magicValue) {
         (uint256 _validationData, bool sigValid) = isValidateSignature(
             hash,
-            signature
+            signature,
+            false
         );
         if (!sigValid) {
             return InvalidID;

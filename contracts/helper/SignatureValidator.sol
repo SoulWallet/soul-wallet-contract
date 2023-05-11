@@ -7,34 +7,39 @@ import "../libraries/SignatureDecoder.sol";
 import "../../account-abstraction/contracts/core/BaseAccount.sol";
 
 abstract contract SignatureValidator is OwnerAuth, BaseAccount {
+    using ECDSA for bytes32;
+
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
     function packSignatureHash(
         bytes32 hash,
-        SignatureDecoder.SignatureData memory signatureData
+        SignatureDecoder.SignatureData memory signatureData,
+        bool toSafeHash
     ) private pure returns (bytes32) {
+        bytes32 packedHash;
         if (signatureData.validationData == 0) {
-            return hash;
+            packedHash = hash;
         } else {
-            return
-                keccak256(abi.encodePacked(hash, signatureData.validationData));
+            packedHash = keccak256(abi.encodePacked(hash, signatureData.validationData));
+        }
+        if (toSafeHash) {
+            return packedHash.toEthSignedMessageHash();
+        } else {
+            return packedHash;
         }
     }
 
     function isValidateSignature(
         bytes32 rawHash,
-        bytes memory rawSignature
+        bytes memory rawSignature,
+        bool toSafeHash
     ) internal view returns (uint256 validationData, bool sigValid) {
-        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder
-            .decodeSignature(rawSignature);
+        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(rawSignature);
         validationData = signatureData.validationData;
-        bytes32 hash = packSignatureHash(rawHash, signatureData);
+        bytes32 hash = packSignatureHash(rawHash, signatureData, toSafeHash);
 
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(
-            hash,
-            signatureData.signature
-        );
+        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
@@ -47,15 +52,10 @@ abstract contract SignatureValidator is OwnerAuth, BaseAccount {
         bytes32 userOpHash
     ) internal view returns (uint256 validationData) {
         bool sigValid;
-        (validationData, sigValid) = isValidateSignature(
-            userOpHash,
-            userOp.signature
-        );
+        (validationData, sigValid) = isValidateSignature(userOpHash, userOp.signature, true);
         // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
         // validUntil and validAfter is already packed in signatureData.validationData,
         // and aggregator is address(0), so we just need to add sigFailed flag.
-        validationData =
-            validationData |
-            (sigValid ? 0 : SIG_VALIDATION_FAILED);
+        validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
     }
 }

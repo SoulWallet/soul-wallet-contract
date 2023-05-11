@@ -18,7 +18,7 @@ library AccountStorage {
 
         // ┌───────────────────┐
         // │      EIP1271      │
-        mapping(bytes32 => uint256) hashStatus; // 0: not exist, 1: rejected, 2: approved
+        mapping(bytes32 => uint256) hashStatus; // 0: not exist, 1: approved
         uint256[50] __gap_1;
         // └───────────────────┘
 

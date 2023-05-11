@@ -8,7 +8,11 @@ import "../authority/Authority.sol";
 
 import "../libraries/AccountStorage.sol";
 
-abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidator {
+abstract contract ERC1271Handler is
+    Authority,
+    IERC1271Handler,
+    SignatureValidator
+{
     // bytes4(keccak256("isValidSignature(bytes32,bytes)")
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
     bytes4 internal constant InvalidID = 0xffffffff;
@@ -26,9 +30,7 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
         bytes32 hash,
         bytes memory signature
     ) external view override returns (bytes4 magicValue) {
-        mapping(bytes32 => uint256) storage hashStatusMap = _hashStatusMap();
-        uint256 status = hashStatusMap[hash];
-        if (status == 0) {
+        if (signature.length == 0) {
             (uint256 _validationData, bool sigValid) = isValidateSignature(
                 hash,
                 signature
@@ -48,34 +50,35 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
                 }
             }
             return MAGICVALUE;
-        } else if (status == 1) {
-            // rejected
-            return InvalidID;
-        } else if (status == 2) {
+        }
+
+        mapping(bytes32 => uint256) storage hashStatusMap = _hashStatusMap();
+        uint256 status = hashStatusMap[hash];
+        if (status == 1) {
             // approved
             return MAGICVALUE;
         } else {
-            revert("ERC1271Handler: invalid status");
+            return InvalidID;
         }
     }
 
     function approveHash(bytes32 hash) external override onlyEntryPointOrSelf {
         mapping(bytes32 => uint256) storage hashStatusMap = _hashStatusMap();
         require(
-            hashStatusMap[hash] != 2,
+            hashStatusMap[hash] != 1,
             "ERC1271Handler: hash already approved"
         );
-        hashStatusMap[hash] = 2;
+        hashStatusMap[hash] = 1;
         emit ApproveHash(hash);
     }
 
     function rejectHash(bytes32 hash) external override onlyEntryPointOrSelf {
         mapping(bytes32 => uint256) storage hashStatusMap = _hashStatusMap();
         require(
-            hashStatusMap[hash] != 1,
+            hashStatusMap[hash] != 0,
             "ERC1271Handler: hash already rejected"
         );
-        hashStatusMap[hash] = 1;
+        hashStatusMap[hash] = 0;
         emit RejectHash(hash);
     }
 }

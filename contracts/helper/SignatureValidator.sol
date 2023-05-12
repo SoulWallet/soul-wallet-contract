@@ -4,9 +4,8 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../authority/OwnerAuth.sol";
 import "../libraries/SignatureDecoder.sol";
-import "../../account-abstraction/contracts/core/BaseAccount.sol";
 
-abstract contract SignatureValidator is OwnerAuth, BaseAccount {
+abstract contract SignatureValidator is OwnerAuth {
     using ECDSA for bytes32;
 
     /**
@@ -38,30 +37,18 @@ abstract contract SignatureValidator is OwnerAuth, BaseAccount {
         }
     }
 
-    function _isValidateSignature(
-        bytes32 rawHash,
-        bytes memory rawSignature
+    function isValidUserOp(
+        bytes32 userOpHash,
+        bytes calldata userOpSignature
     ) internal view returns (uint256 validationData, bool sigValid) {
-        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(rawSignature);
+        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(userOpSignature);
         validationData = signatureData.validationData;
-        bytes32 hash = packSignatureHash(rawHash, signatureData).toEthSignedMessageHash();
+        bytes32 hash = packSignatureHash(userOpHash, signatureData).toEthSignedMessageHash();
         (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
             sigValid = _isOwner(recovered);
         }
-    }
-
-    function isValidUserOpSignature(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal view returns (uint256 validationData) {
-        bool sigValid;
-        (validationData, sigValid) = _isValidateSignature(userOpHash, userOp.signature);
-        // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
-        // validUntil and validAfter is already packed in signatureData.validationData,
-        // and aggregator is address(0), so we just need to add sigFailed flag.
-        validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
     }
 }

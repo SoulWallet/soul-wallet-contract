@@ -16,7 +16,7 @@ interface IPlugin is IPluggable {
     function getHookCallType(HookType hookType) external view returns (CallHelper.CallType calltype);
     function isHookCall(HookType hookType) external view returns (bool);
     
-    function guardHook(UserOperation calldata userOp) external;
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external;
     function preHook(address target, uint256 value, bytes calldata data) external;
     function postHook(address target, uint256 value, bytes calldata data) external;
 }

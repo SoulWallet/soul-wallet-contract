@@ -64,6 +64,11 @@ abstract contract PluginManager is Authority, IPluginManager {
         );
     }
 
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
+        // #TODO
+        return true;
+    }
+
     function preHook(
         address target,
         uint256 value,
@@ -77,13 +82,14 @@ abstract contract PluginManager is Authority, IPluginManager {
         for (uint i = 0; i < plugins.length; i++) {
             if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PreHook)) {
                 //TODO is getHookCallType necessary? call or d`elegatecall?
-                CallHelper.call(
+                (bool success,) = CallHelper.call(
                     IPlugin(plugins[i]).getHookCallType(
                         IPlugin.HookType.PreHook
                     ),
                     plugins[i],
                     abi.encodeCall(IPlugin.preHook, (target, value, data))
                 );
+                require(success, "preHook failed");
             }
         }
     }
@@ -101,13 +107,14 @@ abstract contract PluginManager is Authority, IPluginManager {
         for (uint i = 0; i < plugins.length; i++) {
             if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PostHook)) {
                 //TODO is getHookCallType necessary? call or d`elegatecall?
-                CallHelper.call(
+                (bool success,) = CallHelper.call(
                     IPlugin(plugins[i]).getHookCallType(
                         IPlugin.HookType.PostHook
                     ),
                     plugins[i],
                     abi.encodeCall(IPlugin.postHook, (target, value, data))
                 );
+                require(success, "postHook failed");
             }
         }
     }

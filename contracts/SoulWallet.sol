@@ -66,6 +66,17 @@ contract SoulWallet is
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual override returns (uint256 validationData) {
-        return isValidUserOpSignature(userOp, userOpHash);
+         bool sigValid;
+        (validationData, sigValid) = isValidUserOp(userOpHash, userOp.signature);
+        
+        if(sigValid){
+            sigValid = guardHook(userOp, userOpHash);
+        }
+
+        // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
+        // validUntil and validAfter is already packed in signatureData.validationData,
+        // and aggregator is address(0), so we just need to add sigFailed flag.
+        validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
+        
     }
 }

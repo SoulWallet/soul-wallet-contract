@@ -164,7 +164,6 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         uint256 nonce,
         uint256 day,
         address to,
-        uint256 value,
         bytes memory _data
     ) private {
         uint256 dataLength = _data.length;
@@ -212,42 +211,22 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
                 );
             }
         }
-        if (value > 0 && l.tokens.isExist(ETH_TOKEN_ADDRESS)) {
-            DaySpent storage _DaySpent = l.daySpent[ETH_TOKEN_ADDRESS];
-            if (_DaySpent.nonce != nonce) {
-                _DaySpent.nonce = nonce;
-                if (_DaySpent.day == day) {
-                    _DaySpent.tmpSpent = _DaySpent.spent;
-                } else {
-                    _DaySpent.tmpSpent = 0;
-                }
-            }
-            uint256 _newSpent = _DaySpent.tmpSpent + value;
-            require(
-                _newSpent <= _DaySpent.dailyLimit,
-                "Dailylimit: ETH daily limit reached"
-            );
-        }
     }
 
     function _decodeCalldata(
         uint256 nonce,
         uint256 day,
         bytes calldata data
-    ) private {
+    ) private returns (uint256 ethSpent) {
         bytes4 selector = bytes4(data[0:4]);
-        if (selector == FUNC_EXEC_FROM_MODULE) {
-            // decode
-            bytes calldata _data = data[4:];
-            return _decodeCalldata(nonce, day, _data);
-        }
         if (selector == FUNC_EXECUTE) {
             // execute(address,uint256,bytes)
             (address to, uint256 value, bytes memory _data) = abi.decode(
                 data[4:],
                 (address, uint256, bytes)
             );
-            _decodeExecute(layout(), nonce, day, to, value, _data);
+            _decodeExecute(layout(), nonce, day, to, _data);
+            ethSpent = value;
         } else if (selector == FUNC_EXECUTE_BATCH) {
             // executeBatch(address[],bytes[])
             (address[] memory tos, bytes[] memory _datas) = abi.decode(
@@ -256,7 +235,7 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
             );
             Layout storage l = layout();
             for (uint256 i = 0; i < tos.length; i++) {
-                _decodeExecute(l, nonce, day, tos[i], 0, _datas[i]);
+                _decodeExecute(l, nonce, day, tos[i], _datas[i]);
             }
         } else if (selector == FUNC_EXECUTE_BATCH_VALUE) {
             // executeBatch(address[],uint256[],bytes[])
@@ -267,14 +246,32 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
             ) = abi.decode(data[4:], (address[], uint256[], bytes[]));
             Layout storage l = layout();
             for (uint256 i = 0; i < tos.length; i++) {
-                _decodeExecute(l, nonce, day, tos[i], values[i], _datas[i]);
+                uint256 value = values[i];
+                _decodeExecute(l, nonce, day, tos[i], _datas[i]);
+                ethSpent += value;
             }
+        } else if (selector == FUNC_EXEC_FROM_MODULE) {
+            // decode
+            bytes calldata _data = data[4:];
+            return _decodeCalldata(nonce, day, _data);
         }
     }
 
-    function guardHook(
+    function calcRequiredPrefund(
         UserOperation calldata userOp
+    ) private pure returns (uint256 requiredPrefund) {
+        uint256 requiredGas = userOp.callGasLimit +
+            userOp.verificationGasLimit +
+            userOp.preVerificationGas;
+        requiredPrefund = requiredGas * userOp.maxFeePerGas;
+    }
+
+    function guardHook(
+        UserOperation calldata userOp,
+        bytes32 userOpHash
     ) external override onlyDelegateCall {
+        (userOpHash);
+
         uint256 _validationData = SignatureDecoder
             .decodeSignature(userOp.signature)
             .validationData;
@@ -292,7 +289,37 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
             Layout storage l = layout();
             l.currentDay = currentDay;
             l.nonce += 1;
-            _decodeCalldata(l.nonce, currentDay, userOp.callData);
+            uint256 ethSpent = _decodeCalldata(
+                l.nonce,
+                currentDay,
+                userOp.callData
+            );
+
+            if (l.tokens.isExist(ETH_TOKEN_ADDRESS)) {
+                // calculate ETH gas fee , if not use paymaster
+                uint256 ethGasFee;
+                if (userOp.paymasterAndData.length == 0) {
+                    ethGasFee = calcRequiredPrefund(userOp);
+                    ethSpent += ethGasFee;
+                }
+
+                DaySpent storage _DaySpent = l.daySpent[ETH_TOKEN_ADDRESS];
+
+                uint256 _ethSpent;
+                if (_DaySpent.day == currentDay) {
+                    _ethSpent = _DaySpent.spent;
+                } else {
+                    _DaySpent.day = currentDay;
+                }
+                require(
+                    (_ethSpent + ethSpent) <= _DaySpent.dailyLimit,
+                    "Dailylimit: ETH daily limit reached"
+                );
+                
+                // gas fee not exact here
+                // The spent is updated here because it is not possible to process this data in the preHook or postHook
+                _DaySpent.spent = ethGasFee;
+            }
         } else {
             revert("Dailylimit: signature timerange invalid");
         }
@@ -303,6 +330,7 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         uint256 value,
         bytes calldata data
     ) external override {
+        (target, value, data);
         revert("Dailylimit: preHook not support");
     }
 
@@ -320,7 +348,6 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
                 spent = _DaySpent.spent;
             } else {
                 _DaySpent.day = day;
-                _DaySpent.spent = 0;
             }
             uint256 _newSpent = spent + value;
             require(

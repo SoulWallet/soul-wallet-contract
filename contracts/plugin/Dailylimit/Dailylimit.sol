@@ -311,14 +311,16 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
                 } else {
                     _DaySpent.day = currentDay;
                 }
+
+                uint256 _newSpent = _ethSpent + ethSpent;
                 require(
-                    (_ethSpent + ethSpent) <= _DaySpent.dailyLimit,
+                    _newSpent <= _DaySpent.dailyLimit,
                     "Dailylimit: ETH daily limit reached"
                 );
                 
                 // gas fee not exact here
                 // The spent is updated here because it is not possible to process this data in the preHook or postHook
-                _DaySpent.spent = ethGasFee;
+                _DaySpent.spent = _newSpent;
             }
         } else {
             revert("Dailylimit: signature timerange invalid");

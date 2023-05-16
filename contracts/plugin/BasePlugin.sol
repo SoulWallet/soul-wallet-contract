@@ -11,7 +11,7 @@ abstract contract BasePlugin is IPlugin {
     bytes32 internal immutable PLUGIN_SLOT;
 
     // use immutable to avoid delegatecall to change the value
-    address internal immutable DEPLOY_ADDRESS;
+    address private immutable DEPLOY_ADDRESS;
 
     constructor(bytes32 pluginSlot) {
         PLUGIN_SLOT = pluginSlot;
@@ -20,6 +20,11 @@ abstract contract BasePlugin is IPlugin {
 
     function sender() internal view returns (address) {
         return msg.sender;
+    }
+
+    modifier onlyCall(){
+        require(address(this) == DEPLOY_ADDRESS, "only call");
+        _;
     }
 
     modifier onlyDelegateCall() {
@@ -56,4 +61,10 @@ abstract contract BasePlugin is IPlugin {
     function _init(bytes calldata data) internal virtual;
 
     function _deInit() internal virtual;
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external view override returns (bool) {
+        return interfaceId == type(IPlugin).interfaceId;
+    }
 }

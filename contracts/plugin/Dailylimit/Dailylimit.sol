@@ -57,12 +57,6 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         }
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) external view override returns (bool) {
-        return interfaceId == type(IPlugin).interfaceId;
-    }
-
     function getHookCallType(
         HookType hookType
     ) external view override returns (CallHelper.CallType calltype) {

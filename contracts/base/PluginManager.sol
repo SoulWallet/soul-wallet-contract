@@ -65,8 +65,23 @@ abstract contract PluginManager is Authority, IPluginManager {
     }
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
-        // #TODO
-        return true;
+        mapping(address => address) storage _plugins = pluginsMapping();
+        address[] memory plugins = _plugins.list(
+            AddressLinkedList.SENTINEL_ADDRESS,
+            type(uint8).max
+        );
+        for (uint i = 0; i < plugins.length; i++) {
+            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.GuardHook)) {
+                (bool success,) = CallHelper.call(
+                    IPlugin(plugins[i]).getHookCallType(
+                        IPlugin.HookType.GuardHook
+                    ),
+                    plugins[i],
+                    abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
+                );
+                require(success, "guardHook failed");
+            }
+        }
     }
 
     function preHook(

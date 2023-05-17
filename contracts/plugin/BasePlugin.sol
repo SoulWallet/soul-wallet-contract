@@ -22,7 +22,7 @@ abstract contract BasePlugin is IPlugin {
         return msg.sender;
     }
 
-    modifier onlyCall(){
+    modifier onlyCall() {
         require(address(this) == DEPLOY_ADDRESS, "only call");
         _;
     }
@@ -33,6 +33,10 @@ abstract contract BasePlugin is IPlugin {
     }
 
     function inited(address wallet) internal view virtual returns (bool);
+
+    function _init(bytes calldata data) internal virtual;
+
+    function _deInit() internal virtual;
 
     function walletInit(bytes calldata data) external override {
         address _sender = sender();
@@ -55,10 +59,6 @@ abstract contract BasePlugin is IPlugin {
             emit PluginDeInit(_sender);
         }
     }
-
-    function _init(bytes calldata data) internal virtual;
-
-    function _deInit() internal virtual;
 
     function supportsInterface(
         bytes4 interfaceId

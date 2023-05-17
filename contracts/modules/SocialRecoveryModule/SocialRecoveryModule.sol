@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./ISocialRecoveryModule.sol";
+import "../BaseModule.sol";
 
 struct GuardianInfo {
     address[] guardians;
@@ -20,7 +21,7 @@ struct RecoveryEntry {
     uint256 executeTimestamp;
 }
 
-abstract contract SocialRecoveryModule is ISocialRecoveryModule {
+contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     mapping (address => uint256) recoveryNonce;
 
     mapping (address => GuardianInfo) internal walletGuardian;
@@ -28,6 +29,19 @@ abstract contract SocialRecoveryModule is ISocialRecoveryModule {
     
     mapping (uint256 => mapping (address => bool)) confirmedRecords;
     mapping (address => RecoveryEntry) recoveryEntries;
+
+    function inited(address wallet) internal view override returns (bool){
+        return false;
+    }
+
+    function _init(bytes calldata data) internal override {
+
+    }
+
+    function _deInit() internal override {
+
+    }
+
 
     function _checkLatestGuardian(address wallet) private {
         if (walletPendingGuardian[wallet].pendingUntil > 0 &&

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
-
-import "../../interfaces/IModule.sol";
-import "../../interfaces/ISoulWallet.sol";
+import "../BaseModule.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
@@ -11,7 +9,7 @@ import "../../interfaces/ISoulWallet.sol";
 // 1. add timelock to trx
 // 2. trx must be executed in sequence
 // 3. all trx must be either executed or cancled
-contract SecurityControlModule is IModule {
+contract SecurityControlModule is BaseModule {
     uint public constant MIN_DELAY = 1 days;
     uint public constant MAX_DELAY = 14 days;
     uint public constant GRACE_PERIOD = 30 days;
@@ -27,10 +25,34 @@ contract SecurityControlModule is IModule {
     mapping(address => WalletConfig) private walletConfigs;
 
     modifier authorized(address _target) {
-        require(msg.sender == _target || ISoulWallet(_target).isOwner(msg.sender));
+        address _sender = sender();
+        require(_sender == _target || ISoulWallet(_target).isOwner(_sender));
         require(walletConfigs[_target].inited);
         // TODO: require wallet is not locked
         _;
+    }
+
+
+    function inited(address wallet) internal view override returns (bool) {
+        return walletConfigs[wallet].inited;
+    }
+
+    function _init(bytes calldata data) internal override {
+        uint64 _delay = abi.decode(data, (uint64));
+        require(_delay >= MIN_DELAY && _delay <= MAX_DELAY);
+        address _sender = sender();
+        walletConfigs[_sender].inited = true;
+        walletConfigs[_sender].delay = _delay;
+    }
+
+    function _deInit() internal override {
+        address _sender = sender();
+        walletConfigs[_sender].inited = false;
+        walletConfigs[_sender].delay = 0;
+        // cancel all pending trx
+        for (uint64 i = walletConfigs[_sender].execNonce; i < walletConfigs[_sender].allocNonce; i++) {
+            validateAndUpdateExecNonce(_sender, i);
+        }
     }
 
     function validateAndUpdateAllocNonce(address wallet, uint64 nonce) private {
@@ -40,23 +62,6 @@ contract SecurityControlModule is IModule {
     function validateAndUpdateExecNonce(address wallet, uint64 nonce) private {
         require(walletConfigs[wallet].execNonce < walletConfigs[wallet].allocNonce);
         require(walletConfigs[wallet].execNonce++ == nonce);
-    }
-
-    function walletInit(uint64 _delay) external {
-        require(_delay >= MIN_DELAY && _delay <= MAX_DELAY);
-        require(!walletConfigs[msg.sender].inited);
-        walletConfigs[msg.sender].inited = true;
-        walletConfigs[msg.sender].delay = _delay;
-    }
-
-    function walletDeinit() external {
-        require(walletConfigs[msg.sender].inited);
-        walletConfigs[msg.sender].inited = false;
-        walletConfigs[msg.sender].delay = 0;
-        // cancel all pending trx
-        for (uint64 i = walletConfigs[msg.sender].execNonce; i < walletConfigs[msg.sender].allocNonce; i++) {
-            validateAndUpdateExecNonce(msg.sender, i);
-        }
     }
 
     function getTxId(

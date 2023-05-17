@@ -5,35 +5,45 @@ import "../interfaces/IModule.sol";
 import "../interfaces/ISoulWallet.sol";
 
 abstract contract BaseModule is IModule {
-    function walletInited(address) internal virtual returns (bool);
+    event ModuleInit(address indexed wallet);
+    event ModuleDeInit(address indexed wallet);
 
-    function _walletInit(bytes memory data) internal virtual;
+    function inited(address wallet) internal view virtual returns (bool);
 
-    function _walletDeInit() internal virtual;
+    function _init(bytes calldata data) internal virtual;
 
-    modifier walletInitAllowed() {
-        require(!walletInited(msg.sender));
-        require(ISoulWallet(msg.sender).isAuthorizedModule(address(this)));
+    function _deInit() internal virtual;
 
-        _;
-
-        require(walletInited(msg.sender));
+    function sender() internal view returns (address) {
+        return msg.sender;
     }
 
-    modifier walletDeInitAllowed() {
-        require(walletInited(msg.sender));
-        require(!ISoulWallet(msg.sender).isAuthorizedModule(address(this)));
-
-        _;
-
-        require(!walletInited(msg.sender));
+    function walletInit(bytes calldata data) external {
+        address _sender = sender();
+        if (!inited(_sender)) {
+            if (!ISoulWallet(_sender).isAuthorizedModule(address(this))) {
+                revert("not authorized module");
+            }
+            _init(data);
+            emit ModuleInit(_sender);
+        }
     }
 
-    function walletInit(bytes memory data) external walletInitAllowed {
-        _walletInit(data);
+    function walletDeInit() external {
+        address _sender = sender();
+        if (inited(_sender)) {
+            if (ISoulWallet(_sender).isAuthorizedModule(address(this))) {
+                revert("authorized module");
+            }
+            _deInit();
+            emit ModuleDeInit(_sender);
+        }
     }
 
-    function walletDeInit() external walletDeInitAllowed {
-        _walletDeInit();
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external view override returns (bool) {
+        return interfaceId == type(IModule).interfaceId;
     }
 }

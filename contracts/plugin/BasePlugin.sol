@@ -32,12 +32,11 @@ abstract contract BasePlugin is IPlugin {
         _;
     }
 
-    function emptySlot(address wallet) internal view virtual returns (bool);
+    function inited(address wallet) internal view virtual returns (bool);
 
     function walletInit(bytes calldata data) external override {
         address _sender = sender();
-        bool _emptySlot = emptySlot(_sender);
-        if (_emptySlot) {
+        if (!inited(_sender)) {
             if (!ISoulWallet(_sender).isAuthorizedPlugin(DEPLOY_ADDRESS)) {
                 revert("not authorized plugin");
             }
@@ -48,8 +47,7 @@ abstract contract BasePlugin is IPlugin {
 
     function walletDeInit() external override {
         address _sender = sender();
-        bool _emptySlot = emptySlot(_sender);
-        if (!_emptySlot) {
+        if (inited(_sender)) {
             if (ISoulWallet(_sender).isAuthorizedPlugin(DEPLOY_ADDRESS)) {
                 revert("authorized plugin");
             }

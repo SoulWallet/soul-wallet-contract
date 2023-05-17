@@ -38,11 +38,11 @@ contract Upgrade is BasePlugin, IUpgrade {
         }
     }
 
-    function emptySlot(
+    function inited(
         address wallet
     ) internal view virtual override returns (bool) {
         (wallet);
-        return readNewLogic() == address(0);
+        return readNewLogic() != address(0);
     }
 
     function _init(bytes calldata data) internal override onlyDelegateCall {

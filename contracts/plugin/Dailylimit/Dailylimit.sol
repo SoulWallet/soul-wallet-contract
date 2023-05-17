@@ -72,9 +72,9 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         return true;
     }
 
-    function emptySlot(address wallet) internal view override returns (bool) {
+    function inited(address wallet) internal view override returns (bool) {
         (wallet); // DelegateCall plugin no need wallet parameter
-        return layout().currentDay == 0;
+        return layout().currentDay != 0;
     }
 
     function _init(bytes calldata data) internal override onlyDelegateCall {
@@ -263,7 +263,7 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
     function guardHook(
         UserOperation calldata userOp,
         bytes32 userOpHash
-    ) external override onlyDelegateCall {
+    ) external override {
         (userOpHash);
 
         uint256 _validationData = SignatureDecoder
@@ -311,7 +311,7 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
                     _newSpent <= _DaySpent.dailyLimit,
                     "Dailylimit: ETH daily limit reached"
                 );
-                
+
                 // gas fee not exact here
                 // The spent is updated here because it is not possible to process this data in the preHook or postHook
                 _DaySpent.spent = _newSpent;
@@ -334,7 +334,7 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         address target,
         uint256 value,
         bytes calldata data
-    ) external override onlyDelegateCall {
+    ) external override {
         uint256 day = _getDay(block.timestamp);
         Layout storage l = layout();
         if (value > 0 && l.tokens.isExist(ETH_TOKEN_ADDRESS)) {
@@ -450,13 +450,13 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
 
     function getDailyLimit(
         address token
-    ) external view override onlyDelegateCall returns (uint256) {
+    ) external view override returns (uint256) {
         return _getTokenDailyLimit(token);
     }
 
     function getSpentToday(
         address token
-    ) external view override onlyDelegateCall returns (uint256) {
+    ) external view override returns (uint256) {
         return _getDaySpent(token, block.timestamp);
     }
 }

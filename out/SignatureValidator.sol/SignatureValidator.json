@@ -11,7 +11,7 @@
     "linkReferences": {}
   },
   "methodIdentifiers": {},
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/helper/SignatureValidator.sol\":\"SignatureValidator\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/authority/OwnerAuth.sol\":{\"keccak256\":\"0xa7d2e3240c752b2d1d0f72a5d3fe839a65d1329a99fbd09285a886fecd4c0b80\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://ead431bb2c6e9e1223a12482ececa6f93a64fd10da22ce7dedcfb146623c1b22\",\"dweb:/ipfs/QmX7yvSXWLZ4qmcdYduEeQaD1xebhkWDZeRdaTNL4AGPhv\"]},\"contracts/helper/SignatureValidator.sol\":{\"keccak256\":\"0x89fb0ca8e8af97a194c55ea7e603e61aa353307a6ce119f844390f833e417b0b\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://27f3695224ae2a78ad860bd33583c027e02b7f65886e109aa1035c4df15da1ae\",\"dweb:/ipfs/QmR5x5Ni2KUrgGQH4MzKsCwWwM2c1G9pkWh9FLix5zuPoN\"]},\"contracts/libraries/SignatureDecoder.sol\":{\"keccak256\":\"0x6b1d99ae040108534ef94681ac4933102f23263917a557453ca1c2bbe4298f17\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://129f4dcb220ec16fd90fed5eeec1fe526a0d014dea8dbb76a4cb4012c547f017\",\"dweb:/ipfs/QmTjTKfByFrby7Qvzeag52SfiWH1VR47guMH73okjgyE3K\"]},\"lib/openzeppelin-contracts/contracts/utils/Strings.sol\":{\"keccak256\":\"0xa4d1d62251f8574deb032a35fc948386a9b4de74b812d4f545a1ac120486b48a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8c969013129ba9e651a20735ef659fef6d8a1139ea3607bd4b26ddea2d645634\",\"dweb:/ipfs/QmVhVa6LGuzAcB8qgDtVHRkucn4ihj5UZr8xBLcJkP6ucb\"]},\"lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol\":{\"keccak256\":\"0xda898fa084aa1ddfdb346e6a40459e00a59d87071cce7c315a46d648dd71d0ba\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ce501a941f4aa1555c04dabb5e07992503bb6a9b32ff8f7cdcefdb4a742210cb\",\"dweb:/ipfs/QmeScPrUpdrGYs9BytV3Z5ZWJcBXtuAgCW4BLHua4xFUxx\"]},\"lib/openzeppelin-contracts/contracts/utils/math/Math.sol\":{\"keccak256\":\"0xa1e8e83cd0087785df04ac79fb395d9f3684caeaf973d9e2c71caef723a3a5d6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://33bbf48cc069be677705037ba7520c22b1b622c23b33e1a71495f2d36549d40b\",\"dweb:/ipfs/Qmct36zWXv3j7LZB83uwbg7TXwnZSN1fqHNDZ93GG98bGz\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/helper/SignatureValidator.sol\":\"SignatureValidator\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"]},\"sources\":{\"contracts/authority/OwnerAuth.sol\":{\"keccak256\":\"0xa7d2e3240c752b2d1d0f72a5d3fe839a65d1329a99fbd09285a886fecd4c0b80\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://ead431bb2c6e9e1223a12482ececa6f93a64fd10da22ce7dedcfb146623c1b22\",\"dweb:/ipfs/QmX7yvSXWLZ4qmcdYduEeQaD1xebhkWDZeRdaTNL4AGPhv\"]},\"contracts/helper/SignatureValidator.sol\":{\"keccak256\":\"0x89fb0ca8e8af97a194c55ea7e603e61aa353307a6ce119f844390f833e417b0b\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://27f3695224ae2a78ad860bd33583c027e02b7f65886e109aa1035c4df15da1ae\",\"dweb:/ipfs/QmR5x5Ni2KUrgGQH4MzKsCwWwM2c1G9pkWh9FLix5zuPoN\"]},\"contracts/libraries/SignatureDecoder.sol\":{\"keccak256\":\"0x6b1d99ae040108534ef94681ac4933102f23263917a557453ca1c2bbe4298f17\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://129f4dcb220ec16fd90fed5eeec1fe526a0d014dea8dbb76a4cb4012c547f017\",\"dweb:/ipfs/QmTjTKfByFrby7Qvzeag52SfiWH1VR47guMH73okjgyE3K\"]},\"lib/openzeppelin-contracts/contracts/utils/Strings.sol\":{\"keccak256\":\"0xa4d1d62251f8574deb032a35fc948386a9b4de74b812d4f545a1ac120486b48a\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8c969013129ba9e651a20735ef659fef6d8a1139ea3607bd4b26ddea2d645634\",\"dweb:/ipfs/QmVhVa6LGuzAcB8qgDtVHRkucn4ihj5UZr8xBLcJkP6ucb\"]},\"lib/openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol\":{\"keccak256\":\"0xda898fa084aa1ddfdb346e6a40459e00a59d87071cce7c315a46d648dd71d0ba\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ce501a941f4aa1555c04dabb5e07992503bb6a9b32ff8f7cdcefdb4a742210cb\",\"dweb:/ipfs/QmeScPrUpdrGYs9BytV3Z5ZWJcBXtuAgCW4BLHua4xFUxx\"]},\"lib/openzeppelin-contracts/contracts/utils/math/Math.sol\":{\"keccak256\":\"0xa1e8e83cd0087785df04ac79fb395d9f3684caeaf973d9e2c71caef723a3a5d6\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://33bbf48cc069be677705037ba7520c22b1b622c23b33e1a71495f2d36549d40b\",\"dweb:/ipfs/Qmct36zWXv3j7LZB83uwbg7TXwnZSN1fqHNDZ93GG98bGz\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.17+commit.8df45f5f"
@@ -33,15 +33,14 @@
     "settings": {
       "remappings": [
         ":@account-abstraction/=lib/account-abstraction/",
-        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
         ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
         ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
         ":account-abstraction/=lib/account-abstraction/contracts/",
-        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
-        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
         ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
-        ":safe-contracts/=lib/safe-contracts/contracts/"
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
       ],
       "optimizer": {
         "enabled": true,
@@ -112,10 +111,10 @@
     "id": 2531,
     "exportedSymbols": {
       "ECDSA": [
-        9952
+        39106
       ],
       "Math": [
-        10829
+        39983
       ],
       "OwnerAuth": [
         350
@@ -127,7 +126,7 @@
         2530
       ],
       "Strings": [
-        9591
+        38745
       ]
     },
     "nodeType": "SourceUnit",
@@ -154,7 +153,7 @@
         "file": "@openzeppelin/contracts/utils/cryptography/ECDSA.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 2531,
-        "sourceUnit": 9953,
+        "sourceUnit": 39107,
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -202,7 +201,7 @@
                 "269:5:15"
               ],
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 9952,
+              "referencedDeclaration": 39106,
               "src": "269:5:15"
             },
             "typeName": {
@@ -970,7 +969,7 @@
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       },
                       "typeName": {
@@ -984,13 +983,13 @@
                             "1167:12:15"
                           ],
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 9601,
+                          "referencedDeclaration": 38755,
                           "src": "1161:18:15"
                         },
-                        "referencedDeclaration": 9601,
+                        "referencedDeclaration": 38755,
                         "src": "1161:18:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_RecoverError_$9601",
+                          "typeIdentifier": "t_enum$_RecoverError_$38755",
                           "typeString": "enum ECDSA.RecoverError"
                         }
                       },
@@ -1057,10 +1056,10 @@
                         "name": "ECDSA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9952,
+                        "referencedDeclaration": 39106,
                         "src": "1189:5:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_ECDSA_$9952_$",
+                          "typeIdentifier": "t_type$_t_contract$_ECDSA_$39106_$",
                           "typeString": "type(library ECDSA)"
                         }
                       },
@@ -1072,10 +1071,10 @@
                       "memberLocation": "1195:10:15",
                       "memberName": "tryRecover",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 9691,
+                      "referencedDeclaration": 38845,
                       "src": "1189:16:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$_t_enum$_RecoverError_$9601_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$_t_enum$_RecoverError_$38755_$",
                         "typeString": "function (bytes32,bytes memory) pure returns (address,enum ECDSA.RecoverError)"
                       }
                     },
@@ -1091,7 +1090,7 @@
                     "src": "1189:47:15",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$_t_address_$_t_enum$_RecoverError_$9601_$",
+                      "typeIdentifier": "t_tuple$_t_address_$_t_enum$_RecoverError_$38755_$",
                       "typeString": "tuple(address,enum ECDSA.RecoverError)"
                     }
                   },
@@ -1101,7 +1100,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_RecoverError_$9601",
+                      "typeIdentifier": "t_enum$_RecoverError_$38755",
                       "typeString": "enum ECDSA.RecoverError"
                     },
                     "id": 2448,
@@ -1117,7 +1116,7 @@
                       "referencedDeclaration": 2436,
                       "src": "1250:5:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       }
                     },
@@ -1130,10 +1129,10 @@
                           "name": "ECDSA",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9952,
+                          "referencedDeclaration": 39106,
                           "src": "1259:5:15",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ECDSA_$9952_$",
+                            "typeIdentifier": "t_type$_t_contract$_ECDSA_$39106_$",
                             "typeString": "type(library ECDSA)"
                           }
                         },
@@ -1145,10 +1144,10 @@
                         "memberLocation": "1265:12:15",
                         "memberName": "RecoverError",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 9601,
+                        "referencedDeclaration": 38755,
                         "src": "1259:18:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_RecoverError_$9601_$",
+                          "typeIdentifier": "t_type$_t_enum$_RecoverError_$38755_$",
                           "typeString": "type(enum ECDSA.RecoverError)"
                         }
                       },
@@ -1160,10 +1159,10 @@
                       "memberLocation": "1278:7:15",
                       "memberName": "NoError",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 9596,
+                      "referencedDeclaration": 38750,
                       "src": "1259:26:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       }
                     },
@@ -1746,7 +1745,7 @@
                       "memberLocation": "1798:22:15",
                       "memberName": "toEthSignedMessageHash",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 9909,
+                      "referencedDeclaration": 39063,
                       "src": "1753:67:15",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_pure$_t_bytes32_$returns$_t_bytes32_$bound_to$_t_bytes32_$",
@@ -1818,7 +1817,7 @@
                       "stateVariable": false,
                       "storageLocation": "default",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       },
                       "typeName": {
@@ -1832,13 +1831,13 @@
                             "1858:12:15"
                           ],
                           "nodeType": "IdentifierPath",
-                          "referencedDeclaration": 9601,
+                          "referencedDeclaration": 38755,
                           "src": "1852:18:15"
                         },
-                        "referencedDeclaration": 9601,
+                        "referencedDeclaration": 38755,
                         "src": "1852:18:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_RecoverError_$9601",
+                          "typeIdentifier": "t_enum$_RecoverError_$38755",
                           "typeString": "enum ECDSA.RecoverError"
                         }
                       },
@@ -1905,10 +1904,10 @@
                         "name": "ECDSA",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 9952,
+                        "referencedDeclaration": 39106,
                         "src": "1880:5:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_ECDSA_$9952_$",
+                          "typeIdentifier": "t_type$_t_contract$_ECDSA_$39106_$",
                           "typeString": "type(library ECDSA)"
                         }
                       },
@@ -1920,10 +1919,10 @@
                       "memberLocation": "1886:10:15",
                       "memberName": "tryRecover",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 9691,
+                      "referencedDeclaration": 38845,
                       "src": "1880:16:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$_t_enum$_RecoverError_$9601_$",
+                        "typeIdentifier": "t_function_internal_pure$_t_bytes32_$_t_bytes_memory_ptr_$returns$_t_address_$_t_enum$_RecoverError_$38755_$",
                         "typeString": "function (bytes32,bytes memory) pure returns (address,enum ECDSA.RecoverError)"
                       }
                     },
@@ -1939,7 +1938,7 @@
                     "src": "1880:47:15",
                     "tryCall": false,
                     "typeDescriptions": {
-                      "typeIdentifier": "t_tuple$_t_address_$_t_enum$_RecoverError_$9601_$",
+                      "typeIdentifier": "t_tuple$_t_address_$_t_enum$_RecoverError_$38755_$",
                       "typeString": "tuple(address,enum ECDSA.RecoverError)"
                     }
                   },
@@ -1949,7 +1948,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_RecoverError_$9601",
+                      "typeIdentifier": "t_enum$_RecoverError_$38755",
                       "typeString": "enum ECDSA.RecoverError"
                     },
                     "id": 2514,
@@ -1965,7 +1964,7 @@
                       "referencedDeclaration": 2502,
                       "src": "1941:5:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       }
                     },
@@ -1978,10 +1977,10 @@
                           "name": "ECDSA",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 9952,
+                          "referencedDeclaration": 39106,
                           "src": "1950:5:15",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_contract$_ECDSA_$9952_$",
+                            "typeIdentifier": "t_type$_t_contract$_ECDSA_$39106_$",
                             "typeString": "type(library ECDSA)"
                           }
                         },
@@ -1993,10 +1992,10 @@
                         "memberLocation": "1956:12:15",
                         "memberName": "RecoverError",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 9601,
+                        "referencedDeclaration": 38755,
                         "src": "1950:18:15",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_RecoverError_$9601_$",
+                          "typeIdentifier": "t_type$_t_enum$_RecoverError_$38755_$",
                           "typeString": "type(enum ECDSA.RecoverError)"
                         }
                       },
@@ -2008,10 +2007,10 @@
                       "memberLocation": "1969:7:15",
                       "memberName": "NoError",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 9596,
+                      "referencedDeclaration": 38750,
                       "src": "1950:26:15",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_RecoverError_$9601",
+                        "typeIdentifier": "t_enum$_RecoverError_$38755",
                         "typeString": "enum ECDSA.RecoverError"
                       }
                     },

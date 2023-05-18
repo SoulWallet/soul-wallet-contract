@@ -17,17 +17,17 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5060405161011d38038061011d83398101604081905261002f91610056565b7f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc55610086565b60006020828403121561006857600080fd5b81516001600160a01b038116811461007f57600080fd5b9392505050565b6089806100946000396000f3fe60806040526001600160a01b037f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54163660008037600080366000845af490503d6000803e80604d573d6000fd5b503d6000f3fea2646970667358221220cf339bc444233603c81c0d167ac7d71c0fc7c6c5c196e49905e3683dedf8ac7e64736f6c63430008110033",
-    "sourceMap": "62:1126:1:-:0;;;536:111;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;603:20;596:35;62:1126;;14:290:71;84:6;137:2;125:9;116:7;112:23;108:32;105:52;;;153:1;150;143:12;105:52;179:16;;-1:-1:-1;;;;;224:31:71;;214:42;;204:70;;270:1;267;260:12;204:70;293:5;14:290;-1:-1:-1;;;14:290:71:o;:::-;62:1126:1;;;;;;",
+    "object": "0x608060405234801561001057600080fd5b5060405161011d38038061011d83398101604081905261002f91610056565b7f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc55610086565b60006020828403121561006857600080fd5b81516001600160a01b038116811461007f57600080fd5b9392505050565b6089806100946000396000f3fe60806040526001600160a01b037f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54163660008037600080366000845af490503d6000803e80604d573d6000fd5b503d6000f3fea264697066735822122004cc1843806c82eff8e4450645ceb79a11e9364f53e8497787de10061a0c92a564736f6c63430008110033",
+    "sourceMap": "62:1126:1:-:0;;;536:111;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;603:20;596:35;62:1126;;14:290:91;84:6;137:2;125:9;116:7;112:23;108:32;105:52;;;153:1;150;143:12;105:52;179:16;;-1:-1:-1;;;;;224:31:91;;214:42;;204:70;;270:1;267;260:12;204:70;293:5;14:290;-1:-1:-1;;;14:290:91:o;:::-;62:1126:1;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x60806040526001600160a01b037f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54163660008037600080366000845af490503d6000803e80604d573d6000fd5b503d6000f3fea2646970667358221220cf339bc444233603c81c0d167ac7d71c0fc7c6c5c196e49905e3683dedf8ac7e64736f6c63430008110033",
+    "object": "0x60806040526001600160a01b037f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54163660008037600080366000845af490503d6000803e80604d573d6000fd5b503d6000f3fea264697066735822122004cc1843806c82eff8e4450645ceb79a11e9364f53e8497787de10061a0c92a564736f6c63430008110033",
     "sourceMap": "62:1126:1:-:0;;;-1:-1:-1;;;;;792:20:1;786:27;782:76;890:14;887:1;884;871:34;987:1;984;968:14;965:1;953:10;946:5;933:56;918:71;;1023:16;1020:1;1017;1002:38;1059:7;1053:77;;1099:16;1096:1;1089:27;1053:77;;1153:16;1150:1;1143:27",
     "linkReferences": {}
   },
   "methodIdentifiers": {},
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"logic\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"constructor\":{\"details\":\"Initializes the contract setting the implementation \",\"params\":{\"logic\":\"Address of the initial implementation.\"}}},\"stateVariables\":{\"_IMPLEMENTATION_SLOT\":{\"details\":\"Storage slot with the address of the current implementation. This is the keccak-256 hash of \\\"eip1967.proxy.implementation\\\" subtracted by 1\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/SoulWalletProxy.sol\":\"SoulWalletProxy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/SoulWalletProxy.sol\":{\"keccak256\":\"0xb691d53faf82b3b63e3215c58296e97db7baf752971172f9b8f1559622d4144c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://d1f364ad2ff8efd10ad7b6e2294be692877eb845a9e6a34f891fe96abc2bffa6\",\"dweb:/ipfs/QmfEJWPvZoEXHRjYYT8hT23wm9eWoyNkSsxTd1TBnZxQMp\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"logic\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"constructor\":{\"details\":\"Initializes the contract setting the implementation \",\"params\":{\"logic\":\"Address of the initial implementation.\"}}},\"stateVariables\":{\"_IMPLEMENTATION_SLOT\":{\"details\":\"Storage slot with the address of the current implementation. This is the keccak-256 hash of \\\"eip1967.proxy.implementation\\\" subtracted by 1\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/SoulWalletProxy.sol\":\"SoulWalletProxy\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"]},\"sources\":{\"contracts/SoulWalletProxy.sol\":{\"keccak256\":\"0xb691d53faf82b3b63e3215c58296e97db7baf752971172f9b8f1559622d4144c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://d1f364ad2ff8efd10ad7b6e2294be692877eb845a9e6a34f891fe96abc2bffa6\",\"dweb:/ipfs/QmfEJWPvZoEXHRjYYT8hT23wm9eWoyNkSsxTd1TBnZxQMp\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.17+commit.8df45f5f"
@@ -73,15 +73,14 @@
     "settings": {
       "remappings": [
         ":@account-abstraction/=lib/account-abstraction/",
-        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
         ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
         ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
         ":account-abstraction/=lib/account-abstraction/contracts/",
-        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
-        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
         ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
-        ":safe-contracts/=lib/safe-contracts/contracts/"
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
       ],
       "optimizer": {
         "enabled": true,

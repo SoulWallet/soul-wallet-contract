@@ -3,9 +3,10 @@ pragma solidity ^0.8.17;
 
 library SelectorLinkedList {
     bytes4 internal constant SENTINEL_SELECTOR = 0x00000001;
+    uint32 internal constant SENTINEL_UINT = 1;
 
     function isSafeSelector(bytes4 selector) internal pure returns (bool) {
-        return uint32(selector) > 1;
+        return uint32(selector) > SENTINEL_UINT;
     }
 
     modifier onlySelector(bytes4 selector) {
@@ -13,11 +14,8 @@ library SelectorLinkedList {
         _;
     }
 
-    function add(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4 selector
-    ) internal onlySelector(selector) {
-        require(self[selector] == 0, "selector already exists");
+    function add(mapping(bytes4 => bytes4) storage self, bytes4 selector) internal onlySelector(selector) {
+        require(self[selector] == 0, "bytes4 already exists");
         bytes4 _prev = self[SENTINEL_SELECTOR];
         if (_prev == 0) {
             self[SENTINEL_SELECTOR] = selector;
@@ -28,79 +26,97 @@ library SelectorLinkedList {
         }
     }
 
-    function add(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4[] memory selectors
-    ) internal {
-        //#TODO: optimize
-        require(selectors.length > 0, "selectors is empty");
-        for (uint256 i = 0; i < selectors.length; i++) {
+    function add(mapping(bytes4 => bytes4) storage self, bytes4[] memory selectors) internal {
+        for (uint256 i = 0; i < selectors.length;) {
             add(self, selectors[i]);
-        }
-    }
-
-    function remove(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4 selector
-    ) internal onlySelector(selector) {
-        require(self[selector] != 0, "selector not exists");
-        for (
-            bytes4 _selector = self[SENTINEL_SELECTOR];
-            _selector != SENTINEL_SELECTOR;
-            _selector = self[_selector]
-        ) {
-            if (_selector == selector) {
-                self[_selector] = self[selector];
-                self[selector] = 0;
-                return;
+            unchecked {
+                i++;
             }
         }
     }
 
-    function remove(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4[] memory selectors
-    ) internal {
-        require(selectors.length > 0, "selectors is empty");
-        //#TODO: optimize
-        for (uint256 i = 0; i < selectors.length; i++) {
-            remove(self, selectors[i]);
+    function replace(mapping(bytes4 => bytes4) storage self, bytes4 oldSelector, bytes4 newSelector) internal {
+        require(isExist(self, oldSelector), "bytes4 not exists");
+        require(!isExist(self, newSelector), "new bytes4 already exists");
+
+        bytes4 cursor = SENTINEL_SELECTOR;
+        while (true) {
+            bytes4 _selector = self[cursor];
+            if (_selector == oldSelector) {
+                bytes4 next = self[_selector];
+                self[newSelector] = next;
+                self[cursor] = newSelector;
+                self[_selector] = 0;
+                return;
+            }
+            cursor = _selector;
+        }
+    }
+
+    function remove(mapping(bytes4 => bytes4) storage self, bytes4 selector) internal {
+        require(isExist(self, selector), "bytes4 not exists");
+
+        bytes4 cursor = SENTINEL_SELECTOR;
+        while (true) {
+            bytes4 _selector = self[cursor];
+            if (_selector == selector) {
+                bytes4 next = self[_selector];
+                self[cursor] = next;
+                self[_selector] = 0;
+                return;
+            }
+            cursor = _selector;
         }
     }
 
     function clear(mapping(bytes4 => bytes4) storage self) internal {
-        for (
-            bytes4 _selector = self[SENTINEL_SELECTOR];
-            _selector != SENTINEL_SELECTOR;
-            _selector = self[_selector]
-        ) {
-            self[_selector] = 0;
+        for (bytes4 selector = self[SENTINEL_SELECTOR]; uint32(selector) > SENTINEL_UINT; selector = self[selector]) {
+            self[selector] = 0;
         }
         self[SENTINEL_SELECTOR] = 0;
     }
 
-    function isExist(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4 selector
-    ) internal view onlySelector(selector) returns (bool) {
+    function isExist(mapping(bytes4 => bytes4) storage self, bytes4 selector)
+        internal
+        view
+        onlySelector(selector)
+        returns (bool)
+    {
         return self[selector] != 0;
     }
 
-    function list(
-        mapping(bytes4 => bytes4) storage self,
-        bytes4 from,
-        uint256 limit
-    ) internal view returns (bytes4[] memory) {
+    function size(mapping(bytes4 => bytes4) storage self) internal view returns (uint256) {
+        uint256 result = 0;
+        bytes4 selector = self[SENTINEL_SELECTOR];
+        while (uint32(selector) > SENTINEL_UINT) {
+            selector = self[selector];
+            unchecked {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    function isEmpty(mapping(bytes4 => bytes4) storage self) internal view returns (bool) {
+        return self[SENTINEL_SELECTOR] == 0;
+    }
+
+    function list(mapping(bytes4 => bytes4) storage self, bytes4 from, uint256 limit)
+        internal
+        view
+        returns (bytes4[] memory)
+    {
         bytes4[] memory result = new bytes4[](limit);
         uint256 i = 0;
-        for (
-            bytes4 selector = self[from];
-            selector != SENTINEL_SELECTOR && i < limit;
-            selector = self[selector]
-        ) {
+        bytes4 selector = self[from];
+        while (uint32(selector) > SENTINEL_UINT && i < limit) {
             result[i] = selector;
-            i++;
+            selector = self[selector];
+            unchecked {
+                i++;
+            }
         }
+
         return result;
     }
 }

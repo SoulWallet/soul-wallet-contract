@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "../interfaces/IDepositManager.sol";
 import "../authority/Authority.sol";
 
@@ -25,10 +25,7 @@ abstract contract DepositManager is IDepositManager, Authority {
      * @param withdrawAddress target to send to
      * @param amount to withdraw
      */
-    function withdrawDepositTo(
-        address payable withdrawAddress,
-        uint256 amount
-    ) external onlyEntryPointOrSelf {
+    function withdrawDepositTo(address payable withdrawAddress, uint256 amount) external onlyEntryPointOrSelf {
         _entryPoint().withdrawTo(withdrawAddress, amount);
     }
 }

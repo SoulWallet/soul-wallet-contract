@@ -1,0 +1,1310 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "CancelSetDailyLimit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "DailyLimitChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "PreSetDailyLimit",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "cancelSetDailyLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "comfirmSetDailyLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getDailyLimit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getSpentToday",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "limit",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "preSetDailyLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "token",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amount",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "reduceDailyLimits",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "cancelSetDailyLimit(address[],uint256[])": "e5810adb",
+    "comfirmSetDailyLimit(address[],uint256[])": "fda03237",
+    "getDailyLimit(address)": "58f2ef17",
+    "getSpentToday(address)": "49ff658e",
+    "preSetDailyLimit(address[],uint256[])": "ffaf02fc",
+    "reduceDailyLimits(address[],uint256[])": "5709cd58"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"CancelSetDailyLimit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"DailyLimitChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"PreSetDailyLimit\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"cancelSetDailyLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"comfirmSetDailyLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"getDailyLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"getSpentToday\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"limit\",\"type\":\"uint256[]\"}],\"name\":\"preSetDailyLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"token\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amount\",\"type\":\"uint256[]\"}],\"name\":\"reduceDailyLimits\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/plugin/Dailylimit/IDailylimit.sol\":\"IDailylimit\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/plugin/Dailylimit/IDailylimit.sol\":{\"keccak256\":\"0x114bf64abc60de10c48e060d8754b6f93147138a58a68c53712bee498f38beeb\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://29501011491a796f45315122d6baa51d36c287e2e0e75cef7ff256f227628fe7\",\"dweb:/ipfs/QmfX5SoGTWGywcDRzHAAdaaDyPQLBSA43zhtMSbY8eqkrL\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "CancelSetDailyLimit",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "DailyLimitChanged",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]",
+              "indexed": false
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]",
+              "indexed": false
+            }
+          ],
+          "type": "event",
+          "name": "PreSetDailyLimit",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "cancelSetDailyLimit"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "comfirmSetDailyLimit"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getDailyLimit",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getSpentToday",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "limit",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "preSetDailyLimit"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "token",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amount",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "reduceDailyLimits"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        ":safe-contracts/=lib/safe-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/plugin/Dailylimit/IDailylimit.sol": "IDailylimit"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/plugin/Dailylimit/IDailylimit.sol": {
+        "keccak256": "0x114bf64abc60de10c48e060d8754b6f93147138a58a68c53712bee498f38beeb",
+        "urls": [
+          "bzz-raw://29501011491a796f45315122d6baa51d36c287e2e0e75cef7ff256f227628fe7",
+          "dweb:/ipfs/QmfX5SoGTWGywcDRzHAAdaaDyPQLBSA43zhtMSbY8eqkrL"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/plugin/Dailylimit/IDailylimit.sol",
+    "id": 6935,
+    "exportedSymbols": {
+      "IDailylimit": [
+        6934
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:863:41",
+    "nodes": [
+      {
+        "id": 6859,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:41",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 6934,
+        "nodeType": "ContractDefinition",
+        "src": "62:836:41",
+        "nodes": [
+          {
+            "id": 6867,
+            "nodeType": "EventDefinition",
+            "src": "90:58:41",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "75bb2afda41bd6ae78da0773e0f5d6c9210fbf8dfb4e24a52cdf36cedc9734bd",
+            "name": "DailyLimitChanged",
+            "nameLocation": "96:17:41",
+            "parameters": {
+              "id": 6866,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6862,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "124:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6867,
+                  "src": "114:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6860,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "114:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6861,
+                    "nodeType": "ArrayTypeName",
+                    "src": "114:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6865,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "141:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6867,
+                  "src": "131:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6863,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "131:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6864,
+                    "nodeType": "ArrayTypeName",
+                    "src": "131:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "113:34:41"
+            }
+          },
+          {
+            "id": 6875,
+            "nodeType": "EventDefinition",
+            "src": "153:57:41",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "31dc429d4fbe2d83f018f4f3160db5324d6935488bd6cf176edf6822f8ce0cfb",
+            "name": "PreSetDailyLimit",
+            "nameLocation": "159:16:41",
+            "parameters": {
+              "id": 6874,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6870,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "186:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6875,
+                  "src": "176:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6868,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "176:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6869,
+                    "nodeType": "ArrayTypeName",
+                    "src": "176:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6873,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "203:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6875,
+                  "src": "193:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6871,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "193:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6872,
+                    "nodeType": "ArrayTypeName",
+                    "src": "193:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "175:34:41"
+            }
+          },
+          {
+            "id": 6883,
+            "nodeType": "EventDefinition",
+            "src": "215:60:41",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "5861200cd6d281c28484d230b2b37eb5d63817354dcd9b16a462971421318aa3",
+            "name": "CancelSetDailyLimit",
+            "nameLocation": "221:19:41",
+            "parameters": {
+              "id": 6882,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6878,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "251:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "241:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6876,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "241:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6877,
+                    "nodeType": "ArrayTypeName",
+                    "src": "241:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6881,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "268:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "258:15:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6879,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "258:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6880,
+                    "nodeType": "ArrayTypeName",
+                    "src": "258:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "240:34:41"
+            }
+          },
+          {
+            "id": 6892,
+            "nodeType": "FunctionDefinition",
+            "src": "281:111:41",
+            "nodes": [],
+            "functionSelector": "5709cd58",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "reduceDailyLimits",
+            "nameLocation": "290:17:41",
+            "parameters": {
+              "id": 6890,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6886,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "336:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6892,
+                  "src": "317:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6884,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "317:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6885,
+                    "nodeType": "ArrayTypeName",
+                    "src": "317:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6889,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "370:6:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6892,
+                  "src": "351:25:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6887,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "351:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6888,
+                    "nodeType": "ArrayTypeName",
+                    "src": "351:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "307:75:41"
+            },
+            "returnParameters": {
+              "id": 6891,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "391:0:41"
+            },
+            "scope": 6934,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 6901,
+            "nodeType": "FunctionDefinition",
+            "src": "398:109:41",
+            "nodes": [],
+            "functionSelector": "ffaf02fc",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "preSetDailyLimit",
+            "nameLocation": "407:16:41",
+            "parameters": {
+              "id": 6899,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6895,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "452:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6901,
+                  "src": "433:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6893,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "433:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6894,
+                    "nodeType": "ArrayTypeName",
+                    "src": "433:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6898,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "486:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6901,
+                  "src": "467:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6896,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "467:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6897,
+                    "nodeType": "ArrayTypeName",
+                    "src": "467:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "423:74:41"
+            },
+            "returnParameters": {
+              "id": 6900,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "506:0:41"
+            },
+            "scope": 6934,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 6910,
+            "nodeType": "FunctionDefinition",
+            "src": "513:112:41",
+            "nodes": [],
+            "functionSelector": "e5810adb",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "cancelSetDailyLimit",
+            "nameLocation": "522:19:41",
+            "parameters": {
+              "id": 6908,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6904,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "570:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6910,
+                  "src": "551:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6902,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "551:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6903,
+                    "nodeType": "ArrayTypeName",
+                    "src": "551:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6907,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "604:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6910,
+                  "src": "585:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6905,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "585:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6906,
+                    "nodeType": "ArrayTypeName",
+                    "src": "585:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "541:74:41"
+            },
+            "returnParameters": {
+              "id": 6909,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "624:0:41"
+            },
+            "scope": 6934,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 6919,
+            "nodeType": "FunctionDefinition",
+            "src": "631:113:41",
+            "nodes": [],
+            "functionSelector": "fda03237",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "comfirmSetDailyLimit",
+            "nameLocation": "640:20:41",
+            "parameters": {
+              "id": 6917,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6913,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "689:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6919,
+                  "src": "670:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6911,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "670:7:41",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6912,
+                    "nodeType": "ArrayTypeName",
+                    "src": "670:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6916,
+                  "mutability": "mutable",
+                  "name": "limit",
+                  "nameLocation": "723:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6919,
+                  "src": "704:24:41",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_calldata_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6914,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "704:7:41",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6915,
+                    "nodeType": "ArrayTypeName",
+                    "src": "704:9:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "660:74:41"
+            },
+            "returnParameters": {
+              "id": 6918,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "743:0:41"
+            },
+            "scope": 6934,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 6926,
+            "nodeType": "FunctionDefinition",
+            "src": "750:70:41",
+            "nodes": [],
+            "functionSelector": "58f2ef17",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getDailyLimit",
+            "nameLocation": "759:13:41",
+            "parameters": {
+              "id": 6922,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6921,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "781:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6926,
+                  "src": "773:13:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6920,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "773:7:41",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "772:15:41"
+            },
+            "returnParameters": {
+              "id": 6925,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6924,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6926,
+                  "src": "811:7:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6923,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "811:7:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "810:9:41"
+            },
+            "scope": 6934,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 6933,
+            "nodeType": "FunctionDefinition",
+            "src": "826:70:41",
+            "nodes": [],
+            "functionSelector": "49ff658e",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getSpentToday",
+            "nameLocation": "835:13:41",
+            "parameters": {
+              "id": 6929,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6928,
+                  "mutability": "mutable",
+                  "name": "token",
+                  "nameLocation": "857:5:41",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6933,
+                  "src": "849:13:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6927,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "849:7:41",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "848:15:41"
+            },
+            "returnParameters": {
+              "id": 6932,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6931,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6933,
+                  "src": "887:7:41",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6930,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "887:7:41",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "886:9:41"
+            },
+            "scope": 6934,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IDailylimit",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          6934
+        ],
+        "name": "IDailylimit",
+        "nameLocation": "72:11:41",
+        "scope": 6935,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 41
+}

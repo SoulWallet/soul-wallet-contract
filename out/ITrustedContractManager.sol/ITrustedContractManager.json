@@ -1,0 +1,388 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "TrustedContractAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "TrustedContractRemoved",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "isTrustedContract",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "isTrustedContract(address)": "5bf3a315"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"module\",\"type\":\"address\"}],\"name\":\"TrustedContractAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"module\",\"type\":\"address\"}],\"name\":\"TrustedContractRemoved\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"isTrustedContract\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/trustedContractManager/ITrustedContractManager.sol\":\"ITrustedContractManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/trustedContractManager/ITrustedContractManager.sol\":{\"keccak256\":\"0x8ee1c331bebf3028cc5ece275a6275c8a6d1b9ff4019907bab7e6d4c03b9ea02\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://56a85ca265f25e5177cfd07a0f6ad96c0ea82006c1305a79b468dc19c6733da1\",\"dweb:/ipfs/QmRfSJdgxnEb96DLdmad4jvVsXq99284xeTU5u3Ffam8Xp\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address",
+              "indexed": true
+            }
+          ],
+          "type": "event",
+          "name": "TrustedContractAdded",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address",
+              "indexed": true
+            }
+          ],
+          "type": "event",
+          "name": "TrustedContractRemoved",
+          "anonymous": false
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "addr",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "isTrustedContract",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        ":safe-contracts/=lib/safe-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/trustedContractManager/ITrustedContractManager.sol": "ITrustedContractManager"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/trustedContractManager/ITrustedContractManager.sol": {
+        "keccak256": "0x8ee1c331bebf3028cc5ece275a6275c8a6d1b9ff4019907bab7e6d4c03b9ea02",
+        "urls": [
+          "bzz-raw://56a85ca265f25e5177cfd07a0f6ad96c0ea82006c1305a79b468dc19c6733da1",
+          "dweb:/ipfs/QmRfSJdgxnEb96DLdmad4jvVsXq99284xeTU5u3Ffam8Xp"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/trustedContractManager/ITrustedContractManager.sol",
+    "id": 7488,
+    "exportedSymbols": {
+      "ITrustedContractManager": [
+        7487
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:253:46",
+    "nodes": [
+      {
+        "id": 7471,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:46",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 7487,
+        "nodeType": "ContractDefinition",
+        "src": "62:226:46",
+        "nodes": [
+          {
+            "id": 7475,
+            "nodeType": "EventDefinition",
+            "src": "102:51:46",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "4e87357acd951c4831877b6015585c4a7e20204cadf07178081e9929b3a13b5d",
+            "name": "TrustedContractAdded",
+            "nameLocation": "108:20:46",
+            "parameters": {
+              "id": 7474,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7473,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "module",
+                  "nameLocation": "145:6:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7475,
+                  "src": "129:22:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7472,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "129:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "128:24:46"
+            }
+          },
+          {
+            "id": 7479,
+            "nodeType": "EventDefinition",
+            "src": "158:53:46",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "e077e45f89f0635acaf766ec2ea56cb9579a33b8732ecdc656fe2e7bdf7cac41",
+            "name": "TrustedContractRemoved",
+            "nameLocation": "164:22:46",
+            "parameters": {
+              "id": 7478,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7477,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "module",
+                  "nameLocation": "203:6:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7479,
+                  "src": "187:22:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7476,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "187:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "186:24:46"
+            }
+          },
+          {
+            "id": 7486,
+            "nodeType": "FunctionDefinition",
+            "src": "216:70:46",
+            "nodes": [],
+            "functionSelector": "5bf3a315",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isTrustedContract",
+            "nameLocation": "225:17:46",
+            "parameters": {
+              "id": 7482,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7481,
+                  "mutability": "mutable",
+                  "name": "addr",
+                  "nameLocation": "251:4:46",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7486,
+                  "src": "243:12:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7480,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "243:7:46",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "242:14:46"
+            },
+            "returnParameters": {
+              "id": 7485,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7484,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7486,
+                  "src": "280:4:46",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 7483,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "280:4:46",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "279:6:46"
+            },
+            "scope": 7487,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "ITrustedContractManager",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          7487
+        ],
+        "name": "ITrustedContractManager",
+        "nameLocation": "72:23:46",
+        "scope": 7488,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 46
+}

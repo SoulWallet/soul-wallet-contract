@@ -1,0 +1,501 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "initCode",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "callGasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "verificationGasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "preVerificationGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxFeePerGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxPriorityFeePerGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "paymasterAndData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct UserOperation",
+          "name": "userOp",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "userOpHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "missingAccountFunds",
+          "type": "uint256"
+        }
+      ],
+      "name": "validateUserOp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "validationData",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,uint256)": "3a871cdd"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"struct UserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"missingAccountFunds\",\"type\":\"uint256\"}],\"name\":\"validateUserOp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"validationData\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,uint256)\":{\"details\":\"Must validate caller is the entryPoint.      Must validate the signature and nonce\",\"params\":{\"missingAccountFunds\":\"missing funds on the account's deposit in the entrypoint.      This is the minimum amount to transfer to the sender(entryPoint) to be able to make the call.      The excess is left as a deposit in the entrypoint, for future calls.      can be withdrawn anytime using \\\"entryPoint.withdrawTo()\\\"      In case there is a paymaster in the request (or the current deposit is high enough), this value will be zero.\",\"userOp\":\"the operation that is about to be executed.\",\"userOpHash\":\"hash of the user's request data. can be used as the basis for signature.\"},\"returns\":{\"validationData\":\"packaged ValidationData structure. use `_packValidationData` and `_unpackValidationData` to encode and decode      <20-byte> sigAuthorizer - 0 for valid signature, 1 to mark signature failure,         otherwise, an address of an \\\"authorizer\\\" contract.      <6-byte> validUntil - last timestamp this operation is valid. 0 for \\\"indefinite\\\"      <6-byte> validAfter - first timestamp this operation is valid      If an account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.      Note that the validation code cannot use block.timestamp (or block.number) directly.\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,uint256)\":{\"notice\":\"Validate user's signature and nonce the entryPoint will make the call to the recipient only if this validation call returns successfully. signature failure should be reported by returning SIG_VALIDATION_FAILED (1). This allows making a \\\"simulation call\\\" without a valid signature Other failures (e.g. nonce mismatch, or invalid signature format) should still revert to signal failure.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/account-abstraction/contracts/interfaces/IAccount.sol\":\"IAccount\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"lib/account-abstraction/contracts/core/Helpers.sol\":{\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746\",\"dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU\"]},\"lib/account-abstraction/contracts/interfaces/IAccount.sol\":{\"keccak256\":\"0x556a0e5980de18e90b115553ed502408155ba35f58642823010d9288047bc418\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://a0f420134b79596db8737173c7b933ae0a33059e107b6327c43aa40d4744a9e4\",\"dweb:/ipfs/QmRo8s1AhXmEMV7uPYnbpYwU19e9Bk6jmYBJTiPx3Fo85W\"]},\"lib/account-abstraction/contracts/interfaces/UserOperation.sol\":{\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c\",\"dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "struct UserOperation",
+              "name": "userOp",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "initCode",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "callData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "callGasLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "verificationGasLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "preVerificationGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxFeePerGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxPriorityFeePerGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "paymasterAndData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                }
+              ]
+            },
+            {
+              "internalType": "bytes32",
+              "name": "userOpHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "missingAccountFunds",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "validateUserOp",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "validationData",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,uint256)": {
+            "details": "Must validate caller is the entryPoint.      Must validate the signature and nonce",
+            "params": {
+              "missingAccountFunds": "missing funds on the account's deposit in the entrypoint.      This is the minimum amount to transfer to the sender(entryPoint) to be able to make the call.      The excess is left as a deposit in the entrypoint, for future calls.      can be withdrawn anytime using \"entryPoint.withdrawTo()\"      In case there is a paymaster in the request (or the current deposit is high enough), this value will be zero.",
+              "userOp": "the operation that is about to be executed.",
+              "userOpHash": "hash of the user's request data. can be used as the basis for signature."
+            },
+            "returns": {
+              "validationData": "packaged ValidationData structure. use `_packValidationData` and `_unpackValidationData` to encode and decode      <20-byte> sigAuthorizer - 0 for valid signature, 1 to mark signature failure,         otherwise, an address of an \"authorizer\" contract.      <6-byte> validUntil - last timestamp this operation is valid. 0 for \"indefinite\"      <6-byte> validAfter - first timestamp this operation is valid      If an account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.      Note that the validation code cannot use block.timestamp (or block.number) directly."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "validateUserOp((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32,uint256)": {
+            "notice": "Validate user's signature and nonce the entryPoint will make the call to the recipient only if this validation call returns successfully. signature failure should be reported by returning SIG_VALIDATION_FAILED (1). This allows making a \"simulation call\" without a valid signature Other failures (e.g. nonce mismatch, or invalid signature format) should still revert to signal failure."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        ":safe-contracts/=lib/safe-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "lib/account-abstraction/contracts/interfaces/IAccount.sol": "IAccount"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "lib/account-abstraction/contracts/core/Helpers.sol": {
+        "keccak256": "0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a",
+        "urls": [
+          "bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746",
+          "dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IAccount.sol": {
+        "keccak256": "0x556a0e5980de18e90b115553ed502408155ba35f58642823010d9288047bc418",
+        "urls": [
+          "bzz-raw://a0f420134b79596db8737173c7b933ae0a33059e107b6327c43aa40d4744a9e4",
+          "dweb:/ipfs/QmRo8s1AhXmEMV7uPYnbpYwU19e9Bk6jmYBJTiPx3Fo85W"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/UserOperation.sol": {
+        "keccak256": "0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c",
+        "urls": [
+          "bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c",
+          "dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "lib/account-abstraction/contracts/interfaces/IAccount.sol",
+    "id": 8053,
+    "exportedSymbols": {
+      "IAccount": [
+        8052
+      ],
+      "UserOperation": [
+        8441
+      ],
+      "UserOperationLib": [
+        8611
+      ],
+      "calldataKeccak": [
+        8035
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:2102:52",
+    "nodes": [
+      {
+        "id": 8037,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:52",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".12"
+        ]
+      },
+      {
+        "id": 8038,
+        "nodeType": "ImportDirective",
+        "src": "62:29:52",
+        "nodes": [],
+        "absolutePath": "lib/account-abstraction/contracts/interfaces/UserOperation.sol",
+        "file": "./UserOperation.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 8053,
+        "sourceUnit": 8612,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 8052,
+        "nodeType": "ContractDefinition",
+        "src": "93:2044:52",
+        "nodes": [
+          {
+            "id": 8051,
+            "nodeType": "FunctionDefinition",
+            "src": "1985:150:52",
+            "nodes": [],
+            "documentation": {
+              "id": 8039,
+              "nodeType": "StructuredDocumentation",
+              "src": "119:1861:52",
+              "text": " Validate user's signature and nonce\n the entryPoint will make the call to the recipient only if this validation call returns successfully.\n signature failure should be reported by returning SIG_VALIDATION_FAILED (1).\n This allows making a \"simulation call\" without a valid signature\n Other failures (e.g. nonce mismatch, or invalid signature format) should still revert to signal failure.\n @dev Must validate caller is the entryPoint.\n      Must validate the signature and nonce\n @param userOp the operation that is about to be executed.\n @param userOpHash hash of the user's request data. can be used as the basis for signature.\n @param missingAccountFunds missing funds on the account's deposit in the entrypoint.\n      This is the minimum amount to transfer to the sender(entryPoint) to be able to make the call.\n      The excess is left as a deposit in the entrypoint, for future calls.\n      can be withdrawn anytime using \"entryPoint.withdrawTo()\"\n      In case there is a paymaster in the request (or the current deposit is high enough), this value will be zero.\n @return validationData packaged ValidationData structure. use `_packValidationData` and `_unpackValidationData` to encode and decode\n      <20-byte> sigAuthorizer - 0 for valid signature, 1 to mark signature failure,\n         otherwise, an address of an \"authorizer\" contract.\n      <6-byte> validUntil - last timestamp this operation is valid. 0 for \"indefinite\"\n      <6-byte> validAfter - first timestamp this operation is valid\n      If an account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.\n      Note that the validation code cannot use block.timestamp (or block.number) directly."
+            },
+            "functionSelector": "3a871cdd",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "validateUserOp",
+            "nameLocation": "1994:14:52",
+            "parameters": {
+              "id": 8047,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8042,
+                  "mutability": "mutable",
+                  "name": "userOp",
+                  "nameLocation": "2032:6:52",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8051,
+                  "src": "2009:29:52",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_UserOperation_$8441_calldata_ptr",
+                    "typeString": "struct UserOperation"
+                  },
+                  "typeName": {
+                    "id": 8041,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 8040,
+                      "name": "UserOperation",
+                      "nameLocations": [
+                        "2009:13:52"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 8441,
+                      "src": "2009:13:52"
+                    },
+                    "referencedDeclaration": 8441,
+                    "src": "2009:13:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_UserOperation_$8441_storage_ptr",
+                      "typeString": "struct UserOperation"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8044,
+                  "mutability": "mutable",
+                  "name": "userOpHash",
+                  "nameLocation": "2048:10:52",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8051,
+                  "src": "2040:18:52",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 8043,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2040:7:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 8046,
+                  "mutability": "mutable",
+                  "name": "missingAccountFunds",
+                  "nameLocation": "2068:19:52",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8051,
+                  "src": "2060:27:52",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8045,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2060:7:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2008:80:52"
+            },
+            "returnParameters": {
+              "id": 8050,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 8049,
+                  "mutability": "mutable",
+                  "name": "validationData",
+                  "nameLocation": "2119:14:52",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 8051,
+                  "src": "2111:22:52",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 8048,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2111:7:52",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2110:24:52"
+            },
+            "scope": 8052,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IAccount",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          8052
+        ],
+        "name": "IAccount",
+        "nameLocation": "103:8:52",
+        "scope": 8053,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 52
+}

@@ -1,0 +1,1184 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "enum IPlugin.HookType",
+          "name": "hookType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getHookCallType",
+      "outputs": [
+        {
+          "internalType": "enum CallHelper.CallType",
+          "name": "calltype",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "initCode",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "callGasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "verificationGasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "preVerificationGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxFeePerGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxPriorityFeePerGas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "paymasterAndData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct UserOperation",
+          "name": "userOp",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "userOpHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "guardHook",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum IPlugin.HookType",
+          "name": "hookType",
+          "type": "uint8"
+        }
+      ],
+      "name": "isHookCall",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "postHook",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "preHook",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "walletDeInit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "walletInit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "getHookCallType(uint8)": "310ed931",
+    "guardHook((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes),bytes32)": "bccbbf94",
+    "isHookCall(uint8)": "ba38419a",
+    "postHook(address,uint256,bytes)": "ca5ce119",
+    "preHook(address,uint256,bytes)": "aa32a3f0",
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "walletDeInit()": "e335a37a",
+    "walletInit(bytes)": "f361cef2"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"enum IPlugin.HookType\",\"name\":\"hookType\",\"type\":\"uint8\"}],\"name\":\"getHookCallType\",\"outputs\":[{\"internalType\":\"enum CallHelper.CallType\",\"name\":\"calltype\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"internalType\":\"struct UserOperation\",\"name\":\"userOp\",\"type\":\"tuple\"},{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\"}],\"name\":\"guardHook\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum IPlugin.HookType\",\"name\":\"hookType\",\"type\":\"uint8\"}],\"name\":\"isHookCall\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"postHook\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"preHook\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"walletDeInit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"walletInit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/interfaces/IPlugin.sol\":\"IPlugin\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/interfaces/IPluggable.sol\":{\"keccak256\":\"0x2523d6c4ba6131dd93b238c00137ca6a7ef28b06a6fcc28ec7c5e9e74f6280c8\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6bc5b9ea912569d8d4a4b227b1cd5ee6739a03f4f97d930fb1543b7f8ea33e27\",\"dweb:/ipfs/QmTcFmiAVBYtkgFQSDUJmYJYyWR33kyRWpW42mrMhoyQt7\"]},\"contracts/interfaces/IPlugin.sol\":{\"keccak256\":\"0xa130c9625d16dabdfc778a1eab4af7e455ffcdae211e4ac80f30a0747aa8a764\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://8363d0afeefd1966140683fa7e953ffba2872b200d6e9027fdbeb0d4ab9064ff\",\"dweb:/ipfs/QmTMVXzY7kMHeFj3JvCzQGv5E2EyogTcgbVVLnQBVuvzRv\"]},\"contracts/libraries/CallHelper.sol\":{\"keccak256\":\"0xc6b5c37d7ae393b4bc28311a5e845f415a0862a0c61a3f62e89308b08c63d113\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://2d802e1cb12967f6a023d63dc3febe820ae46328ef34fac43311e53e91207890\",\"dweb:/ipfs/QmXbLgqrxZmctgoN8JhhwULsk4BwvgsJXp1gDzGXnrfNWd\"]},\"lib/account-abstraction/contracts/core/Helpers.sol\":{\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746\",\"dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU\"]},\"lib/account-abstraction/contracts/interfaces/UserOperation.sol\":{\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c\",\"dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN\"]},\"lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f\",\"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "enum IPlugin.HookType",
+              "name": "hookType",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getHookCallType",
+          "outputs": [
+            {
+              "internalType": "enum CallHelper.CallType",
+              "name": "calltype",
+              "type": "uint8"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "struct UserOperation",
+              "name": "userOp",
+              "type": "tuple",
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "initCode",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "callData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "callGasLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "verificationGasLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "preVerificationGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxFeePerGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxPriorityFeePerGas",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "paymasterAndData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                }
+              ]
+            },
+            {
+              "internalType": "bytes32",
+              "name": "userOpHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "guardHook"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "enum IPlugin.HookType",
+              "name": "hookType",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "isHookCall",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "postHook"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "preHook"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "walletDeInit"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "walletInit"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        ":safe-contracts/=lib/safe-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/interfaces/IPlugin.sol": "IPlugin"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/interfaces/IPluggable.sol": {
+        "keccak256": "0x2523d6c4ba6131dd93b238c00137ca6a7ef28b06a6fcc28ec7c5e9e74f6280c8",
+        "urls": [
+          "bzz-raw://6bc5b9ea912569d8d4a4b227b1cd5ee6739a03f4f97d930fb1543b7f8ea33e27",
+          "dweb:/ipfs/QmTcFmiAVBYtkgFQSDUJmYJYyWR33kyRWpW42mrMhoyQt7"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/interfaces/IPlugin.sol": {
+        "keccak256": "0xa130c9625d16dabdfc778a1eab4af7e455ffcdae211e4ac80f30a0747aa8a764",
+        "urls": [
+          "bzz-raw://8363d0afeefd1966140683fa7e953ffba2872b200d6e9027fdbeb0d4ab9064ff",
+          "dweb:/ipfs/QmTMVXzY7kMHeFj3JvCzQGv5E2EyogTcgbVVLnQBVuvzRv"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/libraries/CallHelper.sol": {
+        "keccak256": "0xc6b5c37d7ae393b4bc28311a5e845f415a0862a0c61a3f62e89308b08c63d113",
+        "urls": [
+          "bzz-raw://2d802e1cb12967f6a023d63dc3febe820ae46328ef34fac43311e53e91207890",
+          "dweb:/ipfs/QmXbLgqrxZmctgoN8JhhwULsk4BwvgsJXp1gDzGXnrfNWd"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/core/Helpers.sol": {
+        "keccak256": "0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a",
+        "urls": [
+          "bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746",
+          "dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/UserOperation.sol": {
+        "keccak256": "0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c",
+        "urls": [
+          "bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c",
+          "dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+        "keccak256": "0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1",
+        "urls": [
+          "bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f",
+          "dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
+        ],
+        "license": "MIT"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/interfaces/IPlugin.sol",
+    "id": 2809,
+    "exportedSymbols": {
+      "CallHelper": [
+        3500
+      ],
+      "IERC165": [
+        9964
+      ],
+      "IPluggable": [
+        2753
+      ],
+      "IPlugin": [
+        2808
+      ],
+      "UserOperation": [
+        8441
+      ],
+      "UserOperationLib": [
+        8611
+      ],
+      "calldataKeccak": [
+        8035
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:705:24",
+    "nodes": [
+      {
+        "id": 2755,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:24",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 2756,
+        "nodeType": "ImportDirective",
+        "src": "62:37:24",
+        "nodes": [],
+        "absolutePath": "contracts/libraries/CallHelper.sol",
+        "file": "../libraries/CallHelper.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 2809,
+        "sourceUnit": 3501,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 2757,
+        "nodeType": "ImportDirective",
+        "src": "100:69:24",
+        "nodes": [],
+        "absolutePath": "lib/account-abstraction/contracts/interfaces/UserOperation.sol",
+        "file": "@account-abstraction/contracts/interfaces/UserOperation.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 2809,
+        "sourceUnit": 8612,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 2758,
+        "nodeType": "ImportDirective",
+        "src": "170:26:24",
+        "nodes": [],
+        "absolutePath": "contracts/interfaces/IPluggable.sol",
+        "file": "./IPluggable.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 2809,
+        "sourceUnit": 2754,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 2808,
+        "nodeType": "ContractDefinition",
+        "src": "198:542:24",
+        "nodes": [
+          {
+            "id": 2764,
+            "nodeType": "EnumDefinition",
+            "src": "236:74:24",
+            "nodes": [],
+            "canonicalName": "IPlugin.HookType",
+            "members": [
+              {
+                "id": 2761,
+                "name": "GuardHook",
+                "nameLocation": "260:9:24",
+                "nodeType": "EnumValue",
+                "src": "260:9:24"
+              },
+              {
+                "id": 2762,
+                "name": "PreHook",
+                "nameLocation": "279:7:24",
+                "nodeType": "EnumValue",
+                "src": "279:7:24"
+              },
+              {
+                "id": 2763,
+                "name": "PostHook",
+                "nameLocation": "296:8:24",
+                "nodeType": "EnumValue",
+                "src": "296:8:24"
+              }
+            ],
+            "name": "HookType",
+            "nameLocation": "241:8:24"
+          },
+          {
+            "id": 2773,
+            "nodeType": "FunctionDefinition",
+            "src": "316:97:24",
+            "nodes": [],
+            "functionSelector": "310ed931",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getHookCallType",
+            "nameLocation": "325:15:24",
+            "parameters": {
+              "id": 2768,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2767,
+                  "mutability": "mutable",
+                  "name": "hookType",
+                  "nameLocation": "350:8:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2773,
+                  "src": "341:17:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_HookType_$2764",
+                    "typeString": "enum IPlugin.HookType"
+                  },
+                  "typeName": {
+                    "id": 2766,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2765,
+                      "name": "HookType",
+                      "nameLocations": [
+                        "341:8:24"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2764,
+                      "src": "341:8:24"
+                    },
+                    "referencedDeclaration": 2764,
+                    "src": "341:8:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_HookType_$2764",
+                      "typeString": "enum IPlugin.HookType"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "340:19:24"
+            },
+            "returnParameters": {
+              "id": 2772,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2771,
+                  "mutability": "mutable",
+                  "name": "calltype",
+                  "nameLocation": "403:8:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2773,
+                  "src": "383:28:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_CallType_$3368",
+                    "typeString": "enum CallHelper.CallType"
+                  },
+                  "typeName": {
+                    "id": 2770,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2769,
+                      "name": "CallHelper.CallType",
+                      "nameLocations": [
+                        "383:10:24",
+                        "394:8:24"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 3368,
+                      "src": "383:19:24"
+                    },
+                    "referencedDeclaration": 3368,
+                    "src": "383:19:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_CallType_$3368",
+                      "typeString": "enum CallHelper.CallType"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "382:30:24"
+            },
+            "scope": 2808,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2781,
+            "nodeType": "FunctionDefinition",
+            "src": "418:68:24",
+            "nodes": [],
+            "functionSelector": "ba38419a",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isHookCall",
+            "nameLocation": "427:10:24",
+            "parameters": {
+              "id": 2777,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2776,
+                  "mutability": "mutable",
+                  "name": "hookType",
+                  "nameLocation": "447:8:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2781,
+                  "src": "438:17:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_HookType_$2764",
+                    "typeString": "enum IPlugin.HookType"
+                  },
+                  "typeName": {
+                    "id": 2775,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2774,
+                      "name": "HookType",
+                      "nameLocations": [
+                        "438:8:24"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2764,
+                      "src": "438:8:24"
+                    },
+                    "referencedDeclaration": 2764,
+                    "src": "438:8:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_HookType_$2764",
+                      "typeString": "enum IPlugin.HookType"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "437:19:24"
+            },
+            "returnParameters": {
+              "id": 2780,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2779,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2781,
+                  "src": "480:4:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 2778,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "480:4:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "479:6:24"
+            },
+            "scope": 2808,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2789,
+            "nodeType": "FunctionDefinition",
+            "src": "492:79:24",
+            "nodes": [],
+            "functionSelector": "bccbbf94",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "guardHook",
+            "nameLocation": "501:9:24",
+            "parameters": {
+              "id": 2787,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2784,
+                  "mutability": "mutable",
+                  "name": "userOp",
+                  "nameLocation": "534:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2789,
+                  "src": "511:29:24",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_UserOperation_$8441_calldata_ptr",
+                    "typeString": "struct UserOperation"
+                  },
+                  "typeName": {
+                    "id": 2783,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2782,
+                      "name": "UserOperation",
+                      "nameLocations": [
+                        "511:13:24"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 8441,
+                      "src": "511:13:24"
+                    },
+                    "referencedDeclaration": 8441,
+                    "src": "511:13:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_UserOperation_$8441_storage_ptr",
+                      "typeString": "struct UserOperation"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2786,
+                  "mutability": "mutable",
+                  "name": "userOpHash",
+                  "nameLocation": "550:10:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2789,
+                  "src": "542:18:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 2785,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "542:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "510:51:24"
+            },
+            "returnParameters": {
+              "id": 2788,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "570:0:24"
+            },
+            "scope": 2808,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2798,
+            "nodeType": "FunctionDefinition",
+            "src": "576:78:24",
+            "nodes": [],
+            "functionSelector": "aa32a3f0",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "preHook",
+            "nameLocation": "585:7:24",
+            "parameters": {
+              "id": 2796,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2791,
+                  "mutability": "mutable",
+                  "name": "target",
+                  "nameLocation": "601:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2798,
+                  "src": "593:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2790,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "593:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2793,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "617:5:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2798,
+                  "src": "609:13:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2792,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "609:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2795,
+                  "mutability": "mutable",
+                  "name": "data",
+                  "nameLocation": "639:4:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2798,
+                  "src": "624:19:24",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2794,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "624:5:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "592:52:24"
+            },
+            "returnParameters": {
+              "id": 2797,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "653:0:24"
+            },
+            "scope": 2808,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2807,
+            "nodeType": "FunctionDefinition",
+            "src": "659:79:24",
+            "nodes": [],
+            "functionSelector": "ca5ce119",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "postHook",
+            "nameLocation": "668:8:24",
+            "parameters": {
+              "id": 2805,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2800,
+                  "mutability": "mutable",
+                  "name": "target",
+                  "nameLocation": "685:6:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2807,
+                  "src": "677:14:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2799,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "677:7:24",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2802,
+                  "mutability": "mutable",
+                  "name": "value",
+                  "nameLocation": "701:5:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2807,
+                  "src": "693:13:24",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2801,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "693:7:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2804,
+                  "mutability": "mutable",
+                  "name": "data",
+                  "nameLocation": "723:4:24",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2807,
+                  "src": "708:19:24",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_calldata_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 2803,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "708:5:24",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "676:52:24"
+            },
+            "returnParameters": {
+              "id": 2806,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "737:0:24"
+            },
+            "scope": 2808,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 2759,
+              "name": "IPluggable",
+              "nameLocations": [
+                "219:10:24"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2753,
+              "src": "219:10:24"
+            },
+            "id": 2760,
+            "nodeType": "InheritanceSpecifier",
+            "src": "219:10:24"
+          }
+        ],
+        "canonicalName": "IPlugin",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          2808,
+          2753,
+          9964
+        ],
+        "name": "IPlugin",
+        "nameLocation": "208:7:24",
+        "scope": 2809,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 24
+}

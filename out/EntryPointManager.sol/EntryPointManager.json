@@ -1,0 +1,481 @@
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {},
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/base/EntryPointManager.sol\":\"EntryPointManager\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@gnosis.pm/safe-contracts/=lib/safe-contracts/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\",\":safe-contracts/=lib/safe-contracts/contracts/\"]},\"sources\":{\"contracts/authority/EntryPointAuth.sol\":{\"keccak256\":\"0xf601c3a3abaaa13f40ee572f9a6f3385e1a5b4760d965c47c91a4eb8d6c544e5\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://4e233bc8e124af82ae62257b7fab9e4b3799e0fb0eb9ab658b11fb952e97edec\",\"dweb:/ipfs/QmYd7AaM8KVGVmLz9QUoBfLSCqgvFBLVxYGWcsTBU678Y5\"]},\"contracts/base/EntryPointManager.sol\":{\"keccak256\":\"0xcf4a87a0ef8d2a6885f0cc8686e3891ac9225aa55478406c7c427bdbe72bf758\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://2f58c1bea95e1f606d3f9a7d861d85c83865f1b88359ddbb2183d4f09ebfb60c\",\"dweb:/ipfs/QmdTKfupgKsih95eeNYNzW1T5cpfmDu4z96RqsQHqe9iPk\"]},\"lib/account-abstraction/contracts/core/Helpers.sol\":{\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746\",\"dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU\"]},\"lib/account-abstraction/contracts/interfaces/IAggregator.sol\":{\"keccak256\":\"0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b\",\"dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP\"]},\"lib/account-abstraction/contracts/interfaces/IEntryPoint.sol\":{\"keccak256\":\"0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf\",\"dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd\"]},\"lib/account-abstraction/contracts/interfaces/INonceManager.sol\":{\"keccak256\":\"0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2\",\"dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b\"]},\"lib/account-abstraction/contracts/interfaces/IStakeManager.sol\":{\"keccak256\":\"0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f\",\"license\":\"GPL-3.0-only\",\"urls\":[\"bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3\",\"dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ\"]},\"lib/account-abstraction/contracts/interfaces/UserOperation.sol\":{\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c\",\"dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.17+commit.8df45f5f"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@gnosis.pm/safe-contracts/=lib/safe-contracts/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/openzeppelin-contracts-upgradeable/lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/",
+        ":safe-contracts/=lib/safe-contracts/contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/base/EntryPointManager.sol": "EntryPointManager"
+      },
+      "libraries": {}
+    },
+    "sources": {
+      "contracts/authority/EntryPointAuth.sol": {
+        "keccak256": "0xf601c3a3abaaa13f40ee572f9a6f3385e1a5b4760d965c47c91a4eb8d6c544e5",
+        "urls": [
+          "bzz-raw://4e233bc8e124af82ae62257b7fab9e4b3799e0fb0eb9ab658b11fb952e97edec",
+          "dweb:/ipfs/QmYd7AaM8KVGVmLz9QUoBfLSCqgvFBLVxYGWcsTBU678Y5"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/base/EntryPointManager.sol": {
+        "keccak256": "0xcf4a87a0ef8d2a6885f0cc8686e3891ac9225aa55478406c7c427bdbe72bf758",
+        "urls": [
+          "bzz-raw://2f58c1bea95e1f606d3f9a7d861d85c83865f1b88359ddbb2183d4f09ebfb60c",
+          "dweb:/ipfs/QmdTKfupgKsih95eeNYNzW1T5cpfmDu4z96RqsQHqe9iPk"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/core/Helpers.sol": {
+        "keccak256": "0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a",
+        "urls": [
+          "bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746",
+          "dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IAggregator.sol": {
+        "keccak256": "0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a",
+        "urls": [
+          "bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b",
+          "dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol": {
+        "keccak256": "0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8",
+        "urls": [
+          "bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf",
+          "dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/INonceManager.sol": {
+        "keccak256": "0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12",
+        "urls": [
+          "bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2",
+          "dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IStakeManager.sol": {
+        "keccak256": "0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f",
+        "urls": [
+          "bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3",
+          "dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ"
+        ],
+        "license": "GPL-3.0-only"
+      },
+      "lib/account-abstraction/contracts/interfaces/UserOperation.sol": {
+        "keccak256": "0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c",
+        "urls": [
+          "bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c",
+          "dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/base/EntryPointManager.sol",
+    "id": 442,
+    "exportedSymbols": {
+      "EntryPointAuth": [
+        318
+      ],
+      "EntryPointManager": [
+        441
+      ],
+      "IAggregator": [
+        8086
+      ],
+      "IEntryPoint": [
+        8290
+      ],
+      "INonceManager": [
+        8309
+      ],
+      "IStakeManager": [
+        8414
+      ],
+      "UserOperation": [
+        8441
+      ],
+      "UserOperationLib": [
+        8611
+      ],
+      "calldataKeccak": [
+        8035
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:373:6",
+    "nodes": [
+      {
+        "id": 413,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:6",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 414,
+        "nodeType": "ImportDirective",
+        "src": "62:41:6",
+        "nodes": [],
+        "absolutePath": "contracts/authority/EntryPointAuth.sol",
+        "file": "../authority/EntryPointAuth.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 442,
+        "sourceUnit": 319,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 441,
+        "nodeType": "ContractDefinition",
+        "src": "105:303:6",
+        "nodes": [
+          {
+            "id": 419,
+            "nodeType": "VariableDeclaration",
+            "src": "165:42:6",
+            "nodes": [],
+            "constant": false,
+            "mutability": "immutable",
+            "name": "__entryPoint",
+            "nameLocation": "195:12:6",
+            "scope": 441,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+              "typeString": "contract IEntryPoint"
+            },
+            "typeName": {
+              "id": 418,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 417,
+                "name": "IEntryPoint",
+                "nameLocations": [
+                  "165:11:6"
+                ],
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 8290,
+                "src": "165:11:6"
+              },
+              "referencedDeclaration": 8290,
+              "src": "165:11:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                "typeString": "contract IEntryPoint"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "id": 430,
+            "nodeType": "FunctionDefinition",
+            "src": "214:82:6",
+            "nodes": [],
+            "body": {
+              "id": 429,
+              "nodeType": "Block",
+              "src": "252:44:6",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 427,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 425,
+                      "name": "__entryPoint",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 419,
+                      "src": "262:12:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                        "typeString": "contract IEntryPoint"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 426,
+                      "name": "anEntryPoint",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 422,
+                      "src": "277:12:6",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                        "typeString": "contract IEntryPoint"
+                      }
+                    },
+                    "src": "262:27:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                      "typeString": "contract IEntryPoint"
+                    }
+                  },
+                  "id": 428,
+                  "nodeType": "ExpressionStatement",
+                  "src": "262:27:6"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 423,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 422,
+                  "mutability": "mutable",
+                  "name": "anEntryPoint",
+                  "nameLocation": "238:12:6",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 430,
+                  "src": "226:24:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                    "typeString": "contract IEntryPoint"
+                  },
+                  "typeName": {
+                    "id": 421,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 420,
+                      "name": "IEntryPoint",
+                      "nameLocations": [
+                        "226:11:6"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 8290,
+                      "src": "226:11:6"
+                    },
+                    "referencedDeclaration": 8290,
+                    "src": "226:11:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                      "typeString": "contract IEntryPoint"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "225:26:6"
+            },
+            "returnParameters": {
+              "id": 424,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "252:0:6"
+            },
+            "scope": 441,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 440,
+            "nodeType": "FunctionDefinition",
+            "src": "302:104:6",
+            "nodes": [],
+            "body": {
+              "id": 439,
+              "nodeType": "Block",
+              "src": "370:36:6",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 437,
+                    "name": "__entryPoint",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 419,
+                    "src": "387:12:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                      "typeString": "contract IEntryPoint"
+                    }
+                  },
+                  "functionReturnParameters": 436,
+                  "id": 438,
+                  "nodeType": "Return",
+                  "src": "380:19:6"
+                }
+              ]
+            },
+            "baseFunctions": [
+              291
+            ],
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_entryPoint",
+            "nameLocation": "311:11:6",
+            "overrides": {
+              "id": 432,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "339:8:6"
+            },
+            "parameters": {
+              "id": 431,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "322:2:6"
+            },
+            "returnParameters": {
+              "id": 436,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 435,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 440,
+                  "src": "357:11:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                    "typeString": "contract IEntryPoint"
+                  },
+                  "typeName": {
+                    "id": 434,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 433,
+                      "name": "IEntryPoint",
+                      "nameLocations": [
+                        "357:11:6"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 8290,
+                      "src": "357:11:6"
+                    },
+                    "referencedDeclaration": 8290,
+                    "src": "357:11:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IEntryPoint_$8290",
+                      "typeString": "contract IEntryPoint"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "356:13:6"
+            },
+            "scope": 441,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 415,
+              "name": "EntryPointAuth",
+              "nameLocations": [
+                "144:14:6"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 318,
+              "src": "144:14:6"
+            },
+            "id": 416,
+            "nodeType": "InheritanceSpecifier",
+            "src": "144:14:6"
+          }
+        ],
+        "canonicalName": "EntryPointManager",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          441,
+          318
+        ],
+        "name": "EntryPointManager",
+        "nameLocation": "123:17:6",
+        "scope": 442,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 6
+}

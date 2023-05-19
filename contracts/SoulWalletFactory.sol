@@ -24,17 +24,17 @@ contract SoulWalletFactory {
         walletImpl = _walletImpl;
     }
 
-    function calcSalt(bytes memory initializer, bytes32 _salt) private pure returns (bytes32 salt) {
-        salt = keccak256(abi.encodePacked(keccak256(initializer), _salt));
+    function calcSalt(bytes memory _initializer, bytes32 _salt) private pure returns (bytes32 salt) {
+        salt = keccak256(abi.encodePacked(keccak256(_initializer), _salt));
     }
 
     /**
      * @notice  deploy the soul wallet contract using proxy and returns the address of the proxy. should be called by entrypoint with useropeartoin.initcode > 0
      */
-    function createWallet(bytes memory initializer, bytes32 _salt) external returns (address proxy) {
+    function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
         bytes memory deploymentData =
             abi.encodePacked(type(SoulWalletProxy).creationCode, uint256(uint160((walletImpl))));
-        bytes32 salt = calcSalt(initializer, _salt);
+        bytes32 salt = calcSalt(_initializer, _salt);
         assembly {
             proxy := create2(0, add(deploymentData, 0x20), mload(deploymentData), salt)
         }
@@ -42,7 +42,7 @@ contract SoulWalletFactory {
             revert();
         }
         assembly {
-            let succ := call(gas(), proxy, 0, add(initializer, 0x20), mload(initializer), 0, 0)
+            let succ := call(gas(), proxy, 0, add(_initializer, 0x20), mload(_initializer), 0, 0)
             if eq(succ, 0) { revert(0, 0) }
         }
         return proxy;
@@ -69,10 +69,10 @@ contract SoulWalletFactory {
     /**
      * @notice  return the counterfactual address of soul wallet as it would be return by createWallet()
      */
-    function getWalletAddress(bytes memory initializer, bytes32 _salt) external view returns (address) {
+    function getWalletAddress(bytes memory _initializer, bytes32 _salt) external view returns (address) {
         bytes memory deploymentData =
             abi.encodePacked(type(SoulWalletProxy).creationCode, uint256(uint160((walletImpl))));
-        bytes32 salt = calcSalt(initializer, _salt);
+        bytes32 salt = calcSalt(_initializer, _salt);
         return computeAddress(salt, keccak256(deploymentData), address(this));
     }
 

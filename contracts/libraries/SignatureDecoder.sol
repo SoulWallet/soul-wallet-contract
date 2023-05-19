@@ -79,6 +79,7 @@ library SignatureDecoder {
                     // copy signature to _signature
                     mstore(add(_signature, 32), mload(add(signature, 65)))
                     mstore(add(_signature, 64), mload(add(signature, 97)))
+                    mstore(add(_signature, 96), mload(add(signature, 129)))
                 }
                 case 0x1 {
                     // signType 0x1, EIP-1271 signature withOut validationData ( validAfter and validUntil )

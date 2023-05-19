@@ -1,28 +1,10 @@
+cache
+artifacts
 node_modules
 .env
 coverage
 coverage.json
-typechain
-typechain-types
-
-#Hardhat files
-cache
-artifacts
-
-node_modules
-.env
-coverage
-coverage.json
-typechain
-typechain-types
-
-#Hardhat files
-cache
-artifacts
 .DS_Store
-build
-src/types
-remix-compiler.config.js
 compiler_config.json
 out
 lib

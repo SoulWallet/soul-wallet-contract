@@ -1,7 +1,9 @@
 {
   "name": "soulwallet-contract",
   "scripts": {
-    "compile": "npx hardhat compile"
+    "build": "forge build",
+    "test": "forge test -vv",
+    "gas-report": "forge test --gas-report"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.6.4",

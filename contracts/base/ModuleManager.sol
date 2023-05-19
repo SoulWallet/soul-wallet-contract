@@ -15,30 +15,21 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
     address public immutable defaultModuleManager;
 
-    bytes4 internal constant FUNC_ADD_MODULE =
-        bytes4(keccak256("addModule(address,bytes4[],bytes)"));
-    bytes4 internal constant FUNC_REMOVE_MODULE =
-        bytes4(keccak256("removeModule(address)"));
+    bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes4[],bytes)"));
+    bytes4 internal constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
 
     constructor(address _defaultModuleManager) {
         defaultModuleManager = _defaultModuleManager;
     }
 
-    function modulesMapping()
-        private
-        view
-        returns (mapping(address => address) storage modules)
-    {
+    function modulesMapping() private view returns (mapping(address => address) storage modules) {
         modules = AccountStorage.layout().modules;
     }
 
     function moduleSelectorsMapping()
         private
         view
-        returns (
-            mapping(address => mapping(bytes4 => bytes4))
-                storage moduleSelectors
-        )
+        returns (mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors)
     {
         moduleSelectors = AccountStorage.layout().moduleSelectors;
     }
@@ -50,30 +41,24 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return modulesMapping().isExist(module);
     }
 
-    function isAuthorizedSelector(
-        address module,
-        bytes4 selector
-    ) private view returns (bool) {
+    function isAuthorizedSelector(address module, bytes4 selector) private view returns (bool) {
         if (
-            defaultModuleManager == module &&
-            (selector == FUNC_ADD_MODULE ||
-                selector == FUNC_REMOVE_MODULE ||
-                selector == FUNC_ADD_PLUGIN ||
-                selector == FUNC_REMOVE_PLUGIN)
+            defaultModuleManager == module
+                && (
+                    selector == FUNC_ADD_MODULE || selector == FUNC_REMOVE_MODULE || selector == FUNC_ADD_PLUGIN
+                        || selector == FUNC_REMOVE_PLUGIN
+                )
         ) {
             return true;
         }
         if (!modulesMapping().isExist(module)) {
             return false;
         }
-        mapping(address => mapping(bytes4 => bytes4))
-            storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
         return moduleSelectors[module].isExist(selector);
     }
 
-    function isAuthorizedModule(
-        address module
-    ) external override returns (bool) {
+    function isAuthorizedModule(address module) external override returns (bool) {
         return _isAuthorizedModule(module);
     }
 
@@ -83,8 +68,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
         mapping(address => address) storage modules = modulesMapping();
         modules.add(module);
-        mapping(address => mapping(bytes4 => bytes4))
-            storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
         moduleSelectors[module].add(aModule.selectors);
 
         aModule.module.walletInit(aModule.initData);
@@ -96,8 +80,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         mapping(address => address) storage modules = modulesMapping();
         modules.remove(module);
 
-        mapping(address => mapping(bytes4 => bytes4))
-            storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
         moduleSelectors[module].clear();
 
         try IModule(module).walletDeInit() {
@@ -107,36 +90,22 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         }
     }
 
-    function listModule()
-        external
-        view
-        override
-        returns (address[] memory modules, bytes4[][] memory selectors)
-    {
+    function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
         mapping(address => address) storage _modules = modulesMapping();
-        modules = _modules.list(
-            AddressLinkedList.SENTINEL_ADDRESS,
-            type(uint8).max
-        );
+        modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, _modules.size());
 
-        mapping(address => mapping(bytes4 => bytes4))
-            storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
 
         for (uint256 i = 0; i < modules.length; i++) {
-            selectors[i] = moduleSelectors[modules[i]].list(
-                SelectorLinkedList.SENTINEL_SELECTOR,
-                type(uint8).max
-            );
+            mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[modules[i]];
+            selectors[i] = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, moduleSelector.size());
         }
     }
 
     function execFromModule(bytes calldata data) external override {
         // get 4bytes
         bytes4 selector = bytes4(data[0:4]);
-        require(
-            isAuthorizedSelector(msg.sender, selector),
-            "unauthorized module selector"
-        );
+        require(isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
 
         if (selector == FUNC_ADD_MODULE) {
             // addModule(address,bytes4[],bytes)
@@ -156,32 +125,19 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
             removePlugin(plugin);
         } else if (selector == FUNC_EXECUTE) {
             // execute(address,uint256,bytes)
-            (address to, uint256 value, bytes memory _data) = abi.decode(
-                data[4:],
-                (address, uint256, bytes)
-            );
+            (address to, uint256 value, bytes memory _data) = abi.decode(data[4:], (address, uint256, bytes));
             _execute(to, value, _data);
         } else if (selector == FUNC_EXECUTE_BATCH) {
             // executeBatch(address[],bytes[])
-            (address[] memory tos, bytes[] memory _datas) = abi.decode(
-                data[4:],
-                (address[], bytes[])
-            );
+            (address[] memory tos, bytes[] memory _datas) = abi.decode(data[4:], (address[], bytes[]));
             _executeBatch(tos, _datas);
         } else if (selector == FUNC_EXECUTE_BATCH_VALUE) {
             // executeBatch(address[],uint256[],bytes[])
-            (
-                address[] memory tos,
-                uint256[] memory values,
-                bytes[] memory _datas
-            ) = abi.decode(data[4:], (address[], uint256[], bytes[]));
+            (address[] memory tos, uint256[] memory values, bytes[] memory _datas) =
+                abi.decode(data[4:], (address[], uint256[], bytes[]));
             _executeBatch(tos, values, _datas);
         } else {
-            CallHelper.callWithoutReturnData(
-                CallHelper.CallType.Call,
-                address(this),
-                data
-            );
+            CallHelper.callWithoutReturnData(CallHelper.CallType.Call, address(this), data);
         }
     }
 }

@@ -3,7 +3,23 @@ src = 'contracts'
 test = 'test'
 out = "out"
 libs = ["lib"]
-solc = "0.8.17"
+gas_reports = [
+    "SoulWalletFactory",
+    "SoulWalletProxy",
+    "SoulWallet",
+    "SecurityControlModule",
+    "SocialRecoveryModule",
+    "TrustedModuleManager",
+    "TrustedPluginManager",
+]
+# gas_reports_ignore = ["dev","test"]
+solc = "0.8.19"
+optimize = true
+optimize_runs = 100000
+via_ir = true
 
+# RPC config in .env file
+[rpc_endpoints]
+goerli = "${ETH_GOERLI_PROVIDER}"
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

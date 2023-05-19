@@ -1,7 +1,13 @@
 {
     "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
     "solidity.packageDefaultDependenciesDirectory": "lib",
-    "editor.formatOnSave": true,
-    "solidity.formatter": "forge"
+    "editor.formatOnSave": false,
+    "solidity.formatter": "forge",
+    "solidity.remappings": [
+        "@account-abstraction/=lib/account-abstraction/",
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        "@source/=contracts/"
+    ]
 }
   

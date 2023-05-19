@@ -19,5 +19,5 @@ abstract contract InternalExecutionManager {
     /**
      * execute a sequence of transactions
      */
-    function _executeBatch( address[] memory dest, uint256[] memory value, bytes[] memory func) internal virtual;
+    function _executeBatch(address[] memory dest, uint256[] memory value, bytes[] memory func) internal virtual;
 }

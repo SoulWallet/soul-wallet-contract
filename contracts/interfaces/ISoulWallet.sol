@@ -7,9 +7,10 @@ import "./IModuleManager.sol";
 import "./IOwnerManager.sol";
 import "./IPluginManager.sol";
 import "./IFallbackManager.sol";
+import "@account-abstraction/contracts/interfaces/IAccount.sol";
 
 interface ISoulWallet is
-    // IAccount,
+    IAccount,
     IDepositManager,
     IExecutionManager,
     IModuleManager,

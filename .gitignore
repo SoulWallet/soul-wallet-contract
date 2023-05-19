@@ -26,3 +26,4 @@ remix-compiler.config.js
 compiler_config.json
 out
 lib
+.deps

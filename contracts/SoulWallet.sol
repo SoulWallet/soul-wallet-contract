@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../account-abstraction/contracts/core/BaseAccount.sol";
+import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "./interfaces/ISoulWallet.sol";
 import "./base/DepositManager.sol";
 import "./base/EntryPointManager.sol";
@@ -28,10 +28,10 @@ contract SoulWallet is
     FallbackManager,
     ERC1271Handler
 {
-    constructor(
-        IEntryPoint anEntryPoint,
-        address defaultModuleManager
-    ) EntryPointManager(anEntryPoint) ModuleManager(defaultModuleManager) {
+    constructor(IEntryPoint _EntryPoint, address _DefaultModuleManager)
+        EntryPointManager(_EntryPoint)
+        ModuleManager(_DefaultModuleManager)
+    {
         _disableInitializers();
     }
 
@@ -40,36 +40,33 @@ contract SoulWallet is
         address defalutCallbackHandler,
         Module[] calldata modules,
         Plugin[] calldata plugins
-    ) public initializer {
-        addOwner(anOwner);
-        if (defalutCallbackHandler != address(0)) internalSetFallbackHandler(defalutCallbackHandler);
-
+    ) external initializer {
+        _addOwner(anOwner);
+        if (defalutCallbackHandler != address(0)) {
+            internalSetFallbackHandler(defalutCallbackHandler);
+        }
         for (uint256 i = 0; i < modules.length; i++) {
             addModule(modules[i]);
         }
         for (uint256 i = 0; i < plugins.length; i++) {
             addPlugin(plugins[i]);
         }
-
     }
 
-    function entryPoint()
-        public
-        view
-        override(BaseAccount)
-        returns (IEntryPoint)
-    {
+    function entryPoint() public view override(BaseAccount) returns (IEntryPoint) {
         return EntryPointManager._entryPoint();
     }
 
-    function _validateSignature(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
-         bool sigValid;
+    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
+        internal
+        virtual
+        override
+        returns (uint256 validationData)
+    {
+        bool sigValid;
         (validationData, sigValid) = isValidUserOp(userOpHash, userOp.signature);
-        
-        if(sigValid){
+
+        if (sigValid) {
             sigValid = guardHook(userOp, userOpHash);
         }
 
@@ -77,6 +74,5 @@ contract SoulWallet is
         // validUntil and validAfter is already packed in signatureData.validationData,
         // and aggregator is address(0), so we just need to add sigFailed flag.
         validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
-        
     }
 }

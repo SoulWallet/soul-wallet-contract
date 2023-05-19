@@ -18,7 +18,7 @@ interface IOwnerManager {
 
     function replaceOwner(address oldOwner, address newOwner) external;
 
-    function listOwner(address from, uint256 limit) external returns (address[] memory owners);
+    function listOwner() external returns (address[] memory owners);
 
     function getNonce(address owner) external view returns (uint256);
 }

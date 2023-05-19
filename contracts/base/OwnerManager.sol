@@ -9,11 +9,7 @@ import "../libraries/AddressLinkedList.sol";
 abstract contract OwnerManager is IOwnerManager, Authority {
     using AddressLinkedList for mapping(address => address);
 
-    function ownerMapping()
-        private
-        view
-        returns (mapping(address => address) storage owners)
-    {
+    function ownerMapping() private view returns (mapping(address => address) storage owners) {
         owners = AccountStorage.layout().owners;
     }
 
@@ -36,6 +32,10 @@ abstract contract OwnerManager is IOwnerManager, Authority {
     }
 
     function addOwner(address owner) public override onlyEntryPointOrSelf {
+        _addOwner(owner);
+    }
+
+    function _addOwner(address owner) internal {
         ownerMapping().add(owner);
         emit OwnerAdded(owner);
     }
@@ -46,25 +46,20 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerRemoved(owner);
     }
 
-    function replaceOwner(
-        address oldOwner,
-        address newOwner
-    ) public override onlyEntryPointOrSelf {
+    function replaceOwner(address oldOwner, address newOwner) public override onlyEntryPointOrSelf {
         ownerMapping().replace(oldOwner, newOwner);
         emit OwnerRemoved(oldOwner);
         emit OwnerAdded(newOwner);
     }
 
-    function listOwner(
-        address from,
-        uint256 limit
-    ) external view override returns (address[] memory owners) {
-        owners = ownerMapping().list(from, limit);
+    function listOwner() external view override returns (address[] memory owners) {
+        uint256 size = ownerMapping().size();
+        owners = ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);
     }
 
     function getNonce(address owner) external view override returns (uint256) {
         uint192 key;
-        assembly{
+        assembly {
             key := owner
         }
         return _entryPoint().getNonce(address(this), key);

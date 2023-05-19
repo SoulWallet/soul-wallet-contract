@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
+
 import "../interfaces/IPluginManager.sol";
 import "../interfaces/IPlugin.sol";
 import "../libraries/AccountStorage.sol";
@@ -8,26 +9,18 @@ import "../libraries/AddressLinkedList.sol";
 
 abstract contract PluginManager is Authority, IPluginManager {
     using AddressLinkedList for mapping(address => address);
-    bytes4 internal constant FUNC_ADD_PLUGIN =
-        bytes4(keccak256("addPlugin(address,bytes)"));
-    bytes4 internal constant FUNC_REMOVE_PLUGIN =
-        bytes4(keccak256("removePlugin(address)"));
 
-    function pluginsMapping()
-        private
-        view
-        returns (mapping(address => address) storage plugins)
-    {
+    bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
+    bytes4 internal constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
+
+    function pluginsMapping() private view returns (mapping(address => address) storage plugins) {
         plugins = AccountStorage.layout().plugins;
     }
 
     function addPlugin(Plugin memory aPlugin) internal {
         address plugin = address(aPlugin.plugin);
         if (plugin != address(0)) {
-            require(
-                IPlugin(plugin).supportsInterface(type(IPlugin).interfaceId),
-                "unknown plugin"
-            );
+            require(IPlugin(plugin).supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
         }
         mapping(address => address) storage plugins = pluginsMapping();
         plugins.add(plugin);
@@ -45,37 +38,22 @@ abstract contract PluginManager is Authority, IPluginManager {
         return pluginsMapping().isExist(plugin);
     }
 
-    function isAuthorizedPlugin(
-        address plugin
-    ) external override returns (bool) {
+    function isAuthorizedPlugin(address plugin) external override returns (bool) {
         return _isAuthorizedPlugin(plugin);
     }
 
-    function listPlugin()
-        external
-        view
-        override
-        returns (address[] memory plugins)
-    {
+    function listPlugin() external view override returns (address[] memory plugins) {
         mapping(address => address) storage _plugins = pluginsMapping();
-        plugins = _plugins.list(
-            AddressLinkedList.SENTINEL_ADDRESS,
-            type(uint8).max
-        );
+        plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
     }
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
         mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(
-            AddressLinkedList.SENTINEL_ADDRESS,
-            type(uint8).max
-        );
-        for (uint i = 0; i < plugins.length; i++) {
+        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        for (uint256 i = 0; i < plugins.length; i++) {
             if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.GuardHook)) {
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(
-                        IPlugin.HookType.GuardHook
-                    ),
+                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.GuardHook),
                     plugins[i],
                     abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
                 );
@@ -84,23 +62,14 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
     }
 
-    function preHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
+    function preHook(address target, uint256 value, bytes memory data) internal {
         mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(
-            AddressLinkedList.SENTINEL_ADDRESS,
-            type(uint8).max
-        );
-        for (uint i = 0; i < plugins.length; i++) {
+        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        for (uint256 i = 0; i < plugins.length; i++) {
             if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PreHook)) {
                 //TODO is getHookCallType necessary? call or d`elegatecall?
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(
-                        IPlugin.HookType.PreHook
-                    ),
+                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.PreHook),
                     plugins[i],
                     abi.encodeCall(IPlugin.preHook, (target, value, data))
                 );
@@ -109,23 +78,14 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
     }
 
-    function postHook(
-        address target,
-        uint256 value,
-        bytes memory data
-    ) internal {
+    function postHook(address target, uint256 value, bytes memory data) internal {
         mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(
-            AddressLinkedList.SENTINEL_ADDRESS,
-            type(uint8).max
-        );
-        for (uint i = 0; i < plugins.length; i++) {
+        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        for (uint256 i = 0; i < plugins.length; i++) {
             if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PostHook)) {
                 //TODO is getHookCallType necessary? call or d`elegatecall?
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(
-                        IPlugin.HookType.PostHook
-                    ),
+                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.PostHook),
                     plugins[i],
                     abi.encodeCall(IPlugin.postHook, (target, value, data))
                 );
@@ -140,10 +100,6 @@ abstract contract PluginManager is Authority, IPluginManager {
 
         //#TODO
 
-        CallHelper.callWithoutReturnData(
-            CallHelper.CallType.DelegateCall,
-            address(target),
-            data
-        );
+        CallHelper.callWithoutReturnData(CallHelper.CallType.DelegateCall, address(target), data);
     }
 }

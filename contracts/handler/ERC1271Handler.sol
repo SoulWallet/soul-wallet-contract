@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "../helper/SignatureValidator.sol";
-import "../../account-abstraction/contracts/core/Helpers.sol";
+import "@account-abstraction/contracts/core/Helpers.sol";
 import "../interfaces/IERC1271Handler.sol";
 import "../authority/Authority.sol";
 

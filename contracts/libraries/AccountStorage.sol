@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../../account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
 library AccountStorage {
-    bytes32 private constant ACCOUNT_SLOT =
-        keccak256("soulwallet.contracts.AccountStorage");
+    bytes32 private constant ACCOUNT_SLOT = keccak256("soulwallet.contracts.AccountStorage");
 
     struct Layout {
         // ┌───────────────────┐
@@ -15,13 +14,11 @@ library AccountStorage {
         uint256[50] __gap_0;
         // └───────────────────┘
 
-
         // ┌───────────────────┐
         // │      EIP1271      │
         mapping(bytes32 => uint256) approvedHashes;
         uint256[50] __gap_1;
         // └───────────────────┘
-
 
         // ┌───────────────────┐
         // │       Module      │
@@ -34,13 +31,10 @@ library AccountStorage {
         // │       Plugin      │
         mapping(address => address) plugins;
         uint256[50] __gap_3;
-        // └───────────────────┘
-
-
-
-
-        //#TODO
     }
+    // └───────────────────┘
+
+    //#TODO
 
     function layout() internal pure returns (Layout storage l) {
         bytes32 slot = ACCOUNT_SLOT;
@@ -48,5 +42,4 @@ library AccountStorage {
             l.slot := slot
         }
     }
-
 }

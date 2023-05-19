@@ -9,7 +9,6 @@ typechain-types
 cache
 artifacts
 
-
 node_modules
 .env
 coverage
@@ -25,3 +24,6 @@ build
 src/types
 remix-compiler.config.js
 compiler_config.json
+out
+lib
+.deps

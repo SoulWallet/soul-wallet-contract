@@ -14,8 +14,8 @@ gas_reports = [
 ]
 # gas_reports_ignore = ["dev","test"]
 solc = "0.8.19"
-optimize = true
-optimize_runs = 100000
+optimizer = true
+optimizer_runs = 100000
 via_ir = true
 
 # RPC config in .env file

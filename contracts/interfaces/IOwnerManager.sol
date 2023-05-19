@@ -14,6 +14,9 @@ interface IOwnerManager {
 
     function addOwner(address owner) external;
 
+    function addOwners(address[] calldata owners) external;
+    function resetOwners(address[] calldata newOwners) external;
+
     function removeOwner(address owner) external;
 
     function replaceOwner(address oldOwner, address newOwner) external;

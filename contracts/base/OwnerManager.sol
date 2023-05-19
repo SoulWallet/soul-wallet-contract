@@ -30,9 +30,18 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         clearOwner();
         addOwner(newOwner);
     }
+    function resetOwners(address[] calldata newOwners) public override onlyEntryPointOrSelf {
+        clearOwner();
+        addOwners(newOwners);
+    }
 
     function addOwner(address owner) public override onlyEntryPointOrSelf {
         _addOwner(owner);
+    }
+    function addOwners(address[] calldata owners) public override onlyEntryPointOrSelf {
+        for(uint256 i =0; i < owners.length; i++){
+            _addOwner(owners[i]);
+        }
     }
 
     function _addOwner(address owner) internal {

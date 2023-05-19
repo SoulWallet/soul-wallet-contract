@@ -1,0 +1,1342 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "fallbackContract",
+          "type": "address"
+        }
+      ],
+      "name": "FallbackChanged",
+      "type": "event"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "fallbackContract",
+          "type": "address"
+        }
+      ],
+      "name": "setFallbackHandler",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "setFallbackHandler(address)": "f08a0323"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"fallbackContract\",\"type\":\"address\"}],\"name\":\"FallbackChanged\",\"type\":\"event\"},{\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"fallbackContract\",\"type\":\"address\"}],\"name\":\"setFallbackHandler\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/base/FallbackManager.sol\":\"FallbackManager\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"contracts/authority/Authority.sol\":{\"keccak256\":\"0x52627123303f15e17f9fcc62397679400bcece217b33d739685d4bcce27f5bc3\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://ad48b363ceb4b1a82a47c1c0cbe218eeb95085cab0b0b9f2f49ecbf2e0279d46\",\"dweb:/ipfs/QmQPwWfgmTMkEeijgNNr1MGgx2qgrRkcruqz1Ti4Zd6259\"]},\"contracts/authority/EntryPointAuth.sol\":{\"keccak256\":\"0xf601c3a3abaaa13f40ee572f9a6f3385e1a5b4760d965c47c91a4eb8d6c544e5\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://4e233bc8e124af82ae62257b7fab9e4b3799e0fb0eb9ab658b11fb952e97edec\",\"dweb:/ipfs/QmYd7AaM8KVGVmLz9QUoBfLSCqgvFBLVxYGWcsTBU678Y5\"]},\"contracts/authority/OwnerAuth.sol\":{\"keccak256\":\"0xa7d2e3240c752b2d1d0f72a5d3fe839a65d1329a99fbd09285a886fecd4c0b80\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://ead431bb2c6e9e1223a12482ececa6f93a64fd10da22ce7dedcfb146623c1b22\",\"dweb:/ipfs/QmX7yvSXWLZ4qmcdYduEeQaD1xebhkWDZeRdaTNL4AGPhv\"]},\"contracts/base/FallbackManager.sol\":{\"keccak256\":\"0x2400fc3f57c782633a46e4849ca4b789bfca1f44fe544b5ac5fa7e0e244c637e\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://c4b0ab8477125b4abc006d6411bce64618603e17e8cbb78ff185633d0b38dbd0\",\"dweb:/ipfs/QmNsf5fLCkdiCfcMfxQEU7aXZ7EcLEFjASvZNaeSSsZnr6\"]},\"contracts/interfaces/IFallbackManager.sol\":{\"keccak256\":\"0x2a042d1a62f8194d30f84f64f1c657a03a9360ed4b2a984dda5a74da476daed1\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://4dbf48798d47c2b494516f81ab14d06dbd789ac07a7778920f6164849e0203f2\",\"dweb:/ipfs/QmQwP6ZGbbmGCNS9rwpwU3mHWzH9a1eiZAD8BqLQf6b2bA\"]},\"contracts/libraries/AccountStorage.sol\":{\"keccak256\":\"0x6f66c6152e755e33836624c8abff6380c386402c5e1b5ea255932064b515eba2\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://44d822e2c8b5e41ba4d4abef66920b4f1359d1046ac587c55c06a98bbcadd6a3\",\"dweb:/ipfs/QmQGTdQ7U49QQ2RFVEy76XuSHAXt3vVuH24qTDavKHzFRx\"]},\"lib/account-abstraction/contracts/core/Helpers.sol\":{\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746\",\"dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU\"]},\"lib/account-abstraction/contracts/interfaces/IAggregator.sol\":{\"keccak256\":\"0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b\",\"dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP\"]},\"lib/account-abstraction/contracts/interfaces/IEntryPoint.sol\":{\"keccak256\":\"0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf\",\"dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd\"]},\"lib/account-abstraction/contracts/interfaces/INonceManager.sol\":{\"keccak256\":\"0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2\",\"dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b\"]},\"lib/account-abstraction/contracts/interfaces/IStakeManager.sol\":{\"keccak256\":\"0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f\",\"license\":\"GPL-3.0-only\",\"urls\":[\"bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3\",\"dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ\"]},\"lib/account-abstraction/contracts/interfaces/UserOperation.sol\":{\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c\",\"dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "fallbackContract",
+              "type": "address",
+              "indexed": true
+            }
+          ],
+          "type": "event",
+          "name": "FallbackChanged",
+          "anonymous": false
+        },
+        {
+          "inputs": [],
+          "stateMutability": "payable",
+          "type": "fallback"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "fallbackContract",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "setFallbackHandler"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "payable",
+          "type": "receive"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/base/FallbackManager.sol": "FallbackManager"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "contracts/authority/Authority.sol": {
+        "keccak256": "0x52627123303f15e17f9fcc62397679400bcece217b33d739685d4bcce27f5bc3",
+        "urls": [
+          "bzz-raw://ad48b363ceb4b1a82a47c1c0cbe218eeb95085cab0b0b9f2f49ecbf2e0279d46",
+          "dweb:/ipfs/QmQPwWfgmTMkEeijgNNr1MGgx2qgrRkcruqz1Ti4Zd6259"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/authority/EntryPointAuth.sol": {
+        "keccak256": "0xf601c3a3abaaa13f40ee572f9a6f3385e1a5b4760d965c47c91a4eb8d6c544e5",
+        "urls": [
+          "bzz-raw://4e233bc8e124af82ae62257b7fab9e4b3799e0fb0eb9ab658b11fb952e97edec",
+          "dweb:/ipfs/QmYd7AaM8KVGVmLz9QUoBfLSCqgvFBLVxYGWcsTBU678Y5"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/authority/OwnerAuth.sol": {
+        "keccak256": "0xa7d2e3240c752b2d1d0f72a5d3fe839a65d1329a99fbd09285a886fecd4c0b80",
+        "urls": [
+          "bzz-raw://ead431bb2c6e9e1223a12482ececa6f93a64fd10da22ce7dedcfb146623c1b22",
+          "dweb:/ipfs/QmX7yvSXWLZ4qmcdYduEeQaD1xebhkWDZeRdaTNL4AGPhv"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/base/FallbackManager.sol": {
+        "keccak256": "0x2400fc3f57c782633a46e4849ca4b789bfca1f44fe544b5ac5fa7e0e244c637e",
+        "urls": [
+          "bzz-raw://c4b0ab8477125b4abc006d6411bce64618603e17e8cbb78ff185633d0b38dbd0",
+          "dweb:/ipfs/QmNsf5fLCkdiCfcMfxQEU7aXZ7EcLEFjASvZNaeSSsZnr6"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/interfaces/IFallbackManager.sol": {
+        "keccak256": "0x2a042d1a62f8194d30f84f64f1c657a03a9360ed4b2a984dda5a74da476daed1",
+        "urls": [
+          "bzz-raw://4dbf48798d47c2b494516f81ab14d06dbd789ac07a7778920f6164849e0203f2",
+          "dweb:/ipfs/QmQwP6ZGbbmGCNS9rwpwU3mHWzH9a1eiZAD8BqLQf6b2bA"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/libraries/AccountStorage.sol": {
+        "keccak256": "0x6f66c6152e755e33836624c8abff6380c386402c5e1b5ea255932064b515eba2",
+        "urls": [
+          "bzz-raw://44d822e2c8b5e41ba4d4abef66920b4f1359d1046ac587c55c06a98bbcadd6a3",
+          "dweb:/ipfs/QmQGTdQ7U49QQ2RFVEy76XuSHAXt3vVuH24qTDavKHzFRx"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/core/Helpers.sol": {
+        "keccak256": "0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a",
+        "urls": [
+          "bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746",
+          "dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IAggregator.sol": {
+        "keccak256": "0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a",
+        "urls": [
+          "bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b",
+          "dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol": {
+        "keccak256": "0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8",
+        "urls": [
+          "bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf",
+          "dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/INonceManager.sol": {
+        "keccak256": "0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12",
+        "urls": [
+          "bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2",
+          "dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IStakeManager.sol": {
+        "keccak256": "0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f",
+        "urls": [
+          "bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3",
+          "dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ"
+        ],
+        "license": "GPL-3.0-only"
+      },
+      "lib/account-abstraction/contracts/interfaces/UserOperation.sol": {
+        "keccak256": "0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c",
+        "urls": [
+          "bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c",
+          "dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/base/FallbackManager.sol",
+    "id": 1001,
+    "exportedSymbols": {
+      "AccountStorage": [
+        3191
+      ],
+      "Authority": [
+        469
+      ],
+      "EntryPointAuth": [
+        505
+      ],
+      "FallbackManager": [
+        1000
+      ],
+      "IAggregator": [
+        8476
+      ],
+      "IEntryPoint": [
+        8680
+      ],
+      "IFallbackManager": [
+        2880
+      ],
+      "INonceManager": [
+        8699
+      ],
+      "IStakeManager": [
+        8839
+      ],
+      "OwnerAuth": [
+        537
+      ],
+      "UserOperation": [
+        8866
+      ],
+      "UserOperationLib": [
+        9036
+      ],
+      "calldataKeccak": [
+        7863
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:1251:9",
+    "nodes": [
+      {
+        "id": 935,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:9",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 936,
+        "nodeType": "ImportDirective",
+        "src": "62:44:9",
+        "nodes": [],
+        "absolutePath": "contracts/interfaces/IFallbackManager.sol",
+        "file": "../interfaces/IFallbackManager.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 1001,
+        "sourceUnit": 2881,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 937,
+        "nodeType": "ImportDirective",
+        "src": "107:36:9",
+        "nodes": [],
+        "absolutePath": "contracts/authority/Authority.sol",
+        "file": "../authority/Authority.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 1001,
+        "sourceUnit": 470,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 938,
+        "nodeType": "ImportDirective",
+        "src": "144:41:9",
+        "nodes": [],
+        "absolutePath": "contracts/libraries/AccountStorage.sol",
+        "file": "../libraries/AccountStorage.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 1001,
+        "sourceUnit": 3192,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 1000,
+        "nodeType": "ContractDefinition",
+        "src": "187:1099:9",
+        "nodes": [
+          {
+            "id": 946,
+            "nodeType": "FunctionDefinition",
+            "src": "258:29:9",
+            "nodes": [],
+            "body": {
+              "id": 945,
+              "nodeType": "Block",
+              "src": "285:2:9",
+              "nodes": [],
+              "statements": []
+            },
+            "implemented": true,
+            "kind": "receive",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 943,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "265:2:9"
+            },
+            "returnParameters": {
+              "id": 944,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "285:0:9"
+            },
+            "scope": 1000,
+            "stateMutability": "payable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 970,
+            "nodeType": "FunctionDefinition",
+            "src": "293:239:9",
+            "nodes": [],
+            "body": {
+              "id": 969,
+              "nodeType": "Block",
+              "src": "364:168:9",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 957,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 952,
+                          "name": "fallbackContract",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 948,
+                          "src": "382:16:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "!=",
+                        "rightExpression": {
+                          "arguments": [
+                            {
+                              "hexValue": "30",
+                              "id": 955,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "number",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "410:1:9",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              },
+                              "value": "0"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_rational_0_by_1",
+                                "typeString": "int_const 0"
+                              }
+                            ],
+                            "id": 954,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "nodeType": "ElementaryTypeNameExpression",
+                            "src": "402:7:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_address_$",
+                              "typeString": "type(address)"
+                            },
+                            "typeName": {
+                              "id": 953,
+                              "name": "address",
+                              "nodeType": "ElementaryTypeName",
+                              "src": "402:7:9",
+                              "typeDescriptions": {}
+                            }
+                          },
+                          "id": 956,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "typeConversion",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "402:10:9",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "382:30:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "66616c6c6261636b436f6e7472616374206973207a65726f2061646472657373",
+                        "id": 958,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "414:34:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_b2833e285c2338240877a1cbe57fa53f5f6567868cfb1929f7dac23a56082f78",
+                          "typeString": "literal_string \"fallbackContract is zero address\""
+                        },
+                        "value": "fallbackContract is zero address"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_b2833e285c2338240877a1cbe57fa53f5f6567868cfb1929f7dac23a56082f78",
+                          "typeString": "literal_string \"fallbackContract is zero address\""
+                        }
+                      ],
+                      "id": 951,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "374:7:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 959,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "374:75:9",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 960,
+                  "nodeType": "ExpressionStatement",
+                  "src": "374:75:9"
+                },
+                {
+                  "expression": {
+                    "id": 967,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "id": 961,
+                            "name": "AccountStorage",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3191,
+                            "src": "459:14:9",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_AccountStorage_$3191_$",
+                              "typeString": "type(library AccountStorage)"
+                            }
+                          },
+                          "id": 963,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "474:6:9",
+                          "memberName": "layout",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 3190,
+                          "src": "459:21:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$__$returns$_t_struct$_Layout_$3178_storage_ptr_$",
+                            "typeString": "function () pure returns (struct AccountStorage.Layout storage pointer)"
+                          }
+                        },
+                        "id": 964,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "459:23:9",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Layout_$3178_storage_ptr",
+                          "typeString": "struct AccountStorage.Layout storage pointer"
+                        }
+                      },
+                      "id": 965,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberLocation": "483:23:9",
+                      "memberName": "defaultFallbackContract",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 3143,
+                      "src": "459:47:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 966,
+                      "name": "fallbackContract",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 948,
+                      "src": "509:16:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "459:66:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 968,
+                  "nodeType": "ExpressionStatement",
+                  "src": "459:66:9"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "internalSetFallbackHandler",
+            "nameLocation": "302:26:9",
+            "parameters": {
+              "id": 949,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 948,
+                  "mutability": "mutable",
+                  "name": "fallbackContract",
+                  "nameLocation": "337:16:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 970,
+                  "src": "329:24:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 947,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "329:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "328:26:9"
+            },
+            "returnParameters": {
+              "id": 950,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "364:0:9"
+            },
+            "scope": 1000,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 982,
+            "nodeType": "FunctionDefinition",
+            "src": "538:540:9",
+            "nodes": [],
+            "body": {
+              "id": 981,
+              "nodeType": "Block",
+              "src": "566:512:9",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    974
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 974,
+                      "mutability": "mutable",
+                      "name": "fallbackContract",
+                      "nameLocation": "662:16:9",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 981,
+                      "src": "654:24:9",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      },
+                      "typeName": {
+                        "id": 973,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "654:7:9",
+                        "stateMutability": "nonpayable",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 979,
+                  "initialValue": {
+                    "expression": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "expression": {
+                          "id": 975,
+                          "name": "AccountStorage",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 3191,
+                          "src": "681:14:9",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_contract$_AccountStorage_$3191_$",
+                            "typeString": "type(library AccountStorage)"
+                          }
+                        },
+                        "id": 976,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "696:6:9",
+                        "memberName": "layout",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 3190,
+                        "src": "681:21:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_pure$__$returns$_t_struct$_Layout_$3178_storage_ptr_$",
+                          "typeString": "function () pure returns (struct AccountStorage.Layout storage pointer)"
+                        }
+                      },
+                      "id": 977,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "681:23:9",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Layout_$3178_storage_ptr",
+                        "typeString": "struct AccountStorage.Layout storage pointer"
+                      }
+                    },
+                    "id": 978,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "705:23:9",
+                    "memberName": "defaultFallbackContract",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 3143,
+                    "src": "681:47:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "654:74:9"
+                },
+                {
+                  "AST": {
+                    "nodeType": "YulBlock",
+                    "src": "747:325:9",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "774:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "777:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "arguments": [],
+                              "functionName": {
+                                "name": "calldatasize",
+                                "nodeType": "YulIdentifier",
+                                "src": "780:12:9"
+                              },
+                              "nodeType": "YulFunctionCall",
+                              "src": "780:14:9"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "calldatacopy",
+                            "nodeType": "YulIdentifier",
+                            "src": "761:12:9"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "761:34:9"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "761:34:9"
+                      },
+                      {
+                        "nodeType": "YulVariableDeclaration",
+                        "src": "808:74:9",
+                        "value": {
+                          "arguments": [
+                            {
+                              "arguments": [],
+                              "functionName": {
+                                "name": "gas",
+                                "nodeType": "YulIdentifier",
+                                "src": "833:3:9"
+                              },
+                              "nodeType": "YulFunctionCall",
+                              "src": "833:5:9"
+                            },
+                            {
+                              "name": "fallbackContract",
+                              "nodeType": "YulIdentifier",
+                              "src": "840:16:9"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "858:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "arguments": [],
+                              "functionName": {
+                                "name": "calldatasize",
+                                "nodeType": "YulIdentifier",
+                                "src": "861:12:9"
+                              },
+                              "nodeType": "YulFunctionCall",
+                              "src": "861:14:9"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "877:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "880:1:9",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "staticcall",
+                            "nodeType": "YulIdentifier",
+                            "src": "822:10:9"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "822:60:9"
+                        },
+                        "variables": [
+                          {
+                            "name": "result",
+                            "nodeType": "YulTypedName",
+                            "src": "812:6:9",
+                            "type": ""
+                          }
+                        ]
+                      },
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "910:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "913:1:9",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "arguments": [],
+                              "functionName": {
+                                "name": "returndatasize",
+                                "nodeType": "YulIdentifier",
+                                "src": "916:14:9"
+                              },
+                              "nodeType": "YulFunctionCall",
+                              "src": "916:16:9"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "returndatacopy",
+                            "nodeType": "YulIdentifier",
+                            "src": "895:14:9"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "895:38:9"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "895:38:9"
+                      },
+                      {
+                        "cases": [
+                          {
+                            "body": {
+                              "nodeType": "YulBlock",
+                              "src": "979:31:9",
+                              "statements": [
+                                {
+                                  "expression": {
+                                    "arguments": [
+                                      {
+                                        "kind": "number",
+                                        "nodeType": "YulLiteral",
+                                        "src": "988:1:9",
+                                        "type": "",
+                                        "value": "0"
+                                      },
+                                      {
+                                        "arguments": [],
+                                        "functionName": {
+                                          "name": "returndatasize",
+                                          "nodeType": "YulIdentifier",
+                                          "src": "991:14:9"
+                                        },
+                                        "nodeType": "YulFunctionCall",
+                                        "src": "991:16:9"
+                                      }
+                                    ],
+                                    "functionName": {
+                                      "name": "revert",
+                                      "nodeType": "YulIdentifier",
+                                      "src": "981:6:9"
+                                    },
+                                    "nodeType": "YulFunctionCall",
+                                    "src": "981:27:9"
+                                  },
+                                  "nodeType": "YulExpressionStatement",
+                                  "src": "981:27:9"
+                                }
+                              ]
+                            },
+                            "nodeType": "YulCase",
+                            "src": "972:38:9",
+                            "value": {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "977:1:9",
+                              "type": "",
+                              "value": "0"
+                            }
+                          },
+                          {
+                            "body": {
+                              "nodeType": "YulBlock",
+                              "src": "1031:31:9",
+                              "statements": [
+                                {
+                                  "expression": {
+                                    "arguments": [
+                                      {
+                                        "kind": "number",
+                                        "nodeType": "YulLiteral",
+                                        "src": "1040:1:9",
+                                        "type": "",
+                                        "value": "0"
+                                      },
+                                      {
+                                        "arguments": [],
+                                        "functionName": {
+                                          "name": "returndatasize",
+                                          "nodeType": "YulIdentifier",
+                                          "src": "1043:14:9"
+                                        },
+                                        "nodeType": "YulFunctionCall",
+                                        "src": "1043:16:9"
+                                      }
+                                    ],
+                                    "functionName": {
+                                      "name": "return",
+                                      "nodeType": "YulIdentifier",
+                                      "src": "1033:6:9"
+                                    },
+                                    "nodeType": "YulFunctionCall",
+                                    "src": "1033:27:9"
+                                  },
+                                  "nodeType": "YulExpressionStatement",
+                                  "src": "1033:27:9"
+                                }
+                              ]
+                            },
+                            "nodeType": "YulCase",
+                            "src": "1023:39:9",
+                            "value": "default"
+                          }
+                        ],
+                        "expression": {
+                          "name": "result",
+                          "nodeType": "YulIdentifier",
+                          "src": "953:6:9"
+                        },
+                        "nodeType": "YulSwitch",
+                        "src": "946:116:9"
+                      }
+                    ]
+                  },
+                  "evmVersion": "paris",
+                  "externalReferences": [
+                    {
+                      "declaration": 974,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "840:16:9",
+                      "valueSize": 1
+                    }
+                  ],
+                  "id": 980,
+                  "nodeType": "InlineAssembly",
+                  "src": "738:334:9"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "fallback",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 971,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "546:2:9"
+            },
+            "returnParameters": {
+              "id": 972,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "566:0:9"
+            },
+            "scope": 1000,
+            "stateMutability": "payable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 999,
+            "nodeType": "FunctionDefinition",
+            "src": "1084:200:9",
+            "nodes": [],
+            "body": {
+              "id": 998,
+              "nodeType": "Block",
+              "src": "1175:109:9",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 991,
+                        "name": "fallbackContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 984,
+                        "src": "1212:16:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 990,
+                      "name": "internalSetFallbackHandler",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 970,
+                      "src": "1185:26:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 992,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1185:44:9",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 993,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1185:44:9"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "id": 995,
+                        "name": "fallbackContract",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 984,
+                        "src": "1260:16:9",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 994,
+                      "name": "FallbackChanged",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2874,
+                      "src": "1244:15:9",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 996,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1244:33:9",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 997,
+                  "nodeType": "EmitStatement",
+                  "src": "1239:38:9"
+                }
+              ]
+            },
+            "baseFunctions": [
+              2879
+            ],
+            "functionSelector": "f08a0323",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 988,
+                "kind": "modifierInvocation",
+                "modifierName": {
+                  "id": 987,
+                  "name": "onlyEntryPointOrSelf",
+                  "nameLocations": [
+                    "1154:20:9"
+                  ],
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 468,
+                  "src": "1154:20:9"
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "1154:20:9"
+              }
+            ],
+            "name": "setFallbackHandler",
+            "nameLocation": "1093:18:9",
+            "overrides": {
+              "id": 986,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1145:8:9"
+            },
+            "parameters": {
+              "id": 985,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 984,
+                  "mutability": "mutable",
+                  "name": "fallbackContract",
+                  "nameLocation": "1120:16:9",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 999,
+                  "src": "1112:24:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 983,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1112:7:9",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1111:26:9"
+            },
+            "returnParameters": {
+              "id": 989,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1175:0:9"
+            },
+            "scope": 1000,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 939,
+              "name": "Authority",
+              "nameLocations": [
+                "224:9:9"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 469,
+              "src": "224:9:9"
+            },
+            "id": 940,
+            "nodeType": "InheritanceSpecifier",
+            "src": "224:9:9"
+          },
+          {
+            "baseName": {
+              "id": 941,
+              "name": "IFallbackManager",
+              "nameLocations": [
+                "235:16:9"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 2880,
+              "src": "235:16:9"
+            },
+            "id": 942,
+            "nodeType": "InheritanceSpecifier",
+            "src": "235:16:9"
+          }
+        ],
+        "canonicalName": "FallbackManager",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          1000,
+          2880,
+          469,
+          537,
+          505
+        ],
+        "name": "FallbackManager",
+        "nameLocation": "205:15:9",
+        "scope": 1001,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 9
+}

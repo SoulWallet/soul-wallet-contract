@@ -1,0 +1,3048 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "getSafeLockPeriod",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_safeLockHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSafeLockStatus",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "unLockTime",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "getSafeLockPeriod()": "914643ac",
+    "getSafeLockStatus(bytes32)": "8a7f1b55"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"getSafeLockPeriod\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_safeLockHash\",\"type\":\"bytes32\"}],\"name\":\"getSafeLockStatus\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"unLockTime\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/safeLock/SafeLock.sol\":\"SafeLock\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"contracts/safeLock/ISafeLock.sol\":{\"keccak256\":\"0x6c574de53065831af47064a7c70d929b7ea6f65b577d78368b62f56657e6c57a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6087331cd13c8dfcfba98c4f4f2b64126fc3751b070345742d35c4b92f6d50ca\",\"dweb:/ipfs/QmV1KpAAWz5EqxAyKwXe8PFJH9cCDY3cwTQx42Re1SQJYw\"]},\"contracts/safeLock/SafeLock.sol\":{\"keccak256\":\"0x429f21983bc45feca351663f256af009854be3e7dcb52f20f0f6d252ae5b6252\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://aae62e786311fb86bdd2fbf7efde3d1d004b6485f06638ecc595185326b0b69d\",\"dweb:/ipfs/QmTKTrpspqXUbXsxJaL7Vi5DkGGs5Wxf7M17ZAFAEzz71K\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getSafeLockPeriod",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "_safeLockHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getSafeLockStatus",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "unLockTime",
+              "type": "uint64"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/safeLock/SafeLock.sol": "SafeLock"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "contracts/safeLock/ISafeLock.sol": {
+        "keccak256": "0x6c574de53065831af47064a7c70d929b7ea6f65b577d78368b62f56657e6c57a",
+        "urls": [
+          "bzz-raw://6087331cd13c8dfcfba98c4f4f2b64126fc3751b070345742d35c4b92f6d50ca",
+          "dweb:/ipfs/QmV1KpAAWz5EqxAyKwXe8PFJH9cCDY3cwTQx42Re1SQJYw"
+        ],
+        "license": "GPL-3.0"
+      },
+      "contracts/safeLock/SafeLock.sol": {
+        "keccak256": "0x429f21983bc45feca351663f256af009854be3e7dcb52f20f0f6d252ae5b6252",
+        "urls": [
+          "bzz-raw://aae62e786311fb86bdd2fbf7efde3d1d004b6485f06638ecc595185326b0b69d",
+          "dweb:/ipfs/QmTKTrpspqXUbXsxJaL7Vi5DkGGs5Wxf7M17ZAFAEzz71K"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/safeLock/SafeLock.sol",
+    "id": 7873,
+    "exportedSymbols": {
+      "ISafeLock": [
+        7644
+      ],
+      "SafeLock": [
+        7872
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:2351:50",
+    "nodes": [
+      {
+        "id": 7646,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:50",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 7647,
+        "nodeType": "ImportDirective",
+        "src": "62:25:50",
+        "nodes": [],
+        "absolutePath": "contracts/safeLock/ISafeLock.sol",
+        "file": "./ISafeLock.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 7873,
+        "sourceUnit": 7645,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 7872,
+        "nodeType": "ContractDefinition",
+        "src": "89:2298:50",
+        "nodes": [
+          {
+            "id": 7651,
+            "nodeType": "VariableDeclaration",
+            "src": "136:38:50",
+            "nodes": [],
+            "constant": false,
+            "mutability": "immutable",
+            "name": "safeLockSlot",
+            "nameLocation": "162:12:50",
+            "scope": 7872,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 7650,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "136:7:50",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "id": 7681,
+            "nodeType": "FunctionDefinition",
+            "src": "181:290:50",
+            "nodes": [],
+            "body": {
+              "id": 7680,
+              "nodeType": "Block",
+              "src": "248:223:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 7665,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 7658,
+                      "name": "safeLockSlot",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7651,
+                      "src": "258:12:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "id": 7662,
+                              "name": "safeLockSlotName",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 7653,
+                              "src": "300:16:50",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_string_memory_ptr",
+                                "typeString": "string memory"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_string_memory_ptr",
+                                "typeString": "string memory"
+                              }
+                            ],
+                            "expression": {
+                              "id": 7660,
+                              "name": "abi",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": -1,
+                              "src": "283:3:50",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_magic_abi",
+                                "typeString": "abi"
+                              }
+                            },
+                            "id": 7661,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "lValueRequested": false,
+                            "memberLocation": "287:12:50",
+                            "memberName": "encodePacked",
+                            "nodeType": "MemberAccess",
+                            "src": "283:16:50",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                              "typeString": "function () pure returns (bytes memory)"
+                            }
+                          },
+                          "id": 7663,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "283:34:50",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        ],
+                        "id": 7659,
+                        "name": "keccak256",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": -8,
+                        "src": "273:9:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                          "typeString": "function (bytes memory) pure returns (bytes32)"
+                        }
+                      },
+                      "id": 7664,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "273:45:50",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "src": "258:60:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "id": 7666,
+                  "nodeType": "ExpressionStatement",
+                  "src": "258:60:50"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        },
+                        "id": 7670,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 7668,
+                          "name": "safeLockPeriod",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7655,
+                          "src": "336:14:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint64",
+                            "typeString": "uint64"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">",
+                        "rightExpression": {
+                          "hexValue": "30",
+                          "id": 7669,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "353:1:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "336:18:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "536166654c6f636b3a20736166654c6f636b506572696f64206d7573742062652067726561746572207468616e2030",
+                        "id": 7671,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "356:49:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_793a06cde30d67faa76ce2addc7f35e62d36b995249e9843c31e1da1d2297d0f",
+                          "typeString": "literal_string \"SafeLock: safeLockPeriod must be greater than 0\""
+                        },
+                        "value": "SafeLock: safeLockPeriod must be greater than 0"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_793a06cde30d67faa76ce2addc7f35e62d36b995249e9843c31e1da1d2297d0f",
+                          "typeString": "literal_string \"SafeLock: safeLockPeriod must be greater than 0\""
+                        }
+                      ],
+                      "id": 7667,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "328:7:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 7672,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "328:78:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 7673,
+                  "nodeType": "ExpressionStatement",
+                  "src": "328:78:50"
+                },
+                {
+                  "expression": {
+                    "id": 7678,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 7674,
+                          "name": "safeLockLayout",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7693,
+                          "src": "416:14:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                            "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                          }
+                        },
+                        "id": 7675,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "416:16:50",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                          "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                        }
+                      },
+                      "id": 7676,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberLocation": "433:14:50",
+                      "memberName": "safeLockPeriod",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 7626,
+                      "src": "416:31:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 7677,
+                      "name": "safeLockPeriod",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7655,
+                      "src": "450:14:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "416:48:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 7679,
+                  "nodeType": "ExpressionStatement",
+                  "src": "416:48:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "parameters": {
+              "id": 7656,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7653,
+                  "mutability": "mutable",
+                  "name": "safeLockSlotName",
+                  "nameLocation": "207:16:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7681,
+                  "src": "193:30:50",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 7652,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "193:6:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7655,
+                  "mutability": "mutable",
+                  "name": "safeLockPeriod",
+                  "nameLocation": "232:14:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7681,
+                  "src": "225:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 7654,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "225:6:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "192:55:50"
+            },
+            "returnParameters": {
+              "id": 7657,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "248:0:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7693,
+            "nodeType": "FunctionDefinition",
+            "src": "477:175:50",
+            "nodes": [],
+            "body": {
+              "id": 7692,
+              "nodeType": "Block",
+              "src": "552:100:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    7688
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7688,
+                      "mutability": "mutable",
+                      "name": "slot",
+                      "nameLocation": "570:4:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7692,
+                      "src": "562:12:50",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      },
+                      "typeName": {
+                        "id": 7687,
+                        "name": "bytes32",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "562:7:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7690,
+                  "initialValue": {
+                    "id": 7689,
+                    "name": "safeLockSlot",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 7651,
+                    "src": "577:12:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "562:27:50"
+                },
+                {
+                  "AST": {
+                    "nodeType": "YulBlock",
+                    "src": "608:38:50",
+                    "statements": [
+                      {
+                        "nodeType": "YulAssignment",
+                        "src": "622:14:50",
+                        "value": {
+                          "name": "slot",
+                          "nodeType": "YulIdentifier",
+                          "src": "632:4:50"
+                        },
+                        "variableNames": [
+                          {
+                            "name": "l.slot",
+                            "nodeType": "YulIdentifier",
+                            "src": "622:6:50"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "evmVersion": "paris",
+                  "externalReferences": [
+                    {
+                      "declaration": 7685,
+                      "isOffset": false,
+                      "isSlot": true,
+                      "src": "622:6:50",
+                      "suffix": "slot",
+                      "valueSize": 1
+                    },
+                    {
+                      "declaration": 7688,
+                      "isOffset": false,
+                      "isSlot": false,
+                      "src": "632:4:50",
+                      "valueSize": 1
+                    }
+                  ],
+                  "id": 7691,
+                  "nodeType": "InlineAssembly",
+                  "src": "599:47:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "safeLockLayout",
+            "nameLocation": "486:14:50",
+            "parameters": {
+              "id": 7682,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "500:2:50"
+            },
+            "returnParameters": {
+              "id": 7686,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7685,
+                  "mutability": "mutable",
+                  "name": "l",
+                  "nameLocation": "549:1:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7693,
+                  "src": "526:24:50",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                    "typeString": "struct ISafeLock.SafeLockLayout"
+                  },
+                  "typeName": {
+                    "id": 7684,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 7683,
+                      "name": "SafeLockLayout",
+                      "nameLocations": [
+                        "526:14:50"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 7631,
+                      "src": "526:14:50"
+                    },
+                    "referencedDeclaration": 7631,
+                    "src": "526:14:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                      "typeString": "struct ISafeLock.SafeLockLayout"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "525:26:50"
+            },
+            "scope": 7872,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7705,
+            "nodeType": "FunctionDefinition",
+            "src": "658:93:50",
+            "nodes": [],
+            "body": {
+              "id": 7704,
+              "nodeType": "Block",
+              "src": "704:47:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "expression": {
+                          "id": 7700,
+                          "name": "block",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": -4,
+                          "src": "728:5:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_block",
+                            "typeString": "block"
+                          }
+                        },
+                        "id": 7701,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "734:9:50",
+                        "memberName": "timestamp",
+                        "nodeType": "MemberAccess",
+                        "src": "728:15:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 7699,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "721:6:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint64_$",
+                        "typeString": "type(uint64)"
+                      },
+                      "typeName": {
+                        "id": 7698,
+                        "name": "uint64",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "721:6:50",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 7702,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "721:23:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "functionReturnParameters": 7697,
+                  "id": 7703,
+                  "nodeType": "Return",
+                  "src": "714:30:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_now",
+            "nameLocation": "667:4:50",
+            "parameters": {
+              "id": 7694,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "671:2:50"
+            },
+            "returnParameters": {
+              "id": 7697,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7696,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7705,
+                  "src": "696:6:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 7695,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "696:6:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "695:8:50"
+            },
+            "scope": 7872,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "private"
+          },
+          {
+            "id": 7715,
+            "nodeType": "FunctionDefinition",
+            "src": "757:114:50",
+            "nodes": [],
+            "body": {
+              "id": 7714,
+              "nodeType": "Block",
+              "src": "816:55:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "expression": {
+                      "arguments": [],
+                      "expression": {
+                        "argumentTypes": [],
+                        "id": 7710,
+                        "name": "safeLockLayout",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7693,
+                        "src": "833:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                          "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                        }
+                      },
+                      "id": 7711,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "functionCall",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "833:16:50",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                      }
+                    },
+                    "id": 7712,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "850:14:50",
+                    "memberName": "safeLockPeriod",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 7626,
+                    "src": "833:31:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "functionReturnParameters": 7709,
+                  "id": 7713,
+                  "nodeType": "Return",
+                  "src": "826:38:50"
+                }
+              ]
+            },
+            "baseFunctions": [
+              7636
+            ],
+            "functionSelector": "914643ac",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getSafeLockPeriod",
+            "nameLocation": "766:17:50",
+            "parameters": {
+              "id": 7706,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "783:2:50"
+            },
+            "returnParameters": {
+              "id": 7709,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7708,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7715,
+                  "src": "809:6:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 7707,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "809:6:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "808:8:50"
+            },
+            "scope": 7872,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 7731,
+            "nodeType": "FunctionDefinition",
+            "src": "877:169:50",
+            "nodes": [],
+            "body": {
+              "id": 7730,
+              "nodeType": "Block",
+              "src": "968:78:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 7728,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 7722,
+                      "name": "unLockTime",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7720,
+                      "src": "980:10:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "baseExpression": {
+                        "expression": {
+                          "arguments": [],
+                          "expression": {
+                            "argumentTypes": [],
+                            "id": 7723,
+                            "name": "safeLockLayout",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 7693,
+                            "src": "993:14:50",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                              "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                            }
+                          },
+                          "id": 7724,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "993:16:50",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                            "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                          }
+                        },
+                        "id": 7725,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "1010:14:50",
+                        "memberName": "safeLockStatus",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 7630,
+                        "src": "993:31:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        }
+                      },
+                      "id": 7727,
+                      "indexExpression": {
+                        "id": 7726,
+                        "name": "_safeLockHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7717,
+                        "src": "1025:13:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "IndexAccess",
+                      "src": "993:46:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "980:59:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 7729,
+                  "nodeType": "ExpressionStatement",
+                  "src": "980:59:50"
+                }
+              ]
+            },
+            "baseFunctions": [
+              7643
+            ],
+            "functionSelector": "8a7f1b55",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getSafeLockStatus",
+            "nameLocation": "886:17:50",
+            "parameters": {
+              "id": 7718,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7717,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "912:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7731,
+                  "src": "904:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7716,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "904:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "903:23:50"
+            },
+            "returnParameters": {
+              "id": 7721,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7720,
+                  "mutability": "mutable",
+                  "name": "unLockTime",
+                  "nameLocation": "957:10:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7731,
+                  "src": "950:17:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 7719,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "950:6:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "949:19:50"
+            },
+            "scope": 7872,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 7773,
+            "nodeType": "FunctionDefinition",
+            "src": "1052:391:50",
+            "nodes": [],
+            "body": {
+              "id": 7772,
+              "nodeType": "Block",
+              "src": "1116:327:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    7740
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7740,
+                      "mutability": "mutable",
+                      "name": "layout",
+                      "nameLocation": "1149:6:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7772,
+                      "src": "1126:29:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout"
+                      },
+                      "typeName": {
+                        "id": 7739,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 7738,
+                          "name": "SafeLockLayout",
+                          "nameLocations": [
+                            "1126:14:50"
+                          ],
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 7631,
+                          "src": "1126:14:50"
+                        },
+                        "referencedDeclaration": 7631,
+                        "src": "1126:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                          "typeString": "struct ISafeLock.SafeLockLayout"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7743,
+                  "initialValue": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 7741,
+                      "name": "safeLockLayout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7693,
+                      "src": "1158:14:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                        "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                      }
+                    },
+                    "id": 7742,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1158:16:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                      "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1126:48:50"
+                },
+                {
+                  "assignments": [
+                    7747
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7747,
+                      "mutability": "mutable",
+                      "name": "safeLockStatus",
+                      "nameLocation": "1219:14:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7772,
+                      "src": "1184:49:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                        "typeString": "mapping(bytes32 => uint64)"
+                      },
+                      "typeName": {
+                        "id": 7746,
+                        "keyName": "",
+                        "keyNameLocation": "-1:-1:-1",
+                        "keyType": {
+                          "id": 7744,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1192:7:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "nodeType": "Mapping",
+                        "src": "1184:26:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        },
+                        "valueName": "",
+                        "valueNameLocation": "-1:-1:-1",
+                        "valueType": {
+                          "id": 7745,
+                          "name": "uint64",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1203:6:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint64",
+                            "typeString": "uint64"
+                          }
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7750,
+                  "initialValue": {
+                    "expression": {
+                      "id": 7748,
+                      "name": "layout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7740,
+                      "src": "1236:6:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                      }
+                    },
+                    "id": 7749,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "1243:14:50",
+                    "memberName": "safeLockStatus",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 7630,
+                    "src": "1236:21:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                      "typeString": "mapping(bytes32 => uint64)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1184:73:50"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    },
+                    "id": 7755,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "baseExpression": {
+                        "id": 7751,
+                        "name": "safeLockStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7747,
+                        "src": "1271:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        }
+                      },
+                      "id": 7753,
+                      "indexExpression": {
+                        "id": 7752,
+                        "name": "_safeLockHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7733,
+                        "src": "1286:13:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "IndexAccess",
+                      "src": "1271:29:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 7754,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1304:1:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "1271:34:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 7759,
+                  "nodeType": "IfStatement",
+                  "src": "1267:77:50",
+                  "trueBody": {
+                    "id": 7758,
+                    "nodeType": "Block",
+                    "src": "1307:37:50",
+                    "statements": [
+                      {
+                        "expression": {
+                          "hexValue": "66616c7365",
+                          "id": 7756,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1328:5:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "false"
+                        },
+                        "functionReturnParameters": 7737,
+                        "id": 7757,
+                        "nodeType": "Return",
+                        "src": "1321:12:50"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "id": 7768,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 7760,
+                        "name": "safeLockStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7747,
+                        "src": "1353:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        }
+                      },
+                      "id": 7762,
+                      "indexExpression": {
+                        "id": 7761,
+                        "name": "_safeLockHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7733,
+                        "src": "1368:13:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "1353:29:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      },
+                      "id": 7767,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 7763,
+                          "name": "_now",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7705,
+                          "src": "1385:4:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$__$returns$_t_uint64_$",
+                            "typeString": "function () view returns (uint64)"
+                          }
+                        },
+                        "id": 7764,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1385:6:50",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": "+",
+                      "rightExpression": {
+                        "expression": {
+                          "id": 7765,
+                          "name": "layout",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7740,
+                          "src": "1394:6:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                            "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                          }
+                        },
+                        "id": 7766,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberLocation": "1401:14:50",
+                        "memberName": "safeLockPeriod",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 7626,
+                        "src": "1394:21:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "src": "1385:30:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "1353:62:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 7769,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1353:62:50"
+                },
+                {
+                  "expression": {
+                    "hexValue": "74727565",
+                    "id": 7770,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1432:4:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 7737,
+                  "id": 7771,
+                  "nodeType": "Return",
+                  "src": "1425:11:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tryLock",
+            "nameLocation": "1061:7:50",
+            "parameters": {
+              "id": 7734,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7733,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "1077:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7773,
+                  "src": "1069:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7732,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1069:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1068:23:50"
+            },
+            "returnParameters": {
+              "id": 7737,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7736,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7773,
+                  "src": "1110:4:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 7735,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1110:4:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1109:6:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7786,
+            "nodeType": "FunctionDefinition",
+            "src": "1449:121:50",
+            "nodes": [],
+            "body": {
+              "id": 7785,
+              "nodeType": "Block",
+              "src": "1494:76:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 7780,
+                            "name": "_safeLockHash",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 7775,
+                            "src": "1520:13:50",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          ],
+                          "id": 7779,
+                          "name": "tryLock",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7773,
+                          "src": "1512:7:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$returns$_t_bool_$",
+                            "typeString": "function (bytes32) returns (bool)"
+                          }
+                        },
+                        "id": 7781,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1512:22:50",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "536166654c6f636b3a20616c7265616479206c6f636b6564",
+                        "id": 7782,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "1536:26:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_c2ccb632ef2589246992964bac5a7f17b9fa5ddd3908ee13e3721762499227e0",
+                          "typeString": "literal_string \"SafeLock: already locked\""
+                        },
+                        "value": "SafeLock: already locked"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_c2ccb632ef2589246992964bac5a7f17b9fa5ddd3908ee13e3721762499227e0",
+                          "typeString": "literal_string \"SafeLock: already locked\""
+                        }
+                      ],
+                      "id": 7778,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "1504:7:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 7783,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1504:59:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 7784,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1504:59:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "lock",
+            "nameLocation": "1458:4:50",
+            "parameters": {
+              "id": 7776,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7775,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "1471:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7786,
+                  "src": "1463:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7774,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1463:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1462:23:50"
+            },
+            "returnParameters": {
+              "id": 7777,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1494:0:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7811,
+            "nodeType": "FunctionDefinition",
+            "src": "1576:242:50",
+            "nodes": [],
+            "body": {
+              "id": 7810,
+              "nodeType": "Block",
+              "src": "1627:191:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    7793
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7793,
+                      "mutability": "mutable",
+                      "name": "layout",
+                      "nameLocation": "1660:6:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7810,
+                      "src": "1637:29:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout"
+                      },
+                      "typeName": {
+                        "id": 7792,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 7791,
+                          "name": "SafeLockLayout",
+                          "nameLocations": [
+                            "1637:14:50"
+                          ],
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 7631,
+                          "src": "1637:14:50"
+                        },
+                        "referencedDeclaration": 7631,
+                        "src": "1637:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                          "typeString": "struct ISafeLock.SafeLockLayout"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7796,
+                  "initialValue": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 7794,
+                      "name": "safeLockLayout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7693,
+                      "src": "1669:14:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                        "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                      }
+                    },
+                    "id": 7795,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1669:16:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                      "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1637:48:50"
+                },
+                {
+                  "assignments": [
+                    7800
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7800,
+                      "mutability": "mutable",
+                      "name": "safeLockStatus",
+                      "nameLocation": "1730:14:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7810,
+                      "src": "1695:49:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                        "typeString": "mapping(bytes32 => uint64)"
+                      },
+                      "typeName": {
+                        "id": 7799,
+                        "keyName": "",
+                        "keyNameLocation": "-1:-1:-1",
+                        "keyType": {
+                          "id": 7797,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1703:7:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "nodeType": "Mapping",
+                        "src": "1695:26:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        },
+                        "valueName": "",
+                        "valueNameLocation": "-1:-1:-1",
+                        "valueType": {
+                          "id": 7798,
+                          "name": "uint64",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1714:6:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint64",
+                            "typeString": "uint64"
+                          }
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7803,
+                  "initialValue": {
+                    "expression": {
+                      "id": 7801,
+                      "name": "layout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7793,
+                      "src": "1747:6:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                      }
+                    },
+                    "id": 7802,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "1754:14:50",
+                    "memberName": "safeLockStatus",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 7630,
+                    "src": "1747:21:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                      "typeString": "mapping(bytes32 => uint64)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1695:73:50"
+                },
+                {
+                  "expression": {
+                    "id": 7808,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 7804,
+                        "name": "safeLockStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7800,
+                        "src": "1778:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        }
+                      },
+                      "id": 7806,
+                      "indexExpression": {
+                        "id": 7805,
+                        "name": "_safeLockHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7788,
+                        "src": "1793:13:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "1778:29:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "30",
+                      "id": 7807,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1810:1:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "1778:33:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 7809,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1778:33:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "cancelLock",
+            "nameLocation": "1585:10:50",
+            "parameters": {
+              "id": 7789,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7788,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "1604:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7811,
+                  "src": "1596:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7787,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1596:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1595:23:50"
+            },
+            "returnParameters": {
+              "id": 7790,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1627:0:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7858,
+            "nodeType": "FunctionDefinition",
+            "src": "1824:427:50",
+            "nodes": [],
+            "body": {
+              "id": 7857,
+              "nodeType": "Block",
+              "src": "1890:361:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    7820
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7820,
+                      "mutability": "mutable",
+                      "name": "layout",
+                      "nameLocation": "1923:6:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7857,
+                      "src": "1900:29:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout"
+                      },
+                      "typeName": {
+                        "id": 7819,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 7818,
+                          "name": "SafeLockLayout",
+                          "nameLocations": [
+                            "1900:14:50"
+                          ],
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 7631,
+                          "src": "1900:14:50"
+                        },
+                        "referencedDeclaration": 7631,
+                        "src": "1900:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                          "typeString": "struct ISafeLock.SafeLockLayout"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7823,
+                  "initialValue": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 7821,
+                      "name": "safeLockLayout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7693,
+                      "src": "1932:14:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$__$returns$_t_struct$_SafeLockLayout_$7631_storage_ptr_$",
+                        "typeString": "function () view returns (struct ISafeLock.SafeLockLayout storage pointer)"
+                      }
+                    },
+                    "id": 7822,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1932:16:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                      "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1900:48:50"
+                },
+                {
+                  "assignments": [
+                    7827
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7827,
+                      "mutability": "mutable",
+                      "name": "safeLockStatus",
+                      "nameLocation": "1993:14:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7857,
+                      "src": "1958:49:50",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                        "typeString": "mapping(bytes32 => uint64)"
+                      },
+                      "typeName": {
+                        "id": 7826,
+                        "keyName": "",
+                        "keyNameLocation": "-1:-1:-1",
+                        "keyType": {
+                          "id": 7824,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1966:7:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "nodeType": "Mapping",
+                        "src": "1958:26:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        },
+                        "valueName": "",
+                        "valueNameLocation": "-1:-1:-1",
+                        "valueType": {
+                          "id": 7825,
+                          "name": "uint64",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1977:6:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint64",
+                            "typeString": "uint64"
+                          }
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7830,
+                  "initialValue": {
+                    "expression": {
+                      "id": 7828,
+                      "name": "layout",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7820,
+                      "src": "2010:6:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_SafeLockLayout_$7631_storage_ptr",
+                        "typeString": "struct ISafeLock.SafeLockLayout storage pointer"
+                      }
+                    },
+                    "id": 7829,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberLocation": "2017:14:50",
+                    "memberName": "safeLockStatus",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 7630,
+                    "src": "2010:21:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                      "typeString": "mapping(bytes32 => uint64)"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1958:73:50"
+                },
+                {
+                  "assignments": [
+                    7832
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 7832,
+                      "mutability": "mutable",
+                      "name": "unlockTime",
+                      "nameLocation": "2048:10:50",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 7857,
+                      "src": "2041:17:50",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      },
+                      "typeName": {
+                        "id": 7831,
+                        "name": "uint64",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2041:6:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 7836,
+                  "initialValue": {
+                    "baseExpression": {
+                      "id": 7833,
+                      "name": "safeLockStatus",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7827,
+                      "src": "2061:14:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                        "typeString": "mapping(bytes32 => uint64)"
+                      }
+                    },
+                    "id": 7835,
+                    "indexExpression": {
+                      "id": 7834,
+                      "name": "_safeLockHash",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 7813,
+                      "src": "2076:13:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "2061:29:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2041:49:50"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 7844,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      },
+                      "id": 7839,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 7837,
+                        "name": "unlockTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7832,
+                        "src": "2104:10:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": "==",
+                      "rightExpression": {
+                        "hexValue": "30",
+                        "id": 7838,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2118:1:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "2104:15:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "||",
+                    "rightExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      },
+                      "id": 7843,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 7840,
+                        "name": "unlockTime",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7832,
+                        "src": "2123:10:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 7841,
+                          "name": "_now",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7705,
+                          "src": "2136:4:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$__$returns$_t_uint64_$",
+                            "typeString": "function () view returns (uint64)"
+                          }
+                        },
+                        "id": 7842,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2136:6:50",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "src": "2123:19:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "2104:38:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 7848,
+                  "nodeType": "IfStatement",
+                  "src": "2100:81:50",
+                  "trueBody": {
+                    "id": 7847,
+                    "nodeType": "Block",
+                    "src": "2144:37:50",
+                    "statements": [
+                      {
+                        "expression": {
+                          "hexValue": "66616c7365",
+                          "id": 7845,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "2165:5:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "false"
+                        },
+                        "functionReturnParameters": 7817,
+                        "id": 7846,
+                        "nodeType": "Return",
+                        "src": "2158:12:50"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "id": 7853,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "baseExpression": {
+                        "id": 7849,
+                        "name": "safeLockStatus",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7827,
+                        "src": "2190:14:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_uint64_$",
+                          "typeString": "mapping(bytes32 => uint64)"
+                        }
+                      },
+                      "id": 7851,
+                      "indexExpression": {
+                        "id": 7850,
+                        "name": "_safeLockHash",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 7813,
+                        "src": "2205:13:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "2190:29:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "hexValue": "30",
+                      "id": 7852,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2222:1:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "2190:33:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "id": 7854,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2190:33:50"
+                },
+                {
+                  "expression": {
+                    "hexValue": "74727565",
+                    "id": 7855,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "2240:4:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 7817,
+                  "id": 7856,
+                  "nodeType": "Return",
+                  "src": "2233:11:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "tryUnlock",
+            "nameLocation": "1833:9:50",
+            "parameters": {
+              "id": 7814,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7813,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "1851:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7858,
+                  "src": "1843:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7812,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1843:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1842:23:50"
+            },
+            "returnParameters": {
+              "id": 7817,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7816,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7858,
+                  "src": "1884:4:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 7815,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1884:4:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1883:6:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "id": 7871,
+            "nodeType": "FunctionDefinition",
+            "src": "2257:126:50",
+            "nodes": [],
+            "body": {
+              "id": 7870,
+              "nodeType": "Block",
+              "src": "2304:79:50",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 7865,
+                            "name": "_safeLockHash",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 7860,
+                            "src": "2332:13:50",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes32",
+                              "typeString": "bytes32"
+                            }
+                          ],
+                          "id": 7864,
+                          "name": "tryUnlock",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 7858,
+                          "src": "2322:9:50",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_nonpayable$_t_bytes32_$returns$_t_bool_$",
+                            "typeString": "function (bytes32) returns (bool)"
+                          }
+                        },
+                        "id": 7866,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2322:24:50",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "536166654c6f636b3a206e6f7420756e6c6f636b2074696d65",
+                        "id": 7867,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2348:27:50",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_e69a7ad8532a77cb1930829425d097e5ab6d44b894d4802c93b0eae921c3595e",
+                          "typeString": "literal_string \"SafeLock: not unlock time\""
+                        },
+                        "value": "SafeLock: not unlock time"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_e69a7ad8532a77cb1930829425d097e5ab6d44b894d4802c93b0eae921c3595e",
+                          "typeString": "literal_string \"SafeLock: not unlock time\""
+                        }
+                      ],
+                      "id": 7863,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        -18,
+                        -18
+                      ],
+                      "referencedDeclaration": -18,
+                      "src": "2314:7:50",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 7868,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2314:62:50",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 7869,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2314:62:50"
+                }
+              ]
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "unlock",
+            "nameLocation": "2266:6:50",
+            "parameters": {
+              "id": 7861,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7860,
+                  "mutability": "mutable",
+                  "name": "_safeLockHash",
+                  "nameLocation": "2281:13:50",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7871,
+                  "src": "2273:21:50",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 7859,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2273:7:50",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2272:23:50"
+            },
+            "returnParameters": {
+              "id": 7862,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2304:0:50"
+            },
+            "scope": 7872,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 7648,
+              "name": "ISafeLock",
+              "nameLocations": [
+                "119:9:50"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 7644,
+              "src": "119:9:50"
+            },
+            "id": 7649,
+            "nodeType": "InheritanceSpecifier",
+            "src": "119:9:50"
+          }
+        ],
+        "canonicalName": "SafeLock",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          7872,
+          7644
+        ],
+        "name": "SafeLock",
+        "nameLocation": "107:8:50",
+        "scope": 7873,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 50
+}

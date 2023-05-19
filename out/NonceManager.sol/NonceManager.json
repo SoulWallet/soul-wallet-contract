@@ -1,0 +1,1402 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint192",
+          "name": "key",
+          "type": "uint192"
+        }
+      ],
+      "name": "getNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint192",
+          "name": "key",
+          "type": "uint192"
+        }
+      ],
+      "name": "incrementNonce",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint192",
+          "name": "",
+          "type": "uint192"
+        }
+      ],
+      "name": "nonceSequenceNumber",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x60808060405234610016576101a3908161001c8239f35b600080fdfe604060808152600436101561001357600080fd5b600090813560e01c80630bd28e3b146100cf5780631b2e01b814610091576335567e1a1461004057600080fd5b3461008d57908160209261005336610132565b6001600160a01b0390911684528385528184206001600160c01b0382168552855292205481519290911b67ffffffffffffffff1916178152f35b5080fd5b503461008d57806020926100a436610132565b6001600160a01b0390911682528185528282206001600160c01b039091168252845220549051908152f35b503461008d57602036600319011261008d576004356001600160c01b0381169081900361012e5733835260208381528284209184525281208054600019811461011a57600101905580f35b634e487b7160e01b83526011600452602483fd5b8280fd5b6040906003190112610168576004356001600160a01b038116810361016857906024356001600160c01b03811681036101685790565b600080fdfea26469706673582212206745aeba3536f4d3bc64ae027fdbf0978251fff8d48bfa5c7b2a19f55aee8c3764736f6c63430008130033",
+    "sourceMap": "145:1100:58:-:0;;;;;;;;;;;;;;;;;",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x604060808152600436101561001357600080fd5b600090813560e01c80630bd28e3b146100cf5780631b2e01b814610091576335567e1a1461004057600080fd5b3461008d57908160209261005336610132565b6001600160a01b0390911684528385528184206001600160c01b0382168552855292205481519290911b67ffffffffffffffff1916178152f35b5080fd5b503461008d57806020926100a436610132565b6001600160a01b0390911682528185528282206001600160c01b039091168252845220549051908152f35b503461008d57602036600319011261008d576004356001600160c01b0381169081900361012e5733835260208381528284209184525281208054600019811461011a57600101905580f35b634e487b7160e01b83526011600452602483fd5b8280fd5b6040906003190112610168576004356001600160a01b038116810361016857906024356001600160c01b03811681036101685790565b600080fdfea26469706673582212206745aeba3536f4d3bc64ae027fdbf0978251fff8d48bfa5c7b2a19f55aee8c3764736f6c63430008130033",
+    "sourceMap": "145:1100:58:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;145:1100:58;;;;;;;;;;;-1:-1:-1;;;;;145:1100:58;;;;;;;;;;;;;;;-1:-1:-1;;145:1100:58;462:55;145:1100;;;;;;;;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;145:1100:58;;;;;;;;;;;-1:-1:-1;;;;;145:1100:58;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;145:1100:58;;;;;;-1:-1:-1;;;;;145:1100:58;;;;;;;;868:10;145:1100;;;;;;;;;;;;;;;;;-1:-1:-1;;145:1100:58;;;;;;;;;;;-1:-1:-1;;;145:1100:58;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;145:1100:58;;;;;;;;;-1:-1:-1;;;;;145:1100:58;;;;;;;:::o;:::-;-1:-1:-1;145:1100:58;",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "getNonce(address,uint192)": "35567e1a",
+    "incrementNonce(uint192)": "0bd28e3b",
+    "nonceSequenceNumber(address,uint192)": "1b2e01b8"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint192\",\"name\":\"key\",\"type\":\"uint192\"}],\"name\":\"getNonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint192\",\"name\":\"key\",\"type\":\"uint192\"}],\"name\":\"incrementNonce\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint192\",\"name\":\"\",\"type\":\"uint192\"}],\"name\":\"nonceSequenceNumber\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getNonce(address,uint192)\":{\"params\":{\"key\":\"the high 192 bit of the nonce\",\"sender\":\"the account address\"},\"returns\":{\"nonce\":\"a full nonce to pass for next UserOp with this sender.\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"getNonce(address,uint192)\":{\"notice\":\"Return the next nonce for this sender. Within a given key, the nonce values are sequenced (starting with zero, and incremented by one on each userop) But UserOp with different keys can come with arbitrary order.\"},\"incrementNonce(uint192)\":{\"notice\":\"Manually increment the nonce of the sender. This method is exposed just for completeness.. Account does NOT need to call it, neither during validation, nor elsewhere, as the EntryPoint will update the nonce regardless. Possible use-case is call it with various keys to \\\"initialize\\\" their nonces to one, so that future UserOperations will not pay extra for the first transaction with a given key.\"},\"nonceSequenceNumber(address,uint192)\":{\"notice\":\"The next valid sequence number for a given nonce key.\"}},\"notice\":\"nonce management functionality\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"lib/account-abstraction/contracts/core/NonceManager.sol\":\"NonceManager\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"lib/account-abstraction/contracts/core/Helpers.sol\":{\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746\",\"dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU\"]},\"lib/account-abstraction/contracts/core/NonceManager.sol\":{\"keccak256\":\"0xa17a4a6fde70088ab18ffe6df830f3efa31f1cd0e1a7160336c96e3c94984d25\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://b38615df9f80c56282b72888e9ba1eb1a9413fa67a0dbf094deda7af9feb38e7\",\"dweb:/ipfs/QmSzcXetEJRH4UHuUmZiSgX6bFgfqHWfmyuxVnh4NosMk1\"]},\"lib/account-abstraction/contracts/interfaces/IAggregator.sol\":{\"keccak256\":\"0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b\",\"dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP\"]},\"lib/account-abstraction/contracts/interfaces/IEntryPoint.sol\":{\"keccak256\":\"0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf\",\"dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd\"]},\"lib/account-abstraction/contracts/interfaces/INonceManager.sol\":{\"keccak256\":\"0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2\",\"dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b\"]},\"lib/account-abstraction/contracts/interfaces/IStakeManager.sol\":{\"keccak256\":\"0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f\",\"license\":\"GPL-3.0-only\",\"urls\":[\"bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3\",\"dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ\"]},\"lib/account-abstraction/contracts/interfaces/UserOperation.sol\":{\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c\",\"dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint192",
+              "name": "key",
+              "type": "uint192"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getNonce",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint192",
+              "name": "key",
+              "type": "uint192"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "incrementNonce"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "uint192",
+              "name": "",
+              "type": "uint192"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "nonceSequenceNumber",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "getNonce(address,uint192)": {
+            "params": {
+              "key": "the high 192 bit of the nonce",
+              "sender": "the account address"
+            },
+            "returns": {
+              "nonce": "a full nonce to pass for next UserOp with this sender."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "getNonce(address,uint192)": {
+            "notice": "Return the next nonce for this sender. Within a given key, the nonce values are sequenced (starting with zero, and incremented by one on each userop) But UserOp with different keys can come with arbitrary order."
+          },
+          "incrementNonce(uint192)": {
+            "notice": "Manually increment the nonce of the sender. This method is exposed just for completeness.. Account does NOT need to call it, neither during validation, nor elsewhere, as the EntryPoint will update the nonce regardless. Possible use-case is call it with various keys to \"initialize\" their nonces to one, so that future UserOperations will not pay extra for the first transaction with a given key."
+          },
+          "nonceSequenceNumber(address,uint192)": {
+            "notice": "The next valid sequence number for a given nonce key."
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "lib/account-abstraction/contracts/core/NonceManager.sol": "NonceManager"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "lib/account-abstraction/contracts/core/Helpers.sol": {
+        "keccak256": "0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a",
+        "urls": [
+          "bzz-raw://69643e83f68e6a13d5075c7565bfce326673b0bd98c432033c4603ea84835746",
+          "dweb:/ipfs/QmSwSzjYyV7qudi5vvsmzHMG2Z4YJZxX51RRXXVCLaNcEU"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/core/NonceManager.sol": {
+        "keccak256": "0xa17a4a6fde70088ab18ffe6df830f3efa31f1cd0e1a7160336c96e3c94984d25",
+        "urls": [
+          "bzz-raw://b38615df9f80c56282b72888e9ba1eb1a9413fa67a0dbf094deda7af9feb38e7",
+          "dweb:/ipfs/QmSzcXetEJRH4UHuUmZiSgX6bFgfqHWfmyuxVnh4NosMk1"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IAggregator.sol": {
+        "keccak256": "0x060e9ddb0152250c269ba0640dc5753834ac44cf182a2837d508c0c529cae26a",
+        "urls": [
+          "bzz-raw://20ed837bc5909c89ff1910246bf245a5dad6840aa939382e1694964eb7dbd37b",
+          "dweb:/ipfs/QmTMybRq5yyghPDDs1ZCNAVB9sSJ4WHe6Q9mejuKPTAdNP"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol": {
+        "keccak256": "0x3a90bf308819ed125fa4202f880999caff8a8686633b8ddb79a30ca240d5b8f8",
+        "urls": [
+          "bzz-raw://d2d21cc92c2fdab2b58d21bc25d4cd0e8c284b922528a186b087b818d54bc6cf",
+          "dweb:/ipfs/QmT1qrfuBjsv2rmRCDn8mgPXHp94hARJwzbcDuBLDTbFWd"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/INonceManager.sol": {
+        "keccak256": "0x509871e6c63663cdcc3eba19920fe84e991f38b289b1377ac3c3a6d9f22d7e12",
+        "urls": [
+          "bzz-raw://00fe21b4349b24c50df60e1a705179293982bd9e7a32b78d4bac9620f89e7fe2",
+          "dweb:/ipfs/QmSFFYGfUwQbVa6hASjU7YxTvgi2HkfrPr4X5oPHscHg8b"
+        ],
+        "license": "GPL-3.0"
+      },
+      "lib/account-abstraction/contracts/interfaces/IStakeManager.sol": {
+        "keccak256": "0xd227b02888cd4ac68daebcdfd992ec00f9fff66fa3b3bb16f656cd582fa3480f",
+        "urls": [
+          "bzz-raw://b389da4714a138be63704a576a482505eab2855e263b38a93706395d8d42e7c3",
+          "dweb:/ipfs/QmeeAZpdHwUXxqP8pxA7GNtoCGBmmH4FaqLLwScVKGxtxZ"
+        ],
+        "license": "GPL-3.0-only"
+      },
+      "lib/account-abstraction/contracts/interfaces/UserOperation.sol": {
+        "keccak256": "0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c",
+        "urls": [
+          "bzz-raw://6ff83c59432e733bf6304dda27cd4b0f34401917dd535e2669cc842d2d26568c",
+          "dweb:/ipfs/QmPJbHU5TAjHqUTZzAcicEeG2nknmwCN43L4EW9LHbknTN"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "lib/account-abstraction/contracts/core/NonceManager.sol",
+    "id": 10753,
+    "exportedSymbols": {
+      "IAggregator": [
+        11275
+      ],
+      "IEntryPoint": [
+        11479
+      ],
+      "INonceManager": [
+        11498
+      ],
+      "IStakeManager": [
+        11638
+      ],
+      "NonceManager": [
+        10752
+      ],
+      "UserOperation": [
+        11665
+      ],
+      "UserOperationLib": [
+        11835
+      ],
+      "calldataKeccak": [
+        10662
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:1210:58",
+    "nodes": [
+      {
+        "id": 10664,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:58",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".12"
+        ]
+      },
+      {
+        "id": 10665,
+        "nodeType": "ImportDirective",
+        "src": "62:39:58",
+        "nodes": [],
+        "absolutePath": "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol",
+        "file": "../interfaces/IEntryPoint.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 10753,
+        "sourceUnit": 11480,
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 10752,
+        "nodeType": "ContractDefinition",
+        "src": "145:1100:58",
+        "nodes": [
+          {
+            "id": 10675,
+            "nodeType": "VariableDeclaration",
+            "src": "268:74:58",
+            "nodes": [],
+            "constant": false,
+            "documentation": {
+              "id": 10669,
+              "nodeType": "StructuredDocumentation",
+              "src": "191:72:58",
+              "text": " The next valid sequence number for a given nonce key."
+            },
+            "functionSelector": "1b2e01b8",
+            "mutability": "mutable",
+            "name": "nonceSequenceNumber",
+            "nameLocation": "323:19:58",
+            "scope": 10752,
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint192_$_t_uint256_$_$",
+              "typeString": "mapping(address => mapping(uint192 => uint256))"
+            },
+            "typeName": {
+              "id": 10674,
+              "keyName": "",
+              "keyNameLocation": "-1:-1:-1",
+              "keyType": {
+                "id": 10670,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "276:7:58",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "268:47:58",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint192_$_t_uint256_$_$",
+                "typeString": "mapping(address => mapping(uint192 => uint256))"
+              },
+              "valueName": "",
+              "valueNameLocation": "-1:-1:-1",
+              "valueType": {
+                "id": 10673,
+                "keyName": "",
+                "keyNameLocation": "-1:-1:-1",
+                "keyType": {
+                  "id": 10671,
+                  "name": "uint192",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "295:7:58",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint192",
+                    "typeString": "uint192"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "287:27:58",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_uint192_$_t_uint256_$",
+                  "typeString": "mapping(uint192 => uint256)"
+                },
+                "valueName": "",
+                "valueNameLocation": "-1:-1:-1",
+                "valueType": {
+                  "id": 10672,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "306:7:58",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "id": 10700,
+            "nodeType": "FunctionDefinition",
+            "src": "349:175:58",
+            "nodes": [],
+            "body": {
+              "id": 10699,
+              "nodeType": "Block",
+              "src": "445:79:58",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 10697,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "baseExpression": {
+                        "baseExpression": {
+                          "id": 10685,
+                          "name": "nonceSequenceNumber",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10675,
+                          "src": "462:19:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint192_$_t_uint256_$_$",
+                            "typeString": "mapping(address => mapping(uint192 => uint256))"
+                          }
+                        },
+                        "id": 10687,
+                        "indexExpression": {
+                          "id": 10686,
+                          "name": "sender",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10677,
+                          "src": "482:6:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "462:27:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_uint192_$_t_uint256_$",
+                          "typeString": "mapping(uint192 => uint256)"
+                        }
+                      },
+                      "id": 10689,
+                      "indexExpression": {
+                        "id": 10688,
+                        "name": "key",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10679,
+                        "src": "490:3:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint192",
+                          "typeString": "uint192"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "IndexAccess",
+                      "src": "462:32:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "|",
+                    "rightExpression": {
+                      "components": [
+                        {
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 10695,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "arguments": [
+                              {
+                                "id": 10692,
+                                "name": "key",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 10679,
+                                "src": "506:3:58",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint192",
+                                  "typeString": "uint192"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_uint192",
+                                  "typeString": "uint192"
+                                }
+                              ],
+                              "id": 10691,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "498:7:58",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_uint256_$",
+                                "typeString": "type(uint256)"
+                              },
+                              "typeName": {
+                                "id": 10690,
+                                "name": "uint256",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "498:7:58",
+                                "typeDescriptions": {}
+                              }
+                            },
+                            "id": 10693,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "typeConversion",
+                            "lValueRequested": false,
+                            "nameLocations": [],
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "498:12:58",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "<<",
+                          "rightExpression": {
+                            "hexValue": "3634",
+                            "id": 10694,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "514:2:58",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_64_by_1",
+                              "typeString": "int_const 64"
+                            },
+                            "value": "64"
+                          },
+                          "src": "498:18:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        }
+                      ],
+                      "id": 10696,
+                      "isConstant": false,
+                      "isInlineArray": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "TupleExpression",
+                      "src": "497:20:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "462:55:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 10684,
+                  "id": 10698,
+                  "nodeType": "Return",
+                  "src": "455:62:58"
+                }
+              ]
+            },
+            "baseFunctions": [
+              11491
+            ],
+            "functionSelector": "35567e1a",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getNonce",
+            "nameLocation": "358:8:58",
+            "overrides": {
+              "id": 10681,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "412:8:58"
+            },
+            "parameters": {
+              "id": 10680,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10677,
+                  "mutability": "mutable",
+                  "name": "sender",
+                  "nameLocation": "375:6:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10700,
+                  "src": "367:14:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 10676,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "367:7:58",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 10679,
+                  "mutability": "mutable",
+                  "name": "key",
+                  "nameLocation": "391:3:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10700,
+                  "src": "383:11:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint192",
+                    "typeString": "uint192"
+                  },
+                  "typeName": {
+                    "id": 10678,
+                    "name": "uint192",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "383:7:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint192",
+                      "typeString": "uint192"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "366:29:58"
+            },
+            "returnParameters": {
+              "id": 10684,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10683,
+                  "mutability": "mutable",
+                  "name": "nonce",
+                  "nameLocation": "438:5:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10700,
+                  "src": "430:13:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 10682,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "430:7:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "429:15:58"
+            },
+            "scope": 10752,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 10715,
+            "nodeType": "FunctionDefinition",
+            "src": "785:108:58",
+            "nodes": [],
+            "body": {
+              "id": 10714,
+              "nodeType": "Block",
+              "src": "838:55:58",
+              "nodes": [],
+              "statements": [
+                {
+                  "expression": {
+                    "id": 10712,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "UnaryOperation",
+                    "operator": "++",
+                    "prefix": false,
+                    "src": "848:38:58",
+                    "subExpression": {
+                      "baseExpression": {
+                        "baseExpression": {
+                          "id": 10706,
+                          "name": "nonceSequenceNumber",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10675,
+                          "src": "848:19:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint192_$_t_uint256_$_$",
+                            "typeString": "mapping(address => mapping(uint192 => uint256))"
+                          }
+                        },
+                        "id": 10710,
+                        "indexExpression": {
+                          "expression": {
+                            "id": 10707,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": -15,
+                            "src": "868:3:58",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 10708,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "872:6:58",
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "src": "868:10:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "848:31:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_uint192_$_t_uint256_$",
+                          "typeString": "mapping(uint192 => uint256)"
+                        }
+                      },
+                      "id": 10711,
+                      "indexExpression": {
+                        "id": 10709,
+                        "name": "key",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10702,
+                        "src": "880:3:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint192",
+                          "typeString": "uint192"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "848:36:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 10713,
+                  "nodeType": "ExpressionStatement",
+                  "src": "848:38:58"
+                }
+              ]
+            },
+            "baseFunctions": [
+              11497
+            ],
+            "functionSelector": "0bd28e3b",
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "incrementNonce",
+            "nameLocation": "794:14:58",
+            "overrides": {
+              "id": 10704,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "829:8:58"
+            },
+            "parameters": {
+              "id": 10703,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10702,
+                  "mutability": "mutable",
+                  "name": "key",
+                  "nameLocation": "817:3:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10715,
+                  "src": "809:11:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint192",
+                    "typeString": "uint192"
+                  },
+                  "typeName": {
+                    "id": 10701,
+                    "name": "uint192",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "809:7:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint192",
+                      "typeString": "uint192"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "808:13:58"
+            },
+            "returnParameters": {
+              "id": 10705,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "838:0:58"
+            },
+            "scope": 10752,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "id": 10751,
+            "nodeType": "FunctionDefinition",
+            "src": "1008:234:58",
+            "nodes": [],
+            "body": {
+              "id": 10750,
+              "nodeType": "Block",
+              "src": "1096:146:58",
+              "nodes": [],
+              "statements": [
+                {
+                  "assignments": [
+                    10726
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 10726,
+                      "mutability": "mutable",
+                      "name": "key",
+                      "nameLocation": "1115:3:58",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 10750,
+                      "src": "1107:11:58",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint192",
+                        "typeString": "uint192"
+                      },
+                      "typeName": {
+                        "id": 10725,
+                        "name": "uint192",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1107:7:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint192",
+                          "typeString": "uint192"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 10733,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 10731,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 10729,
+                          "name": "nonce",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10720,
+                          "src": "1129:5:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">>",
+                        "rightExpression": {
+                          "hexValue": "3634",
+                          "id": 10730,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "1138:2:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_64_by_1",
+                            "typeString": "int_const 64"
+                          },
+                          "value": "64"
+                        },
+                        "src": "1129:11:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 10728,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "1121:7:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint192_$",
+                        "typeString": "type(uint192)"
+                      },
+                      "typeName": {
+                        "id": 10727,
+                        "name": "uint192",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1121:7:58",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 10732,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1121:20:58",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint192",
+                      "typeString": "uint192"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1107:34:58"
+                },
+                {
+                  "assignments": [
+                    10735
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 10735,
+                      "mutability": "mutable",
+                      "name": "seq",
+                      "nameLocation": "1158:3:58",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 10750,
+                      "src": "1151:10:58",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      },
+                      "typeName": {
+                        "id": 10734,
+                        "name": "uint64",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1151:6:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint64",
+                          "typeString": "uint64"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 10740,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 10738,
+                        "name": "nonce",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 10720,
+                        "src": "1171:5:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 10737,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "1164:6:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint64_$",
+                        "typeString": "type(uint64)"
+                      },
+                      "typeName": {
+                        "id": 10736,
+                        "name": "uint64",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "1164:6:58",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 10739,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1164:13:58",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "1151:26:58"
+                },
+                {
+                  "expression": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 10748,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 10746,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "UnaryOperation",
+                      "operator": "++",
+                      "prefix": false,
+                      "src": "1194:34:58",
+                      "subExpression": {
+                        "baseExpression": {
+                          "baseExpression": {
+                            "id": 10741,
+                            "name": "nonceSequenceNumber",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 10675,
+                            "src": "1194:19:58",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint192_$_t_uint256_$_$",
+                              "typeString": "mapping(address => mapping(uint192 => uint256))"
+                            }
+                          },
+                          "id": 10743,
+                          "indexExpression": {
+                            "id": 10742,
+                            "name": "sender",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 10718,
+                            "src": "1214:6:58",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "nodeType": "IndexAccess",
+                          "src": "1194:27:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_mapping$_t_uint192_$_t_uint256_$",
+                            "typeString": "mapping(uint192 => uint256)"
+                          }
+                        },
+                        "id": 10745,
+                        "indexExpression": {
+                          "id": 10744,
+                          "name": "key",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 10726,
+                          "src": "1222:3:58",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint192",
+                            "typeString": "uint192"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": true,
+                        "nodeType": "IndexAccess",
+                        "src": "1194:32:58",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "==",
+                    "rightExpression": {
+                      "id": 10747,
+                      "name": "seq",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 10735,
+                      "src": "1232:3:58",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint64",
+                        "typeString": "uint64"
+                      }
+                    },
+                    "src": "1194:41:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 10724,
+                  "id": 10749,
+                  "nodeType": "Return",
+                  "src": "1187:48:58"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 10716,
+              "nodeType": "StructuredDocumentation",
+              "src": "899:104:58",
+              "text": " validate nonce uniqueness for this account.\n called just after validateUserOp()"
+            },
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_validateAndUpdateNonce",
+            "nameLocation": "1017:23:58",
+            "parameters": {
+              "id": 10721,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10718,
+                  "mutability": "mutable",
+                  "name": "sender",
+                  "nameLocation": "1049:6:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10751,
+                  "src": "1041:14:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 10717,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1041:7:58",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 10720,
+                  "mutability": "mutable",
+                  "name": "nonce",
+                  "nameLocation": "1065:5:58",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10751,
+                  "src": "1057:13:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 10719,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1057:7:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1040:31:58"
+            },
+            "returnParameters": {
+              "id": 10724,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10723,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 10751,
+                  "src": "1090:4:58",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 10722,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1090:4:58",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1089:6:58"
+            },
+            "scope": 10752,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 10667,
+              "name": "INonceManager",
+              "nameLocations": [
+                "170:13:58"
+              ],
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 11498,
+              "src": "170:13:58"
+            },
+            "id": 10668,
+            "nodeType": "InheritanceSpecifier",
+            "src": "170:13:58"
+          }
+        ],
+        "canonicalName": "NonceManager",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": {
+          "id": 10666,
+          "nodeType": "StructuredDocumentation",
+          "src": "103:41:58",
+          "text": " nonce management functionality"
+        },
+        "fullyImplemented": true,
+        "linearizedBaseContracts": [
+          10752,
+          11498
+        ],
+        "name": "NonceManager",
+        "nameLocation": "154:12:58",
+        "scope": 10753,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 58
+}

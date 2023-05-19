@@ -1,0 +1,400 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "addDeposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDeposit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "withdrawAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawDepositTo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "addDeposit()": "4a58db19",
+    "getDeposit()": "c399ec88",
+    "withdrawDepositTo(address,uint256)": "4d44560d"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"addDeposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDeposit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"withdrawAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawDepositTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"withdrawDepositTo(address,uint256)\":{\"params\":{\"amount\":\"to withdraw\",\"withdrawAddress\":\"target to send to\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"addDeposit()\":{\"notice\":\"deposit more funds for this account in the entryPoint\"},\"getDeposit()\":{\"notice\":\"check current account deposit in the entryPoint\"},\"withdrawDepositTo(address,uint256)\":{\"notice\":\"withdraw value from the account's deposit\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/interfaces/IDepositManager.sol\":\"IDepositManager\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"contracts/interfaces/IDepositManager.sol\":{\"keccak256\":\"0x5721e241817c2c5e69b97ccc69a4aa34fafabb790cabb2a4fe2669b49cac3994\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://29a95e9e53ac056c17854bbf08d9aa9244b3d174a79bec09e5b74c7764e7b5f3\",\"dweb:/ipfs/QmSFNviB6g8eo4vXtKTjSKxZSVncTH1B1oX6ahoLgpj3cV\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "stateMutability": "payable",
+          "type": "function",
+          "name": "addDeposit"
+        },
+        {
+          "inputs": [],
+          "stateMutability": "view",
+          "type": "function",
+          "name": "getDeposit",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ]
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address payable",
+              "name": "withdrawAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "withdrawDepositTo"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "withdrawDepositTo(address,uint256)": {
+            "params": {
+              "amount": "to withdraw",
+              "withdrawAddress": "target to send to"
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "addDeposit()": {
+            "notice": "deposit more funds for this account in the entryPoint"
+          },
+          "getDeposit()": {
+            "notice": "check current account deposit in the entryPoint"
+          },
+          "withdrawDepositTo(address,uint256)": {
+            "notice": "withdraw value from the account's deposit"
+          }
+        },
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/interfaces/IDepositManager.sol": "IDepositManager"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "contracts/interfaces/IDepositManager.sol": {
+        "keccak256": "0x5721e241817c2c5e69b97ccc69a4aa34fafabb790cabb2a4fe2669b49cac3994",
+        "urls": [
+          "bzz-raw://29a95e9e53ac056c17854bbf08d9aa9244b3d174a79bec09e5b74c7764e7b5f3",
+          "dweb:/ipfs/QmSFNviB6g8eo4vXtKTjSKxZSVncTH1B1oX6ahoLgpj3cV"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/interfaces/IDepositManager.sol",
+    "id": 2858,
+    "exportedSymbols": {
+      "IDepositManager": [
+        2857
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:567:21",
+    "nodes": [
+      {
+        "id": 2838,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:21",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 2857,
+        "nodeType": "ContractDefinition",
+        "src": "62:540:21",
+        "nodes": [
+          {
+            "id": 2844,
+            "nodeType": "FunctionDefinition",
+            "src": "165:54:21",
+            "nodes": [],
+            "documentation": {
+              "id": 2839,
+              "nodeType": "StructuredDocumentation",
+              "src": "94:66:21",
+              "text": " check current account deposit in the entryPoint"
+            },
+            "functionSelector": "c399ec88",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getDeposit",
+            "nameLocation": "174:10:21",
+            "parameters": {
+              "id": 2840,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "184:2:21"
+            },
+            "returnParameters": {
+              "id": 2843,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2842,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2844,
+                  "src": "210:7:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2841,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "210:7:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "209:9:21"
+            },
+            "scope": 2857,
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2848,
+            "nodeType": "FunctionDefinition",
+            "src": "302:39:21",
+            "nodes": [],
+            "documentation": {
+              "id": 2845,
+              "nodeType": "StructuredDocumentation",
+              "src": "225:72:21",
+              "text": " deposit more funds for this account in the entryPoint"
+            },
+            "functionSelector": "4a58db19",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "addDeposit",
+            "nameLocation": "311:10:21",
+            "parameters": {
+              "id": 2846,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "321:2:21"
+            },
+            "returnParameters": {
+              "id": 2847,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "340:0:21"
+            },
+            "scope": 2857,
+            "stateMutability": "payable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "id": 2856,
+            "nodeType": "FunctionDefinition",
+            "src": "493:107:21",
+            "nodes": [],
+            "documentation": {
+              "id": 2849,
+              "nodeType": "StructuredDocumentation",
+              "src": "347:141:21",
+              "text": " withdraw value from the account's deposit\n @param withdrawAddress target to send to\n @param amount to withdraw"
+            },
+            "functionSelector": "4d44560d",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "withdrawDepositTo",
+            "nameLocation": "502:17:21",
+            "parameters": {
+              "id": 2854,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2851,
+                  "mutability": "mutable",
+                  "name": "withdrawAddress",
+                  "nameLocation": "545:15:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2856,
+                  "src": "529:31:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address_payable",
+                    "typeString": "address payable"
+                  },
+                  "typeName": {
+                    "id": 2850,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "529:15:21",
+                    "stateMutability": "payable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address_payable",
+                      "typeString": "address payable"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2853,
+                  "mutability": "mutable",
+                  "name": "amount",
+                  "nameLocation": "578:6:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2856,
+                  "src": "570:14:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2852,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "570:7:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "519:71:21"
+            },
+            "returnParameters": {
+              "id": 2855,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "599:0:21"
+            },
+            "scope": 2857,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IDepositManager",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          2857
+        ],
+        "name": "IDepositManager",
+        "nameLocation": "72:15:21",
+        "scope": 2858,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 21
+}

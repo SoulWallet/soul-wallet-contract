@@ -1,0 +1,275 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newLogic",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldLogic",
+          "type": "address"
+        }
+      ],
+      "name": "Upgrade",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "upgrade",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "methodIdentifiers": {
+    "upgrade()": "d55ec697"
+  },
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newLogic\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"oldLogic\",\"type\":\"address\"}],\"name\":\"Upgrade\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"upgrade\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/plugin/Upgrade/IUpgrade.sol\":\"IUpgrade\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[\":@account-abstraction/=lib/account-abstraction/\",\":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/\",\":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/\",\":@source/=contracts/\",\":account-abstraction/=lib/account-abstraction/contracts/\",\":ds-test/=lib/forge-std/lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\",\":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/\",\":openzeppelin-contracts/=lib/openzeppelin-contracts/\"],\"viaIR\":true},\"sources\":{\"contracts/plugin/Upgrade/IUpgrade.sol\":{\"keccak256\":\"0x17d4ac97a684061875a54a750ac4ad754060f62a8cf393a233245b9e8db05edc\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://b27bc6555a6af1dd63664f742a04b9e7ed280bf60c9c14b4b03545359164c831\",\"dweb:/ipfs/QmZymBYCJf3v3icuTtgLxMGu63s91FxfS43uQfB9pCCBLx\"]}},\"version\":1}",
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newLogic",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "internalType": "address",
+              "name": "oldLogic",
+              "type": "address",
+              "indexed": true
+            }
+          ],
+          "type": "event",
+          "name": "Upgrade",
+          "anonymous": false
+        },
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function",
+          "name": "upgrade"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "remappings": [
+        ":@account-abstraction/=lib/account-abstraction/",
+        ":@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+        ":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+        ":@source/=contracts/",
+        ":account-abstraction/=lib/account-abstraction/contracts/",
+        ":ds-test/=lib/forge-std/lib/ds-test/src/",
+        ":forge-std/=lib/forge-std/src/",
+        ":openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+        ":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "contracts/plugin/Upgrade/IUpgrade.sol": "IUpgrade"
+      },
+      "libraries": {},
+      "viaIR": true
+    },
+    "sources": {
+      "contracts/plugin/Upgrade/IUpgrade.sol": {
+        "keccak256": "0x17d4ac97a684061875a54a750ac4ad754060f62a8cf393a233245b9e8db05edc",
+        "urls": [
+          "bzz-raw://b27bc6555a6af1dd63664f742a04b9e7ed280bf60c9c14b4b03545359164c831",
+          "dweb:/ipfs/QmZymBYCJf3v3icuTtgLxMGu63s91FxfS43uQfB9pCCBLx"
+        ],
+        "license": "GPL-3.0"
+      }
+    },
+    "version": 1
+  },
+  "ast": {
+    "absolutePath": "contracts/plugin/Upgrade/IUpgrade.sol",
+    "id": 7350,
+    "exportedSymbols": {
+      "IUpgrade": [
+        7349
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "36:154:47",
+    "nodes": [
+      {
+        "id": 7339,
+        "nodeType": "PragmaDirective",
+        "src": "36:24:47",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".17"
+        ]
+      },
+      {
+        "id": 7349,
+        "nodeType": "ContractDefinition",
+        "src": "62:127:47",
+        "nodes": [
+          {
+            "id": 7345,
+            "nodeType": "EventDefinition",
+            "src": "87:66:47",
+            "nodes": [],
+            "anonymous": false,
+            "eventSelector": "d23ce5645530506727523fe6d7939e72bb49102454460bc72f0f5baec60ac718",
+            "name": "Upgrade",
+            "nameLocation": "93:7:47",
+            "parameters": {
+              "id": 7344,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7341,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "newLogic",
+                  "nameLocation": "117:8:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7345,
+                  "src": "101:24:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7340,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "101:7:47",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7343,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "oldLogic",
+                  "nameLocation": "143:8:47",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7345,
+                  "src": "127:24:47",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7342,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "127:7:47",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "100:52:47"
+            }
+          },
+          {
+            "id": 7348,
+            "nodeType": "FunctionDefinition",
+            "src": "159:28:47",
+            "nodes": [],
+            "functionSelector": "d55ec697",
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "upgrade",
+            "nameLocation": "168:7:47",
+            "parameters": {
+              "id": 7346,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "175:2:47"
+            },
+            "returnParameters": {
+              "id": 7347,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "186:0:47"
+            },
+            "scope": 7349,
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IUpgrade",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "linearizedBaseContracts": [
+          7349
+        ],
+        "name": "IUpgrade",
+        "nameLocation": "72:8:47",
+        "scope": 7350,
+        "usedErrors": []
+      }
+    ],
+    "license": "GPL-3.0"
+  },
+  "id": 47
+}

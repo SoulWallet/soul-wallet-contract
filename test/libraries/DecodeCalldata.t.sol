@@ -7,11 +7,11 @@ import "@source/libraries/DecodeCalldata.sol";
 contract DecodeCalldataTest is Test {
     function setUp() public {}
 
-    function testSomething(uint256 a, bool b) external {}
+    function something(uint256 a, bool b) external {}
 
     function test_decodeMethodId() public {
-        bytes memory data = abi.encodeWithSelector(DecodeCalldataTest.testSomething.selector);
+        bytes memory data = abi.encodeWithSelector(DecodeCalldataTest.something.selector);
         bytes4 methodId = DecodeCalldata.decodeMethodId(data);
-        assertEq(methodId, DecodeCalldataTest.testSomething.selector);
+        assertEq(methodId, DecodeCalldataTest.something.selector);
     }
 }

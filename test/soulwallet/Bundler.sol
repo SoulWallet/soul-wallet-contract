@@ -7,7 +7,7 @@ import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import "@source/libraries/DecodeCalldata.sol";
 
-contract Bundler {
+contract Bundler is Test {
     /* 
         address sender;
         uint256 nonce;
@@ -23,7 +23,11 @@ contract Bundler {
      */
     function post(IEntryPoint entryPoint, UserOperation memory userOp) external {
         // staticcall: function simulateValidation(UserOperation calldata userOp) external
+
         if (false) {
+            vm.startPrank(address(0));
+            uint256 snapshotId = vm.snapshot();
+
             (bool success, bytes memory data) = address(entryPoint).staticcall(
                 abi.encodeWithSignature(
                     "simulateValidation((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))",
@@ -32,20 +36,27 @@ contract Bundler {
             );
             if (!success) {
                 bytes4 methodId = DecodeCalldata.decodeMethodId(data);
-                if (methodId == IEntryPoint.FailedOp.selector) {
-                    // error FailedOp(uint256 opIndex, string reason);
-                    bytes memory _data = DecodeCalldata.decodeMethodCalldata(data);
-                    (, string memory reason) = abi.decode(_data, (uint256, string));
-                    revert(reason);
-                } else if (methodId == IEntryPoint.ValidationResult.selector) {
+                if (methodId == IEntryPoint.ValidationResult.selector) {
                     // error ValidationResult(ReturnInfo returnInfo, StakeInfo senderInfo, StakeInfo factoryInfo, StakeInfo paymasterInfo);
                 } else {
-                    console.logBytes(data);
-                    revert("simulateValidation failed");
+                    if (methodId == IEntryPoint.FailedOp.selector) {
+                        // error FailedOp(uint256 opIndex, string reason);
+                        bytes memory _data = DecodeCalldata.decodeMethodCalldata(data);
+                        (uint256 opIndex, string memory reason) = abi.decode(_data, (uint256, string));
+                        console.log("FailedOp:", opIndex, reason);
+                        //revert IEntryPoint.FailedOp(opIndex, reason);
+                    }
+
+                    assembly {
+                        revert(add(data, 0x20), mload(data))
+                    }
                 }
             } else {
                 revert("failed");
             }
+
+            vm.revertTo(snapshotId);
+            vm.stopPrank();
         }
 
         UserOperation[] memory userOperations = new UserOperation[](1);

@@ -11,10 +11,11 @@ abstract contract SignatureValidator is OwnerAuth {
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
-    function packSignatureHash(
-        bytes32 hash,
-        SignatureDecoder.SignatureData memory signatureData
-    ) private pure returns (bytes32 packedHash) {
+    function packSignatureHash(bytes32 hash, SignatureDecoder.SignatureData memory signatureData)
+        private
+        pure
+        returns (bytes32 packedHash)
+    {
         if (signatureData.validationData == 0) {
             packedHash = hash;
         } else {
@@ -22,10 +23,11 @@ abstract contract SignatureValidator is OwnerAuth {
         }
     }
 
-    function isValidateSignature(
-        bytes32 rawHash,
-        bytes memory rawSignature
-    ) internal view returns (uint256 validationData, bool sigValid) {
+    function isValidateSignature(bytes32 rawHash, bytes memory rawSignature)
+        internal
+        view
+        returns (uint256 validationData, bool sigValid)
+    {
         SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(rawSignature);
         validationData = signatureData.validationData;
         bytes32 hash = packSignatureHash(rawHash, signatureData);
@@ -37,10 +39,11 @@ abstract contract SignatureValidator is OwnerAuth {
         }
     }
 
-    function isValidUserOp(
-        bytes32 userOpHash,
-        bytes calldata userOpSignature
-    ) internal view returns (uint256 validationData, bool sigValid) {
+    function isValidUserOp(bytes32 userOpHash, bytes calldata userOpSignature)
+        internal
+        view
+        returns (uint256 validationData, bool sigValid)
+    {
         SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(userOpSignature);
         validationData = signatureData.validationData;
         bytes32 hash = packSignatureHash(userOpHash, signatureData).toEthSignedMessageHash();

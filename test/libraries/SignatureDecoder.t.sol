@@ -15,7 +15,7 @@ contract SignatureDecoderTest is Test {
         (, uint256 ownerKey) = makeAddrAndKey("owner");
         bytes32 hash = keccak256(abi.encodePacked("hello world"));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, hash);
-        bytes memory sig = abi.encodePacked(v, r, s);
+        bytes memory sig = abi.encodePacked(r, s, v);
         assertEq(sig.length, 65);
         signTypeDecode(sig, sig, 0);
     }
@@ -33,7 +33,7 @@ contract SignatureDecoderTest is Test {
         (, uint256 ownerKey) = makeAddrAndKey("owner");
         bytes32 hash = keccak256(abi.encodePacked("hello world"));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, hash);
-        bytes memory sig = abi.encodePacked(v, r, s);
+        bytes memory sig = abi.encodePacked(r, s, v);
         uint48 validUntil = 0;
         uint48 validAfter = 0;
         uint256 validationData = (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));

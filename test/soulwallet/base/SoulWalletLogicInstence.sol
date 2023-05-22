@@ -12,16 +12,14 @@ contract SoulWalletLogicInstence {
     TrustedPluginManager public trustedPluginManager;
     SoulWallet public soulWalletLogic;
     SecurityControlModule public securityControlModule;
-    EntryPoint public entryPoint;
 
     uint256 public TrustedModuleManagerOwnerPrivateKey;
 
-    constructor(address trustedManagerOwner) {
+    constructor(address trustedManagerOwner, EntryPoint _entryPoint) {
         //(trustedManagerOwner, TrustedModuleManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
         trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
         trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
         securityControlModule = new SecurityControlModule(trustedModuleManager, trustedPluginManager);
-        entryPoint = new EntryPoint();
-        soulWalletLogic = new SoulWallet(entryPoint, address(securityControlModule));
+        soulWalletLogic = new SoulWallet(_entryPoint, address(securityControlModule));
     }
 }

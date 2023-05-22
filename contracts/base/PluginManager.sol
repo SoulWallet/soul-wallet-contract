@@ -57,9 +57,12 @@ abstract contract PluginManager is Authority, IPluginManager {
                     plugins[i],
                     abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
                 );
-                require(success, "guardHook failed");
+                if (!success) {
+                    return false;
+                }
             }
         }
+        return true;
     }
 
     function preHook(address target, uint256 value, bytes memory data) internal {

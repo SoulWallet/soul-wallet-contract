@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "./SoulWalletInstence.sol";
+import "./base/SoulWalletInstence.sol";
 import "@source/handler/DefaultCallbackHandler.sol";
 import "@source/dev/Tokens/TokenERC721.sol";
 
@@ -13,8 +13,8 @@ contract DefaultCallbackHandlerTest is Test {
     TokenERC721 tokenERC721;
 
     function setUp() public {
-        (address ownerAddr, uint256 ownerKey) = makeAddrAndKey("owner1");
-        (address trustedManagerOwner, uint256 trustedManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
+        (address ownerAddr,) = makeAddrAndKey("owner1");
+        (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
         IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
         IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
         bytes32 salt = bytes32(0);

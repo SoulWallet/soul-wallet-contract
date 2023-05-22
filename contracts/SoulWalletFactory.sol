@@ -16,12 +16,12 @@ import "./SoulWallet.sol";
  */
 
 contract SoulWalletFactory {
-    address public immutable walletImpl;
+    uint256 public immutable walletImpl;
     string public constant VERSION = "0.0.1";
 
     constructor(address _walletImpl) {
         require(_walletImpl != address(0));
-        walletImpl = _walletImpl;
+        walletImpl = uint256(uint160(_walletImpl));
     }
 
     function calcSalt(bytes memory _initializer, bytes32 _salt) private pure returns (bytes32 salt) {
@@ -32,11 +32,10 @@ contract SoulWalletFactory {
      * @notice  deploy the soul wallet contract using proxy and returns the address of the proxy. should be called by entrypoint with useropeartoin.initcode > 0
      */
     function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
-        bytes memory deploymentData =
-            abi.encodePacked(type(SoulWalletProxy).creationCode, uint256(uint160((walletImpl))));
+        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, walletImpl);
         bytes32 salt = calcSalt(_initializer, _salt);
         assembly {
-            proxy := create2(0, add(deploymentData, 0x20), mload(deploymentData), salt)
+            proxy := create2(0x0, add(deploymentData, 0x20), mload(deploymentData), salt)
         }
         if (proxy == address(0)) {
             revert();
@@ -69,11 +68,10 @@ contract SoulWalletFactory {
     /**
      * @notice  return the counterfactual address of soul wallet as it would be return by createWallet()
      */
-    function getWalletAddress(bytes memory _initializer, bytes32 _salt) external view returns (address) {
-        bytes memory deploymentData =
-            abi.encodePacked(type(SoulWalletProxy).creationCode, uint256(uint160((walletImpl))));
+    function getWalletAddress(bytes memory _initializer, bytes32 _salt) external view returns (address proxy) {
+        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, walletImpl);
         bytes32 salt = calcSalt(_initializer, _salt);
-        return computeAddress(salt, keccak256(deploymentData), address(this));
+        proxy = computeAddress(salt, keccak256(deploymentData), address(this));
     }
 
     /**

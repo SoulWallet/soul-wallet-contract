@@ -6,7 +6,7 @@ import "@source/SoulWallet.sol";
 import "@source/SoulWalletFactory.sol";
 import "./SoulWalletLogicInstence.sol";
 import "@source/dev/SingletonFactory.sol";
-
+import "@account-abstraction/contracts/core/EntryPoint.sol";
 import "forge-std/Test.sol";
 
 contract SoulWalletInstence {
@@ -14,6 +14,7 @@ contract SoulWalletInstence {
     SoulWalletFactory public soulWalletFactory;
     SingletonFactory public singletonFactory;
     ISoulWallet public soulWallet;
+    EntryPoint public entryPoint;
 
     constructor(
         address trustedManagerOwner,
@@ -23,8 +24,9 @@ contract SoulWalletInstence {
         IPluginManager.Plugin[] memory plugins,
         bytes32 salt
     ) {
+        entryPoint = new EntryPoint();
         singletonFactory = new SingletonFactory();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         /*

@@ -4,6 +4,7 @@ test = 'test'
 out = "out"
 libs = ["lib"]
 gas_reports = [
+    "EntryPoint",
     "SoulWalletFactory",
     "SoulWalletProxy",
     "SoulWallet",

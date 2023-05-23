@@ -24,10 +24,10 @@ contract Bundler is Test {
     function post(IEntryPoint entryPoint, UserOperation memory userOp) external {
         // staticcall: function simulateValidation(UserOperation calldata userOp) external
 
-        if (false) {
+        if (true) {
             uint256 snapshotId = vm.snapshot();
 
-            (bool success, bytes memory data) = address(entryPoint).staticcall(
+            (bool success, bytes memory data) = address(entryPoint).call /* can not use staticcall */ (
                 abi.encodeWithSignature(
                     "simulateValidation((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))",
                     userOp

@@ -35,7 +35,7 @@ contract SoulWalletInstence {
         Plugin[] calldata plugins
          */
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,(address,bytes4[],bytes)[],(address,bytes)[])",
+            "initialize(address,address,(address,bytes)[],(address,bytes)[])",
             ownerAddr,
             defaultCallbackHandler,
             modules,

@@ -15,7 +15,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
     address public immutable defaultModuleManager;
 
-    bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes4[],bytes)"));
+    bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
 
     constructor(address _defaultModuleManager) {
@@ -63,17 +63,18 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     }
 
     function addModule(Module memory aModule) internal {
-        require(aModule.selectors.length > 0, "selectors empty");
+        bytes4[] memory requiredFunctions = aModule.module.requiredFunctions();
+        require(requiredFunctions.length > 0, "selectors empty");
         address module = address(aModule.module);
 
         mapping(address => address) storage modules = modulesMapping();
         modules.add(module);
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
-        moduleSelectors[module].add(aModule.selectors);
+        moduleSelectors[module].add(requiredFunctions);
 
         aModule.module.walletInit(aModule.initData);
 
-        emit ModuleAdded(module, aModule.selectors);
+        emit ModuleAdded(module);
     }
 
     function removeModule(address module) internal {
@@ -90,16 +91,9 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         }
     }
 
-    function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
+    function listModule() external view override returns (address[] memory modules) {
         mapping(address => address) storage _modules = modulesMapping();
         modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, _modules.size());
-
-        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
-
-        for (uint256 i = 0; i < modules.length; i++) {
-            mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[modules[i]];
-            selectors[i] = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, moduleSelector.size());
-        }
     }
 
     function execFromModule(bytes calldata data) external override {
@@ -108,7 +102,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         require(isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
 
         if (selector == FUNC_ADD_MODULE) {
-            // addModule(address,bytes4[],bytes)
+            // addModule(address,bytes)
             Module memory _module = abi.decode(data[4:], (Module));
             addModule(_module);
         } else if (selector == FUNC_REMOVE_MODULE) {

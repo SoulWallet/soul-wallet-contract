@@ -6,7 +6,7 @@ import "../../trustedContractManager/ITrustedContractManager.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
-contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
+abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
     uint public constant MIN_DELAY = 1 days;
     uint public constant MAX_DELAY = 14 days;
 
@@ -52,7 +52,10 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         address _target,
         bytes calldata _data
     ) public override returns (bytes32) {
-        return keccak256(abi.encode(block.chainid, address(this), _seed, _target, _data));
+        return
+            keccak256(
+                abi.encode(block.chainid, address(this), _seed, _target, _data)
+            );
     }
 
     function getWalletConfig(
@@ -119,4 +122,5 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         emit Execute(ok, txId, _target, _data);
         return (ok, res);
     }
+
 }

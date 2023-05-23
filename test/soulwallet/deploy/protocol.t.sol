@@ -53,7 +53,7 @@ contract DeployProtocolTest is Test {
             bytes32 salt = bytes32(0);
             DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(address,address,(address,bytes4[],bytes)[],(address,bytes)[])",
+                "initialize(address,address,(address,bytes)[],(address,bytes)[])",
                 walletOwner,
                 defaultCallbackHandler,
                 modules,

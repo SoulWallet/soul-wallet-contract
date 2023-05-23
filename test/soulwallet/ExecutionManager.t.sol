@@ -123,6 +123,14 @@ contract ExecutionManagerTest is Test {
                     0,
                     abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 1)
                 );
+
+                vm.expectRevert(bytes("require from Entrypoint or owner"));
+                vm.prank(sender);
+                soulWallet.execute(
+                    address(tokenERC721),
+                    0,
+                    abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 1)
+                );
             }
             {
                 tokenERC721.safeMint(sender, 2);

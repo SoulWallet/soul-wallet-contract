@@ -9,6 +9,8 @@ import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../Bundler.sol";
+import "@source/dev/Tokens/TokenERC721.sol";
+import "@source/handler/DefaultCallbackHandler.sol";
 
 contract DeployProtocolTest is Test {
     using ECDSA for bytes32;
@@ -49,11 +51,11 @@ contract DeployProtocolTest is Test {
             IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
             IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
             bytes32 salt = bytes32(0);
-
+            DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
             bytes memory initializer = abi.encodeWithSignature(
                 "initialize(address,address,(address,bytes4[],bytes)[],(address,bytes)[])",
                 walletOwner,
-                address(0),
+                defaultCallbackHandler,
                 modules,
                 plugins
             );

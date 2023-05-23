@@ -8,6 +8,8 @@ abstract contract BaseModule is IModule {
     event ModuleInit(address indexed wallet);
     event ModuleDeInit(address indexed wallet);
 
+    bytes4 internal constant FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
+
     function inited(address wallet) internal view virtual returns (bool);
 
     function _init(bytes calldata data) internal virtual;
@@ -40,10 +42,7 @@ abstract contract BaseModule is IModule {
         }
     }
 
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) external view override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IModule).interfaceId;
     }
 }

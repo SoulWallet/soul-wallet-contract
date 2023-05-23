@@ -6,21 +6,12 @@ interface IBaseSecurityControlModule {
     error NotOwnerError();
     error AlreadyQueuedError(bytes32 txId);
     error NotQueuedError(bytes32 txId);
-    error TimestampNotPassedError(uint blockTimestmap, uint timestamp);
+    error TimestampNotPassedError(uint256 blockTimestmap, uint256 timestamp);
 
-    event Queue(
-        bytes32 indexed txId,
-        address indexed target,
-        bytes data,
-        uint timestamp
-    );
-    event Execute(
-        bool indexed success,
-        bytes32 indexed txId,
-        address indexed target,
-        bytes data
-    );
-    event Cancel(bytes32 indexed txId);
+    event Queue(address indexed sender, bytes32 indexed txId, address target, bytes data, uint256 timestamp);
+    event Execute(bool indexed success, address indexed sender, bytes32 indexed txId, address target, bytes data);
+    event Cancel(address indexed sender, bytes32 indexed txId);
+    event CancelAll(address indexed sender);
 
     struct Tx {
         address target;
@@ -32,25 +23,15 @@ interface IBaseSecurityControlModule {
         uint64 delay;
     }
 
-    function getTxId(
-        uint128 _seed,
-        address _target,
-        bytes calldata _data
-    ) external returns (bytes32);
+    function getTxId(uint128 _seed, address _target, bytes calldata _data) external view returns (bytes32);
 
-    function getWalletConfig(
-        address _target
-    ) external view returns (WalletConfig memory);
+    function getWalletConfig(address _target) external view returns (WalletConfig memory);
 
-    function queue(
-        address _target,
-        bytes calldata _data
-    ) external returns (bytes32);
+    function queue(address _target, bytes calldata _data) external returns (bytes32);
 
     function cancel(bytes32 _txId) external;
 
-    function execute(
-        address _target,
-        bytes calldata _data
-    ) external returns (bool, bytes memory);
+    function cancelAll() external;
+
+    function execute(address _target, bytes calldata _data) external returns (bool, bytes memory);
 }

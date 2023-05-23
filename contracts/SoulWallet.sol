@@ -42,6 +42,9 @@ contract SoulWallet is
         Plugin[] calldata plugins
     ) external initializer {
         _addOwner(anOwner);
+
+        initDefaultModuleManager(2 days);
+
         if (defalutCallbackHandler != address(0)) {
             internalSetFallbackHandler(defalutCallbackHandler);
         }

@@ -91,9 +91,16 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         }
     }
 
-    function listModule() external view override returns (address[] memory modules) {
+    function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
         mapping(address => address) storage _modules = modulesMapping();
         modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, _modules.size());
+
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
+
+        for (uint256 i = 0; i < modules.length; i++) {
+            mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[modules[i]];
+            selectors[i] = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, moduleSelector.size());
+        }
     }
 
     function execFromModule(bytes calldata data) external override {

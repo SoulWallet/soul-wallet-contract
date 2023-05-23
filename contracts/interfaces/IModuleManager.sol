@@ -18,7 +18,7 @@ interface IModuleManager {
 
     function isAuthorizedModule(address module) external returns (bool);
 
-    function listModule() external view returns (address[] memory modules);
+    function listModule() external view returns (address[] memory modules, bytes4[][] memory selectors);
 
     function execFromModule(bytes calldata data) external;
 }

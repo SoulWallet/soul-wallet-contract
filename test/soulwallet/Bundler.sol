@@ -25,7 +25,6 @@ contract Bundler is Test {
         // staticcall: function simulateValidation(UserOperation calldata userOp) external
 
         if (false) {
-            vm.startPrank(address(0));
             uint256 snapshotId = vm.snapshot();
 
             (bool success, bytes memory data) = address(entryPoint).staticcall(
@@ -34,6 +33,9 @@ contract Bundler is Test {
                     userOp
                 )
             );
+
+            vm.revertTo(snapshotId);
+
             if (!success) {
                 bytes4 methodId = DecodeCalldata.decodeMethodId(data);
                 if (methodId == IEntryPoint.ValidationResult.selector) {
@@ -54,9 +56,6 @@ contract Bundler is Test {
             } else {
                 revert("failed");
             }
-
-            vm.revertTo(snapshotId);
-            vm.stopPrank();
         }
 
         UserOperation[] memory userOperations = new UserOperation[](1);

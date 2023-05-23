@@ -88,7 +88,7 @@ contract DeployProtocolTest is Test {
 
         bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, userOpHash.toEthSignedMessageHash());
-        userOperation.signature = abi.encodePacked(r ,s, v);
+        userOperation.signature = abi.encodePacked(r, s, v);
         vm.expectRevert(abi.encodeWithSelector(IEntryPoint.FailedOp.selector, 0, "AA21 didn't pay prefund"));
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length, 0, "A1:sender.code.length != 0");
@@ -96,5 +96,8 @@ contract DeployProtocolTest is Test {
         vm.deal(userOperation.sender, 10 ether);
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length > 0, true, "A2:sender.code.length == 0");
+        ISoulWallet soulWallet = ISoulWallet(sender);
+        assertEq(soulWallet.isOwner(walletOwner), true);
+        assertEq(soulWallet.isOwner(address(0x1111)), false);
     }
 }

@@ -10,7 +10,7 @@ import "../libraries/AddressLinkedList.sol";
 abstract contract PluginManager is Authority, IPluginManager {
     using AddressLinkedList for mapping(address => address);
 
-    bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
+    bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin((address,bytes))"));
     bytes4 internal constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
 
     function pluginsMapping() private view returns (mapping(address => address) storage plugins) {

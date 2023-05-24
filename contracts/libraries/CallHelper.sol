@@ -9,37 +9,48 @@ library CallHelper {
         StaticCall
     }
 
-    function call(
-        CallType callType,
-        address target,
-        bytes memory data
-    ) internal returns (bool success, bytes memory returnData) {
+    function call(CallType callType, address target, bytes memory data)
+        internal
+        returns (bool success, bytes memory returnData)
+    {
         if (callType == CallType.Call) {
-            (success, returnData) = target.call(data);
+            (success, returnData) = call(target, data);
         } else if (callType == CallType.DelegateCall) {
-            (success, returnData) = target.delegatecall(data);
+            (success, returnData) = delegatecall(target, data);
         } else if (callType == CallType.StaticCall) {
-            (success, returnData) = target.staticcall(data);
+            (success, returnData) = staticcall(target, data);
         } else {
             revert("CallHelper: INVALID_CALL_TYPE");
         }
     }
 
-    function callWithoutReturnData(
-        CallType callType,
-        address target,
-        bytes memory data
-    ) internal {
+    function callWithoutReturnData(CallType callType, address target, bytes memory data) internal {
         bool success;
         if (callType == CallType.Call) {
-            (success, ) = target.call(data);
+            (success,) = call(target, data);
         } else if (callType == CallType.DelegateCall) {
-            (success, ) = target.delegatecall(data);
+            (success,) = delegatecall(target, data);
         } else if (callType == CallType.StaticCall) {
-            (success, ) = target.staticcall(data);
+            (success,) = staticcall(target, data);
         } else {
             revert("CallHelper: INVALID_CALL_TYPE");
         }
         require(success, "CallHelper: CALL_FAILED");
+    }
+
+    function call(address target, bytes memory data) internal returns (bool success, bytes memory returnData) {
+        (success, returnData) = target.call{value: 0}(data);
+    }
+
+    function delegatecall(address target, bytes memory data) internal returns (bool success, bytes memory returnData) {
+        (success, returnData) = target.delegatecall(data);
+    }
+
+    function staticcall(address target, bytes memory data)
+        internal
+        view
+        returns (bool success, bytes memory returnData)
+    {
+        (success, returnData) = target.staticcall(data);
     }
 }

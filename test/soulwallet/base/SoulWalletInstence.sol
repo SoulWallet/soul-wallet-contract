@@ -18,7 +18,7 @@ contract SoulWalletInstence {
     constructor(
         address defaultCallbackHandler,
         address ownerAddr,
-        IModuleManager.Module[] memory modules,
+        bytes[] memory modules,
         IPluginManager.Plugin[] memory plugins,
         bytes32 salt
     ) {
@@ -34,7 +34,7 @@ contract SoulWalletInstence {
         Plugin[] calldata plugins
          */
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,(address,bytes)[],(address,bytes)[])",
+            "initialize(address,address,bytes[],(address,bytes)[])",
             ownerAddr,
             defaultCallbackHandler,
             modules,

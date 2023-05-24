@@ -14,13 +14,12 @@ contract DefaultCallbackHandlerTest is Test {
 
     function setUp() public {
         (address ownerAddr,) = makeAddrAndKey("owner1");
-        (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
         IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
         IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
         bytes32 salt = bytes32(0);
         defaultCallbackHandler = new DefaultCallbackHandler();
         soulWalletInstence =
-        new SoulWalletInstence(trustedManagerOwner, address(defaultCallbackHandler), ownerAddr,  modules, plugins,  salt);
+            new SoulWalletInstence(address(defaultCallbackHandler), ownerAddr,  modules, plugins,  salt);
         soulWallet = soulWalletInstence.soulWallet();
         tokenERC721 = new TokenERC721();
     }

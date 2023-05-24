@@ -23,10 +23,7 @@ contract ExecutionManagerTest is Test {
     function setUp() public {
         entryPoint = new EntryPoint();
         (address trustedManagerOwner, uint256 trustedManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
-        IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
-        bytes32 salt = bytes32(0);
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         bundler = new Bundler();
@@ -53,7 +50,7 @@ contract ExecutionManagerTest is Test {
             bytes32 salt = bytes32(0);
             DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(address,address,(address,bytes4[],bytes)[],(address,bytes)[])",
+                "initialize(address,address,(address,bytes)[],(address,bytes)[])",
                 walletOwner,
                 defaultCallbackHandler,
                 modules,

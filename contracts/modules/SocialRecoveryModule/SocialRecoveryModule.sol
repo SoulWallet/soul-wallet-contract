@@ -21,6 +21,9 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     bytes32 private constant SOCIAL_RECOVERY_TYPEHASH =
         0x333ef7ecc7b8a82065578df0879cefc36c32344d49afdf1e0370a60babe64feb;
 
+    bytes4 private constant FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
+    bytes4 private constant FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
+
     mapping(address => uint256) walletRecoveryNonce;
     mapping(address => uint256) walletInitSeed;
 
@@ -406,5 +409,12 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
 
     function threshold(address _wallet) public view returns (uint256 _threshold) {
         return walletGuardian[_wallet].threshold;
+    }
+
+    function requiredFunctions() external pure override returns (bytes4[] memory){
+        bytes4[] memory functions = new bytes4[](2);
+        functions[0] = FUNC_RESET_OWNER;
+        functions[1] = FUNC_RESET_OWNERS;
+        return functions;
     }
 }

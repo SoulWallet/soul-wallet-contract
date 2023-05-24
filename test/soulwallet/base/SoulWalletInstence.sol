@@ -16,7 +16,6 @@ contract SoulWalletInstence {
     EntryPoint public entryPoint;
 
     constructor(
-        address trustedManagerOwner,
         address defaultCallbackHandler,
         address ownerAddr,
         IModuleManager.Module[] memory modules,
@@ -25,7 +24,7 @@ contract SoulWalletInstence {
     ) {
         entryPoint = new EntryPoint();
         singletonFactory = new SingletonFactory();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         /*
@@ -35,7 +34,7 @@ contract SoulWalletInstence {
         Plugin[] calldata plugins
          */
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,(address,bytes4[],bytes)[],(address,bytes)[])",
+            "initialize(address,address,(address,bytes)[],(address,bytes)[])",
             ownerAddr,
             defaultCallbackHandler,
             modules,

@@ -6,11 +6,10 @@ import "./IModule.sol";
 interface IModuleManager {
     struct Module {
         IModule module;
-        bytes4[] selectors;
         bytes initData;
     }
 
-    event ModuleAdded(address indexed module, bytes4[] selectors);
+    event ModuleAdded(address indexed module);
     event ModuleRemoved(address indexed module);
     event ModuleRemovedWithError(address indexed module);
 
@@ -19,10 +18,7 @@ interface IModuleManager {
 
     function isAuthorizedModule(address module) external returns (bool);
 
-    function listModule()
-        external
-        view
-        returns (address[] memory modules, bytes4[][] memory selectors);
+    function listModule() external view returns (address[] memory modules, bytes4[][] memory selectors);
 
     function execFromModule(bytes calldata data) external;
 }

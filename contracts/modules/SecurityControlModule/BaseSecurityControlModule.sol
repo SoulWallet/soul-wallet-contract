@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
+
 import "../BaseModule.sol";
 import "./IBaseSecurityControlModule.sol";
 import "../../trustedContractManager/ITrustedContractManager.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
-contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
-    uint public constant MIN_DELAY = 1 days;
-    uint public constant MAX_DELAY = 14 days;
+abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
+    uint256 public constant MIN_DELAY = 1 days;
+    uint256 public constant MAX_DELAY = 14 days;
 
     mapping(bytes32 => Tx) private queued;
     mapping(address => WalletConfig) private walletConfigs;
@@ -47,24 +48,19 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         walletConfigs[_sender] = WalletConfig(0, 0);
     }
 
-    function getTxId(
-        uint128 _seed,
-        address _target,
-        bytes calldata _data
-    ) public override returns (bytes32) {
+    function _getTxId(uint128 _seed, address _target, bytes calldata _data) private view returns (bytes32) {
         return keccak256(abi.encode(block.chainid, address(this), _seed, _target, _data));
     }
 
-    function getWalletConfig(
-        address _target
-    ) external view override returns (WalletConfig memory) {
+    function getTxId(uint128 _seed, address _target, bytes calldata _data) public view override returns (bytes32) {
+        return _getTxId(_seed, _target, _data);
+    }
+
+    function getWalletConfig(address _target) external view override returns (WalletConfig memory) {
         return walletConfigs[_target];
     }
 
-    function queue(
-        address _target,
-        bytes calldata _data
-    ) external virtual override returns (bytes32 txId) {
+    function queue(address _target, bytes calldata _data) external virtual override returns (bytes32 txId) {
         authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
         txId = getTxId(walletConfig.inited, _target, _data);
@@ -73,11 +69,9 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         }
         uint256 _timestamp = block.timestamp + walletConfig.delay;
         queued[txId] = Tx(_target, uint128(_timestamp));
-        emit Queue(txId, _target, _data, _timestamp);
+        emit Queue(sender(), txId, _target, _data, _timestamp);
     }
 
-    // TOOD: batch cancel or clear all pending trx, which
-    // is useful after social recovery
     function cancel(bytes32 _txId) external virtual override {
         Tx memory _tx = queued[_txId];
         if (_tx.target == address(0)) {
@@ -86,14 +80,18 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         authorized(_tx.target);
 
         queued[_txId] = Tx(address(0), 0);
-        emit Cancel(_txId);
+        emit Cancel(sender(), _txId);
     }
 
-    function preExecute(
-        address _target,
-        bytes calldata _data,
-        bytes32 _txId
-    ) internal virtual {
+    function cancelAll() external virtual override {
+        address _sender = sender();
+        WalletConfig storage walletConfig = walletConfigs[_sender];
+        require(walletConfig.inited != 0);
+        walletConfig.inited = newSeed();
+        emit CancelAll(_sender);
+    }
+
+    function preExecute(address _target, bytes calldata _data, bytes32 _txId) internal virtual {
         (_target, _data);
         Tx memory _tx = queued[_txId];
         uint256 validAfter = _tx.validAfter;
@@ -105,18 +103,19 @@ contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
         }
     }
 
-    function execute(
-        address _target,
-        bytes calldata _data
-    ) external virtual override returns (bool, bytes memory) {
+    function packExecuteData(bytes calldata _data) private pure returns (bytes memory) {
+        return abi.encodeWithSelector(FUNC_EXEC_FROM_MODULE, _data);
+    }
+
+    function execute(address _target, bytes calldata _data) external virtual override returns (bool, bytes memory) {
         authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
         bytes32 txId = getTxId(walletConfig.inited, _target, _data);
         preExecute(_target, _data, txId);
         queued[txId] = Tx(address(0), 0);
         // call target
-        (bool ok, bytes memory res) = _target.call{value: 0}(_data);
-        emit Execute(ok, txId, _target, _data);
+        (bool ok, bytes memory res) = _target.call{value: 0}(packExecuteData(_data));
+        emit Execute(ok, sender(), txId, _target, _data);
         return (ok, res);
     }
 }

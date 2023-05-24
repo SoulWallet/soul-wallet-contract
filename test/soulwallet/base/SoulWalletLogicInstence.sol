@@ -8,18 +8,9 @@ import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager
 import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager.sol";
 
 contract SoulWalletLogicInstence {
-    TrustedModuleManager public trustedModuleManager;
-    TrustedPluginManager public trustedPluginManager;
     SoulWallet public soulWalletLogic;
-    SecurityControlModule public securityControlModule;
 
-    uint256 public TrustedModuleManagerOwnerPrivateKey;
-
-    constructor(address trustedManagerOwner, EntryPoint _entryPoint) {
-        //(trustedManagerOwner, TrustedModuleManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
-        trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
-        trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
-        securityControlModule = new SecurityControlModule(trustedModuleManager, trustedPluginManager);
-        soulWalletLogic = new SoulWallet(_entryPoint, address(securityControlModule));
+    constructor(EntryPoint _entryPoint) {
+        soulWalletLogic = new SoulWallet(_entryPoint);
     }
 }

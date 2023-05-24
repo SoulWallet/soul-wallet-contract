@@ -13,20 +13,8 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     using AddressLinkedList for mapping(address => address);
     using SelectorLinkedList for mapping(bytes4 => bytes4);
 
-    address public immutable defaultModuleManager;
-
     bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
-
-    constructor(address _defaultModuleManager) {
-        require(_defaultModuleManager != address(0));
-        defaultModuleManager = _defaultModuleManager;
-    }
-
-    function initDefaultModuleManager(uint64 time) internal {
-        // DefaultModuleManager initialize
-        IModule(defaultModuleManager).walletInit(abi.encode(time));
-    }
 
     function modulesMapping() private view returns (mapping(address => address) storage modules) {
         modules = AccountStorage.layout().modules;
@@ -41,22 +29,10 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     }
 
     function _isAuthorizedModule(address module) private view returns (bool) {
-        if (defaultModuleManager == module) {
-            return true;
-        }
         return modulesMapping().isExist(module);
     }
 
     function isAuthorizedSelector(address module, bytes4 selector) private view returns (bool) {
-        if (
-            defaultModuleManager == module
-                && (
-                    selector == FUNC_ADD_MODULE || selector == FUNC_REMOVE_MODULE || selector == FUNC_ADD_PLUGIN
-                        || selector == FUNC_REMOVE_PLUGIN
-                )
-        ) {
-            return true;
-        }
         if (!modulesMapping().isExist(module)) {
             return false;
         }
@@ -72,7 +48,6 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         bytes4[] memory requiredFunctions = aModule.module.requiredFunctions();
         require(requiredFunctions.length > 0, "selectors empty");
         address module = address(aModule.module);
-        require(module != defaultModuleManager, "default module manager exists");
 
         mapping(address => address) storage modules = modulesMapping();
         modules.add(module);

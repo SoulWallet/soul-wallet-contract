@@ -6,6 +6,9 @@ import "../../trustedContractManager/ITrustedContractManager.sol";
 
 contract SecurityControlModule is BaseSecurityControlModule {
     error UnsupportedSelectorError(bytes4 selector);
+    error RemoveSelfError();
+
+    address private immutable selfAddr;
 
     ITrustedContractManager public immutable trustedModuleManager;
     ITrustedContractManager public immutable trustedPluginManager;
@@ -16,6 +19,7 @@ contract SecurityControlModule is BaseSecurityControlModule {
     bytes4 private constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
 
     constructor(ITrustedContractManager _trustedModuleManager, ITrustedContractManager _trustedPluginManager) {
+        selfAddr = address(this);
         trustedModuleManager = _trustedModuleManager;
         trustedPluginManager = _trustedPluginManager;
     }
@@ -34,7 +38,13 @@ contract SecurityControlModule is BaseSecurityControlModule {
             if (!trustedPluginManager.isTrustedContract(_plugin)) {
                 super.preExecute(_target, _data, _txId);
             }
-        } else if (_func == FUNC_REMOVE_MODULE || _func == FUNC_REMOVE_PLUGIN) {
+        } else if (_func == FUNC_REMOVE_MODULE) {
+            (address _module) = abi.decode(_data[4:], (address));
+            if (_module == selfAddr) {
+                revert RemoveSelfError();
+            }
+            super.preExecute(_target, _data, _txId);
+        } else if (_func == FUNC_REMOVE_PLUGIN) {
             super.preExecute(_target, _data, _txId);
         } else {
             revert UnsupportedSelectorError(_func);

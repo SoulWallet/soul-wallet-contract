@@ -23,10 +23,7 @@ contract ExecutionManagerTest is Test {
     function setUp() public {
         entryPoint = new EntryPoint();
         (address trustedManagerOwner, uint256 trustedManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
-        IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
-        bytes32 salt = bytes32(0);
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         bundler = new Bundler();

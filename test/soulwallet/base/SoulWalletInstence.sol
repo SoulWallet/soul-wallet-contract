@@ -16,7 +16,6 @@ contract SoulWalletInstence {
     EntryPoint public entryPoint;
 
     constructor(
-        address trustedManagerOwner,
         address defaultCallbackHandler,
         address ownerAddr,
         IModuleManager.Module[] memory modules,
@@ -25,7 +24,7 @@ contract SoulWalletInstence {
     ) {
         entryPoint = new EntryPoint();
         singletonFactory = new SingletonFactory();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         /*

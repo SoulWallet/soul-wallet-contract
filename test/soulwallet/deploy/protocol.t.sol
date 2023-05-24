@@ -22,11 +22,7 @@ contract DeployProtocolTest is Test {
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        (address trustedManagerOwner, uint256 trustedManagerOwnerPrivateKey) = makeAddrAndKey("trustedManagerOwner");
-        IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
-        bytes32 salt = bytes32(0);
-        soulWalletLogicInstence = new SoulWalletLogicInstence(trustedManagerOwner, entryPoint);
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
 
         bundler = new Bundler();
@@ -48,9 +44,19 @@ contract DeployProtocolTest is Test {
         (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey("walletOwner");
         {
             nonce = 0;
-            IModuleManager.Module[] memory modules = new IModuleManager.Module[](0);
+
+            (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
+            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
+            TrustedPluginManager trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
+            SecurityControlModule securityControlModule =
+                new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+
+            IModuleManager.Module[] memory modules = new IModuleManager.Module[](1);
+            modules[0] = IModuleManager.Module(securityControlModule, abi.encode(uint64(2 days)));
             IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
+
             bytes32 salt = bytes32(0);
+
             DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
             bytes memory initializer = abi.encodeWithSignature(
                 "initialize(address,address,(address,bytes)[],(address,bytes)[])",

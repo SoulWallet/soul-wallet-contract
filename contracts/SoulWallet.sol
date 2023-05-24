@@ -28,10 +28,7 @@ contract SoulWallet is
     FallbackManager,
     ERC1271Handler
 {
-    constructor(IEntryPoint _EntryPoint, address _DefaultModuleManager)
-        EntryPointManager(_EntryPoint)
-        ModuleManager(_DefaultModuleManager)
-    {
+    constructor(IEntryPoint _EntryPoint) EntryPointManager(_EntryPoint) {
         _disableInitializers();
     }
 
@@ -42,8 +39,6 @@ contract SoulWallet is
         Plugin[] calldata plugins
     ) external initializer {
         _addOwner(anOwner);
-
-        initDefaultModuleManager(2 days);
 
         if (defalutCallbackHandler != address(0)) {
             internalSetFallbackHandler(defalutCallbackHandler);

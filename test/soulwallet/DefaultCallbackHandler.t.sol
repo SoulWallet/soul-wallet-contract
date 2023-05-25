@@ -15,7 +15,7 @@ contract DefaultCallbackHandlerTest is Test {
     function setUp() public {
         (address ownerAddr,) = makeAddrAndKey("owner1");
         bytes[] memory modules = new bytes[](0);
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
+        bytes[] memory plugins = new bytes[](0);
         bytes32 salt = bytes32(0);
         defaultCallbackHandler = new DefaultCallbackHandler();
         soulWalletInstence =

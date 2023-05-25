@@ -44,9 +44,9 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return _isAuthorizedModule(module);
     }
 
-    function addModule(bytes calldata moduleAndInitData) internal {
-        address moduleAddress = address(bytes20(moduleAndInitData[:20]));
-        bytes memory initData = moduleAndInitData[20:];
+    function addModule(bytes calldata moduleAndData) internal {
+        address moduleAddress = address(bytes20(moduleAndData[:20]));
+        bytes memory initData = moduleAndData[20:];
         addModule(moduleAddress, initData);
     }
 
@@ -105,8 +105,8 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
             removeModule(module);
         } else if (selector == FUNC_ADD_PLUGIN) {
             // addPlugin((address,bytes))
-            Plugin memory _plugin = abi.decode(data[4:], (Plugin));
-            addPlugin(_plugin);
+            (address pluginAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
+            addPlugin(pluginAddress, initData);
         } else if (selector == FUNC_REMOVE_PLUGIN) {
             // removePlugin(address)
             address plugin = abi.decode(data[4:], (address));

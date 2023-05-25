@@ -9,7 +9,7 @@ contract DeployDirectTest is Test {
 
     function test_Deploy() public {
         bytes[] memory modules = new bytes[](0);
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
+        bytes[] memory plugins = new bytes[](0);
         bytes32 salt = bytes32(0);
         SoulWalletInstence soulWalletInstence =
             new SoulWalletInstence(address(0), address(this),  modules, plugins,  salt);

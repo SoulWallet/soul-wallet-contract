@@ -5,15 +5,11 @@ import "./IPlugin.sol";
 import "../libraries/CallHelper.sol";
 
 interface IPluginManager {
-    struct Plugin {
-        IPlugin plugin;
-        bytes initData;
-    }
     event PluginAdded(address indexed plugin);
     event PluginRemoved(address indexed plugin);
     event PluginRemovedWithError(address indexed plugin);
 
-    // function addPlugin(Plugin plugin) external;
+    // function addPlugin(address,bytes) external;
     // function removePlugin(address plugin) external;
 
     function isAuthorizedPlugin(address plugin) external returns (bool);

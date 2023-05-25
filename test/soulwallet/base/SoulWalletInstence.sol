@@ -19,7 +19,7 @@ contract SoulWalletInstence {
         address defaultCallbackHandler,
         address ownerAddr,
         bytes[] memory modules,
-        IPluginManager.Plugin[] memory plugins,
+        bytes[] memory plugins,
         bytes32 salt
     ) {
         entryPoint = new EntryPoint();
@@ -34,11 +34,7 @@ contract SoulWalletInstence {
         Plugin[] calldata plugins
          */
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,bytes[],(address,bytes)[])",
-            ownerAddr,
-            defaultCallbackHandler,
-            modules,
-            plugins
+            "initialize(address,address,bytes[],bytes[])", ownerAddr, defaultCallbackHandler, modules, plugins
         );
         address walletAddress1 = soulWalletFactory.getWalletAddress(initializer, salt);
         address walletAddress2 = soulWalletFactory.createWallet(initializer, salt);

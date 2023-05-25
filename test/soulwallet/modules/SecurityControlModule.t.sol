@@ -29,7 +29,7 @@ contract SecurityControlModuleTest is Test {
 
         bytes[] memory modules = new bytes[](1);
         modules[0] = abi.encodePacked(securityControlModule, abi.encode(time));
-        IPluginManager.Plugin[] memory plugins = new IPluginManager.Plugin[](0);
+        bytes[] memory plugins = new bytes[](0);
         bytes32 salt = bytes32(0);
         soulWalletInstence = new SoulWalletInstence(address(0), walletOwner,  modules, plugins,  salt);
         soulWallet = soulWalletInstence.soulWallet();
@@ -40,7 +40,7 @@ contract SecurityControlModuleTest is Test {
         assertEq(_modules[0], address(securityControlModule), "module address error");
         assertEq(_selectors[0].length, 4);
         assertEq(_selectors[0][3], bytes4(keccak256("addModule(address,bytes)")), "addModule selector error");
-        assertEq(_selectors[0][2], bytes4(keccak256("addPlugin((address,bytes))")), "addPlugin selector error");
+        assertEq(_selectors[0][2], bytes4(keccak256("addPlugin(address,bytes)")), "addPlugin selector error");
         assertEq(_selectors[0][1], bytes4(keccak256("removeModule(address)")), "removeModule selector error");
         assertEq(_selectors[0][0], bytes4(keccak256("removePlugin(address)")), "removePlugin selector error");
 

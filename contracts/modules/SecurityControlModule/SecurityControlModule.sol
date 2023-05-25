@@ -12,7 +12,7 @@ contract SecurityControlModule is BaseSecurityControlModule {
     ITrustedContractManager public immutable trustedPluginManager;
 
     bytes4 private constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes)"));
-    bytes4 private constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin((address,bytes))"));
+    bytes4 private constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
     bytes4 private constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
     bytes4 private constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
 

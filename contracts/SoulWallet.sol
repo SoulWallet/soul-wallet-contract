@@ -36,7 +36,7 @@ contract SoulWallet is
         address anOwner,
         address defalutCallbackHandler,
         bytes[] calldata modules,
-        Plugin[] calldata plugins
+        bytes[] calldata plugins
     ) external initializer {
         _addOwner(anOwner);
 

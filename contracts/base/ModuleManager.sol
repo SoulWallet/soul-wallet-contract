@@ -96,7 +96,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         require(isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
 
         if (selector == FUNC_ADD_MODULE) {
-            // addModule((address,bytes))
+            // addModule(address,bytes)
             (address moduleAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
             addModule(moduleAddress, initData);
         } else if (selector == FUNC_REMOVE_MODULE) {
@@ -125,7 +125,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
                 abi.decode(data[4:], (address[], uint256[], bytes[]));
             _executeBatch(tos, values, _datas);
         } else {
-            CallHelper.callWithoutReturnData(CallHelper.CallType.Call, address(this), data);
+            CallHelper.call(address(this), data);
         }
     }
 }

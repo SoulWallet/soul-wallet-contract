@@ -25,17 +25,21 @@ abstract contract PluginManager is Authority, IPluginManager {
 
     function addPlugin(address pluginAddress, bytes memory initData) internal {
         IPlugin aPlugin = IPlugin(pluginAddress);
-        require(IPlugin(aPlugin).supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
+        require(aPlugin.supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
         mapping(address => address) storage plugins = pluginsMapping();
         plugins.add(pluginAddress);
-        //TODO call initdata necessary?
+        aPlugin.walletInit(initData);
         emit PluginAdded(pluginAddress);
     }
 
     function removePlugin(address plugin) internal {
         mapping(address => address) storage plugins = pluginsMapping();
         plugins.remove(plugin);
-        emit PluginRemoved(plugin);
+        try IPlugin(plugin).walletDeInit() {
+            emit PluginRemoved(plugin);
+        } catch {
+            emit PluginRemovedWithError(plugin);
+        }
     }
 
     function _isAuthorizedPlugin(address plugin) private returns (bool) {

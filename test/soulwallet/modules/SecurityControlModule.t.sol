@@ -7,8 +7,14 @@ import "@source/modules/SecurityControlModule/SecurityControlModule.sol";
 import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
 import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager.sol";
 import "@source/dev/DemoModule.sol";
+import "@source/dev/DemoPlugin.sol";
+import "../Bundler.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@source/dev/Tokens/TokenERC20.sol";
 
 contract SecurityControlModuleTest is Test {
+    using ECDSA for bytes32;
+
     SoulWalletInstence public soulWalletInstence;
     ISoulWallet public soulWallet;
     SecurityControlModule public securityControlModule;
@@ -18,9 +24,13 @@ contract SecurityControlModuleTest is Test {
     uint64 public time = 2 days;
     address public walletOwner;
     address trustedManagerOwner;
+    DemoPlugin public demoPlugin;
+    uint256 public walletOwnerPrivateKey;
+    Bundler public bundler;
+    TokenERC20 public token;
 
     function setUp() public {
-        (walletOwner,) = makeAddrAndKey("owner");
+        (walletOwner, walletOwnerPrivateKey) = makeAddrAndKey("owner");
 
         (trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
         trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
@@ -45,15 +55,20 @@ contract SecurityControlModuleTest is Test {
         assertEq(_selectors[0][0], bytes4(keccak256("removePlugin(address)")), "removePlugin selector error");
 
         demoModule = new DemoModule();
+        demoPlugin = new DemoPlugin();
+        bundler = new Bundler();
+        token = new TokenERC20();
     }
+
+    // #region Module
 
     //function queue(address _target, bytes calldata _data) external returns (bytes32);
     function addModule_queue() private returns (bytes32) {
         bytes memory initData;
-        bytes memory _data =
-            abi.encodeWithSelector(bytes4(keccak256("addModule(address,bytes)")), address(demoModule), initData);
-
-        return securityControlModule.queue(address(soulWallet), _data);
+        return securityControlModule.queue(
+            address(soulWallet),
+            abi.encodeWithSelector(bytes4(keccak256("addModule(address,bytes)")), address(demoModule), initData)
+        );
     }
 
     //function cancel(bytes32 _txId) external;
@@ -166,7 +181,6 @@ contract SecurityControlModuleTest is Test {
         vm.stopPrank();
 
         vm.startPrank(walletOwner);
-        addModule_queue();
         vm.expectEmit(true, true, true, true); //   (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
         emit initEvent(address(soulWallet));
         addModule_execute();
@@ -225,4 +239,128 @@ contract SecurityControlModuleTest is Test {
         (address[] memory _modules,) = soulWallet.listModule();
         assertEq(_modules.length, 1, "module length error");
     }
+
+    // #endregion
+
+    // #region Plugin
+
+    //function queue(address _target, bytes calldata _data) external returns (bytes32);
+    function addPlugin_queue() private returns (bytes32) {
+        bytes memory initData;
+        return securityControlModule.queue(
+            address(soulWallet),
+            abi.encodeWithSelector(bytes4(keccak256("addPlugin(address,bytes)")), address(demoPlugin), initData)
+        );
+    }
+
+    //function execute(address _target, bytes calldata _data) external  ;
+    function addPlugin_execute() private {
+        bytes memory initData;
+        securityControlModule.execute(
+            address(soulWallet),
+            abi.encodeWithSelector(bytes4(keccak256("addPlugin(address,bytes)")), address(demoPlugin), initData)
+        );
+    }
+
+    event PluginInit(address indexed wallet);
+    event PluginDeInit(address indexed wallet);
+
+    function test_addPlugin() public {
+        vm.startPrank(trustedManagerOwner);
+        address[] memory _plugins = new address[](1);
+        _plugins[0] = address(demoPlugin);
+        trustedPluginManager.add(_plugins);
+        vm.stopPrank();
+
+        vm.startPrank(walletOwner);
+        vm.expectEmit(true, true, true, true); //   (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
+        emit PluginInit(address(soulWallet));
+        addPlugin_execute();
+        vm.stopPrank();
+    }
+
+    function test_addPlugin_withoutWhiteList() public {
+        vm.startPrank(walletOwner);
+
+        vm.expectRevert();
+        addPlugin_execute();
+
+        addPlugin_queue();
+
+        vm.expectRevert();
+        addPlugin_execute();
+
+        vm.warp(block.timestamp + time);
+        addPlugin_execute();
+
+        vm.stopPrank();
+    }
+
+    event OnGuardHook();
+    event OnPreHook();
+    event OnPostHook();
+
+    function test_Plugin() public {
+        test_addPlugin();
+        address sender = address(soulWallet);
+
+        token.mint(sender, 1000);
+
+        uint256 nonce = 0;
+        bytes memory initCode;
+        bytes memory callData;
+        uint256 callGasLimit;
+        uint256 verificationGasLimit;
+        uint256 preVerificationGas;
+        uint256 maxFeePerGas;
+        uint256 maxPriorityFeePerGas;
+        bytes memory paymasterAndData;
+        bytes memory signature;
+        {
+            verificationGasLimit = 1000000;
+            preVerificationGas = 100000;
+            maxFeePerGas = 10 gwei;
+            maxPriorityFeePerGas = 10 gwei;
+
+            // transfer ERC20
+            bytes memory transferData =
+                abi.encodeWithSelector(bytes4(keccak256("transfer(address,uint256)")), address(0x1111), 100);
+            callData = abi.encodeWithSelector(
+                bytes4(keccak256("execute(address,uint256,bytes)")), address(token), 0, transferData
+            );
+            callGasLimit = 1000000;
+        }
+
+        UserOperation memory userOperation = UserOperation(
+            sender,
+            nonce,
+            initCode,
+            callData,
+            callGasLimit,
+            verificationGasLimit,
+            preVerificationGas,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            paymasterAndData,
+            signature
+        );
+
+        bytes32 userOpHash = soulWalletInstence.entryPoint().getUserOpHash(userOperation);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, userOpHash.toEthSignedMessageHash());
+        userOperation.signature = abi.encodePacked(r, s, v);
+
+        vm.deal(userOperation.sender, 10 ether);
+
+        vm.expectEmit(true, true, true, true);
+        emit OnGuardHook();
+        vm.expectEmit(true, true, true, true);
+        emit OnPreHook();
+        vm.expectEmit(true, true, true, true);
+        emit OnPostHook();
+        bundler.post(soulWalletInstence.entryPoint(), userOperation);
+
+        assertEq(token.balanceOf(address(0x1111)), 100, "transfer error");
+    }
+
+    // #endregion
 }

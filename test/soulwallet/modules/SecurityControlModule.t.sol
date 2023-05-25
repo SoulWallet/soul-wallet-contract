@@ -75,7 +75,7 @@ contract SecurityControlModuleTest is Test {
         );
     }
 
-    function test_add_withoutWhiteList() public {
+    function test_addModule_withoutWhiteList() public {
         {
             vm.startPrank(address(0x1111));
 
@@ -155,7 +155,10 @@ contract SecurityControlModuleTest is Test {
         }
     }
 
-    function test_add() public {
+    event initEvent(address wallet);
+    event deInitEvent(address wallet);
+
+    function test_addModule() public {
         vm.startPrank(trustedManagerOwner);
         address[] memory _modules = new address[](1);
         _modules[0] = address(demoModule);
@@ -164,11 +167,62 @@ contract SecurityControlModuleTest is Test {
 
         vm.startPrank(walletOwner);
         addModule_queue();
+        vm.expectEmit(true, true, true, true); //   (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
+        emit initEvent(address(soulWallet));
         addModule_execute();
         vm.stopPrank();
 
         assertEq(soulWallet.isOwner(address(0x1111)), false);
         demoModule.addOwner(address(soulWallet), address(0x1111));
         assertEq(soulWallet.isOwner(address(0x1111)), true, "addOwner error");
+    }
+
+    //function queue(address _target, bytes calldata _data) external returns (bytes32);
+    function removeModule_queue() private returns (bytes32) {
+        bytes memory _data = abi.encodeWithSelector(bytes4(keccak256("removeModule(address)")), address(demoModule));
+
+        return securityControlModule.queue(address(soulWallet), _data);
+    }
+
+    //function cancel(bytes32 _txId) external;
+    function removeModule_cancel(bytes32 _txId) private {
+        securityControlModule.cancel(_txId);
+    }
+
+    //function cancelAll() external;
+    function removeModule_cancelAll() private {
+        securityControlModule.cancelAll(address(soulWallet));
+    }
+
+    //function execute(address _target, bytes calldata _data) external  ;
+    function removeModule_execute() private {
+        securityControlModule.execute(
+            address(soulWallet), abi.encodeWithSelector(bytes4(keccak256("removeModule(address)")), address(demoModule))
+        );
+    }
+
+    function test_removeModule() public {
+        test_addModule();
+
+        assertEq(soulWallet.isOwner(address(0x1111)), true, "addOwner error");
+
+        vm.startPrank(walletOwner);
+        removeModule_queue();
+        vm.expectRevert();
+        removeModule_execute();
+
+        vm.warp(block.timestamp + time);
+        vm.expectEmit(true, true, true, true); //   (bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData).
+        emit deInitEvent(address(soulWallet));
+        removeModule_execute();
+
+        vm.expectRevert();
+        demoModule.addOwner(address(soulWallet), address(0x2222));
+        assertEq(soulWallet.isOwner(address(0x2222)), false, "addOwner error");
+
+        vm.stopPrank();
+
+        (address[] memory _modules,) = soulWallet.listModule();
+        assertEq(_modules.length, 1, "module length error");
     }
 }

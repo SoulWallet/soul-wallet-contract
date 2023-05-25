@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "../BaseModule.sol";
 import "./IBaseSecurityControlModule.sol";
 import "../../trustedContractManager/ITrustedContractManager.sol";
+import "../../libraries/CallHelper.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
@@ -14,11 +15,10 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
     mapping(bytes32 => Tx) private queued;
     mapping(address => WalletConfig) private walletConfigs;
 
-    uint128 private __seed = 0;
+    uint128 private __seed;
 
     function newSeed() private returns (uint128) {
-        __seed++;
-        return __seed;
+        return ++__seed;
     }
 
     function authorized(address _target) private view {
@@ -26,26 +26,26 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         if (_sender != _target && !ISoulWallet(_target).isOwner(_sender)) {
             revert NotOwnerError();
         }
-        if (walletConfigs[_target].inited == 0) {
+        if (walletConfigs[_target].seed == 0) {
             revert NotInitializedError();
         }
         // TODO: require wallet is not locked
     }
 
-    function inited(address wallet) internal view override returns (bool) {
-        return walletConfigs[wallet].inited != 0;
+    function inited(address _target) internal view override returns (bool) {
+        return walletConfigs[_target].seed != 0;
     }
 
     function _init(bytes calldata data) internal override {
         uint64 _delay = abi.decode(data, (uint64));
         require(_delay >= MIN_DELAY && _delay <= MAX_DELAY);
-        address _sender = sender();
-        walletConfigs[_sender] = WalletConfig(newSeed(), _delay);
+        address _target = sender();
+        walletConfigs[_target] = WalletConfig(newSeed(), _delay);
     }
 
     function _deInit() internal override {
-        address _sender = sender();
-        walletConfigs[_sender] = WalletConfig(0, 0);
+        address _target = sender();
+        walletConfigs[_target] = WalletConfig(0, 0);
     }
 
     function _getTxId(uint128 _seed, address _target, bytes calldata _data) private view returns (bytes32) {
@@ -63,13 +63,13 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
     function queue(address _target, bytes calldata _data) external virtual override returns (bytes32 txId) {
         authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
-        txId = getTxId(walletConfig.inited, _target, _data);
+        txId = _getTxId(walletConfig.seed, _target, _data);
         if (queued[txId].target != address(0)) {
             revert AlreadyQueuedError(txId);
         }
         uint256 _timestamp = block.timestamp + walletConfig.delay;
         queued[txId] = Tx(_target, uint128(_timestamp));
-        emit Queue(sender(), txId, _target, _data, _timestamp);
+        emit Queue(txId, _target, sender(), _data, _timestamp);
     }
 
     function cancel(bytes32 _txId) external virtual override {
@@ -80,15 +80,14 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         authorized(_tx.target);
 
         queued[_txId] = Tx(address(0), 0);
-        emit Cancel(sender(), _txId);
+        emit Cancel(_txId, sender());
     }
 
-    function cancelAll() external virtual override {
+    function cancelAll(address target) external virtual override {
+        authorized(target);
         address _sender = sender();
-        WalletConfig storage walletConfig = walletConfigs[_sender];
-        require(walletConfig.inited != 0);
-        walletConfig.inited = newSeed();
-        emit CancelAll(_sender);
+        walletConfigs[target].seed = newSeed();
+        emit CancelAll(target, _sender);
     }
 
     function preExecute(address _target, bytes calldata _data, bytes32 _txId) internal virtual {
@@ -101,21 +100,20 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         if (block.timestamp < validAfter) {
             revert TimestampNotPassedError(block.timestamp, validAfter);
         }
+        queued[_txId] = Tx(address(0), 0);
     }
 
-    function packExecuteData(bytes calldata _data) private pure returns (bytes memory) {
-        return abi.encodeWithSelector(FUNC_EXEC_FROM_MODULE, _data);
-    }
-
-    function execute(address _target, bytes calldata _data) external virtual override returns (bool, bytes memory) {
+    function execute(address _target, bytes calldata _data) external virtual override {
         authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
-        bytes32 txId = getTxId(walletConfig.inited, _target, _data);
+        bytes32 txId = _getTxId(walletConfig.seed, _target, _data);
         preExecute(_target, _data, txId);
-        queued[txId] = Tx(address(0), 0);
-        // call target
-        (bool ok, bytes memory res) = _target.call{value: 0}(packExecuteData(_data));
-        emit Execute(ok, sender(), txId, _target, _data);
-        return (ok, res);
+        (bool ok, bytes memory res) = CallHelper.call(_target, packExecuteData(_data));
+
+        if (ok) {
+            emit Execute(txId, _target, sender(), _data);
+        } else {
+            revert ExecuteError(txId, _target, sender(), _data, res);
+        }
     }
 }

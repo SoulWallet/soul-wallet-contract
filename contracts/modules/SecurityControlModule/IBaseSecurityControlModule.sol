@@ -7,11 +7,12 @@ interface IBaseSecurityControlModule {
     error AlreadyQueuedError(bytes32 txId);
     error NotQueuedError(bytes32 txId);
     error TimestampNotPassedError(uint256 blockTimestmap, uint256 timestamp);
+    error ExecuteError(bytes32 txId, address target, address sender, bytes data, bytes returnData);
 
-    event Queue(address indexed sender, bytes32 indexed txId, address target, bytes data, uint256 timestamp);
-    event Execute(bool indexed success, address indexed sender, bytes32 indexed txId, address target, bytes data);
-    event Cancel(address indexed sender, bytes32 indexed txId);
-    event CancelAll(address indexed sender);
+    event Queue(bytes32 indexed txId, address indexed target, address sender, bytes data, uint256 timestamp);
+    event Cancel(bytes32 indexed txId, address sender);
+    event CancelAll(address indexed target, address sender);
+    event Execute(bytes32 indexed txId, address indexed target, address sender, bytes data);
 
     struct Tx {
         address target;
@@ -19,7 +20,7 @@ interface IBaseSecurityControlModule {
     }
 
     struct WalletConfig {
-        uint128 inited;
+        uint128 seed;
         uint64 delay;
     }
 
@@ -31,7 +32,7 @@ interface IBaseSecurityControlModule {
 
     function cancel(bytes32 _txId) external;
 
-    function cancelAll() external;
+    function cancelAll(address _target) external;
 
-    function execute(address _target, bytes calldata _data) external returns (bool, bytes memory);
+    function execute(address _target, bytes calldata _data) external;
 }

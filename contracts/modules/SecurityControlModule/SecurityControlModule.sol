@@ -8,7 +8,6 @@ contract SecurityControlModule is BaseSecurityControlModule {
     error UnsupportedSelectorError(bytes4 selector);
     error RemoveSelfError();
 
-
     ITrustedContractManager public immutable trustedModuleManager;
     ITrustedContractManager public immutable trustedPluginManager;
 

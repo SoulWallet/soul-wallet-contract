@@ -44,19 +44,22 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return _isAuthorizedModule(module);
     }
 
-    function addModule(Module memory aModule) internal {
-        bytes4[] memory requiredFunctions = aModule.module.requiredFunctions();
+    function addModule(bytes calldata moduleAndData) internal {
+        address moduleAddress = address(bytes20(moduleAndData[:20]));
+        bytes memory initData = moduleAndData[20:];
+        addModule(moduleAddress, initData);
+    }
+
+    function addModule(address moduleAddress, bytes memory initData) internal {
+        IModule aModule = IModule(moduleAddress);
+        bytes4[] memory requiredFunctions = aModule.requiredFunctions();
         require(requiredFunctions.length > 0, "selectors empty");
-        address module = address(aModule.module);
-
         mapping(address => address) storage modules = modulesMapping();
-        modules.add(module);
+        modules.add(moduleAddress);
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
-        moduleSelectors[module].add(requiredFunctions);
-
-        aModule.module.walletInit(aModule.initData);
-
-        emit ModuleAdded(module);
+        moduleSelectors[moduleAddress].add(requiredFunctions);
+        aModule.walletInit(initData);
+        emit ModuleAdded(moduleAddress);
     }
 
     function removeModule(address module) internal {
@@ -75,33 +78,35 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
     function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
         mapping(address => address) storage _modules = modulesMapping();
-        modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, _modules.size());
-
+        uint256 moduleSize = modulesMapping().size();
+        modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, moduleSize);
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
-
+        selectors = new bytes4[][](moduleSize);
         for (uint256 i = 0; i < modules.length; i++) {
             mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[modules[i]];
-            selectors[i] = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, moduleSelector.size());
+            uint256 selectorSize = moduleSelector.size();
+            bytes4[] memory _selectors = new bytes4[](selectorSize);
+            _selectors = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, selectorSize);
+            selectors[i] = _selectors;
         }
     }
 
     function execFromModule(bytes calldata data) external override {
-        // get 4bytes
         bytes4 selector = bytes4(data[0:4]);
         require(isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
 
         if (selector == FUNC_ADD_MODULE) {
             // addModule(address,bytes)
-            Module memory _module = abi.decode(data[4:], (Module));
-            addModule(_module);
+            (address moduleAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
+            addModule(moduleAddress, initData);
         } else if (selector == FUNC_REMOVE_MODULE) {
             // removeModule(address)
             address module = abi.decode(data[4:], (address));
             removeModule(module);
         } else if (selector == FUNC_ADD_PLUGIN) {
-            // addPlugin(address,bytes)
-            Plugin memory _plugin = abi.decode(data[4:], (Plugin));
-            addPlugin(_plugin);
+            // addPlugin((address,bytes))
+            (address pluginAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
+            addPlugin(pluginAddress, initData);
         } else if (selector == FUNC_REMOVE_PLUGIN) {
             // removePlugin(address)
             address plugin = abi.decode(data[4:], (address));
@@ -120,7 +125,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
                 abi.decode(data[4:], (address[], uint256[], bytes[]));
             _executeBatch(tos, values, _datas);
         } else {
-            CallHelper.callWithoutReturnData(CallHelper.CallType.Call, address(this), data);
+            CallHelper.call(address(this), data);
         }
     }
 }

@@ -4,17 +4,12 @@ pragma solidity ^0.8.17;
 import "./IModule.sol";
 
 interface IModuleManager {
-    struct Module {
-        IModule module;
-        bytes initData;
-    }
-
     event ModuleAdded(address indexed module);
     event ModuleRemoved(address indexed module);
     event ModuleRemovedWithError(address indexed module);
 
-    // function addModule(Module) external;
-    // function removeModule(address module) external;
+    // function addModule(address,bytes) external;
+    // function removeModule(address) external;
 
     function isAuthorizedModule(address module) external returns (bool);
 

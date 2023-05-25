@@ -42,6 +42,11 @@ abstract contract BaseModule is IModule {
         }
     }
 
+    function packExecuteData(bytes memory _data) internal view returns (bytes memory) {
+        bytes memory packedData = abi.encodeWithSelector(FUNC_EXEC_FROM_MODULE, _data);
+        return packedData;
+    }
+
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IModule).interfaceId;
     }

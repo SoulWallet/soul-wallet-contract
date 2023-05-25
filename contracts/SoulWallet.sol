@@ -35,8 +35,8 @@ contract SoulWallet is
     function initialize(
         address anOwner,
         address defalutCallbackHandler,
-        Module[] calldata modules,
-        Plugin[] calldata plugins
+        bytes[] calldata modules,
+        bytes[] calldata plugins
     ) external initializer {
         _addOwner(anOwner);
 

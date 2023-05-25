@@ -88,6 +88,9 @@ library AddressLinkedList {
         return self[SENTINEL_ADDRESS] == address(0);
     }
 
+    /**
+     * @dev This function is just an example, please copy this code directly when you need it, you should not call this function
+     */
     function list(mapping(address => address) storage self, address from, uint256 limit)
         internal
         view

@@ -6,14 +6,13 @@ import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import "./IPluggable.sol";
 
 interface IPlugin is IPluggable {
-    enum HookType {
-        GuardHook,
-        PreHook,
-        PostHook
-    }
-
-    function getHookCallType(HookType hookType) external view returns (CallHelper.CallType calltype);
-    function isHookCall(HookType hookType) external view returns (bool);
+    /**
+     * @dev hookType structure:
+     * 0b1: GuardHook
+     * 0b10: PreHook
+     * 0b100: PostHook
+     */
+    function supportsHook() external pure returns (uint8 hookType, CallHelper.CallType callType);
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external;
     function preHook(address target, uint256 value, bytes calldata data) external;

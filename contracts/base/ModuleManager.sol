@@ -45,6 +45,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     }
 
     function addModule(bytes calldata moduleAndData) internal {
+        require(moduleAndData.length >= 20, "module address empty");
         address moduleAddress = address(bytes20(moduleAndData[:20]));
         bytes memory initData = moduleAndData[20:];
         addModule(moduleAddress, initData);
@@ -52,6 +53,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
     function addModule(address moduleAddress, bytes memory initData) internal {
         IModule aModule = IModule(moduleAddress);
+        require(aModule.supportsInterface(type(IModule).interfaceId), "unknown module");
         bytes4[] memory requiredFunctions = aModule.requiredFunctions();
         require(requiredFunctions.length > 0, "selectors empty");
         mapping(address => address) storage modules = modulesMapping();

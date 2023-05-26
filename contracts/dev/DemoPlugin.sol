@@ -13,12 +13,9 @@ contract DemoPlugin is BasePlugin {
 
     constructor() BasePlugin(keccak256("UNUSEDSLOT")) {}
 
-    function getHookCallType(HookType hookType) external view override returns (CallHelper.CallType calltype) {
-        return CallHelper.CallType.Call;
-    }
-
-    function isHookCall(HookType hookType) external view override returns (bool) {
-        return true;
+    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+        hookType = GUARD_HOOK | PRE_HOOK | POST_HOOK;
+        callType = CallHelper.CallType.Call;
     }
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external override {

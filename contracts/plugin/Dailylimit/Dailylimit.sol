@@ -47,15 +47,9 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
         }
     }
 
-    function getHookCallType(HookType hookType) external view override returns (CallHelper.CallType calltype) {
-        if (hookType == HookType.PreHook) {
-            return CallHelper.CallType.Unknown;
-        }
-        return CallHelper.CallType.DelegateCall;
-    }
-
-    function isHookCall(HookType hookType) external view override returns (bool) {
-        return true;
+    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+        hookType = GUARD_HOOK | PRE_HOOK | POST_HOOK;
+        callType = CallHelper.CallType.DelegateCall;
     }
 
     function inited(address wallet) internal view override returns (bool) {

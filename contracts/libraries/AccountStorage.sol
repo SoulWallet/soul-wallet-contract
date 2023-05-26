@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "./CallHelper.sol";
 
 library AccountStorage {
     bytes32 private constant ACCOUNT_SLOT = keccak256("soulwallet.contracts.AccountStorage");
@@ -30,6 +31,10 @@ library AccountStorage {
         // ┌───────────────────┐
         // │       Plugin      │
         mapping(address => address) plugins;
+        mapping(address => CallHelper.CallType) pluginCallType;
+        mapping(address => address) guardHookPlugins;
+        mapping(address => address) preHookPlugins;
+        mapping(address => address) postHookPlugins;
         uint256[50] __gap_3;
     }
     // └───────────────────┘

@@ -16,5 +16,5 @@ interface IPluginManager {
 
     function listPlugin() external view returns (address[] memory plugins);
 
-    function execDelegateCall(IPlugin target, bytes calldata data) external;
+    function execDelegateCall(address target, bytes calldata data) external;
 }

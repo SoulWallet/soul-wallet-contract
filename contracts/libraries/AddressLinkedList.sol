@@ -56,6 +56,22 @@ library AddressLinkedList {
         }
     }
 
+    function tryRemove(mapping(address => address) storage self, address addr) internal {
+        if (isExist(self, addr)) {
+            address cursor = SENTINEL_ADDRESS;
+            while (true) {
+                address _addr = self[cursor];
+                if (_addr == addr) {
+                    address next = self[_addr];
+                    self[cursor] = next;
+                    self[_addr] = address(0);
+                    return;
+                }
+                cursor = _addr;
+            }
+        }
+    }
+
     function clear(mapping(address => address) storage self) internal {
         for (address addr = self[SENTINEL_ADDRESS]; uint160(addr) > SENTINEL_UINT; addr = self[addr]) {
             self[addr] = address(0);

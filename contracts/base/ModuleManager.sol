@@ -81,15 +81,38 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
         mapping(address => address) storage _modules = modulesMapping();
         uint256 moduleSize = modulesMapping().size();
-        modules = _modules.list(AddressLinkedList.SENTINEL_ADDRESS, moduleSize);
+        modules = new address[](moduleSize);
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
         selectors = new bytes4[][](moduleSize);
-        for (uint256 i = 0; i < modules.length; i++) {
-            mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[modules[i]];
-            uint256 selectorSize = moduleSelector.size();
-            bytes4[] memory _selectors = new bytes4[](selectorSize);
-            _selectors = moduleSelector.list(SelectorLinkedList.SENTINEL_SELECTOR, selectorSize);
-            selectors[i] = _selectors;
+
+        uint256 i = 0;
+        address addr = _modules[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                modules[i] = addr;
+                mapping(bytes4 => bytes4) storage moduleSelector = moduleSelectors[addr];
+
+                {
+                    uint256 selectorSize = moduleSelector.size();
+                    bytes4[] memory _selectors = new bytes4[](selectorSize);
+                    uint256 j = 0;
+                    bytes4 selector = moduleSelector[SelectorLinkedList.SENTINEL_SELECTOR];
+                    while (uint32(selector) > SelectorLinkedList.SENTINEL_UINT) {
+                        _selectors[j] = selector;
+
+                        selector = moduleSelector[selector];
+                        unchecked {
+                            j++;
+                        }
+                    }
+                    selectors[i] = _selectors;
+                }
+            }
+
+            addr = _modules[addr];
+            unchecked {
+                i++;
+            }
         }
     }
 

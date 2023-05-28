@@ -63,7 +63,7 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
     }
 
-    function isAuthorizedPlugin(address plugin) external override returns (bool) {
+    function isAuthorizedPlugin(address plugin) external view override returns (bool) {
         return AccountStorage.layout().plugins.isExist(plugin);
     }
 
@@ -75,47 +75,59 @@ abstract contract PluginManager is Authority, IPluginManager {
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
         AccountStorage.Layout storage l = AccountStorage.layout();
         mapping(address => address) storage _plugins = l.guardHookPlugins;
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            address plugin = plugins[i];
-            (bool success,) = CallHelper.call(
-                l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
-            );
-            if (!success) {
-                return false;
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
+                (bool success,) = CallHelper.call(
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
+                );
+                if (!success) {
+                    return false;
+                }
             }
+            addr = _plugins[addr];
         }
+
         return true;
     }
 
     function preHook(address target, uint256 value, bytes memory data) internal {
         AccountStorage.Layout storage l = AccountStorage.layout();
         mapping(address => address) storage _plugins = l.preHookPlugins;
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            address plugin = plugins[i];
-            (bool success,) = CallHelper.call(
-                l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))
-            );
-            require(success, "preHook failed");
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
+                (bool success,) = CallHelper.call(
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))
+                );
+                require(success, "preHook failed");
+            }
+            addr = _plugins[addr];
         }
     }
 
     function postHook(address target, uint256 value, bytes memory data) internal {
         AccountStorage.Layout storage l = AccountStorage.layout();
         mapping(address => address) storage _plugins = l.postHookPlugins;
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            address plugin = plugins[i];
-            (bool success,) = CallHelper.call(
-                l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))
-            );
-            require(success, "postHook failed");
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
+                (bool success,) = CallHelper.call(
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))
+                );
+                require(success, "postHook failed");
+            }
+            addr = _plugins[addr];
         }
     }
 
-    function execDelegateCall(address target, bytes memory data) external {
-        _requireFromEntryPointOrOwner();
+    function execDelegateCall(address target, bytes memory data) external onlyEntryPointOrOwner {
         require(
             AccountStorage.layout().pluginCallType[target] == CallHelper.CallType.DelegateCall,
             "not delegatecall plugin"

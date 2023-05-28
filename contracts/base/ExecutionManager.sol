@@ -24,10 +24,13 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
      */
     function _executeBatch(address[] memory dest, bytes[] memory func) internal override {
         require(dest.length == func.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length; i++) {
+        for (uint256 i = 0; i < dest.length;) {
             address to = dest[i];
             _blockSelf(to);
             _call(to, 0, func[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -36,10 +39,13 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
      */
     function _executeBatch(address[] memory dest, uint256[] memory value, bytes[] memory func) internal override {
         require(dest.length == func.length && dest.length == value.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length; i++) {
+        for (uint256 i = 0; i < dest.length;) {
             address to = dest[i];
             _blockSelf(to);
             _call(to, value[i], func[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -54,8 +60,11 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
      * execute a sequence of transactions
      */
     function executeBatch(address[] calldata dest, bytes[] calldata func) external override onlyEntryPointOrOwner {
-        for (uint256 i = 0; i < dest.length; i++) {
+        for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], 0, func[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 
@@ -67,8 +76,11 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
         override
         onlyEntryPointOrOwner
     {
-        for (uint256 i = 0; i < dest.length; i++) {
+        for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], value[i], func[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 

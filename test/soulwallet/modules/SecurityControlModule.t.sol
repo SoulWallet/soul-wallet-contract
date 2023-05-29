@@ -57,7 +57,7 @@ contract SecurityControlModuleTest is Test {
         demoModule = new DemoModule();
         demoPlugin = new DemoPlugin();
         bundler = new Bundler();
-        token = new TokenERC20();
+        token = new TokenERC20(18);
     }
 
     // #region Module
@@ -304,7 +304,7 @@ contract SecurityControlModuleTest is Test {
         test_addPlugin();
         address sender = address(soulWallet);
 
-        token.mint(sender, 1000);
+        token.sudoMint(sender, 1000);
 
         uint256 nonce = 0;
         bytes memory initCode;

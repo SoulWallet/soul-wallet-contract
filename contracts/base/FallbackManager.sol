@@ -8,8 +8,7 @@ import "../libraries/AccountStorage.sol";
 abstract contract FallbackManager is Authority, IFallbackManager {
     receive() external payable {}
 
-    function internalSetFallbackHandler(address fallbackContract) internal {
-        require(fallbackContract != address(0), "fallbackContract is zero address");
+    function _setFallbackHandler(address fallbackContract) internal {
         AccountStorage.layout().defaultFallbackContract = fallbackContract;
     }
 
@@ -26,8 +25,8 @@ abstract contract FallbackManager is Authority, IFallbackManager {
         }
     }
 
-    function setFallbackHandler(address fallbackContract) public override onlyEntryPointOrSelf {
-        internalSetFallbackHandler(fallbackContract);
+    function setFallbackHandler(address fallbackContract) external override onlyEntryPointOrSelf {
+        _setFallbackHandler(fallbackContract);
         emit FallbackChanged(fallbackContract);
     }
 }

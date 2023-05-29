@@ -26,22 +26,31 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerCleared();
     }
 
-    function resetOwner(address newOwner) public override onlyEntryPointOrSelf {
+    function resetOwner(address newOwner) external override onlyEntryPointOrSelf {
         clearOwner();
-        addOwner(newOwner);
-    }
-    function resetOwners(address[] calldata newOwners) public override onlyEntryPointOrSelf {
-        clearOwner();
-        addOwners(newOwners);
+        _addOwner(newOwner);
     }
 
-    function addOwner(address owner) public override onlyEntryPointOrSelf {
+    function resetOwners(address[] calldata newOwners) external override onlyEntryPointOrSelf {
+        clearOwner();
+        _addOwners(newOwners);
+    }
+
+    function _addOwners(address[] calldata owners) private {
+        for (uint256 i = 0; i < owners.length;) {
+            _addOwner(owners[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    function addOwner(address owner) external override onlyEntryPointOrSelf {
         _addOwner(owner);
     }
-    function addOwners(address[] calldata owners) public override onlyEntryPointOrSelf {
-        for(uint256 i =0; i < owners.length; i++){
-            _addOwner(owners[i]);
-        }
+
+    function addOwners(address[] calldata owners) external override onlyEntryPointOrSelf {
+        _addOwners(owners);
     }
 
     function _addOwner(address owner) internal {
@@ -49,13 +58,13 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerAdded(owner);
     }
 
-    function removeOwner(address owner) public override onlyEntryPointOrSelf {
+    function removeOwner(address owner) external override onlyEntryPointOrSelf {
         ownerMapping().remove(owner);
         require(!ownerMapping().isEmpty(), "no owner");
         emit OwnerRemoved(owner);
     }
 
-    function replaceOwner(address oldOwner, address newOwner) public override onlyEntryPointOrSelf {
+    function replaceOwner(address oldOwner, address newOwner) external override onlyEntryPointOrSelf {
         ownerMapping().replace(oldOwner, newOwner);
         emit OwnerRemoved(oldOwner);
         emit OwnerAdded(newOwner);

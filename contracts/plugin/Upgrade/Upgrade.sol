@@ -5,8 +5,7 @@ import "../BasePlugin.sol";
 import "./IUpgrade.sol";
 
 contract Upgrade is BasePlugin, IUpgrade {
-    bytes32 private constant _IMPLEMENTATION_SLOT =
-        0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+    bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
     constructor() BasePlugin(keccak256("PLUGIN_UPGRADE_SLOT")) {}
 
@@ -38,9 +37,7 @@ contract Upgrade is BasePlugin, IUpgrade {
         }
     }
 
-    function inited(
-        address wallet
-    ) internal view virtual override returns (bool) {
+    function inited(address wallet) internal view virtual override returns (bool) {
         (wallet);
         return readNewLogic() != address(0);
     }
@@ -67,42 +64,22 @@ contract Upgrade is BasePlugin, IUpgrade {
         emit Upgrade(newLogic, oldLogic);
     }
 
-    function getHookCallType(
-        HookType hookType
-    ) external view override returns (CallHelper.CallType calltype) {
-        (hookType);
-        return CallHelper.CallType.Unknown;
+    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+        hookType = 0;
+        callType = CallHelper.CallType.DelegateCall;
     }
 
-    function isHookCall(
-        HookType hookType
-    ) external view override returns (bool) {
-        (hookType);
-        return true;
-    }
-
-    function guardHook(
-        UserOperation calldata userOp,
-        bytes32 userOpHash
-    ) external override {
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external pure override {
         (userOp, userOpHash);
         revert("not support");
     }
 
-    function preHook(
-        address target,
-        uint256 value,
-        bytes calldata data
-    ) external override {
+    function preHook(address target, uint256 value, bytes calldata data) external pure override {
         (target, value, data);
         revert("not support");
     }
 
-    function postHook(
-        address target,
-        uint256 value,
-        bytes calldata data
-    ) external override {
+    function postHook(address target, uint256 value, bytes calldata data) external pure override {
         (target, value, data);
         revert("not support");
     }

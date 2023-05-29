@@ -13,11 +13,8 @@ abstract contract PluginManager is Authority, IPluginManager {
     bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
 
-    function pluginsMapping() private view returns (mapping(address => address) storage plugins) {
-        plugins = AccountStorage.layout().plugins;
-    }
-
     function addPlugin(bytes calldata pluginAndData) internal {
+        require(pluginAndData.length >= 20, "plugin address empty");
         address moduleAddress = address(bytes20(pluginAndData[:20]));
         bytes memory initData = pluginAndData[20:];
         addPlugin(moduleAddress, initData);
@@ -26,15 +23,39 @@ abstract contract PluginManager is Authority, IPluginManager {
     function addPlugin(address pluginAddress, bytes memory initData) internal {
         IPlugin aPlugin = IPlugin(pluginAddress);
         require(aPlugin.supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
-        mapping(address => address) storage plugins = pluginsMapping();
-        plugins.add(pluginAddress);
+        AccountStorage.Layout storage l = AccountStorage.layout();
+        (uint8 hookType, CallHelper.CallType callType) = aPlugin.supportsHook();
+        require(callType != CallHelper.CallType.Unknown, "unknow call type");
+        l.pluginCallType[pluginAddress] = callType;
+        /*
+            uint8 internal constant GUARD_HOOK = 0x1;
+            uint8 internal constant PRE_HOOK = 0x2;
+            uint8 internal constant POST_HOOK = 0x4;
+         */
+        if (hookType & 0x1 == 0x1) {
+            l.guardHookPlugins.add(pluginAddress);
+        }
+        if (hookType & 0x2 == 0x2) {
+            l.preHookPlugins.add(pluginAddress);
+        }
+        if (hookType & 0x4 == 0x4) {
+            l.postHookPlugins.add(pluginAddress);
+        }
+        l.plugins.add(pluginAddress);
+
         aPlugin.walletInit(initData);
+
         emit PluginAdded(pluginAddress);
     }
 
     function removePlugin(address plugin) internal {
-        mapping(address => address) storage plugins = pluginsMapping();
-        plugins.remove(plugin);
+        AccountStorage.Layout storage l = AccountStorage.layout();
+        l.plugins.remove(plugin);
+        l.guardHookPlugins.tryRemove(plugin);
+        l.preHookPlugins.tryRemove(plugin);
+        l.postHookPlugins.tryRemove(plugin);
+        l.pluginCallType[plugin] = CallHelper.CallType.Unknown;
+
         try IPlugin(plugin).walletDeInit() {
             emit PluginRemoved(plugin);
         } catch {
@@ -42,75 +63,80 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
     }
 
-    function _isAuthorizedPlugin(address plugin) private returns (bool) {
-        return pluginsMapping().isExist(plugin);
-    }
-
-    function isAuthorizedPlugin(address plugin) external override returns (bool) {
-        return _isAuthorizedPlugin(plugin);
+    function isAuthorizedPlugin(address plugin) external view override returns (bool) {
+        return AccountStorage.layout().plugins.isExist(plugin);
     }
 
     function listPlugin() external view override returns (address[] memory plugins) {
-        mapping(address => address) storage _plugins = pluginsMapping();
+        mapping(address => address) storage _plugins = AccountStorage.layout().plugins;
         plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
     }
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
-        mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.GuardHook)) {
+        AccountStorage.Layout storage l = AccountStorage.layout();
+        mapping(address => address) storage _plugins = l.guardHookPlugins;
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.GuardHook),
-                    plugins[i],
-                    abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash))
                 );
                 if (!success) {
                     return false;
                 }
             }
+            addr = _plugins[addr];
         }
+
         return true;
     }
 
     function preHook(address target, uint256 value, bytes memory data) internal {
-        mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PreHook)) {
-                //TODO is getHookCallType necessary? call or d`elegatecall?
+        AccountStorage.Layout storage l = AccountStorage.layout();
+        mapping(address => address) storage _plugins = l.preHookPlugins;
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.PreHook),
-                    plugins[i],
-                    abi.encodeCall(IPlugin.preHook, (target, value, data))
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))
                 );
                 require(success, "preHook failed");
             }
+            addr = _plugins[addr];
         }
     }
 
     function postHook(address target, uint256 value, bytes memory data) internal {
-        mapping(address => address) storage _plugins = pluginsMapping();
-        address[] memory plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-        for (uint256 i = 0; i < plugins.length; i++) {
-            if (IPlugin(plugins[i]).isHookCall(IPlugin.HookType.PostHook)) {
-                //TODO is getHookCallType necessary? call or d`elegatecall?
+        AccountStorage.Layout storage l = AccountStorage.layout();
+        mapping(address => address) storage _plugins = l.postHookPlugins;
+
+        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
+        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+            {
+                address plugin = addr;
                 (bool success,) = CallHelper.call(
-                    IPlugin(plugins[i]).getHookCallType(IPlugin.HookType.PostHook),
-                    plugins[i],
-                    abi.encodeCall(IPlugin.postHook, (target, value, data))
+                    l.pluginCallType[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))
                 );
                 require(success, "postHook failed");
             }
+            addr = _plugins[addr];
         }
     }
 
-    function execDelegateCall(IPlugin target, bytes memory data) external {
-        _requireFromEntryPointOrOwner();
-        require(_isAuthorizedPlugin(address(target)));
-
-        //#TODO
-
-        CallHelper.callWithoutReturnData(CallHelper.CallType.DelegateCall, address(target), data);
+    function execDelegateCall(address target, bytes memory data) external onlyEntryPointOrOwner {
+        require(
+            AccountStorage.layout().pluginCallType[target] == CallHelper.CallType.DelegateCall,
+            "not delegatecall plugin"
+        );
+        (bool success, bytes memory returnData) = CallHelper.delegatecall(target, data);
+        assembly {
+            switch success
+            case 0 { revert(add(returnData, 0x20), mload(returnData)) }
+            default { return(add(returnData, 0x20), mload(returnData)) }
+        }
     }
 }

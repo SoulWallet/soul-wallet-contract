@@ -8,6 +8,13 @@ abstract contract BasePlugin is IPlugin {
     event PluginInit(address indexed wallet);
     event PluginDeInit(address indexed wallet);
 
+    // GUARD_HOOK: 0b1
+    uint8 internal constant GUARD_HOOK = 0x1;
+    // PRE_HOOK: 0b10
+    uint8 internal constant PRE_HOOK = 0x2;
+    // POST_HOOK: 0b100
+    uint8 internal constant POST_HOOK = 0x4;
+
     bytes32 internal immutable PLUGIN_SLOT;
 
     // use immutable to avoid delegatecall to change the value
@@ -60,9 +67,7 @@ abstract contract BasePlugin is IPlugin {
         }
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) external view override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IPlugin).interfaceId;
     }
 }

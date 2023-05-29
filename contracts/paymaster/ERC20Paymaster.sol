@@ -62,7 +62,7 @@ contract ERC20Paymaster is BasePaymaster {
             require(IOracle(_tokenOracle).decimals() == 8, "Paymaster: token oracle decimals must be 8");
             supportedToken[_token].priceMarkup = _priceMarkup;
             supportedToken[_token].tokenOracle = IOracle(_tokenOracle);
-            supportedToken[_token].tokenDecimals = 10 ** IERC20Metadata(_token).decimals();
+            supportedToken[_token].tokenDecimals =  IERC20Metadata(_token).decimals();
 
             emit ConfigUpdated(_token, _tokenOracle, _priceMarkup);
         }
@@ -78,7 +78,7 @@ contract ERC20Paymaster is BasePaymaster {
         supportedToken[token].previousPrice = tokenPrice;
     }
 
-    function isSupportToken(address token) internal view returns (bool) {
+    function isSupportToken(address token) public view returns (bool) {
         return address(supportedToken[token].tokenOracle) != address(0);
     }
 
@@ -188,7 +188,7 @@ contract ERC20Paymaster is BasePaymaster {
     function fetchPrice(IOracle _oracle) internal view returns (uint192 price) {
         (uint80 roundId, int256 answer,, uint256 updatedAt, uint80 answeredInRound) = _oracle.latestRoundData();
         require(answer > 0, "Paymaster: Chainlink price <= 0");
-        require(updatedAt >= block.timestamp - 60 * 60 * 24 * 2, "Paymaster: Incomplete round");
+        require(updatedAt >= (block.timestamp - 2 days), "Paymaster: Incomplete round");
         require(answeredInRound >= roundId, "Paymaster: Stale price");
         price = uint192(int192(answer));
     }

@@ -74,12 +74,4 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         uint256 size = ownerMapping().size();
         owners = ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);
     }
-
-    function getNonce(address owner) external view override returns (uint256) {
-        uint192 key;
-        assembly {
-            key := owner
-        }
-        return _entryPoint().getNonce(address(this), key);
-    }
 }

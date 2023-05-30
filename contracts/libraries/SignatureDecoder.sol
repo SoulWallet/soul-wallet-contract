@@ -46,9 +46,7 @@ library SignatureDecoder {
         bytes signature;
     }
 
-    function decodeSignature(
-        bytes memory signature
-    ) internal pure returns (SignatureData memory) {
+    function decodeSignature(bytes memory signature) internal pure returns (SignatureData memory) {
         if (signature.length == 65) {
             return SignatureData(0, signature);
         } else {
@@ -75,6 +73,8 @@ library SignatureDecoder {
                         length: 65 `signature length`
                      */
                     // set _signature length to 65
+                    _signature := mload(0x40)
+                    mstore(0x40, add(_signature, 128))
                     mstore(_signature, 65)
                     // copy signature to _signature
                     mstore(add(_signature, 32), mload(add(signature, 65)))
@@ -86,13 +86,9 @@ library SignatureDecoder {
                     // not implemented yet
                     revert(0, 0)
                 }
-                default {
-                    revert(0, 0)
-                }
+                default { revert(0, 0) }
             }
             return SignatureData(_validationData, _signature);
         }
     }
-
-    
 }

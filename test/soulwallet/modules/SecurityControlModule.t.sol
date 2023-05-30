@@ -8,6 +8,7 @@ import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager
 import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager.sol";
 import "@source/dev/DemoModule.sol";
 import "@source/dev/DemoPlugin.sol";
+import "@source/dev/DemoDelegataCallPlugin.sol";
 import "../Bundler.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
@@ -24,7 +25,9 @@ contract SecurityControlModuleTest is Test {
     uint64 public time = 2 days;
     address public walletOwner;
     address trustedManagerOwner;
+    DemoPlugin public demoPlugin_init;
     DemoPlugin public demoPlugin;
+    DemoDelegataCallPlugin public demoDelegataCallPlugin;
     uint256 public walletOwnerPrivateKey;
     Bundler public bundler;
     TokenERC20 public token;
@@ -36,10 +39,13 @@ contract SecurityControlModuleTest is Test {
         trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
         trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
         securityControlModule = new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+        demoPlugin_init = new DemoPlugin();
 
         bytes[] memory modules = new bytes[](1);
         modules[0] = abi.encodePacked(securityControlModule, abi.encode(time));
-        bytes[] memory plugins = new bytes[](0);
+        bytes[] memory plugins = new bytes[](1);
+        bytes memory demoPlugin_init_initData;
+        plugins[0] = abi.encodePacked(address(demoPlugin_init), demoPlugin_init_initData);
         bytes32 salt = bytes32(0);
         soulWalletInstence = new SoulWalletInstence(address(0), walletOwner,  modules, plugins,  salt);
         soulWallet = soulWalletInstence.soulWallet();
@@ -56,6 +62,7 @@ contract SecurityControlModuleTest is Test {
 
         demoModule = new DemoModule();
         demoPlugin = new DemoPlugin();
+        demoDelegataCallPlugin = new DemoDelegataCallPlugin();
         bundler = new Bundler();
         token = new TokenERC20(18);
     }
@@ -262,8 +269,8 @@ contract SecurityControlModuleTest is Test {
         );
     }
 
-    event PluginInit(address indexed wallet);
-    event PluginDeInit(address indexed wallet);
+    event PluginInit(address indexed addr);
+    event PluginDeInit(address indexed addr);
 
     function test_addPlugin() public {
         vm.startPrank(trustedManagerOwner);
@@ -362,5 +369,25 @@ contract SecurityControlModuleTest is Test {
         assertEq(token.balanceOf(address(0x1111)), 100, "transfer error");
     }
 
+    // #endregion
+
+    // #region test delegateCall plugin
+    function test_demoDelegataCallPlugin() public {
+        vm.startPrank(trustedManagerOwner);
+        address[] memory _plugins = new address[](1);
+        _plugins[0] = address(demoDelegataCallPlugin);
+        trustedPluginManager.add(_plugins);
+        vm.stopPrank();
+
+        vm.startPrank(walletOwner);
+        bytes memory initData;
+        securityControlModule.execute(
+            address(soulWallet),
+            abi.encodeWithSelector(
+                bytes4(keccak256("addPlugin(address,bytes)")), address(demoDelegataCallPlugin), initData
+            )
+        );
+        vm.stopPrank();
+    }
     // #endregion
 }

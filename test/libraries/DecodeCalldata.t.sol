@@ -28,7 +28,7 @@ contract DecodeCalldataTest is Test {
         assertEq(_a, a);
         assertEq(_b, b);
         assertEq(_c, c);
-        bytes memory expected = abi.encodePacked(a, b, c);
+        bytes memory expected = abi.encode(a, b, c);
         assertEq(methodCalldata, expected);
     }
 }

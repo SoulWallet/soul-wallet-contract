@@ -15,6 +15,7 @@ interface IOwnerManager {
     function addOwner(address owner) external;
 
     function addOwners(address[] calldata owners) external;
+
     function resetOwners(address[] calldata newOwners) external;
 
     function removeOwner(address owner) external;
@@ -22,6 +23,4 @@ interface IOwnerManager {
     function replaceOwner(address oldOwner, address newOwner) external;
 
     function listOwner() external returns (address[] memory owners);
-
-    function getNonce(address owner) external view returns (uint256);
 }

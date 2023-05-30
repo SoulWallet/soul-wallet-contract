@@ -5,9 +5,6 @@ import "../interfaces/IPlugin.sol";
 import "../interfaces/ISoulWallet.sol";
 
 abstract contract BasePlugin is IPlugin {
-    event PluginInit(address indexed wallet);
-    event PluginDeInit(address indexed wallet);
-
     // GUARD_HOOK: 0b1
     uint8 internal constant GUARD_HOOK = 0x1;
     // PRE_HOOK: 0b10
@@ -15,17 +12,14 @@ abstract contract BasePlugin is IPlugin {
     // POST_HOOK: 0b100
     uint8 internal constant POST_HOOK = 0x4;
 
-    bytes32 internal immutable PLUGIN_SLOT;
-
     // use immutable to avoid delegatecall to change the value
-    address private immutable DEPLOY_ADDRESS;
+    address internal immutable DEPLOY_ADDRESS;
 
-    constructor(bytes32 pluginSlot) {
-        PLUGIN_SLOT = pluginSlot;
+    constructor() {
         DEPLOY_ADDRESS = address(this);
     }
 
-    function sender() internal view returns (address) {
+    function _sender() internal view returns (address) {
         return msg.sender;
     }
 
@@ -39,33 +33,13 @@ abstract contract BasePlugin is IPlugin {
         _;
     }
 
-    function inited(address wallet) internal view virtual returns (bool);
+    function _wallet() internal view virtual returns (address wallet);
 
     function _init(bytes calldata data) internal virtual;
 
     function _deInit() internal virtual;
 
-    function walletInit(bytes calldata data) external override {
-        address _sender = sender();
-        if (!inited(_sender)) {
-            if (!ISoulWallet(_sender).isAuthorizedPlugin(DEPLOY_ADDRESS)) {
-                revert("not authorized plugin");
-            }
-            _init(data);
-            emit PluginInit(_sender);
-        }
-    }
-
-    function walletDeInit() external override {
-        address _sender = sender();
-        if (inited(_sender)) {
-            if (ISoulWallet(_sender).isAuthorizedPlugin(DEPLOY_ADDRESS)) {
-                revert("authorized plugin");
-            }
-            _deInit();
-            emit PluginDeInit(_sender);
-        }
-    }
+    function _supportsHook() internal pure virtual returns (uint8 hookType);
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IPlugin).interfaceId;

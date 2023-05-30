@@ -13,6 +13,9 @@ abstract contract PluginManager is Authority, IPluginManager {
     bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
 
+    bytes4 internal constant FUNC_WALLETINIT = bytes4(keccak256("walletInit(bytes)"));
+    bytes4 internal constant FUNC_WALLETDEINIT = bytes4(keccak256("walletDeInit()"));
+
     function addPlugin(bytes calldata pluginAndData) internal {
         require(pluginAndData.length >= 20, "plugin address empty");
         address moduleAddress = address(bytes20(pluginAndData[:20]));
@@ -42,8 +45,8 @@ abstract contract PluginManager is Authority, IPluginManager {
             l.postHookPlugins.add(pluginAddress);
         }
         l.plugins.add(pluginAddress);
-
-        aPlugin.walletInit(initData);
+        (bool success,) = CallHelper.call(callType, pluginAddress, abi.encodeWithSelector(FUNC_WALLETINIT, initData));
+        require(success, "plugin init failed");
 
         emit PluginAdded(pluginAddress);
     }
@@ -51,16 +54,16 @@ abstract contract PluginManager is Authority, IPluginManager {
     function removePlugin(address plugin) internal {
         AccountStorage.Layout storage l = AccountStorage.layout();
         l.plugins.remove(plugin);
+        (bool success,) = CallHelper.call(l.pluginCallType[plugin], plugin, abi.encodeWithSelector(FUNC_WALLETDEINIT));
+        if (success) {
+            emit PluginRemoved(plugin);
+        } else {
+            emit PluginRemovedWithError(plugin);
+        }
         l.guardHookPlugins.tryRemove(plugin);
         l.preHookPlugins.tryRemove(plugin);
         l.postHookPlugins.tryRemove(plugin);
         l.pluginCallType[plugin] = CallHelper.CallType.Unknown;
-
-        try IPlugin(plugin).walletDeInit() {
-            emit PluginRemoved(plugin);
-        } catch {
-            emit PluginRemovedWithError(plugin);
-        }
     }
 
     function isAuthorizedPlugin(address plugin) external view override returns (bool) {

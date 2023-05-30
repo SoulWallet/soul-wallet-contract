@@ -10,7 +10,7 @@ library DecodeCalldata {
         }
     }
 
-    function decodeMethodCalldata(bytes memory data) internal view returns (bytes memory MethodCalldata) {
+    function decodeMethodCalldata(bytes memory data) internal pure returns (bytes memory MethodCalldata) {
         assembly {
             let dataLength := mload(data)
             if lt(dataLength, 0x04) { revert(0, 0) }

@@ -334,7 +334,7 @@ contract DailylimitTest is Test {
     }
 
     function test_transferETH() public {
-        transferETH(address(1), 0.001 ether, true);
+        transferETH(address(1), 0.2 ether, true);
     }
 
     function test_transferERC20_dailylimit() public {

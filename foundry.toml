@@ -12,9 +12,11 @@ gas_reports = [
     "SocialRecoveryModule",
     "TrustedModuleManager",
     "TrustedPluginManager",
+    "Dailylimit",
+    "Upgrade"
 ]
 # gas_reports_ignore = ["dev","test"]
-solc = "0.8.19"
+solc = "0.8.20"
 optimizer = true
 optimizer_runs = 100000
 via_ir = true

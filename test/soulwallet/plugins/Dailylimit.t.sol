@@ -304,31 +304,31 @@ contract DailylimitTest is Test {
     }
 
     function test_transferETH_dailylimit() public {
+        uint256 snapshotId = vm.snapshot();
         setUpPlugin();
-        {
-            //uint256 snapshotId = vm.snapshot();
+        uint256 _eth;
+        (_eth,,,,) = getSpentToday();
+        assertEq(_eth, 0, "dailylimit should be 0");
 
-            uint256 _eth;
-            (_eth,,,,) = getSpentToday();
-            assertEq(_eth, 0, "dailylimit should be 0");
+        transferETH(address(1), 0.2 ether, true);
+        (_eth,,,,) = getSpentToday();
+        //console.log("dailylimit 1", _eth);
+        assertEq(_eth > 0.2 ether, true, "spentToday should be more than 0.2");
 
-            transferETH(address(1), 0.1 ether, true);
-            (_eth,,,,) = getSpentToday();
-            //console.log("dailylimit 1", _eth);
-            assertEq(_eth > 0.1 ether, true, "spentToday should be more than 0.1");
+        transferETH(address(1), 0.3 ether, true);
+        (_eth,,,,) = getSpentToday();
+        //console.log("dailylimit 2", _eth);
+        assertEq(_eth > 0.5 ether, true, "spentToday should be more than 0.5");
 
-            transferETH(address(1), 0.2 ether, true);
-            (_eth,,,,) = getSpentToday();
-            //console.log("dailylimit 2", _eth);
-            assertEq(_eth > 0.3 ether, true, "spentToday should be more than 0.3");
+        transferETH(address(1), 0.5 ether, false);
 
-            transferETH(address(1), 0.3 ether, false);
+        vm.warp(block.timestamp + 1 days);
+        transferETH(address(1), 0.3 ether, true);
+        (_eth,,,,) = getSpentToday();
+        //console.log("dailylimit 4", _eth);
+        assertEq(_eth > 0.3 ether && _eth < 0.5 ether, true, "spentToday should be more than 0.3 and less than 0.5");
 
-            vm.warp(block.timestamp + 1 days);
-            transferETH(address(1), 0.3 ether, true);
-
-            //vm.revertTo(snapshotId);
-        }
+        vm.revertTo(snapshotId);
 
         //transferETH(address(1), 2 ether);
     }
@@ -338,31 +338,28 @@ contract DailylimitTest is Test {
     }
 
     function test_transferERC20_dailylimit() public {
+        uint256 snapshotId = vm.snapshot();
         setUpPlugin();
-        {
-            //uint256 snapshotId = vm.snapshot();
+        uint256 _token;
+        (,, _token,,) = getSpentToday();
+        assertEq(_token, 0, "dailylimit should be 0");
 
-            uint256 _token;
-            (,, _token,,) = getSpentToday();
-            assertEq(_token, 0, "dailylimit should be 0");
+        transferERC20(address(token2), address(1), 0.1 ether, true);
+        (,, _token,,) = getSpentToday();
+        //console.log("dailylimit 1", _eth);
+        assertEq(_token, 0.1 ether, "spentToday must be 0.1");
 
-            transferERC20(address(token2), address(1), 0.1 ether, true);
-            (,, _token,,) = getSpentToday();
-            //console.log("dailylimit 1", _eth);
-            assertEq(_token, 0.1 ether, "spentToday must be 0.1");
+        transferERC20(address(token2), address(1), 0.2 ether, true);
+        (,, _token,,) = getSpentToday();
+        //console.log("dailylimit 2", _eth);
+        assertEq(_token, 0.3 ether, "spentToday must be 0.3");
 
-            transferERC20(address(token2), address(1), 0.2 ether, true);
-            (,, _token,,) = getSpentToday();
-            //console.log("dailylimit 2", _eth);
-            assertEq(_token, 0.3 ether, "spentToday must be 0.3");
+        transferERC20(address(token2), address(1), 0.8 ether, false);
 
-            transferERC20(address(token2), address(1), 0.8 ether, false);
+        vm.warp(block.timestamp + 1 days);
+        transferERC20(address(token2), address(1), 0.8 ether, true);
 
-            vm.warp(block.timestamp + 1 days);
-            transferERC20(address(token2), address(1), 0.8 ether, true);
-
-            //vm.revertTo(snapshotId);
-        }
+        vm.revertTo(snapshotId);
     }
 
     function test_transferERC20() public {

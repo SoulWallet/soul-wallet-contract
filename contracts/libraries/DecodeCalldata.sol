@@ -16,6 +16,7 @@ library DecodeCalldata {
             if lt(dataLength, 0x04) { revert(0, 0) }
             let methodDataLength := sub(dataLength, 0x04)
             MethodCalldata := mload(0x40)
+            mstore(0x40, add(MethodCalldata, and(add(methodDataLength, 0x3f), not(0x1f))))
             mstore(MethodCalldata, methodDataLength)
             let MethodCalldataStart := add(MethodCalldata, 0x20)
             let dataStart := add(data, 0x24)

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../BasePlugin.sol";
+import "../BaseDelegateCallPlugin.sol";
 import "./IUpgrade.sol";
 
-contract Upgrade is BasePlugin, IUpgrade {
+contract Upgrade is BaseDelegateCallPlugin, IUpgrade {
     bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
-    constructor() BasePlugin(keccak256("PLUGIN_UPGRADE_SLOT")) {}
+    constructor() BaseDelegateCallPlugin(keccak256("PLUGIN_UPGRADE_SLOT")) {}
 
     function readLogic() private view returns (address logic) {
         assembly {
@@ -37,8 +37,7 @@ contract Upgrade is BasePlugin, IUpgrade {
         }
     }
 
-    function inited(address wallet) internal view virtual override returns (bool) {
-        (wallet);
+    function inited() internal view virtual override returns (bool) {
         return readNewLogic() != address(0);
     }
 
@@ -64,9 +63,8 @@ contract Upgrade is BasePlugin, IUpgrade {
         emit Upgrade(newLogic, oldLogic);
     }
 
-    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+    function _supportsHook() internal pure override returns (uint8 hookType) {
         hookType = 0;
-        callType = CallHelper.CallType.DelegateCall;
     }
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external pure override {

@@ -42,7 +42,7 @@ abstract contract BaseModule is IModule {
         }
     }
 
-    function packExecuteData(bytes memory _data) internal view returns (bytes memory) {
+    function packExecuteData(bytes memory _data) internal pure returns (bytes memory) {
         bytes memory packedData = abi.encodeWithSelector(FUNC_EXEC_FROM_MODULE, _data);
         return packedData;
     }

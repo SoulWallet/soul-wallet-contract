@@ -20,15 +20,6 @@ contract SignatureDecoderTest is Test {
         signTypeDecode(sig, sig, 0);
     }
 
-    function signTypeBTest(uint48 validUntil, uint48 validAfter, bytes calldata sig) public {
-        // e.g. sig:0x1c75aa92441aa5232a0e40c1bef20c76345308d6b844a48858f553e0ec04a207c67ebd05b9c7262bdae813dc51cd4ea285a30e4bf7766186f7ab88f910c61caf36
-        require(sig.length == 65, "invalid signature length");
-        uint256 validationData = (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));
-        uint8 signType = 0;
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
-        signTypeDecode(packedSig, sig, validationData);
-    }
-
     function test_SignTypeB() public {
         (, uint256 ownerKey) = makeAddrAndKey("owner");
         bytes32 hash = keccak256(abi.encodePacked("hello world"));

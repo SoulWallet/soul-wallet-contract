@@ -1,8 +1,8 @@
 {
   "name": "soulwallet-contract",
   "scripts": {
-    "build": "forge build",
-    "test": "forge test -vv",
+    "build": "forge build --sizes",
+    "test": "forge test -vvv",
     "gas-report": "forge test --gas-report"
   },
   "devDependencies": {

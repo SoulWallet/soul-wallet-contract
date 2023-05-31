@@ -40,7 +40,7 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return moduleSelectors[module].isExist(selector);
     }
 
-    function isAuthorizedModule(address module) external override returns (bool) {
+    function isAuthorizedModule(address module) external view override returns (bool) {
         return _isAuthorizedModule(module);
     }
 

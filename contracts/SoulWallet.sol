@@ -11,7 +11,6 @@ import "./base/OwnerManager.sol";
 import "./helper/SignatureValidator.sol";
 import "./handler/ERC1271Handler.sol";
 import "./base/FallbackManager.sol";
-import "./interfaces/IModule.sol";
 
 // Draft
 contract SoulWallet is
@@ -66,9 +65,7 @@ contract SoulWallet is
         bool sigValid;
         (validationData, sigValid) = isValidUserOp(userOpHash, userOp.signature);
 
-        if (sigValid) {
-            sigValid = guardHook(userOp, userOpHash);
-        }
+        sigValid = sigValid && guardHook(userOp, userOpHash);
 
         // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
         // validUntil and validAfter is already packed in signatureData.validationData,

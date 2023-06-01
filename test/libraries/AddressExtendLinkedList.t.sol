@@ -15,57 +15,67 @@ contract AddressExtendLinkedListTest is Test {
         {
             address a1 = address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF);
             uint96 a1_ext = type(uint96).max;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
         }
         {
             address a1 = address(0);
             uint96 a1_ext = type(uint96).max;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
         }
         {
             address a1 = address(1);
             uint96 a1_ext = type(uint96).max;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
         }
 
         {
             address a1 = address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF);
             uint96 a1_ext = 0;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
         }
         {
             address a1 = address(0);
             uint96 a1_ext = 0;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
         }
         {
             address a1 = address(1);
             uint96 a1_ext = 0;
-            bytes32 a1_packed = AddressExtendLinkedList._pack(a1, a1_ext);
-            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList._unpack(a1_packed);
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
             assertEq(_a1, a1);
             assertEq(_a1_ext, a1_ext);
-            assertEq(AddressExtendLinkedList._unpackAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
+        }
+        {
+            address a1 = address(1);
+            uint96 a1_ext = 0x111;
+            bytes32 a1_packed = AddressExtendLinkedList.encode(a1, a1_ext);
+            (address _a1, uint96 _a1_ext) = AddressExtendLinkedList.decode(a1_packed);
+            assertEq(_a1, a1);
+            assertEq(_a1_ext, a1_ext);
+            assertEq(AddressExtendLinkedList.decodeAddress(a1_packed), a1);
+            assertEq(AddressExtendLinkedList.decodeExtendData(a1_packed), a1_ext);
         }
     }
 
@@ -128,8 +138,20 @@ contract AddressExtendLinkedListTest is Test {
 
     function test_size() public {
         assertEq(list.size(), 0);
-        test_add_address1();
+        list.add(address(0x2), 0);
         assertEq(list.size(), 1);
+        list.remove(address(0x2));
+        assertEq(list.size(), 0);
+
+        list.add(address(0x2), 0);
+        assertEq(list.size(), 1);
+        list.add(address(0x3), 0);
+        assertEq(list.size(), 2);
+        list.remove(address(0x2));
+        assertEq(list.size(), 1);
+        list.remove(address(0x3));
+        assertEq(list.size(), 0);
+
         test_add10();
         assertEq(list.size(), 10);
     }
@@ -138,15 +160,5 @@ contract AddressExtendLinkedListTest is Test {
         assertEq(list.isEmpty(), true);
         test_add_address1();
         assertEq(list.isEmpty(), false);
-    }
-
-    function test_list() public {
-        uint256 size = list.size();
-        AddressExtendLinkedList.AddressExtend[] memory _list = list.list(address(0x1), size);
-        assertEq(_list.length, 0);
-        test_add10();
-        size = list.size();
-        _list = list.list(address(0x1), size);
-        assertEq(_list.length, 10);
     }
 }

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "../plugin/BaseCallPlugin.sol";
-import "../libraries/CallHelper.sol";
 
 contract DemoPlugin is BaseCallPlugin {
     mapping(address => bool) registry;

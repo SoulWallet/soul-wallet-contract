@@ -42,8 +42,8 @@ abstract contract BaseDelegateCallPlugin is BasePlugin {
         }
     }
 
-    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+    function supportsHook() external pure override returns (uint8 hookType, uint8 callType) {
         hookType = _supportsHook();
-        callType = CallHelper.CallType.DelegateCall;
+        callType = DELEGATECALL;
     }
 }

@@ -4,13 +4,13 @@ pragma solidity ^0.8.17;
 import "../authority/EntryPointAuth.sol";
 
 abstract contract EntryPointManager is EntryPointAuth {
-    IEntryPoint private immutable __entryPoint;
+    IEntryPoint private immutable _ENTRY_POINT;
 
     constructor(IEntryPoint anEntryPoint) {
-        __entryPoint = anEntryPoint;
+        _ENTRY_POINT = anEntryPoint;
     }
 
     function _entryPoint() internal view override returns (IEntryPoint) {
-        return __entryPoint;
+        return _ENTRY_POINT;
     }
 }

@@ -5,16 +5,16 @@ import "./ISafeLock.sol";
 
 abstract contract SafeLock is ISafeLock {
 
-    bytes32 private immutable safeLockSlot;
+    bytes32 private immutable _SAFELOCK_SLOT;
 
     constructor(string memory safeLockSlotName, uint64 safeLockPeriod) {
-        safeLockSlot = keccak256(abi.encodePacked(safeLockSlotName));
+        _SAFELOCK_SLOT = keccak256(abi.encodePacked(safeLockSlotName));
         require(safeLockPeriod > 0, "SafeLock: safeLockPeriod must be greater than 0");
-        safeLockLayout().safeLockPeriod = safeLockPeriod;
+        _safeLockLayout().safeLockPeriod = safeLockPeriod;
     }
 
-    function safeLockLayout() internal view returns (SafeLockLayout storage l) {
-        bytes32 slot = safeLockSlot;
+    function _safeLockLayout() internal view returns (SafeLockLayout storage l) {
+        bytes32 slot = _SAFELOCK_SLOT;
         assembly {
             l.slot := slot
         }
@@ -25,15 +25,15 @@ abstract contract SafeLock is ISafeLock {
     }
 
     function getSafeLockPeriod() external view returns (uint64){
-        return safeLockLayout().safeLockPeriod;
+        return _safeLockLayout().safeLockPeriod;
     }
 
     function getSafeLockStatus(bytes32 _safeLockHash) external view returns (uint64 unLockTime){
-          unLockTime = safeLockLayout().safeLockStatus[_safeLockHash];
+          unLockTime = _safeLockLayout().safeLockStatus[_safeLockHash];
     }
 
-    function tryLock(bytes32 _safeLockHash) internal returns (bool) {
-        SafeLockLayout storage layout = safeLockLayout();
+    function _tryLock(bytes32 _safeLockHash) internal returns (bool) {
+        SafeLockLayout storage layout = _safeLockLayout();
         mapping(bytes32 => uint64) storage safeLockStatus = layout.safeLockStatus;
         if (safeLockStatus[_safeLockHash] != 0) {
             return false;
@@ -42,18 +42,18 @@ abstract contract SafeLock is ISafeLock {
         return true;
     }
 
-    function lock(bytes32 _safeLockHash) internal{
-        require(tryLock(_safeLockHash), "SafeLock: already locked");
+    function _lock(bytes32 _safeLockHash) internal{
+        require(_tryLock(_safeLockHash), "SafeLock: already locked");
     }
 
-    function cancelLock(bytes32 _safeLockHash) internal{
-        SafeLockLayout storage layout = safeLockLayout();
+    function _cancelLock(bytes32 _safeLockHash) internal{
+        SafeLockLayout storage layout = _safeLockLayout();
         mapping(bytes32 => uint64) storage safeLockStatus = layout.safeLockStatus;
         safeLockStatus[_safeLockHash] = 0;
     }
 
-    function tryUnlock(bytes32 _safeLockHash) internal returns (bool) {
-        SafeLockLayout storage layout = safeLockLayout();
+    function _tryUnlock(bytes32 _safeLockHash) internal returns (bool) {
+        SafeLockLayout storage layout = _safeLockLayout();
         mapping(bytes32 => uint64) storage safeLockStatus = layout.safeLockStatus;
         uint64 unlockTime = safeLockStatus[_safeLockHash];
         if (unlockTime == 0 || unlockTime > _now()) {
@@ -63,8 +63,8 @@ abstract contract SafeLock is ISafeLock {
         return true;
     }
 
-    function unlock(bytes32 _safeLockHash) internal{
-        require(tryUnlock(_safeLockHash), "SafeLock: not unlock time");
+    function _unlock(bytes32 _safeLockHash) internal{
+        require(_tryUnlock(_safeLockHash), "SafeLock: not unlock time");
     }
 
 

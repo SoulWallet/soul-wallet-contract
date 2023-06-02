@@ -16,11 +16,11 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes)"));
     bytes4 internal constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
 
-    function modulesMapping() private view returns (mapping(address => address) storage modules) {
+    function _modulesMapping() private view returns (mapping(address => address) storage modules) {
         modules = AccountStorage.layout().modules;
     }
 
-    function moduleSelectorsMapping()
+    function _moduleSelectorsMapping()
         private
         view
         returns (mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors)
@@ -29,14 +29,14 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     }
 
     function _isAuthorizedModule(address module) private view returns (bool) {
-        return modulesMapping().isExist(module);
+        return _modulesMapping().isExist(module);
     }
 
-    function isAuthorizedSelector(address module, bytes4 selector) private view returns (bool) {
-        if (!modulesMapping().isExist(module)) {
+    function _isAuthorizedSelector(address module, bytes4 selector) private view returns (bool) {
+        if (!_modulesMapping().isExist(module)) {
             return false;
         }
-        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
         return moduleSelectors[module].isExist(selector);
     }
 
@@ -44,31 +44,31 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return _isAuthorizedModule(module);
     }
 
-    function addModule(bytes calldata moduleAndData) internal {
+    function _addModule(bytes calldata moduleAndData) internal {
         require(moduleAndData.length >= 20, "module address empty");
         address moduleAddress = address(bytes20(moduleAndData[:20]));
         bytes memory initData = moduleAndData[20:];
-        addModule(moduleAddress, initData);
+        _addModule(moduleAddress, initData);
     }
 
-    function addModule(address moduleAddress, bytes memory initData) internal {
+    function _addModule(address moduleAddress, bytes memory initData) internal {
         IModule aModule = IModule(moduleAddress);
         require(aModule.supportsInterface(type(IModule).interfaceId), "unknown module");
         bytes4[] memory requiredFunctions = aModule.requiredFunctions();
         require(requiredFunctions.length > 0, "selectors empty");
-        mapping(address => address) storage modules = modulesMapping();
+        mapping(address => address) storage modules = _modulesMapping();
         modules.add(moduleAddress);
-        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
         moduleSelectors[moduleAddress].add(requiredFunctions);
         aModule.walletInit(initData);
         emit ModuleAdded(moduleAddress);
     }
 
-    function removeModule(address module) internal {
-        mapping(address => address) storage modules = modulesMapping();
+    function _removeModule(address module) internal {
+        mapping(address => address) storage modules = _modulesMapping();
         modules.remove(module);
 
-        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
         moduleSelectors[module].clear();
 
         try IModule(module).walletDeInit() {
@@ -79,10 +79,10 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
     }
 
     function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
-        mapping(address => address) storage _modules = modulesMapping();
-        uint256 moduleSize = modulesMapping().size();
+        mapping(address => address) storage _modules = _modulesMapping();
+        uint256 moduleSize = _modulesMapping().size();
         modules = new address[](moduleSize);
-        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = moduleSelectorsMapping();
+        mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
         selectors = new bytes4[][](moduleSize);
 
         uint256 i = 0;
@@ -118,24 +118,24 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
 
     function execFromModule(bytes calldata data) external override {
         bytes4 selector = bytes4(data[0:4]);
-        require(isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
+        require(_isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
 
         if (selector == FUNC_ADD_MODULE) {
             // addModule(address,bytes)
             (address moduleAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
-            addModule(moduleAddress, initData);
+            _addModule(moduleAddress, initData);
         } else if (selector == FUNC_REMOVE_MODULE) {
             // removeModule(address)
             address module = abi.decode(data[4:], (address));
-            removeModule(module);
+            _removeModule(module);
         } else if (selector == FUNC_ADD_PLUGIN) {
             // addPlugin((address,bytes))
             (address pluginAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
-            addPlugin(pluginAddress, initData);
+            _addPlugin(pluginAddress, initData);
         } else if (selector == FUNC_REMOVE_PLUGIN) {
             // removePlugin(address)
             address plugin = abi.decode(data[4:], (address));
-            removePlugin(plugin);
+            _removePlugin(plugin);
         } else if (selector == FUNC_EXECUTE) {
             // execute(address,uint256,bytes)
             (address to, uint256 value, bytes memory _data) = abi.decode(data[4:], (address, uint256, bytes));

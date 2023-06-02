@@ -9,30 +9,30 @@ import "../libraries/AddressLinkedList.sol";
 abstract contract OwnerManager is IOwnerManager, Authority {
     using AddressLinkedList for mapping(address => address);
 
-    function ownerMapping() private view returns (mapping(address => address) storage owners) {
+    function _ownerMapping() private view returns (mapping(address => address) storage owners) {
         owners = AccountStorage.layout().owners;
     }
 
     function _isOwner(address addr) internal view override returns (bool) {
-        return ownerMapping().isExist(addr);
+        return _ownerMapping().isExist(addr);
     }
 
     function isOwner(address addr) external view override returns (bool) {
         return _isOwner(addr);
     }
 
-    function clearOwner() private {
-        ownerMapping().clear();
+    function _clearOwner() private {
+        _ownerMapping().clear();
         emit OwnerCleared();
     }
 
     function resetOwner(address newOwner) external override onlyEntryPointOrSelf {
-        clearOwner();
+        _clearOwner();
         _addOwner(newOwner);
     }
 
     function resetOwners(address[] calldata newOwners) external override onlyEntryPointOrSelf {
-        clearOwner();
+        _clearOwner();
         _addOwners(newOwners);
     }
 
@@ -54,24 +54,24 @@ abstract contract OwnerManager is IOwnerManager, Authority {
     }
 
     function _addOwner(address owner) internal {
-        ownerMapping().add(owner);
+        _ownerMapping().add(owner);
         emit OwnerAdded(owner);
     }
 
     function removeOwner(address owner) external override onlyEntryPointOrSelf {
-        ownerMapping().remove(owner);
-        require(!ownerMapping().isEmpty(), "no owner");
+        _ownerMapping().remove(owner);
+        require(!_ownerMapping().isEmpty(), "no owner");
         emit OwnerRemoved(owner);
     }
 
     function replaceOwner(address oldOwner, address newOwner) external override onlyEntryPointOrSelf {
-        ownerMapping().replace(oldOwner, newOwner);
+        _ownerMapping().replace(oldOwner, newOwner);
         emit OwnerRemoved(oldOwner);
         emit OwnerAdded(newOwner);
     }
 
     function listOwner() external view override returns (address[] memory owners) {
-        uint256 size = ownerMapping().size();
-        owners = ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);
+        uint256 size = _ownerMapping().size();
+        owners = _ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);
     }
 }

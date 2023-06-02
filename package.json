@@ -3,7 +3,9 @@
   "scripts": {
     "build": "forge build --sizes",
     "test": "forge test -vvv",
-    "gas-report": "forge test --gas-report"
+    "gas-report": "forge test --gas-report",
+    "gas-report-save": "./gas-report-check.sh save",
+    "gas-report-check": "./gas-report-check.sh"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.6.4",

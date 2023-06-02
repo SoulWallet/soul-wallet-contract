@@ -22,14 +22,14 @@ contract ERC20Paymaster is BasePaymaster {
     using UserOperationLib for UserOperation;
     using SafeERC20 for IERC20Metadata;
 
-    uint256 public constant priceDenominator = 1e6;
+    uint256 public constant PRICE_DENOMINATOR = 1e6;
     // calculated cost of the postOp
     uint256 public constant COST_OF_POST = 40000;
 
     // Trusted token approve gas cost
-    uint256 private constant SAFE_APPROVE_GAS_COST = 50000;
+    uint256 private constant _SAFE_APPROVE_GAS_COST = 50000;
 
-    address public immutable walletFactory;
+    address public immutable WALLET_FACTORY;
 
     mapping(address => TokenSetting) public supportedToken;
 
@@ -40,7 +40,7 @@ contract ERC20Paymaster is BasePaymaster {
     constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint) {
         transferOwnership(_owner);
         require(address(_walletFactory) != address(0), "Paymaster: invalid etnrypoint addr");
-        walletFactory = _walletFactory;
+        WALLET_FACTORY = _walletFactory;
     }
 
     function setToken(
@@ -106,7 +106,7 @@ contract ERC20Paymaster is BasePaymaster {
         uint256 costOfPost = userOp.gasPrice() * COST_OF_POST;
 
         uint256 tokenRequiredPreFund = (requiredPreFund + costOfPost) * supportedToken[token].priceMarkup * exchangeRate
-            / (1e18 * priceDenominator);
+            / (1e18 * PRICE_DENOMINATOR);
 
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
 
@@ -128,7 +128,7 @@ contract ERC20Paymaster is BasePaymaster {
         view
     {
         address factory = address(bytes20(userOp.initCode));
-        require(factory == walletFactory, "Paymaster: unknown wallet factory");
+        require(factory == WALLET_FACTORY, "Paymaster: unknown wallet factory");
         require(
             bytes4(userOp.callData)
                 == bytes4(0x2763604f /* 0x2763604f execFromEntryPoint(address[],uint256[],bytes[]) */ ),
@@ -151,7 +151,7 @@ contract ERC20Paymaster is BasePaymaster {
             _destAddress = destAddr;
         }
         // callGasLimit
-        uint256 callGasLimit = dest.length * SAFE_APPROVE_GAS_COST;
+        uint256 callGasLimit = dest.length * _SAFE_APPROVE_GAS_COST;
         require(userOp.callGasLimit >= callGasLimit, "Paymaster: gas too low for postOp");
     }
 
@@ -175,7 +175,7 @@ contract ERC20Paymaster is BasePaymaster {
         (address sender, address payable token, uint256 costOfPost, uint256 exchangeRate) =
             abi.decode(context, (address, address, uint256, uint256));
         uint256 tokenRequiredFund =
-            (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * exchangeRate / (1e18 * priceDenominator);
+            (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * exchangeRate / (1e18 * PRICE_DENOMINATOR);
 
         IERC20Metadata(token).safeTransferFrom(sender, address(this), tokenRequiredFund);
         // update oracle

@@ -14,15 +14,15 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     string public constant VERSION = "0.0.1";
 
     // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-    bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH =
+    bytes32 private constant _DOMAIN_SEPARATOR_TYPEHASH =
         0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
 
     // keccak256("SocialRecovery(address wallet,address[] newOwners,uint256 nonce)");
-    bytes32 private constant SOCIAL_RECOVERY_TYPEHASH =
+    bytes32 private constant _SOCIAL_RECOVERY_TYPEHASH =
         0x333ef7ecc7b8a82065578df0879cefc36c32344d49afdf1e0370a60babe64feb;
 
-    bytes4 private constant FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
-    bytes4 private constant FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
+    bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
+    bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
 
     mapping(address => uint256) walletRecoveryNonce;
     mapping(address => uint256) walletInitSeed;
@@ -61,7 +61,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     function domainSeparator() public view returns (bytes32) {
         return keccak256(
             abi.encode(
-                DOMAIN_SEPARATOR_TYPEHASH,
+                _DOMAIN_SEPARATOR_TYPEHASH,
                 keccak256(abi.encodePacked(NAME)),
                 keccak256(abi.encodePacked(VERSION)),
                 getChainId(),
@@ -76,7 +76,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
         returns (bytes memory)
     {
         bytes32 recoveryHash =
-            keccak256(abi.encode(SOCIAL_RECOVERY_TYPEHASH, _wallet, keccak256(abi.encodePacked(_newOwners)), _nonce));
+            keccak256(abi.encode(_SOCIAL_RECOVERY_TYPEHASH, _wallet, keccak256(abi.encodePacked(_newOwners)), _nonce));
         return abi.encodePacked(bytes1(0x19), bytes1(0x01), domainSeparator(), recoveryHash);
     }
 
@@ -88,7 +88,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
         return keccak256(encodeSocialRecoveryData(_wallet, _newOwners, _nonce));
     }
 
-    function newSeed() private returns (uint128) {
+    function _newSeed() private returns (uint128) {
         __seed++;
         return __seed;
     }
@@ -113,7 +113,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
         }
         walletGuardian[_sender].guardianHash = _guardianHash;
         walletGuardian[_sender].threshold = _threshold;
-        walletInitSeed[_sender] = newSeed();
+        walletInitSeed[_sender] = _newSeed();
     }
 
     function _deInit() internal override {
@@ -413,8 +413,8 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
 
     function requiredFunctions() external pure override returns (bytes4[] memory){
         bytes4[] memory functions = new bytes4[](2);
-        functions[0] = FUNC_RESET_OWNER;
-        functions[1] = FUNC_RESET_OWNERS;
+        functions[0] = _FUNC_RESET_OWNER;
+        functions[1] = _FUNC_RESET_OWNERS;
         return functions;
     }
 }

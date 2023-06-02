@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
 
-    name: Foundry project
+    name: SoulWallet Contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,3 +37,9 @@ jobs:
         run: |
           forge test -vvv
         id: test
+      
+      - name: Run gas report
+        run: |
+          chmod +x ./gas-report-check.sh
+          ./gas-report-check.sh
+        id: gas

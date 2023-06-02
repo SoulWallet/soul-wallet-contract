@@ -16,14 +16,14 @@ abstract contract PluginManager is Authority, IPluginManager {
     bytes4 internal constant FUNC_WALLETINIT = bytes4(keccak256("walletInit(bytes)"));
     bytes4 internal constant FUNC_WALLETDEINIT = bytes4(keccak256("walletDeInit()"));
 
-    function addPlugin(bytes calldata pluginAndData) internal {
+    function _addPlugin(bytes calldata pluginAndData) internal {
         require(pluginAndData.length >= 20, "plugin address empty");
         address moduleAddress = address(bytes20(pluginAndData[:20]));
         bytes memory initData = pluginAndData[20:];
-        addPlugin(moduleAddress, initData);
+        _addPlugin(moduleAddress, initData);
     }
 
-    function addPlugin(address pluginAddress, bytes memory initData) internal {
+    function _addPlugin(address pluginAddress, bytes memory initData) internal {
         IPlugin aPlugin = IPlugin(pluginAddress);
         require(aPlugin.supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
         AccountStorage.Layout storage l = AccountStorage.layout();
@@ -50,7 +50,7 @@ abstract contract PluginManager is Authority, IPluginManager {
         emit PluginAdded(pluginAddress);
     }
 
-    function removePlugin(address plugin) internal {
+    function _removePlugin(address plugin) internal {
         AccountStorage.Layout storage l = AccountStorage.layout();
         l.plugins.remove(plugin);
         bool success = call(l.pluginCallTypes[plugin], plugin, abi.encodeWithSelector(FUNC_WALLETDEINIT));

@@ -16,11 +16,11 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
 
     uint128 private __seed;
 
-    function newSeed() private returns (uint128) {
+    function _newSeed() private returns (uint128) {
         return ++__seed;
     }
 
-    function authorized(address _target) private view {
+    function _authorized(address _target) private view {
         address _sender = sender();
         if (_sender != _target && !ISoulWallet(_target).isOwner(_sender)) {
             revert NotOwnerError();
@@ -39,7 +39,7 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         uint64 _delay = abi.decode(data, (uint64));
         require(_delay >= MIN_DELAY && _delay <= MAX_DELAY);
         address _target = sender();
-        walletConfigs[_target] = WalletConfig(newSeed(), _delay);
+        walletConfigs[_target] = WalletConfig(_newSeed(), _delay);
     }
 
     function _deInit() internal override {
@@ -60,7 +60,7 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
     }
 
     function queue(address _target, bytes calldata _data) external virtual override returns (bytes32 txId) {
-        authorized(_target);
+        _authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
         txId = _getTxId(walletConfig.seed, _target, _data);
         if (queued[txId].target != address(0)) {
@@ -76,20 +76,20 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         if (_tx.target == address(0)) {
             revert NotQueuedError(_txId);
         }
-        authorized(_tx.target);
+        _authorized(_tx.target);
 
         queued[_txId] = Tx(address(0), 0);
         emit Cancel(_txId, sender());
     }
 
     function cancelAll(address target) external virtual override {
-        authorized(target);
+        _authorized(target);
         address _sender = sender();
-        walletConfigs[target].seed = newSeed();
+        walletConfigs[target].seed = _newSeed();
         emit CancelAll(target, _sender);
     }
 
-    function preExecute(address _target, bytes calldata _data, bytes32 _txId) internal virtual {
+    function _preExecute(address _target, bytes calldata _data, bytes32 _txId) internal virtual {
         (_target, _data);
         Tx memory _tx = queued[_txId];
         uint256 validAfter = _tx.validAfter;
@@ -103,10 +103,10 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
     }
 
     function execute(address _target, bytes calldata _data) external virtual override {
-        authorized(_target);
+        _authorized(_target);
         WalletConfig memory walletConfig = walletConfigs[_target];
         bytes32 txId = _getTxId(walletConfig.seed, _target, _data);
-        preExecute(_target, _data, txId);
+        _preExecute(_target, _data, txId);
 
         (bool succ, bytes memory ret) = _target.call{value: 0}(packExecuteData(_data));
         if (succ) {

@@ -15,8 +15,8 @@ abstract contract ERC1271Handler is
 {
     // bytes4(keccak256("isValidSignature(bytes32,bytes)")
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
-    bytes4 internal constant InvalidID = 0xffffffff;
-    bytes4 internal constant InvalidTimeRange = 0xfffffffe;
+    bytes4 internal constant INVALID_ID = 0xffffffff;
+    bytes4 internal constant INVALID_TIME_RANGE = 0xfffffffe;
 
     function _approvedHashes()
         private
@@ -31,12 +31,12 @@ abstract contract ERC1271Handler is
         bytes memory signature
     ) external view override returns (bytes4 magicValue) {
         if (signature.length > 0) {
-            (uint256 _validationData, bool sigValid) = isValidateSignature(
+            (uint256 _validationData, bool sigValid) = _isValidateSignature(
                 hash,
                 signature
             );
             if (!sigValid) {
-                return InvalidID;
+                return INVALID_ID;
             }
             if (_validationData > 0) {
                 ValidationData memory validationData = _parseValidationData(
@@ -46,7 +46,7 @@ abstract contract ERC1271Handler is
                     validationData.validUntil) ||
                     (block.timestamp < validationData.validAfter);
                 if (outOfTimeRange) {
-                    return InvalidTimeRange;
+                    return INVALID_TIME_RANGE;
                 }
             }
             return MAGICVALUE;
@@ -58,7 +58,7 @@ abstract contract ERC1271Handler is
             // approved
             return MAGICVALUE;
         } else {
-            return InvalidID;
+            return INVALID_ID;
         }
     }
 

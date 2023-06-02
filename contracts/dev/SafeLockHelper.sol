@@ -6,14 +6,14 @@ contract SafeLockHelper is SafeLock {
     constructor(uint64 safeLockPeriod) SafeLock("SafeLockHelper", safeLockPeriod) {}
 
     function start(bytes32 _id) external {
-        lock(_id);
+        _lock(_id);
     }
 
     function cancel(bytes32 _id) external {
-        cancelLock(_id);
+        _cancelLock(_id);
     }
 
     function end(bytes32 _id) external {
-        unlock(_id);
+        _unlock(_id);
     }
 }

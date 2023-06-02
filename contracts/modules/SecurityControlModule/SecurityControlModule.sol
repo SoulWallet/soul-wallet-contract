@@ -21,28 +21,28 @@ contract SecurityControlModule is BaseSecurityControlModule {
         trustedPluginManager = _trustedPluginManager;
     }
 
-    function preExecute(address _target, bytes calldata _data, bytes32 _txId) internal override {
+    function _preExecute(address _target, bytes calldata _data, bytes32 _txId) internal override {
         bytes4 _func = bytes4(_data[0:4]);
         if (_func == FUNC_ADD_MODULE) {
             address _module;
             (_module,) = abi.decode(_data[4:], (address, bytes));
             if (!trustedModuleManager.isTrustedContract(_module)) {
-                super.preExecute(_target, _data, _txId);
+                super._preExecute(_target, _data, _txId);
             }
         } else if (_func == FUNC_ADD_PLUGIN) {
             address _plugin;
             (_plugin,) = abi.decode(_data[4:], (address, bytes));
             if (!trustedPluginManager.isTrustedContract(_plugin)) {
-                super.preExecute(_target, _data, _txId);
+                super._preExecute(_target, _data, _txId);
             }
         } else if (_func == FUNC_REMOVE_MODULE) {
             (address _module) = abi.decode(_data[4:], (address));
             if (_module == address(this)) {
                 revert RemoveSelfError();
             }
-            super.preExecute(_target, _data, _txId);
+            super._preExecute(_target, _data, _txId);
         } else if (_func == FUNC_REMOVE_PLUGIN) {
-            super.preExecute(_target, _data, _txId);
+            super._preExecute(_target, _data, _txId);
         } else {
             revert UnsupportedSelectorError(_func);
         }

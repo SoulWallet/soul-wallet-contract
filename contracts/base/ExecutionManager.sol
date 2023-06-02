@@ -86,10 +86,11 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
 
     function _call(address target, uint256 value, bytes memory data) private {
         preHook(target, value, data);
-        (bool success, bytes memory result) = target.call{value: value}(data);
-        if (!success) {
-            assembly {
-                revert(add(result, 32), mload(result))
+        assembly {
+            let result := call(gas(), target, value, add(data, 0x20), mload(data), 0, 0)
+            if iszero(result) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
             }
         }
         postHook(target, value, data);

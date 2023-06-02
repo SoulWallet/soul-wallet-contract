@@ -61,7 +61,11 @@ library SelectorLinkedList {
             bytes4 _selector = self[cursor];
             if (_selector == selector) {
                 bytes4 next = self[_selector];
-                self[cursor] = next;
+                if (next == SENTINEL_SELECTOR && cursor == SENTINEL_SELECTOR) {
+                    self[SENTINEL_SELECTOR] = 0;
+                } else {
+                    self[cursor] = next;
+                }
                 self[_selector] = 0;
                 return;
             }

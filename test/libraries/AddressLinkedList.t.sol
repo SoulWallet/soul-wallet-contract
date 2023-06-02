@@ -89,7 +89,20 @@ contract AddressLinkedListTest is Test {
     function test_size() public {
         assertEq(list.size(), 0);
         test_add_address1();
+        assertEq(list.size(), 0);
+
+        list.add(address(2));
         assertEq(list.size(), 1);
+        list.remove(address(2));
+        assertEq(list.size(), 0);
+        list.add(address(2));
+        list.add(address(3));
+        assertEq(list.size(), 2);
+        list.remove(address(2));
+        assertEq(list.size(), 1);
+        list.remove(address(3));
+        assertEq(list.size(), 0);
+
         test_add10();
         assertEq(list.size(), 10);
     }

@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "../BaseModule.sol";
 import "./IBaseSecurityControlModule.sol";
 import "../../trustedContractManager/ITrustedContractManager.sol";
-import "../../libraries/CallHelper.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
@@ -108,12 +107,12 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         WalletConfig memory walletConfig = walletConfigs[_target];
         bytes32 txId = _getTxId(walletConfig.seed, _target, _data);
         preExecute(_target, _data, txId);
-        (bool ok, bytes memory res) = CallHelper.call(_target, packExecuteData(_data));
 
-        if (ok) {
+        (bool succ, bytes memory ret) = _target.call{value: 0}(packExecuteData(_data));
+        if (succ) {
             emit Execute(txId, _target, sender(), _data);
         } else {
-            revert ExecuteError(txId, _target, sender(), _data, res);
+            revert ExecuteError(txId, _target, sender(), _data, ret);
         }
     }
 }

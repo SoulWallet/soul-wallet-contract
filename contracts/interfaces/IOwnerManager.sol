@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../libraries/CallHelper.sol";
-
 interface IOwnerManager {
     event OwnerCleared();
     event OwnerAdded(address indexed owner);

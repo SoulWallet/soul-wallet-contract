@@ -12,6 +12,9 @@ abstract contract BasePlugin is IPlugin {
     // POST_HOOK: 0b100
     uint8 internal constant POST_HOOK = 0x4;
 
+    uint8 internal constant CALL = 0x0;
+    uint8 internal constant DELEGATECALL = 0x1;
+
     // use immutable to avoid delegatecall to change the value
     address internal immutable DEPLOY_ADDRESS;
 

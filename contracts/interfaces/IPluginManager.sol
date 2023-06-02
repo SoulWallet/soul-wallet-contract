@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "./IPlugin.sol";
-import "../libraries/CallHelper.sol";
 
 interface IPluginManager {
     event PluginAdded(address indexed plugin);

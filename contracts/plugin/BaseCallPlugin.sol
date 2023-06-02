@@ -36,8 +36,8 @@ abstract contract BaseCallPlugin is BasePlugin {
         }
     }
 
-    function supportsHook() external pure override returns (uint8 hookType, CallHelper.CallType callType) {
+    function supportsHook() external pure override returns (uint8 hookType, uint8 callType) {
         hookType = _supportsHook();
-        callType = CallHelper.CallType.Call;
+        callType = CALL;
     }
 }

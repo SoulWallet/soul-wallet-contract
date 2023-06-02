@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import "../plugin/BaseDelegateCallPlugin.sol";
-import "../libraries/CallHelper.sol";
 
 contract DemoDelegataCallPlugin is BaseDelegateCallPlugin {
     bool registry;

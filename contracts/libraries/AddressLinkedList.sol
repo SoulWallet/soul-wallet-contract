@@ -41,22 +41,10 @@ library AddressLinkedList {
     }
 
     function remove(mapping(address => address) storage self, address addr) internal {
-        require(isExist(self, addr), "address not exists");
-
-        address cursor = SENTINEL_ADDRESS;
-        while (true) {
-            address _addr = self[cursor];
-            if (_addr == addr) {
-                address next = self[_addr];
-                self[cursor] = next;
-                self[_addr] = address(0);
-                return;
-            }
-            cursor = _addr;
-        }
+        require(tryRemove(self, addr), "address not exists");
     }
 
-    function tryRemove(mapping(address => address) storage self, address addr) internal {
+    function tryRemove(mapping(address => address) storage self, address addr) internal returns (bool) {
         if (isExist(self, addr)) {
             address cursor = SENTINEL_ADDRESS;
             while (true) {
@@ -65,11 +53,12 @@ library AddressLinkedList {
                     address next = self[_addr];
                     self[cursor] = next;
                     self[_addr] = address(0);
-                    return;
+                    return true;
                 }
                 cursor = _addr;
             }
         }
+        return false;
     }
 
     function clear(mapping(address => address) storage self) internal {

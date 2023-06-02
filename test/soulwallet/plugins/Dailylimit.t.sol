@@ -7,7 +7,6 @@ import "../Bundler.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/plugin/Dailylimit/Dailylimit.sol";
-import "@source/libraries/CallHelper.sol";
 import "@source/helper/SignatureValidator.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -106,8 +105,8 @@ contract DailylimitTest is Test {
 
     function execDelegateCall_staticcall(bytes memory data) private returns (bytes memory) {
         vm.prank(walletOwner);
-        (bool success, bytes memory returnData) = CallHelper.staticcall(
-            address(soulWallet), abi.encodeWithSelector(soulWallet.execDelegateCall.selector, dailylimitPlugin, data)
+        (bool success, bytes memory returnData) = address(soulWallet).staticcall(
+            abi.encodeWithSelector(soulWallet.execDelegateCall.selector, dailylimitPlugin, data)
         );
         require(success, string(returnData));
         return returnData;

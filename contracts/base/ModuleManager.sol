@@ -150,7 +150,11 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
                 abi.decode(data[4:], (address[], uint256[], bytes[]));
             _executeBatch(tos, values, _datas);
         } else {
-            CallHelper.call(address(this), data);
+            (bool succ, bytes memory ret) = address(this).call{value: 0}(data);
+            assembly {
+                if iszero(succ) { revert(add(ret, 0x20), mload(ret)) }
+                return(add(ret, 0x20), mload(ret))
+            }
         }
     }
 }

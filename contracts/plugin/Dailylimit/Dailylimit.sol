@@ -12,17 +12,17 @@ import "../../libraries/DecodeCalldata.sol";
 contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     using AddressLinkedList for mapping(address => address);
 
-    address private constant ETH_TOKEN_ADDRESS = address(2);
-    uint256 private constant MAX_TIMERANGE = 1 hours;
+    address private constant _ETH_TOKEN_ADDRESS = address(2);
+    uint256 private constant _MAX_TIMERANGE = 1 hours;
 
-    bytes4 private constant FUNC_EXECUTE = bytes4(keccak256("execute(address,uint256,bytes)"));
-    bytes4 private constant FUNC_EXECUTE_BATCH = bytes4(keccak256("executeBatch(address[],bytes[])"));
-    bytes4 private constant FUNC_EXECUTE_BATCH_VALUE = bytes4(keccak256("executeBatch(address[],uint256[],bytes[])"));
-    bytes4 private constant FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
+    bytes4 private constant _FUNC_EXECUTE = bytes4(keccak256("execute(address,uint256,bytes)"));
+    bytes4 private constant _FUNC_EXECUTE_BATCH = bytes4(keccak256("executeBatch(address[],bytes[])"));
+    bytes4 private constant _FUNC_EXECUTE_BATCH_VALUE = bytes4(keccak256("executeBatch(address[],uint256[],bytes[])"));
+    bytes4 private constant _FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
 
-    bytes4 private constant ERC20_TRANSFER = bytes4(keccak256("transfer(address,uint256)"));
-    bytes4 private constant ERC20_APPROVE = bytes4(keccak256("approve(address,uint256)"));
-    bytes4 private constant ERC20_TRANSFER_FROM = bytes4(keccak256("transferFrom(address,address,uint256)"));
+    bytes4 private constant _ERC20_TRANSFER = bytes4(keccak256("transfer(address,uint256)"));
+    bytes4 private constant _ERC20_APPROVE = bytes4(keccak256("approve(address,uint256)"));
+    bytes4 private constant _ERC20_TRANSFER_FROM = bytes4(keccak256("transferFrom(address,address,uint256)"));
 
     constructor()
         BaseDelegateCallPlugin(keccak256("PLUGIN_DAILYLIMIT_SLOT"))
@@ -41,7 +41,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         mapping(address => DaySpent) daySpent;
     }
 
-    function layout() internal view returns (Layout storage l) {
+    function _layout() internal view returns (Layout storage l) {
         bytes32 slot = PLUGIN_SLOT;
         assembly {
             l.slot := slot
@@ -53,11 +53,11 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     }
 
     function inited() internal view override returns (bool) {
-        return layout().currentDay != 0;
+        return _layout().currentDay != 0;
     }
 
     function _init(bytes calldata data) internal override onlyDelegateCall {
-        Layout storage l = layout();
+        Layout storage l = _layout();
         if (l.currentDay == 0) {
             l.currentDay = _getDay(block.timestamp);
             // decode data
@@ -75,7 +75,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     }
 
     function _deInit() internal override onlyDelegateCall {
-        Layout storage l = layout();
+        Layout storage l = _layout();
         if (l.currentDay != 0) {
             l.currentDay = 0;
             l.tokens.clear();
@@ -83,11 +83,11 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     }
 
     function _getTokenAddress(address token) private pure returns (address) {
-        return token == address(0) ? ETH_TOKEN_ADDRESS : token;
+        return token == address(0) ? _ETH_TOKEN_ADDRESS : token;
     }
 
     function _getTokenDailyLimit(address token) private view returns (uint256) {
-        return layout().daySpent[_getTokenAddress(token)].dailyLimit;
+        return _layout().daySpent[_getTokenAddress(token)].dailyLimit;
     }
 
     function _getDay(uint256 timeNow) private pure returns (uint256) {
@@ -96,7 +96,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
 
     function _getDaySpent(address token, uint256 timeNow) private view returns (uint128) {
         uint256 day = _getDay(timeNow);
-        Layout storage l = layout();
+        Layout storage l = _layout();
         DaySpent storage daySpent = l.daySpent[_getTokenAddress(token)];
         if (daySpent.day != day) {
             return 0;
@@ -109,13 +109,13 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         view
         returns (address token, uint256 spent)
     {
-        if (selector == ERC20_TRANSFER) {
+        if (selector == _ERC20_TRANSFER) {
             (, spent) = abi.decode(data, (address, uint256));
             token = to;
-        } else if (selector == ERC20_APPROVE) {
+        } else if (selector == _ERC20_APPROVE) {
             (, spent) = abi.decode(data, (address, uint256));
             token = to;
-        } else if (selector == ERC20_TRANSFER_FROM) {
+        } else if (selector == _ERC20_TRANSFER_FROM) {
             (address sender,, uint256 amount) = abi.decode(data, (address, address, uint256));
             if (sender == _wallet()) {
                 token = to;
@@ -124,7 +124,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         }
     }
 
-    function calcRequiredPrefund(UserOperation calldata userOp) private pure returns (uint256 requiredPrefund) {
+    function _calcRequiredPrefund(UserOperation calldata userOp) private pure returns (uint256 requiredPrefund) {
         uint256 requiredGas = userOp.callGasLimit + userOp.verificationGasLimit + userOp.preVerificationGas;
         requiredPrefund = requiredGas * userOp.maxFeePerGas;
     }
@@ -136,15 +136,15 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
 
         ValidationData memory validationData = _parseValidationData(_validationData);
         require(
-            validationData.validUntil - validationData.validAfter < MAX_TIMERANGE, "Dailylimit: exceed max timerange"
+            validationData.validUntil - validationData.validAfter < _MAX_TIMERANGE, "Dailylimit: exceed max timerange"
         );
         uint256 currentDay = _getDay(validationData.validAfter);
-        Layout storage l = layout();
+        Layout storage l = _layout();
         l.currentDay = currentDay;
-        if (l.tokens.isExist(ETH_TOKEN_ADDRESS)) {
+        if (l.tokens.isExist(_ETH_TOKEN_ADDRESS)) {
             if (userOp.paymasterAndData.length == 0) {
-                uint256 ethGasFee = calcRequiredPrefund(userOp);
-                DaySpent storage _DaySpent = l.daySpent[ETH_TOKEN_ADDRESS];
+                uint256 ethGasFee = _calcRequiredPrefund(userOp);
+                DaySpent storage _DaySpent = l.daySpent[_ETH_TOKEN_ADDRESS];
 
                 uint256 _ethSpent;
                 if (_DaySpent.day == currentDay) {
@@ -166,9 +166,9 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
 
     function postHook(address target, uint256 value, bytes calldata data) external override {
         uint256 day = _getDay(block.timestamp);
-        Layout storage l = layout();
-        if (value > 0 && l.tokens.isExist(ETH_TOKEN_ADDRESS)) {
-            DaySpent storage _DaySpent = l.daySpent[ETH_TOKEN_ADDRESS];
+        Layout storage l = _layout();
+        if (value > 0 && l.tokens.isExist(_ETH_TOKEN_ADDRESS)) {
+            DaySpent storage _DaySpent = l.daySpent[_ETH_TOKEN_ADDRESS];
             uint256 spent;
             if (_DaySpent.day == day) {
                 spent = _DaySpent.spent;
@@ -200,7 +200,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
 
     function reduceDailyLimits(address[] calldata token, uint256[] calldata limit) external override {
         require(token.length == limit.length, "Dailylimit: invalid data");
-        Layout storage l = layout();
+        Layout storage l = _layout();
         for (uint256 i = 0; i < token.length; i++) {
             uint256 _amount = limit[i];
             require(_amount > 0, "Dailylimit: invalid amount");
@@ -216,23 +216,23 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
 
     function preSetDailyLimit(address[] calldata token, uint256[] calldata limit) external override {
         bytes32 hash = keccak256(abi.encode(token, limit));
-        lock(hash);
+        _lock(hash);
 
         emit PreSetDailyLimit(token, limit);
     }
 
     function cancelSetDailyLimit(address[] calldata token, uint256[] calldata limit) external override {
         bytes32 hash = keccak256(abi.encode(token, limit));
-        cancelLock(hash);
+        _cancelLock(hash);
 
         emit CancelSetDailyLimit(token, limit);
     }
 
     function comfirmSetDailyLimit(address[] calldata token, uint256[] calldata limit) external override {
         bytes32 hash = keccak256(abi.encode(token, limit));
-        unlock(hash);
+        _unlock(hash);
         require(token.length == limit.length, "Dailylimit: invalid data");
-        Layout storage l = layout();
+        Layout storage l = _layout();
         for (uint256 i = 0; i < token.length; i++) {
             uint256 _amount = limit[i];
             address _token = _getTokenAddress(token[i]);

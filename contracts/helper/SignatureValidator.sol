@@ -11,7 +11,7 @@ abstract contract SignatureValidator is OwnerAuth {
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
-    function packSignatureHash(bytes32 hash, SignatureDecoder.SignatureData memory signatureData)
+    function _packSignatureHash(bytes32 hash, SignatureDecoder.SignatureData memory signatureData)
         private
         pure
         returns (bytes32 packedHash)
@@ -23,14 +23,14 @@ abstract contract SignatureValidator is OwnerAuth {
         }
     }
 
-    function isValidateSignature(bytes32 rawHash, bytes memory rawSignature)
+    function _isValidateSignature(bytes32 rawHash, bytes memory rawSignature)
         internal
         view
         returns (uint256 validationData, bool sigValid)
     {
         SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(rawSignature);
         validationData = signatureData.validationData;
-        bytes32 hash = packSignatureHash(rawHash, signatureData);
+        bytes32 hash = _packSignatureHash(rawHash, signatureData);
         (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
@@ -39,14 +39,14 @@ abstract contract SignatureValidator is OwnerAuth {
         }
     }
 
-    function isValidUserOp(bytes32 userOpHash, bytes calldata userOpSignature)
+    function _isValidUserOp(bytes32 userOpHash, bytes calldata userOpSignature)
         internal
         view
         returns (uint256 validationData, bool sigValid)
     {
         SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(userOpSignature);
         validationData = signatureData.validationData;
-        bytes32 hash = packSignatureHash(userOpHash, signatureData).toEthSignedMessageHash();
+        bytes32 hash = _packSignatureHash(userOpHash, signatureData).toEthSignedMessageHash();
         (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;

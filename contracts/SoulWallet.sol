@@ -39,13 +39,13 @@ contract SoulWallet is
         _setFallbackHandler(defalutCallbackHandler);
 
         for (uint256 i = 0; i < modules.length;) {
-            addModule(modules[i]);
+            _addModule(modules[i]);
             unchecked {
                 i++;
             }
         }
         for (uint256 i = 0; i < plugins.length;) {
-            addPlugin(plugins[i]);
+            _addPlugin(plugins[i]);
             unchecked {
                 i++;
             }
@@ -63,7 +63,7 @@ contract SoulWallet is
         returns (uint256 validationData)
     {
         bool sigValid;
-        (validationData, sigValid) = isValidUserOp(userOpHash, userOp.signature);
+        (validationData, sigValid) = _isValidUserOp(userOpHash, userOp.signature);
 
         sigValid = sigValid && guardHook(userOp, userOpHash);
 

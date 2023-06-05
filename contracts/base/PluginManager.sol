@@ -6,24 +6,19 @@ import "../interfaces/IPlugin.sol";
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../libraries/AddressLinkedList.sol";
+import "../interfaces/IPluggable.sol";
 
 abstract contract PluginManager is Authority, IPluginManager {
     using AddressLinkedList for mapping(address => address);
 
-    bytes4 internal constant FUNC_ADD_PLUGIN = bytes4(keccak256("addPlugin(address,bytes)"));
-    bytes4 internal constant FUNC_REMOVE_PLUGIN = bytes4(keccak256("removePlugin(address)"));
-
-    bytes4 internal constant FUNC_WALLETINIT = bytes4(keccak256("walletInit(bytes)"));
-    bytes4 internal constant FUNC_WALLETDEINIT = bytes4(keccak256("walletDeInit()"));
+    function addPlugin(bytes calldata pluginAndData) external override onlyModule {
+        _addPlugin(pluginAndData);
+    }
 
     function _addPlugin(bytes calldata pluginAndData) internal {
         require(pluginAndData.length >= 20, "plugin address empty");
-        address moduleAddress = address(bytes20(pluginAndData[:20]));
-        bytes memory initData = pluginAndData[20:];
-        _addPlugin(moduleAddress, initData);
-    }
-
-    function _addPlugin(address pluginAddress, bytes memory initData) internal {
+        address pluginAddress = address(bytes20(pluginAndData[:20]));
+        bytes calldata initData = pluginAndData[20:];
         IPlugin aPlugin = IPlugin(pluginAddress);
         require(aPlugin.supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
         AccountStorage.Layout storage l = AccountStorage.layout();
@@ -46,14 +41,21 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
         l.pluginCallTypes[pluginAddress] = callType;
         l.plugins.add(pluginAddress);
-        require(call(callType, pluginAddress, abi.encodeWithSelector(FUNC_WALLETINIT, initData)), "plugin init failed");
+        require(
+            call(callType, pluginAddress, abi.encodeWithSelector(IPluggable.walletInit.selector, initData)),
+            "plugin init failed"
+        );
         emit PluginAdded(pluginAddress);
     }
 
-    function _removePlugin(address plugin) internal {
+    function removePlugin(address plugin) external override onlyModule {
+        _removePlugin(plugin);
+    }
+
+    function _removePlugin(address plugin) private {
         AccountStorage.Layout storage l = AccountStorage.layout();
         l.plugins.remove(plugin);
-        bool success = call(l.pluginCallTypes[plugin], plugin, abi.encodeWithSelector(FUNC_WALLETDEINIT));
+        bool success = call(l.pluginCallTypes[plugin], plugin, abi.encodeWithSelector(IPluggable.walletDeInit.selector));
         if (success) {
             emit PluginRemoved(plugin);
         } else {
@@ -92,41 +94,41 @@ abstract contract PluginManager is Authority, IPluginManager {
         return true;
     }
 
-    function preHook(address target, uint256 value, bytes memory data) internal {
+    modifier executeHook(address target, uint256 value, bytes memory data) {
         AccountStorage.Layout storage l = AccountStorage.layout();
-        mapping(address => address) storage _plugins = l.preHookPlugins;
-
-        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
-        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
-            {
-                address plugin = addr;
-                require(
-                    call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))),
-                    "preHook failed"
-                );
+        {
+            mapping(address => address) storage _preHookPlugins = l.preHookPlugins;
+            address addr = _preHookPlugins[AddressLinkedList.SENTINEL_ADDRESS];
+            while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+                {
+                    address plugin = addr;
+                    require(
+                        call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))),
+                        "preHook failed"
+                    );
+                }
+                addr = _preHookPlugins[addr];
             }
-            addr = _plugins[addr];
+        }
+        _;
+        {
+            mapping(address => address) storage _postHookPlugins = l.postHookPlugins;
+
+            address addr = _postHookPlugins[AddressLinkedList.SENTINEL_ADDRESS];
+            while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
+                {
+                    address plugin = addr;
+                    require(
+                        call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))),
+                        "postHook failed"
+                    );
+                }
+                addr = _postHookPlugins[addr];
+            }
         }
     }
 
-    function postHook(address target, uint256 value, bytes memory data) internal {
-        AccountStorage.Layout storage l = AccountStorage.layout();
-        mapping(address => address) storage _plugins = l.postHookPlugins;
-
-        address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
-        while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
-            {
-                address plugin = addr;
-                require(
-                    call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))),
-                    "postHook failed"
-                );
-            }
-            addr = _plugins[addr];
-        }
-    }
-
-    function execDelegateCall(address target, bytes memory data) external onlyEntryPointOrOwner {
+    function execDelegateCall(address target, bytes memory data) external onlyEntryPointOrSimulate {
         require(AccountStorage.layout().pluginCallTypes[target] == 1, "not delegatecall plugin");
         assembly {
             let succ := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0)

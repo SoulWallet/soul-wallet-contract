@@ -3,33 +3,19 @@ pragma solidity ^0.8.17;
 
 import "./EntryPointAuth.sol";
 import "./OwnerAuth.sol";
+import "../interfaces/IExecutionManager.sol";
+import "../interfaces/IModuleManager.sol";
+import "./ModuleGuard.sol";
+import "./ExecutionManagerGuard.sol";
 
-abstract contract Authority is EntryPointAuth, OwnerAuth {
-    function _requireFromEntryPointOrOwner() internal view {
-        address addr = msg.sender;
-        require(
-            addr == address(_entryPoint()) || _isOwner(addr),
-            "require from Entrypoint or owner"
-        );
-    }
-
-    function _requireFromEntryPointOrSelf() internal view {
-        address addr = msg.sender;
-        require(
-            addr == address(_entryPoint()) ||
-                addr == address(this) ||
-                _isOwner(addr),
-            "require from Entrypoint or owner or self"
-        );
-    }
-
-    modifier onlyEntryPointOrOwner() {
-        _requireFromEntryPointOrOwner();
+abstract contract Authority is EntryPointAuth, OwnerAuth, ModuleGuard, ExecutionManagerGuard {
+    modifier onlyEntryPointOrSimulate() {
+        require(msg.sender == address(_entryPoint()) || msg.sender == address(0), "require from Entrypoint or Simulate");
         _;
     }
 
-    modifier onlyEntryPointOrSelf() {
-        _requireFromEntryPointOrSelf();
+    modifier onlyExecutionManagerOrModule() {
+        require(_isExecutionManager() || _isInModule(), "require from ExecutionManager or Module");
         _;
     }
 }

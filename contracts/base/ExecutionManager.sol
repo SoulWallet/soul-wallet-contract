@@ -4,62 +4,24 @@ pragma solidity ^0.8.17;
 import "../authority/Authority.sol";
 import "./PluginManager.sol";
 import "../interfaces/IExecutionManager.sol";
-import "./InternalExecutionManager.sol";
 
-abstract contract ExecutionManager is IExecutionManager, Authority, PluginManager, InternalExecutionManager {
-    function _blockSelf(address to) private view {
-        require(to != address(this), "can not call self");
-    }
-
+abstract contract ExecutionManager is IExecutionManager, Authority, PluginManager {
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
-    function _execute(address dest, uint256 value, bytes memory func) internal override {
-        _blockSelf(dest);
+    function execute(address dest, uint256 value, bytes calldata func) external override onlyEntryPoint executionHook {
         _call(dest, value, func);
     }
 
     /**
      * execute a sequence of transactions
      */
-    function _executeBatch(address[] memory dest, bytes[] memory func) internal override {
-        require(dest.length == func.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length;) {
-            address to = dest[i];
-            _blockSelf(to);
-            _call(to, 0, func[i]);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /**
-     * execute a sequence of transactions
-     */
-    function _executeBatch(address[] memory dest, uint256[] memory value, bytes[] memory func) internal override {
-        require(dest.length == func.length && dest.length == value.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length;) {
-            address to = dest[i];
-            _blockSelf(to);
-            _call(to, value[i], func[i]);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /**
-     * execute a transaction (called directly from owner, or by entryPoint)
-     */
-    function execute(address dest, uint256 value, bytes calldata func) external override onlyEntryPointOrOwner {
-        _call(dest, value, func);
-    }
-
-    /**
-     * execute a sequence of transactions
-     */
-    function executeBatch(address[] calldata dest, bytes[] calldata func) external override onlyEntryPointOrOwner {
+    function executeBatch(address[] calldata dest, bytes[] calldata func)
+        external
+        override
+        onlyEntryPoint
+        executionHook
+    {
         for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], 0, func[i]);
             unchecked {
@@ -71,10 +33,11 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(address[] calldata dest, uint256[] calldata value, bytes[] calldata func)
+    function executeBatchWithValue(address[] calldata dest, uint256[] calldata value, bytes[] calldata func)
         external
         override
-        onlyEntryPointOrOwner
+        onlyEntryPoint
+        executionHook
     {
         for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], value[i], func[i]);
@@ -84,8 +47,7 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
         }
     }
 
-    function _call(address target, uint256 value, bytes memory data) private {
-        preHook(target, value, data);
+    function _call(address target, uint256 value, bytes memory data) private executeHook(target, value, data) {
         assembly {
             let result := call(gas(), target, value, add(data, 0x20), mload(data), 0, 0)
             if iszero(result) {
@@ -93,6 +55,5 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
                 revert(0, returndatasize())
             }
         }
-        postHook(target, value, data);
     }
 }

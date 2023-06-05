@@ -2,11 +2,11 @@
 pragma solidity ^0.8.17;
 
 library Errors {
-    // require from Entrypoint or owner
-    error RequireFromEntryPointOrOwner();
+    // require from Entrypoint
+    error RequireFromEntryPoint();
 
-    // require from Entrypoint or owner or self
-    error RequireFromEntryPointOrOwnerOrSelf();
+    // require from Entrypoint or self
+    error RequireFromEntryPointOrSelf();
 
     // can not call self
     error CanNotCallSelf();

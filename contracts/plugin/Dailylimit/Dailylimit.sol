@@ -8,6 +8,7 @@ import "../../libraries/AddressLinkedList.sol";
 import "../../libraries/SignatureDecoder.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "../../libraries/DecodeCalldata.sol";
+import "../../interfaces/IExecutionManager.sol";
 
 contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     using AddressLinkedList for mapping(address => address);
@@ -18,7 +19,7 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     bytes4 private constant _FUNC_EXECUTE = bytes4(keccak256("execute(address,uint256,bytes)"));
     bytes4 private constant _FUNC_EXECUTE_BATCH = bytes4(keccak256("executeBatch(address[],bytes[])"));
     bytes4 private constant _FUNC_EXECUTE_BATCH_VALUE = bytes4(keccak256("executeBatch(address[],uint256[],bytes[])"));
-    bytes4 private constant _FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
+    bytes4 private constant _FUNC_EXEC_FROM_MODULE = bytes4(keccak256("moduleEntryPoint(bytes)"));
 
     bytes4 private constant _ERC20_TRANSFER = bytes4(keccak256("transfer(address,uint256)"));
     bytes4 private constant _ERC20_APPROVE = bytes4(keccak256("approve(address,uint256)"));

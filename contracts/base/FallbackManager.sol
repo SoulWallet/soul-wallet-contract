@@ -25,7 +25,7 @@ abstract contract FallbackManager is Authority, IFallbackManager {
         }
     }
 
-    function setFallbackHandler(address fallbackContract) external override onlyEntryPointOrSelf {
+    function setFallbackHandler(address fallbackContract) external override onlyExecutionManagerOrModule {
         _setFallbackHandler(fallbackContract);
         emit FallbackChanged(fallbackContract);
     }

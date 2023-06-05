@@ -8,8 +8,9 @@ interface IPluginManager {
     event PluginRemoved(address indexed plugin);
     event PluginRemovedWithError(address indexed plugin);
 
-    // function addPlugin(address,bytes) external;
-    // function removePlugin(address plugin) external;
+    function addPlugin(bytes calldata pluginAndData) external;
+
+    function removePlugin(address plugin) external;
 
     function isAuthorizedPlugin(address plugin) external returns (bool);
 

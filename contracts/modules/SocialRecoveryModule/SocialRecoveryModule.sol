@@ -268,7 +268,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
 
         ISoulWallet soulwallet = ISoulWallet(payable(_wallet));
         // update owners
-        soulwallet.execFromModule(abi.encodeCall(IOwnerManager.resetOwners, _newOwners));
+        soulwallet.moduleEntryPoint(abi.encodeCall(IOwnerManager.resetOwners, _newOwners));
 
         // emit RecoverySuccess
         emit SocialRecovery(_wallet, _newOwners);

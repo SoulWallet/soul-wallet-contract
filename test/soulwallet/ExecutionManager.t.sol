@@ -109,14 +109,14 @@ contract ExecutionManagerTest is Test {
             {
                 tokenERC721.safeMint(sender, 1);
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint or owner"));
+                vm.expectRevert(bytes("require from Entrypoint"));
                 soulWallet.execute(
                     address(tokenERC721),
                     0,
                     abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 1)
                 );
 
-                vm.expectRevert(bytes("require from Entrypoint or owner"));
+                vm.expectRevert(bytes("require from Entrypoint"));
                 vm.prank(sender);
                 soulWallet.execute(
                     address(tokenERC721),
@@ -127,6 +127,7 @@ contract ExecutionManagerTest is Test {
             {
                 tokenERC721.safeMint(sender, 2);
                 vm.prank(walletOwner);
+                vm.expectRevert(bytes("require from Entrypoint"));
                 soulWallet.execute(
                     address(tokenERC721),
                     0,
@@ -145,7 +146,7 @@ contract ExecutionManagerTest is Test {
 
             vm.revertTo(snapshotId);
         }
-        // function executeBatch(address[] calldata dest, bytes[] calldata func) external override onlyEntryPointOrOwner
+        // function executeBatch(address[] calldata dest, bytes[] calldata func)
         {
             uint256 snapshotId = vm.snapshot();
             address[] memory dest = new address[](2);
@@ -161,7 +162,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 5);
 
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint or owner"));
+                vm.expectRevert(bytes("require from Entrypoint"));
                 soulWallet.executeBatch(dest, func);
             }
             {
@@ -170,16 +171,6 @@ contract ExecutionManagerTest is Test {
 
                 func[0] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 6);
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 7);
-
-                vm.prank(walletOwner);
-                soulWallet.executeBatch(dest, func);
-            }
-            {
-                tokenERC721.safeMint(sender, 8);
-                tokenERC721.safeMint(sender, 9);
-
-                func[0] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 8);
-                func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 9);
 
                 vm.prank(address(entryPoint));
                 soulWallet.executeBatch(dest, func);
@@ -209,8 +200,8 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 5);
 
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint or owner"));
-                soulWallet.executeBatch(dest, value, func);
+                vm.expectRevert(bytes("require from Entrypoint"));
+                soulWallet.executeBatchWithValue(dest, value, func);
             }
             {
                 tokenERC721.safeMint(sender, 6);
@@ -219,8 +210,8 @@ contract ExecutionManagerTest is Test {
                 func[0] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 6);
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 7);
 
-                vm.prank(walletOwner);
-                soulWallet.executeBatch(dest, value, func);
+                vm.prank(address(entryPoint));
+                soulWallet.executeBatchWithValue(dest, value, func);
             }
             {
                 tokenERC721.safeMint(sender, 8);
@@ -230,7 +221,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 9);
 
                 vm.prank(address(entryPoint));
-                soulWallet.executeBatch(dest, value, func);
+                soulWallet.executeBatchWithValue(dest, value, func);
             }
             vm.revertTo(snapshotId);
         }

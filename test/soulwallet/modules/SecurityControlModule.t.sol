@@ -55,8 +55,8 @@ contract SecurityControlModuleTest is Test {
         assertEq(_selectors.length, 1, "selector length error");
         assertEq(_modules[0], address(securityControlModule), "module address error");
         assertEq(_selectors[0].length, 4);
-        assertEq(_selectors[0][3], bytes4(keccak256("addModule(address,bytes)")), "addModule selector error");
-        assertEq(_selectors[0][2], bytes4(keccak256("addPlugin(address,bytes)")), "addPlugin selector error");
+        assertEq(_selectors[0][3], bytes4(keccak256("addModule(bytes)")), "addModule selector error");
+        assertEq(_selectors[0][2], bytes4(keccak256("addPlugin(bytes)")), "addPlugin selector error");
         assertEq(_selectors[0][1], bytes4(keccak256("removeModule(address)")), "removeModule selector error");
         assertEq(_selectors[0][0], bytes4(keccak256("removePlugin(address)")), "removePlugin selector error");
 
@@ -74,7 +74,9 @@ contract SecurityControlModuleTest is Test {
         bytes memory initData;
         return securityControlModule.queue(
             address(soulWallet),
-            abi.encodeWithSelector(bytes4(keccak256("addModule(address,bytes)")), address(demoModule), initData)
+            abi.encodeWithSelector(
+                bytes4(keccak256("addModule(bytes)")), abi.encodePacked(address(demoModule), initData)
+            )
         );
     }
 
@@ -93,7 +95,9 @@ contract SecurityControlModuleTest is Test {
         bytes memory initData;
         securityControlModule.execute(
             address(soulWallet),
-            abi.encodeWithSelector(bytes4(keccak256("addModule(address,bytes)")), address(demoModule), initData)
+            abi.encodeWithSelector(
+                bytes4(keccak256("addModule(bytes)")), abi.encodePacked(address(demoModule), initData)
+            )
         );
     }
 
@@ -143,7 +147,7 @@ contract SecurityControlModuleTest is Test {
                         walletConfig.seed,
                         address(soulWallet),
                         abi.encodeWithSelector(
-                            bytes4(keccak256("addModule(address,bytes)")), address(demoModule), initData
+                            bytes4(keccak256("addModule(bytes)")), abi.encodePacked(address(demoModule), initData)
                         )
                     );
                     vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("NotQueuedError(bytes32)")), _txId));
@@ -256,7 +260,9 @@ contract SecurityControlModuleTest is Test {
         bytes memory initData;
         return securityControlModule.queue(
             address(soulWallet),
-            abi.encodeWithSelector(bytes4(keccak256("addPlugin(address,bytes)")), address(demoPlugin), initData)
+            abi.encodeWithSelector(
+                bytes4(keccak256("addPlugin(bytes)")), abi.encodePacked(address(demoPlugin), initData)
+            )
         );
     }
 
@@ -265,7 +271,9 @@ contract SecurityControlModuleTest is Test {
         bytes memory initData;
         securityControlModule.execute(
             address(soulWallet),
-            abi.encodeWithSelector(bytes4(keccak256("addPlugin(address,bytes)")), address(demoPlugin), initData)
+            abi.encodeWithSelector(
+                bytes4(keccak256("addPlugin(bytes)")), abi.encodePacked(address(demoPlugin), initData)
+            )
         );
     }
 
@@ -384,7 +392,7 @@ contract SecurityControlModuleTest is Test {
         securityControlModule.execute(
             address(soulWallet),
             abi.encodeWithSelector(
-                bytes4(keccak256("addPlugin(address,bytes)")), address(demoDelegataCallPlugin), initData
+                bytes4(keccak256("addPlugin(bytes)")), abi.encodePacked(address(demoDelegataCallPlugin), initData)
             )
         );
         vm.stopPrank();

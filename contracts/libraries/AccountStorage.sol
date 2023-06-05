@@ -17,14 +17,14 @@ library AccountStorage {
         // ┌───────────────────┐
         // │      EIP1271      │
         mapping(bytes32 => uint256) approvedHashes;
-        uint256[50] __gap_1;
+        uint256[50] __gap_2;
         // └───────────────────┘
 
         // ┌───────────────────┐
         // │       Module      │
         mapping(address => address) modules;
         mapping(address => mapping(bytes4 => bytes4)) moduleSelectors;
-        uint256[50] __gap_2;
+        uint256[50] __gap_3;
         // └───────────────────┘
 
         // ┌───────────────────┐
@@ -34,7 +34,7 @@ library AccountStorage {
         mapping(address => address) guardHookPlugins;
         mapping(address => address) preHookPlugins;
         mapping(address => address) postHookPlugins;
-        uint256[50] __gap_3;
+        uint256[50] __gap_4;
     }
     // └───────────────────┘
 

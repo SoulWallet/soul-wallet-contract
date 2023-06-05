@@ -10,17 +10,10 @@ interface IExecutionManager {
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(
-        address[] calldata dest,
-        bytes[] calldata func
-    ) external;
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external;
 
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(
-        address[] calldata dest,
-        uint256[] calldata value,
-        bytes[] calldata func
-    ) external;
+    function executeBatchWithValue(address[] calldata dest, uint256[] calldata value, bytes[] calldata func) external;
 }

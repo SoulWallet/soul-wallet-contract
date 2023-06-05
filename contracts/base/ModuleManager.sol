@@ -4,17 +4,14 @@ pragma solidity ^0.8.17;
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IModuleManager.sol";
+import "../interfaces/IPluginManager.sol";
 import "./PluginManager.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../libraries/SelectorLinkedList.sol";
-import "./InternalExecutionManager.sol";
 
-abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecutionManager {
+abstract contract ModuleManager is IModuleManager, PluginManager {
     using AddressLinkedList for mapping(address => address);
     using SelectorLinkedList for mapping(bytes4 => bytes4);
-
-    bytes4 internal constant FUNC_ADD_MODULE = bytes4(keccak256("addModule(address,bytes)"));
-    bytes4 internal constant FUNC_REMOVE_MODULE = bytes4(keccak256("removeModule(address)"));
 
     function _modulesMapping() private view returns (mapping(address => address) storage modules) {
         modules = AccountStorage.layout().modules;
@@ -44,14 +41,14 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         return _isAuthorizedModule(module);
     }
 
+    function addModule(bytes calldata moduleAndData) external override onlyModule {
+        _addModule(moduleAndData);
+    }
+
     function _addModule(bytes calldata moduleAndData) internal {
         require(moduleAndData.length >= 20, "module address empty");
         address moduleAddress = address(bytes20(moduleAndData[:20]));
-        bytes memory initData = moduleAndData[20:];
-        _addModule(moduleAddress, initData);
-    }
-
-    function _addModule(address moduleAddress, bytes memory initData) internal {
+        bytes calldata initData = moduleAndData[20:];
         IModule aModule = IModule(moduleAddress);
         require(aModule.supportsInterface(type(IModule).interfaceId), "unknown module");
         bytes4[] memory requiredFunctions = aModule.requiredFunctions();
@@ -62,6 +59,10 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         moduleSelectors[moduleAddress].add(requiredFunctions);
         aModule.walletInit(initData);
         emit ModuleAdded(moduleAddress);
+    }
+
+    function removeModule(address module) external override onlyModule {
+        _removeModule(module);
     }
 
     function _removeModule(address module) internal {
@@ -116,44 +117,26 @@ abstract contract ModuleManager is IModuleManager, PluginManager, InternalExecut
         }
     }
 
-    function execFromModule(bytes calldata data) external override {
+    function moduleEntryPoint(bytes calldata data) external override {
         bytes4 selector = bytes4(data[0:4]);
         require(_isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
+        (bool succ, bytes memory ret) = _moduleExec(data);
+        assembly {
+            if iszero(succ) { revert(add(ret, 0x20), mload(ret)) }
+            return(add(ret, 0x20), mload(ret))
+        }
+    }
 
-        if (selector == FUNC_ADD_MODULE) {
-            // addModule(address,bytes)
-            (address moduleAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
-            _addModule(moduleAddress, initData);
-        } else if (selector == FUNC_REMOVE_MODULE) {
-            // removeModule(address)
-            address module = abi.decode(data[4:], (address));
-            _removeModule(module);
-        } else if (selector == FUNC_ADD_PLUGIN) {
-            // addPlugin((address,bytes))
-            (address pluginAddress, bytes memory initData) = abi.decode(data[4:], (address, bytes));
-            _addPlugin(pluginAddress, initData);
-        } else if (selector == FUNC_REMOVE_PLUGIN) {
-            // removePlugin(address)
-            address plugin = abi.decode(data[4:], (address));
-            _removePlugin(plugin);
-        } else if (selector == FUNC_EXECUTE) {
-            // execute(address,uint256,bytes)
-            (address to, uint256 value, bytes memory _data) = abi.decode(data[4:], (address, uint256, bytes));
-            _execute(to, value, _data);
-        } else if (selector == FUNC_EXECUTE_BATCH) {
-            // executeBatch(address[],bytes[])
-            (address[] memory tos, bytes[] memory _datas) = abi.decode(data[4:], (address[], bytes[]));
-            _executeBatch(tos, _datas);
-        } else if (selector == FUNC_EXECUTE_BATCH_VALUE) {
-            // executeBatch(address[],uint256[],bytes[])
-            (address[] memory tos, uint256[] memory values, bytes[] memory _datas) =
-                abi.decode(data[4:], (address[], uint256[], bytes[]));
-            _executeBatch(tos, values, _datas);
-        } else {
-            (bool succ, bytes memory ret) = address(this).call{value: 0}(data);
-            assembly {
-                if iszero(succ) { revert(add(ret, 0x20), mload(ret)) }
-                return(add(ret, 0x20), mload(ret))
+    function _moduleExec(bytes calldata data) private moduleHook returns (bool succ, bytes memory ret) {
+        (succ, ret) = address(this).call{value: 0}(data);
+    }
+
+    function executeFromModule(address to, uint256 value, bytes memory data) external override onlyModule {
+        assembly {
+            let result := call(gas(), to, value, add(data, 0x20), mload(data), 0, 0)
+            if iszero(result) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
             }
         }
     }

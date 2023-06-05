@@ -26,12 +26,12 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerCleared();
     }
 
-    function resetOwner(address newOwner) external override onlyEntryPointOrSelf {
+    function resetOwner(address newOwner) external override onlyExecutionManagerOrModule {
         _clearOwner();
         _addOwner(newOwner);
     }
 
-    function resetOwners(address[] calldata newOwners) external override onlyEntryPointOrSelf {
+    function resetOwners(address[] calldata newOwners) external override onlyExecutionManagerOrModule {
         _clearOwner();
         _addOwners(newOwners);
     }
@@ -45,11 +45,11 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         }
     }
 
-    function addOwner(address owner) external override onlyEntryPointOrSelf {
+    function addOwner(address owner) external override onlyExecutionManagerOrModule {
         _addOwner(owner);
     }
 
-    function addOwners(address[] calldata owners) external override onlyEntryPointOrSelf {
+    function addOwners(address[] calldata owners) external override onlyExecutionManagerOrModule {
         _addOwners(owners);
     }
 
@@ -58,13 +58,13 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerAdded(owner);
     }
 
-    function removeOwner(address owner) external override onlyEntryPointOrSelf {
+    function removeOwner(address owner) external override onlyExecutionManagerOrModule {
         _ownerMapping().remove(owner);
         require(!_ownerMapping().isEmpty(), "no owner");
         emit OwnerRemoved(owner);
     }
 
-    function replaceOwner(address oldOwner, address newOwner) external override onlyEntryPointOrSelf {
+    function replaceOwner(address oldOwner, address newOwner) external override onlyExecutionManagerOrModule {
         _ownerMapping().replace(oldOwner, newOwner);
         emit OwnerRemoved(oldOwner);
         emit OwnerAdded(newOwner);

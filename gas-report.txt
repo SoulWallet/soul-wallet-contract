@@ -1,20 +1,23 @@
 |----------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                              | Deployment Size |        |        |        |         |
-| 4835788                                      | 24405           |        |        |        |         |
+| 4954380                                      | 25011           |        |        |        |         |
 | Function Name                                | min             | avg    | median | max    | # calls |
-| addOwner                                     | 27465           | 27465  | 27465  | 27465  | 3       |
-| execDelegateCall                             | 2155            | 2272   | 2300   | 2304   | 40      |
-| execFromModule                               | 9782            | 170426 | 128797 | 454099 | 14      |
-| execute                                      | 3164            | 19917  | 11229  | 55102  | 20      |
-| executeBatch(address[],bytes[])              | 2962            | 20503  | 16186  | 42362  | 3       |
-| executeBatch(address[],uint256[],bytes[])    | 3246            | 20884  | 16616  | 42792  | 3       |
-| initialize                                   | 73195           | 256739 | 286412 | 497676 | 27      |
+| addModule                                    | 104509          | 105342 | 104509 | 107009 | 3       |
+| addOwner                                     | 27564           | 27564  | 27564  | 27564  | 3       |
+| addPlugin                                    | 140276          | 273577 | 145625 | 447631 | 7       |
+| execDelegateCall                             | 1855            | 1972   | 2000   | 2004   | 40      |
+| execute                                      | 955             | 20203  | 12987  | 55620  | 20      |
+| executeBatch                                 | 684             | 21591  | 21591  | 42498  | 2       |
+| executeBatchWithValue                        | 1367            | 20719  | 17445  | 43345  | 3       |
+| initialize                                   | 73239           | 256626 | 286245 | 497355 | 27      |
 | isAuthorizedModule                           | 590             | 590    | 590    | 590    | 19      |
 | isAuthorizedPlugin                           | 623             | 623    | 623    | 623    | 13      |
 | isOwner                                      | 568             | 1663   | 2568   | 2568   | 42      |
-| listModule                                   | 6794            | 8662   | 6794   | 17612  | 9       |
+| listModule                                   | 6805            | 8673   | 6805   | 17623  | 9       |
 | listPlugin                                   | 2034            | 2034   | 2034   | 2034   | 3       |
-| onERC721Received                             | 1430            | 1959   | 1430   | 5930   | 17      |
+| moduleEntryPoint                             | 13199           | 171606 | 130341 | 454499 | 14      |
+| onERC721Received                             | 1540            | 2140   | 1540   | 6040   | 15      |
+| removeModule                                 | 7216            | 7216   | 7216   | 7216   | 1       |
 | validateUserOp                               | 9601            | 36718  | 38576  | 60429  | 34      |
 
 
@@ -23,7 +26,7 @@
 | Deployment Cost                                            | Deployment Size |        |        |        |         |
 | 343858                                                     | 1903            |        |        |        |         |
 | Function Name                                              | min             | avg    | median | max    | # calls |
-| createWallet                                               | 159047          | 343201 | 372337 | 583656 | 27      |
+| createWallet                                               | 159091          | 343088 | 372170 | 583335 | 27      |
 | getWalletAddress                                           | 2281            | 2319   | 2329   | 2366   | 23      |
 
 
@@ -32,30 +35,33 @@
 | Deployment Cost                                        | Deployment Size |        |        |        |         |
 | 51178                                                  | 331             |        |        |        |         |
 | Function Name                                          | min             | avg    | median | max    | # calls |
-| addOwner                                               | 27763           | 27763  | 27763  | 27763  | 3       |
-| execDelegateCall                                       | 2477            | 2594   | 2622   | 2626   | 40      |
-| execFromModule                                         | 10032           | 170761 | 129122 | 454508 | 14      |
-| execute                                                | 3514            | 20692  | 13802  | 55433  | 20      |
-| executeBatch(address[],bytes[])                        | 3372            | 20904  | 16583  | 42759  | 3       |
-| executeBatch(address[],uint256[],bytes[])              | 3681            | 21311  | 17038  | 43214  | 3       |
-| initialize                                             | 73520           | 257638 | 286761 | 498043 | 27      |
+| addModule                                              | 104816          | 105649 | 104816 | 107316 | 3       |
+| addOwner                                               | 27862           | 27862  | 27862  | 27862  | 3       |
+| addPlugin                                              | 140583          | 273920 | 145932 | 448022 | 7       |
+| execDelegateCall                                       | 2177            | 2294   | 2322   | 2326   | 40      |
+| execute                                                | 1305            | 20929  | 14454  | 55951  | 20      |
+| executeBatch                                           | 1094            | 21994  | 21994  | 42895  | 2       |
+| executeBatchWithValue                                  | 1802            | 21145  | 17867  | 43767  | 3       |
+| initialize                                             | 73564           | 257524 | 286594 | 497722 | 27      |
 | isAuthorizedModule                                     | 891             | 891    | 891    | 891    | 19      |
 | isAuthorizedPlugin                                     | 924             | 924    | 924    | 924    | 13      |
 | isOwner                                                | 869             | 3357   | 2869   | 7369   | 42      |
-| listModule                                             | 7146            | 9017   | 7146   | 17988  | 9       |
+| listModule                                             | 7157            | 9028   | 7157   | 17999  | 9       |
 | listPlugin                                             | 2338            | 2338   | 2338   | 2338   | 3       |
-| onERC721Received                                       | 1752            | 2810   | 1752   | 10752  | 17      |
+| moduleEntryPoint                                       | 13449           | 171941 | 130666 | 454908 | 14      |
+| onERC721Received                                       | 1862            | 3062   | 1862   | 10862  | 15      |
+| removeModule                                           | 7455            | 7455   | 7455   | 7455   | 1       |
 | validateUserOp                                         | 14574           | 38512  | 43531  | 60902  | 34      |
 
 
 | contracts/modules/SecurityControlModule/SecurityControlModule.sol:SecurityControlModule contract |                 |        |        |        |         |
 |--------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                                  | Deployment Size |        |        |        |         |
-| 1361620                                                                                          | 7049            |        |        |        |         |
+| 1336792                                                                                          | 6925            |        |        |        |         |
 | Function Name                                                                                    | min             | avg    | median | max    | # calls |
 | cancel                                                                                           | 3539            | 3877   | 3877   | 4215   | 2       |
 | cancelAll                                                                                        | 3772            | 7658   | 7658   | 11544  | 2       |
-| execute                                                                                          | 3602            | 133495 | 101491 | 479627 | 19      |
+| execute                                                                                          | 3581            | 134085 | 104693 | 479404 | 19      |
 | getTxId                                                                                          | 1154            | 1154   | 1154   | 1154   | 1       |
 | getWalletConfig                                                                                  | 755             | 755    | 755    | 755    | 1       |
 | queue                                                                                            | 3332            | 38111  | 51019  | 62567  | 5       |
@@ -109,10 +115,10 @@
 | depositTo                                                                 | 24498           | 24498  | 24498  | 24498  | 5       |
 | getNonce                                                                  | 681             | 1681   | 1681   | 2681   | 12      |
 | getUserOpHash                                                             | 2133            | 2154   | 2160   | 2223   | 17      |
-| handleOps                                                                 | 61818           | 161091 | 128089 | 515830 | 15      |
-| innerHandleOp                                                             | 25852           | 47787  | 40513  | 81579  | 15      |
+| handleOps                                                                 | 64472           | 162240 | 128604 | 515663 | 15      |
+| innerHandleOp                                                             | 25852           | 48720  | 41971  | 82097  | 15      |
 | receive                                                                   | 0               | 13259  | 22103  | 22103  | 32      |
-| simulateValidation                                                        | 32968           | 120766 | 72752  | 466782 | 19      |
+| simulateValidation                                                        | 32968           | 120753 | 72752  | 466615 | 19      |
 
 
 

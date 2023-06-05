@@ -95,7 +95,7 @@ contract DailylimitTest is Test {
         vm.prank(walletOwner);
         securityControlModule.execute(
             address(soulWallet),
-            abi.encodeWithSelector(bytes4(keccak256("addPlugin(address,bytes)")), dailylimitPlugin, initData)
+            abi.encodeWithSelector(bytes4(keccak256("addPlugin(bytes)")), abi.encodePacked(dailylimitPlugin, initData))
         );
 
         address[] memory plugins = soulWallet.listPlugin();
@@ -104,7 +104,7 @@ contract DailylimitTest is Test {
     }
 
     function execDelegateCall_staticcall(bytes memory data) private returns (bytes memory) {
-        vm.prank(walletOwner);
+        vm.prank(address(entryPoint));
         (bool success, bytes memory returnData) = address(soulWallet).staticcall(
             abi.encodeWithSelector(soulWallet.execDelegateCall.selector, dailylimitPlugin, data)
         );

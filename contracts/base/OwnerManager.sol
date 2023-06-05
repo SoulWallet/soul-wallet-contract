@@ -63,13 +63,7 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         require(!_ownerMapping().isEmpty(), "no owner");
         emit OwnerRemoved(owner);
     }
-
-    function replaceOwner(address oldOwner, address newOwner) external override onlyExecutionManagerOrModule {
-        _ownerMapping().replace(oldOwner, newOwner);
-        emit OwnerRemoved(oldOwner);
-        emit OwnerAdded(newOwner);
-    }
-
+    
     function listOwner() external view override returns (address[] memory owners) {
         uint256 size = _ownerMapping().size();
         owners = _ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);

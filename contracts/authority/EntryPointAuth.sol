@@ -7,8 +7,7 @@ abstract contract EntryPointAuth {
     function _entryPoint() internal view virtual returns (IEntryPoint);
 
     modifier onlyEntryPoint() {
-        address addr = msg.sender;
-        require(addr == address(_entryPoint()), "require from Entrypoint");
+        require(msg.sender == address(_entryPoint()), "require from Entrypoint");
         _;
     }
 }

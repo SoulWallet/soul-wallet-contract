@@ -32,16 +32,19 @@ contract ExecutionManagerGuard is GuardByteSlot {
         }
     }
 
-    function _isExecutionManager() internal view returns (bool _inExecutionManager) {
-        require(msg.sender == address(this), "require from ExecutionManager");
+    function _callFromExecutionManager() internal view returns (bool callFromExecutionManager) {
+        /*  Equivalent code：
+            if (msg.sender != address(this)) {
+                return false;
+            } else {
+                return isInExecutionManager();
+            }
+        */
         assembly {
-            let _byte := byte(1, sload(_BIT_SLOT))
-            _inExecutionManager := eq(_byte, 1)
+            if eq(caller(), address()) {
+                let _byte := byte(1, sload(_BIT_SLOT))
+                callFromExecutionManager := eq(_byte, 1)
+            }
         }
-    }
-
-    modifier onlyExecutionManager() {
-        require(_isExecutionManager(), "require from ExecutionManager");
-        _;
     }
 }

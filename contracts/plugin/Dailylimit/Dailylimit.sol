@@ -25,6 +25,9 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     bytes4 private constant _ERC20_APPROVE = bytes4(keccak256("approve(address,uint256)"));
     bytes4 private constant _ERC20_TRANSFER_FROM = bytes4(keccak256("transferFrom(address,address,uint256)"));
 
+    /**
+     * @dev all constructor parameters must be `immutable` type (Dailylimit plugin is a `delegatecall` plugin)
+     */
     constructor()
         BaseDelegateCallPlugin(keccak256("PLUGIN_DAILYLIMIT_SLOT"))
         SafeLock("PLUGIN_DAILYLIMIT_SAFELOCK_SLOT", 2 days)

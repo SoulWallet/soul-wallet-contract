@@ -104,7 +104,7 @@ contract DailylimitTest is Test {
     }
 
     function execDelegateCall_staticcall(bytes memory data) private returns (bytes memory) {
-        vm.prank(address(entryPoint));
+        vm.prank(address(0));
         (bool success, bytes memory returnData) = address(soulWallet).staticcall(
             abi.encodeWithSelector(soulWallet.execDelegateCall.selector, dailylimitPlugin, data)
         );
@@ -363,5 +363,129 @@ contract DailylimitTest is Test {
 
     function test_transferERC20() public {
         transferERC20(address(token2), address(1), 0.1 ether, true);
+    }
+
+    function test_updateDaliylimit() public {
+        setUpPlugin();
+
+        uint256 _eth;
+        uint256 _token1;
+        uint256 _token2;
+        uint256 _token3;
+        uint256 _token4;
+        (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
+        assertEq(_eth, 1 ether);
+        assertEq(_token1, 1 ether);
+
+        {
+            /*
+                1. function execute(address dest, uint256 value, bytes calldata func)
+                2. function execDelegateCall(address target, bytes memory data) external
+                3. function reduceDailyLimits( address[] calldata token, uint256[] calldata amount) external;
+            */
+
+            address[] memory _token = new address[](2);
+            uint256[] memory _limit = new uint256[](2);
+
+            _token[0] = address(0);
+            _limit[0] = 0.5 ether;
+
+            _token[1] = address(token1);
+            _limit[1] = 0.6 ether;
+
+            vm.prank(address(entryPoint));
+            soulWallet.execute(
+                address(soulWallet),
+                0,
+                abi.encodeWithSelector(
+                    soulWallet.execDelegateCall.selector,
+                    dailylimitPlugin,
+                    abi.encodeWithSelector(IDailylimit.reduceDailyLimits.selector, _token, _limit)
+                )
+            );
+            (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
+            assertEq(_eth, 0.5 ether);
+            assertEq(_token1, 0.6 ether);
+        }
+    }
+
+    function test_setDaliylimit() public {
+        setUpPlugin();
+
+        uint256 _eth;
+        uint256 _token1;
+        uint256 _token2;
+        uint256 _token3;
+        uint256 _token4;
+        (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
+        assertEq(_eth, 1 ether);
+        assertEq(_token1, 1 ether);
+
+        {
+            /*
+                1. function execute(address dest, uint256 value, bytes calldata func)
+                2. function execDelegateCall(address target, bytes memory data) external
+                3. function preSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
+                4. function comfirmSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
+            */
+
+            address[] memory _token = new address[](2);
+            uint256[] memory _limit = new uint256[](2);
+
+            _token[0] = address(0);
+            _limit[0] = 2 ether;
+
+            _token[1] = address(token1);
+            _limit[1] = 3 ether;
+
+            {
+                vm.prank(address(entryPoint));
+                soulWallet.execute(
+                    address(soulWallet),
+                    0,
+                    abi.encodeWithSelector(
+                        soulWallet.execDelegateCall.selector,
+                        dailylimitPlugin,
+                        abi.encodeWithSelector(IDailylimit.preSetDailyLimit.selector, _token, _limit)
+                    )
+                );
+                // vm.prank(address(entryPoint));
+                // soulWallet.execute(
+                //     address(soulWallet),
+                //     0,
+                //     abi.encodeWithSelector(
+                //         soulWallet.execDelegateCall.selector,
+                //         dailylimitPlugin,
+                //         abi.encodeWithSelector(IDailylimit.cancelSetDailyLimit.selector, _token, _limit)
+                //     )
+                // );
+            }
+            uint256 PLUGIN_DAILYLIMIT_SAFELOCK_SLOT = 2 days;
+            vm.prank(address(entryPoint));
+            vm.expectRevert("SafeLock: not unlock time");
+            soulWallet.execute(
+                address(soulWallet),
+                0,
+                abi.encodeWithSelector(
+                    soulWallet.execDelegateCall.selector,
+                    dailylimitPlugin,
+                    abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
+                )
+            );
+            vm.warp(block.timestamp + PLUGIN_DAILYLIMIT_SAFELOCK_SLOT);
+            vm.prank(address(entryPoint));
+            soulWallet.execute(
+                address(soulWallet),
+                0,
+                abi.encodeWithSelector(
+                    soulWallet.execDelegateCall.selector,
+                    dailylimitPlugin,
+                    abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
+                )
+            );
+            (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
+            assertEq(_eth, 2 ether);
+            assertEq(_token1, 3 ether);
+        }
     }
 }

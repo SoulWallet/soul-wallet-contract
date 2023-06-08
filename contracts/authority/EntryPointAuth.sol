@@ -6,6 +6,17 @@ import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 abstract contract EntryPointAuth {
     function _entryPoint() internal view virtual returns (IEntryPoint);
 
+    /*
+        Data Flow:
+
+        A: from entryPoint
+            # msg.sender:    entryPoint
+            # address(this): soulwalletProxy
+            ┌────────────┐     ┌────────┐
+            │ entryPoint │ ──► │  here  │
+            └────────────┘     └────────┘
+
+    */
     modifier onlyEntryPoint() {
         require(msg.sender == address(_entryPoint()), "require from Entrypoint");
         _;

@@ -11,6 +11,9 @@ import "../interfaces/IPluggable.sol";
 abstract contract PluginManager is Authority, IPluginManager {
     using AddressLinkedList for mapping(address => address);
 
+    /**
+     * @dev Make sure the plugin code does not contain the F4 (DELEGATECALL) opcode
+     */
     function addPlugin(bytes calldata pluginAndData) external override onlyModule {
         _addPlugin(pluginAndData);
     }
@@ -128,7 +131,7 @@ abstract contract PluginManager is Authority, IPluginManager {
         }
     }
 
-    function execDelegateCall(address target, bytes memory data) external onlyEntryPointOrSimulate {
+    function execDelegateCall(address target, bytes memory data) external onlyExecutionManagerOrSimulate {
         require(AccountStorage.layout().pluginCallTypes[target] == 1, "not delegatecall plugin");
         assembly {
             let succ := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0)

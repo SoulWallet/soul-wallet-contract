@@ -32,16 +32,74 @@ contract ModuleGuard is GuardByteSlot {
         }
     }
 
-    function _isInModule() internal view returns (bool _inModule) {
-        require(msg.sender == address(this), "require from Module");
+    function _callFromModule() internal view returns (bool callFromModule) {
+        /*  Equivalent code：
+            if (msg.sender != address(this)) {
+                return false;
+            } else {
+                return isInModule();
+            }
+        */
         assembly {
-            let _byte := byte(0, sload(_BIT_SLOT))
-            _inModule := eq(_byte, 1)
+            if eq(caller(), address()) {
+                let _byte := byte(0, sload(_BIT_SLOT))
+                callFromModule := eq(_byte, 1)
+            }
         }
     }
 
+    /*
+        Data Flow:
+
+        A: from Module
+            # msg.sender:    soulwalletProxy
+            # address(this): soulwalletProxy
+            ┌───────────────────────────┐     ┌──────────────────┐
+            │ ExecutionManager::execute │ ──► │                  │
+            └───────────────────────────┘     │                  │
+                                              │  Module Contract │──┐
+            ┌───────────────┐                 │                  │  │
+            │ Other Account │ ──────────────► │                  │  │
+            └───────────────┘                 └──────────────────┘  │
+                                                                    │
+                                                                    │
+                                   ┌────────────────────────────────┘
+                                   │
+                                   ▼
+            ┌─────────────────────────────────┐     ┌──────┐
+            | ModuleManager::moduleEntryPoint | ──► | here |
+            └─────────────────────────────────┘     └──────┘
+
+
+    ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                                                                                   ├┐
+    │ # In addition, the following data flow may be exist:                                              ││
+    │                                                                                                   ││
+    │ A: Module and Plugin (only delegatecall plugin and plugin contain the DELEGATECALL opcode)        ││
+    │     # msg.sender:    soulwalletProxy                                                              ││
+    │     # address(this): soulwalletProxy                                                              ││
+    │     ┌───────────────────────────┐     ┌────────┐     ┌─────────────────────────────────┐          ││
+    │     │ ExecutionManager::execute │ ──► │ Module │ ──► │ ModuleManager::moduleEntryPoint │          ││
+    │     └───────────────────────────┘     └────────┘     └─────────────────┬───────────────┘          ││
+    │                 ┌──────────────────────────────────────────────────────┘                          ││
+    │                 ▼                                                                                 ││
+    │     ┌──────────────────────┐     ┌──────┐                                                         ││
+    │     │ Plugin (Init/DeInit) │ ──► │ here │                                                         ││
+    │     └──────────────────────┘     └──────┘                                                         ││
+    │                                                                                                   ││
+    │ B: More...                                                                                        ││
+    │                                                                                                   ││
+    │ However, they can be avoided by prohibit adding plugin that contain F4 (DELEGATECALL) opcode:     ││
+    │ 1. If a user add a plugin via the soulwallet frontend,the addition is prohibited                  ││
+    │    if DELEGATECALL opcode is found in plugin.                                                     ││
+    │ 2. If a hacker steals your account and add plugin directly via contract,then hacker also          ││
+    │    needs to wait 48 hours(During this period, users can regain control of the account             ││
+    │    through social recovery and interrupt the process).                                            ││
+    │                                                                                                   ││
+    └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+    */
     modifier onlyModule() {
-        require(_isInModule(), "require from Module");
+        require(_callFromModule(), "require from Module");
         _;
     }
 }

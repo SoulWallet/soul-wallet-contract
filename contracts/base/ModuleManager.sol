@@ -62,10 +62,6 @@ abstract contract ModuleManager is IModuleManager, PluginManager {
     }
 
     function removeModule(address module) external override onlyModule {
-        _removeModule(module);
-    }
-
-    function _removeModule(address module) internal {
         mapping(address => address) storage modules = _modulesMapping();
         modules.remove(module);
 

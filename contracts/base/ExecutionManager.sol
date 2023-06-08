@@ -7,7 +7,7 @@ import "../interfaces/IExecutionManager.sol";
 
 abstract contract ExecutionManager is IExecutionManager, Authority, PluginManager {
     /**
-     * execute a transaction (called directly from owner, or by entryPoint)
+     * execute a transaction
      */
     function execute(address dest, uint256 value, bytes calldata func) external override onlyEntryPoint executionHook {
         _call(dest, value, func);

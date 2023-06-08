@@ -52,10 +52,6 @@ abstract contract PluginManager is Authority, IPluginManager {
     }
 
     function removePlugin(address plugin) external override onlyModule {
-        _removePlugin(plugin);
-    }
-
-    function _removePlugin(address plugin) private {
         AccountStorage.Layout storage l = AccountStorage.layout();
         l.plugins.remove(plugin);
         bool success = call(l.pluginCallTypes[plugin], plugin, abi.encodeWithSelector(IPluggable.walletDeInit.selector));

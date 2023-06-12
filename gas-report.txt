@@ -18,7 +18,7 @@
 | moduleEntryPoint                             | 13224           | 201846 | 147053 | 452464 | 17      |
 | onERC721Received                             | 1518            | 2118   | 1518   | 6018   | 15      |
 | removeModule                                 | 7242            | 7242   | 7242   | 7242   | 1       |
-| validateUserOp                               | 9542            | 36928  | 38517  | 60074  | 36      |
+| validateUserOp                               | 9542            | 36926  | 38517  | 60074  | 36      |
 
 
 | contracts/SoulWalletFactory.sol:SoulWalletFactory contract |                 |        |        |        |         |
@@ -51,7 +51,7 @@
 | moduleEntryPoint                                       | 13475           | 202190 | 147378 | 452873 | 17      |
 | onERC721Received                                       | 1840            | 3040   | 1840   | 10840  | 15      |
 | removeModule                                           | 7480            | 7480   | 7480   | 7480   | 1       |
-| validateUserOp                                         | 14515           | 38647  | 43345  | 60547  | 36      |
+| validateUserOp                                         | 14515           | 38646  | 43330  | 60547  | 36      |
 
 
 | contracts/modules/SecurityControlModule/SecurityControlModule.sol:SecurityControlModule contract |                 |        |        |        |         |
@@ -106,9 +106,9 @@
 | contracts/plugin/Simple2FA/Simple2FA.sol:Simple2FA contract |                 |       |        |       |         |
 |-------------------------------------------------------------|-----------------|-------|--------|-------|---------|
 | Deployment Cost                                             | Deployment Size |       |        |       |         |
-| 1097092                                                     | 5750            |       |        |       |         |
+| 1079072                                                     | 5660            |       |        |       |         |
 | Function Name                                               | min             | avg   | median | max   | # calls |
-| guardHook                                                   | 4751            | 4751  | 4751   | 4751  | 2       |
+| guardHook                                                   | 4721            | 4721  | 4721   | 4721  | 2       |
 | signerAddress                                               | 436             | 436   | 436    | 436   | 1       |
 | supportsHook                                                | 328             | 328   | 328    | 328   | 1       |
 | supportsInterface                                           | 190             | 190   | 190    | 190   | 1       |
@@ -146,10 +146,10 @@
 | depositTo                                                                 | 24498           | 24498  | 24498  | 24498  | 5       |
 | getNonce                                                                  | 681             | 1757   | 2681   | 2681   | 13      |
 | getUserOpHash                                                             | 2133            | 2153   | 2151   | 2223   | 18      |
-| handleOps                                                                 | 63897           | 161941 | 142688 | 515604 | 16      |
+| handleOps                                                                 | 63897           | 161939 | 142688 | 515604 | 16      |
 | innerHandleOp                                                             | 25852           | 49796  | 44510  | 81733  | 16      |
 | receive                                                                   | 0               | 13779  | 22103  | 22103  | 34      |
-| simulateValidation                                                        | 32683           | 118021 | 70634  | 466556 | 20      |
+| simulateValidation                                                        | 32683           | 118019 | 70634  | 466556 | 20      |
 
 
 

@@ -32,33 +32,37 @@ contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
     {
         (userOp);
         address _2FAAddr = _2FA[msg.sender];
-        require(_2FAAddr != address(0), "Simple2FA: 2FA not set");
-        if (guardData.length == 0) {
-            // # 1. function execute(address dest, uint256 value, bytes calldata func)
-            // userOp.callData;
-            bytes4 selector = bytes4(userOp.callData[0:4]);
-            require(selector == ExecutionManager.execute.selector, "Simple2FA: invalid selector");
-            // decode callData
-            (address dest,, bytes memory func) = abi.decode(userOp.callData[4:], (address, uint256, bytes));
-            // check dest
-            require(dest == address(this), "Simple2FA: invalid dest");
+        if (_2FAAddr != address(0)) {
+            if (guardData.length == 0) {
+                // # 1. function execute(address dest, uint256 value, bytes calldata func)
+                // userOp.callData;
+                bytes4 selector = bytes4(userOp.callData[0:4]);
+                require(selector == ExecutionManager.execute.selector, "Simple2FA: invalid selector");
+                // decode callData
+                (address dest,, bytes memory func) = abi.decode(userOp.callData[4:], (address, uint256, bytes));
+                // check dest
+                require(dest == address(this), "Simple2FA: invalid dest");
 
-            // # 2. preReset2FA or comfirmReset2FA
-            // check func
-            selector = DecodeCalldata.decodeMethodId(func);
-            require(
-                selector == this.preReset2FA.selector || selector == this.comfirmReset2FA.selector,
-                "Simple2FA: invalid selector"
-            );
-        } else {
-            // check signature
-            bytes32 hash = userOpHash.toEthSignedMessageHash();
-            (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, guardData);
-            if (error != ECDSA.RecoverError.NoError) {
-                revert("Simple2FA: invalid signature");
+                // # 2. preReset2FA or comfirmReset2FA
+                // check func
+                selector = DecodeCalldata.decodeMethodId(func);
+                require(
+                    selector == this.preReset2FA.selector || selector == this.comfirmReset2FA.selector,
+                    "Simple2FA: invalid selector"
+                );
             } else {
-                require(recovered == _2FAAddr, "Simple2FA: invalid signature");
+                // check signature
+                bytes32 hash = userOpHash.toEthSignedMessageHash();
+                (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, guardData);
+                if (error != ECDSA.RecoverError.NoError) {
+                    revert("Simple2FA: invalid signature");
+                } else {
+                    require(recovered == _2FAAddr, "Simple2FA: invalid signature");
+                }
             }
+        } else {
+            // 2FA not set, skip
+            require(guardData.length == 0, "Simple2FA: invalid signature");
         }
     }
 

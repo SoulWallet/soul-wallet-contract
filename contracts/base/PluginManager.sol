@@ -107,10 +107,6 @@ abstract contract PluginManager is IPluginManager, Authority {
                 _cursorEnd = cursor + guardSigLen;
             }
             _cursorFrom = cursor;
-        } else {
-            _guardAddr = address(0);
-            _cursorFrom = 0;
-            _cursorEnd = 0;
         }
     }
 

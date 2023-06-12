@@ -222,7 +222,7 @@ contract DailylimitTest is Test {
         );
         bytes memory sig = abi.encodePacked(r, s, v);
 
-        uint8 signType = 0;
+        uint8 signType = 1;
         bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
         userOperation.signature = packedSig;
 
@@ -288,7 +288,7 @@ contract DailylimitTest is Test {
         );
         bytes memory sig = abi.encodePacked(r, s, v);
 
-        uint8 signType = 0;
+        uint8 signType = 1;
         bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
         userOperation.signature = packedSig;
 

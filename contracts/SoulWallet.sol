@@ -6,6 +6,7 @@ import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "./interfaces/ISoulWallet.sol";
 import "./base/EntryPointManager.sol";
 import "./base/ExecutionManager.sol";
+import "./base/PluginManager.sol";
 import "./base/ModuleManager.sol";
 import "./base/OwnerManager.sol";
 import "./helper/SignatureValidator.sol";
@@ -20,6 +21,7 @@ contract SoulWallet is
     EntryPointManager,
     OwnerManager,
     SignatureValidator,
+    PluginManager,
     ModuleManager,
     ExecutionManager,
     FallbackManager,
@@ -63,9 +65,10 @@ contract SoulWallet is
         returns (uint256 validationData)
     {
         bool sigValid;
-        (validationData, sigValid) = _isValidUserOp(userOpHash, userOp.signature);
+        bytes calldata guardHookInputData;
+        (validationData, sigValid, guardHookInputData) = _isValidUserOp(userOpHash, userOp.signature);
 
-        sigValid = sigValid && guardHook(userOp, userOpHash);
+        sigValid = sigValid && guardHook(userOp, userOpHash, guardHookInputData);
 
         // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
         // validUntil and validAfter is already packed in signatureData.validationData,

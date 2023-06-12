@@ -15,11 +15,17 @@ interface IPlugin is IPluggable {
      * callType structure:
      * 0: call
      * 1: delegatecall
-     * ... reserved for future use
+     * ...
      */
     function supportsHook() external pure returns (uint8 hookType, uint8 callType);
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external;
+    /**
+     * @dev For flexibility, guardData does not participate in the userOp signature verification.
+     *      Plugins must revert when they do not need guardData but guardData.length > 0(for security reasons)
+     */
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData) external;
+
     function preHook(address target, uint256 value, bytes calldata data) external;
+
     function postHook(address target, uint256 value, bytes calldata data) external;
 }

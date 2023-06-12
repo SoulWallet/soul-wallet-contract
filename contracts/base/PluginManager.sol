@@ -8,7 +8,7 @@ import "../authority/Authority.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../interfaces/IPluggable.sol";
 
-abstract contract PluginManager is Authority, IPluginManager {
+abstract contract PluginManager is IPluginManager, Authority {
     using AddressLinkedList for mapping(address => address);
 
     /**
@@ -74,21 +74,108 @@ abstract contract PluginManager is Authority, IPluginManager {
         plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) internal returns (bool) {
+    function listGuardHookPlugin() external view override returns (address[] memory plugins) {
+        mapping(address => address) storage _plugins = AccountStorage.layout().guardHookPlugins;
+        plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+    }
+
+    function _nextGuardHookData(bytes calldata guardHookData, uint256 cursor)
+        private
+        pure
+        returns (address _guardAddr, uint256 _cursorFrom, uint256 _cursorEnd)
+    {
+        uint256 dataLen = guardHookData.length;
+        uint256 guardMinInputLen;
+        uint48 guardSigLen;
+        unchecked {
+            guardMinInputLen = cursor + 26; /* 20+6 */
+        }
+
+        if (dataLen > guardMinInputLen) {
+            unchecked {
+                _cursorEnd = cursor + 20;
+            }
+            bytes calldata _guardAddrBytes = guardHookData[cursor:_cursorEnd];
+            assembly {
+                _guardAddr := shr(0x60, calldataload(_guardAddrBytes.offset))
+            }
+            unchecked {
+                cursor = _cursorEnd;
+                _cursorEnd = cursor + 6;
+            }
+            bytes calldata _guardSigLen = guardHookData[cursor:_cursorEnd];
+            assembly {
+                guardSigLen := shr(0xd0, calldataload(_guardSigLen.offset))
+            }
+            unchecked {
+                cursor = _cursorEnd;
+                _cursorEnd = cursor + guardSigLen;
+            }
+            _cursorFrom = cursor;
+        } else {
+            _guardAddr = address(0);
+            _cursorFrom = 0;
+            _cursorEnd = 0;
+        }
+    }
+
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardHookData)
+        internal
+        returns (bool)
+    {
         AccountStorage.Layout storage l = AccountStorage.layout();
         mapping(address => address) storage _plugins = l.guardHookPlugins;
+
+        /* 
+            +--------------------------------------------------------------------------------+  
+            |                            multi-guardHookInputData                            |  
+            +--------------------------------------------------------------------------------+  
+            |   guardHookInputData  |  guardHookInputData   |   ...  |  guardHookInputData   |
+            +-----------------------+--------------------------------------------------------+  
+            |     dynamic data      |     dynamic data      |   ...  |     dynamic data      |
+            +--------------------------------------------------------------------------------+
+
+            +----------------------------------------------------------------------+  
+            |                                guardHookInputData                    |  
+            +----------------------------------------------------------------------+  
+            |   guardHook address  |   input data length   |      input data       |
+            +----------------------+-----------------------------------------------+  
+            |        20bytes       |     6bytes(uint48)    |         bytes         |
+            +----------------------------------------------------------------------+
+         */
+        address _guardAddr;
+        uint256 _cursorFrom;
+        uint256 _cursorEnd;
+        (_guardAddr, _cursorFrom, _cursorEnd) = _nextGuardHookData(guardHookData, _cursorEnd);
 
         address addr = _plugins[AddressLinkedList.SENTINEL_ADDRESS];
         while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
             {
+                bytes calldata currentGuardHookData;
                 address plugin = addr;
-                bool success =
-                    call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash)));
+                if (plugin == _guardAddr) {
+                    currentGuardHookData = guardHookData[_cursorFrom:_cursorEnd];
+                    // next
+                    _guardAddr = address(0);
+                    if (_cursorEnd > 0) {
+                        (_guardAddr, _cursorFrom, _cursorEnd) = _nextGuardHookData(guardHookData, _cursorEnd);
+                    }
+                } else {
+                    currentGuardHookData = guardHookData[0:0];
+                }
+                bool success = call(
+                    l.pluginCallTypes[plugin],
+                    plugin,
+                    abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash, currentGuardHookData))
+                );
                 if (!success) {
                     return false;
                 }
             }
             addr = _plugins[addr];
+        }
+        if (_guardAddr != address(0)) {
+            revert("invalid guardHookData");
         }
         return true;
     }

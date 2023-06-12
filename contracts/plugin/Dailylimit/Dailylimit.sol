@@ -7,7 +7,6 @@ import "../../safeLock/SafeLock.sol";
 import "../../libraries/AddressLinkedList.sol";
 import "../../libraries/SignatureDecoder.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
-import "../../libraries/DecodeCalldata.sol";
 import "../../interfaces/IExecutionManager.sol";
 
 contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
@@ -133,9 +132,15 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         requiredPrefund = requiredGas * userOp.maxFeePerGas;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external override {
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData)
+        external
+        override
+    {
         (userOpHash);
-        uint256 _validationData = SignatureDecoder.decodeSignature(userOp.signature).validationData;
+        require(guardData.length == 0, "Dailylimit: guard signature not allowed");
+        uint256 _validationData;
+        (,, _validationData,) = SignatureDecoder.decodeSignature(userOp.signature);
+
         if (_validationData == 0) revert("Dailylimit: signature timerange invalid");
 
         ValidationData memory validationData = _parseValidationData(_validationData);

@@ -16,5 +16,7 @@ interface IPluginManager {
 
     function listPlugin() external view returns (address[] memory plugins);
 
+    function listGuardHookPlugin() external view returns (address[] memory plugins);
+
     function execDelegateCall(address target, bytes calldata data) external;
 }

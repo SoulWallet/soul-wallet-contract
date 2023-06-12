@@ -1,24 +1,24 @@
 |----------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                              | Deployment Size |        |        |        |         |
-| 4760895                                      | 24038           |        |        |        |         |
+| 4960974                                      | 25037           |        |        |        |         |
 | Function Name                                | min             | avg    | median | max    | # calls |
 | addModule                                    | 104565          | 105398 | 104565 | 107065 | 3       |
 | addOwner                                     | 27780           | 27780  | 27780  | 27780  | 3       |
-| addPlugin                                    | 140332          | 312312 | 447687 | 447687 | 9       |
-| execDelegateCall                             | 1910            | 2590   | 2055   | 28936  | 64      |
-| execute                                      | 955             | 20086  | 14229  | 55620  | 24      |
+| addPlugin                                    | 122215          | 292265 | 295649 | 445596 | 10      |
+| execDelegateCall                             | 1913            | 2590   | 2058   | 28953  | 64      |
+| execute                                      | 955             | 20854  | 14568  | 55256  | 25      |
 | executeBatch                                 | 684             | 21591  | 21591  | 42498  | 2       |
 | executeBatchWithValue                        | 1367            | 20719  | 17445  | 43345  | 3       |
-| initialize                                   | 73239           | 258669 | 286245 | 497355 | 29      |
-| isAuthorizedModule                           | 590             | 590    | 590    | 590    | 21      |
-| isAuthorizedPlugin                           | 623             | 623    | 623    | 623    | 15      |
-| isOwner                                      | 568             | 1704   | 2568   | 2568   | 44      |
+| initialize                                   | 73239           | 259593 | 286245 | 497377 | 30      |
+| isAuthorizedModule                           | 590             | 590    | 590    | 590    | 22      |
+| isAuthorizedPlugin                           | 623             | 623    | 623    | 623    | 16      |
+| isOwner                                      | 568             | 1723   | 2568   | 2568   | 45      |
 | listModule                                   | 6805            | 8673   | 6805   | 17623  | 9       |
-| listPlugin                                   | 2034            | 2034   | 2034   | 2034   | 5       |
-| moduleEntryPoint                             | 13224           | 207052 | 148455 | 454555 | 16      |
-| onERC721Received                             | 1518            | 2118   | 1518   | 6018   | 15      |
+| listPlugin                                   | 2034            | 2034   | 2034   | 2034   | 6       |
+| moduleEntryPoint                             | 13224           | 201846 | 147053 | 452464 | 17      |
+| onERC721Received                             | 1540            | 2140   | 1540   | 6040   | 15      |
 | removeModule                                 | 7242            | 7242   | 7242   | 7242   | 1       |
-| validateUserOp                               | 9601            | 36718  | 38576  | 60429  | 34      |
+| validateUserOp                               | 9542            | 36928  | 38517  | 60074  | 36      |
 
 
 | contracts/SoulWalletFactory.sol:SoulWalletFactory contract |                 |        |        |        |         |
@@ -26,8 +26,8 @@
 | Deployment Cost                                            | Deployment Size |        |        |        |         |
 | 343858                                                     | 1903            |        |        |        |         |
 | Function Name                                              | min             | avg    | median | max    | # calls |
-| createWallet                                               | 159091          | 345094 | 372170 | 583335 | 29      |
-| getWalletAddress                                           | 2281            | 2320   | 2329   | 2366   | 25      |
+| createWallet                                               | 159091          | 346002 | 372170 | 583357 | 30      |
+| getWalletAddress                                           | 2281            | 2320   | 2329   | 2366   | 26      |
 
 
 | contracts/SoulWalletProxy.sol:SoulWalletProxy contract |                 |        |        |        |         |
@@ -37,21 +37,21 @@
 | Function Name                                          | min             | avg    | median | max    | # calls |
 | addModule                                              | 104872          | 105705 | 104872 | 107372 | 3       |
 | addOwner                                               | 28078           | 28078  | 28078  | 28078  | 3       |
-| addPlugin                                              | 140639          | 312665 | 448078 | 448078 | 9       |
-| execDelegateCall                                       | 2232            | 2913   | 2377   | 29297  | 64      |
-| execute                                                | 1305            | 20753  | 14542  | 55951  | 24      |
+| addPlugin                                              | 122528          | 292615 | 295998 | 445987 | 10      |
+| execDelegateCall                                       | 2235            | 2913   | 2380   | 29314  | 64      |
+| execute                                                | 1305            | 21508  | 14881  | 55587  | 25      |
 | executeBatch                                           | 1094            | 21994  | 21994  | 42895  | 2       |
 | executeBatchWithValue                                  | 1802            | 21145  | 17867  | 43767  | 3       |
-| initialize                                             | 73564           | 259529 | 286594 | 497722 | 29      |
-| isAuthorizedModule                                     | 891             | 891    | 891    | 891    | 21      |
-| isAuthorizedPlugin                                     | 924             | 924    | 924    | 924    | 15      |
-| isOwner                                                | 869             | 3539   | 2869   | 7369   | 44      |
+| initialize                                             | 73564           | 260437 | 286594 | 497744 | 30      |
+| isAuthorizedModule                                     | 891             | 891    | 891    | 891    | 22      |
+| isAuthorizedPlugin                                     | 924             | 924    | 924    | 924    | 16      |
+| isOwner                                                | 869             | 3624   | 2869   | 7369   | 45      |
 | listModule                                             | 7157            | 9028   | 7157   | 17999  | 9       |
-| listPlugin                                             | 2338            | 2338   | 2338   | 2338   | 5       |
-| moduleEntryPoint                                       | 13475           | 207396 | 148780 | 454964 | 16      |
-| onERC721Received                                       | 1840            | 3040   | 1840   | 10840  | 15      |
+| listPlugin                                             | 2338            | 2338   | 2338   | 2338   | 6       |
+| moduleEntryPoint                                       | 13475           | 202190 | 147378 | 452873 | 17      |
+| onERC721Received                                       | 1862            | 3062   | 1862   | 10862  | 15      |
 | removeModule                                           | 7480            | 7480   | 7480   | 7480   | 1       |
-| validateUserOp                                         | 14574           | 38512  | 43531  | 60902  | 34      |
+| validateUserOp                                         | 14515           | 38647  | 43345  | 60547  | 36      |
 
 
 | contracts/modules/SecurityControlModule/SecurityControlModule.sol:SecurityControlModule contract |                 |        |        |        |         |
@@ -61,30 +61,58 @@
 | Function Name                                                                                    | min             | avg    | median | max    | # calls |
 | cancel                                                                                           | 3539            | 3877   | 3877   | 4215   | 2       |
 | cancelAll                                                                                        | 3772            | 7658   | 7658   | 11544  | 2       |
-| execute                                                                                          | 3581            | 167004 | 130996 | 479460 | 21      |
+| execute                                                                                          | 3581            | 165717 | 130996 | 477369 | 22      |
 | getTxId                                                                                          | 1154            | 1154   | 1154   | 1154   | 1       |
 | getWalletConfig                                                                                  | 755             | 755    | 755    | 755    | 1       |
 | queue                                                                                            | 3332            | 38111  | 51019  | 62567  | 5       |
-| requiredFunctions                                                                                | 994             | 994    | 994    | 994    | 17      |
-| supportsInterface                                                                                | 208             | 208    | 208    | 208    | 17      |
-| walletInit                                                                                       | 48005           | 48005  | 48005  | 48005  | 17      |
+| requiredFunctions                                                                                | 994             | 994    | 994    | 994    | 18      |
+| supportsInterface                                                                                | 208             | 208    | 208    | 208    | 18      |
+| walletInit                                                                                       | 48005           | 48005  | 48005  | 48005  | 18      |
+
+
+| contracts/paymaster/ERC20Paymaster.sol:ERC20Paymaster contract |                 |       |        |       |         |
+|----------------------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                                | Deployment Size |       |        |       |         |
+| 2375780                                                        | 12445           |       |        |       |         |
+| Function Name                                                  | min             | avg   | median | max   | # calls |
+| addStake                                                       | 33361           | 33361 | 33361  | 33361 | 5       |
+| entryPoint                                                     | 426             | 426   | 426    | 426   | 1       |
+| isSupportToken                                                 | 2535            | 2535  | 2535   | 2535  | 1       |
+| owner                                                          | 2463            | 2463  | 2463   | 2463  | 1       |
+| postOp                                                         | 11416           | 11416 | 11416  | 11416 | 1       |
+| setToken                                                       | 71564           | 71564 | 71564  | 71564 | 5       |
+| updatePrice                                                    | 11556           | 11556 | 11556  | 11556 | 1       |
+| validatePaymasterUserOp                                        | 8157            | 8157  | 8157   | 8157  | 2       |
+| withdrawToken                                                  | 2481            | 12333 | 12333  | 22185 | 2       |
 
 
 | contracts/plugin/Dailylimit/Dailylimit.sol:Dailylimit contract |                 |        |        |        |         |
 |----------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                | Deployment Size |        |        |        |         |
-| 1918380                                                        | 9975            |        |        |        |         |
+| 1869707                                                        | 9724            |        |        |        |         |
 | Function Name                                                  | min             | avg    | median | max    | # calls |
-| comfirmSetDailyLimit                                           | 1981            | 3879   | 3879   | 5777   | 2       |
-| getDailyLimit                                                  | 523             | 523    | 523    | 527    | 25      |
-| getSpentToday                                                  | 562             | 656    | 668    | 672    | 35      |
-| guardHook                                                      | 3247            | 18168  | 13197  | 43033  | 16      |
-| postHook                                                       | 1027            | 6797   | 2487   | 33925  | 11      |
-| preSetDailyLimit                                               | 27405           | 27405  | 27405  | 27405  | 1       |
-| reduceDailyLimits                                              | 5486            | 5486   | 5486   | 5486   | 1       |
-| supportsHook                                                   | 284             | 284    | 284    | 284    | 5       |
+| comfirmSetDailyLimit                                           | 1965            | 3821   | 3821   | 5678   | 2       |
+| getDailyLimit                                                  | 526             | 526    | 526    | 530    | 25      |
+| getSpentToday                                                  | 565             | 659    | 671    | 675    | 35      |
+| guardHook                                                      | 2536            | 17457  | 12486  | 42322  | 16      |
+| postHook                                                       | 995             | 6654   | 2130   | 33634  | 11      |
+| preSetDailyLimit                                               | 27422           | 27422  | 27422  | 27422  | 1       |
+| reduceDailyLimits                                              | 5388            | 5388   | 5388   | 5388   | 1       |
+| supportsHook                                                   | 302             | 302    | 302    | 302    | 5       |
 | supportsInterface                                              | 190             | 190    | 190    | 190    | 5       |
-| walletInit                                                     | 286360          | 286360 | 286360 | 286360 | 5       |
+| walletInit                                                     | 284251          | 284251 | 284251 | 284251 | 5       |
+
+
+| contracts/plugin/Simple2FA/Simple2FA.sol:Simple2FA contract |                 |       |        |       |         |
+|-------------------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                             | Deployment Size |       |        |       |         |
+| 1097092                                                     | 5750            |       |        |       |         |
+| Function Name                                               | min             | avg   | median | max   | # calls |
+| guardHook                                                   | 4751            | 4751  | 4751   | 4751  | 2       |
+| signerAddress                                               | 436             | 436   | 436    | 436   | 1       |
+| supportsHook                                                | 328             | 328   | 328    | 328   | 1       |
+| supportsInterface                                           | 190             | 190   | 190    | 190   | 1       |
+| walletInit                                                  | 25692           | 25692 | 25692  | 25692 | 1       |
 
 
 | contracts/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol:TrustedModuleManager contract |                 |       |        |       |         |
@@ -104,8 +132,8 @@
 | Deployment Cost                                                                                              | Deployment Size |       |        |       |         |
 | 478197                                                                                                       | 2503            |       |        |       |         |
 | Function Name                                                                                                | min             | avg   | median | max   | # calls |
-| add                                                                                                          | 29415           | 29415 | 29415  | 29415 | 8       |
-| isTrustedContract                                                                                            | 404             | 949   | 404    | 2404  | 11      |
+| add                                                                                                          | 29415           | 29415 | 29415  | 29415 | 9       |
+| isTrustedContract                                                                                            | 404             | 904   | 404    | 2404  | 12      |
 
 
 | lib/account-abstraction/contracts/core/EntryPoint.sol:EntryPoint contract |                 |        |        |        |         |
@@ -113,15 +141,15 @@
 | Deployment Cost                                                           | Deployment Size |        |        |        |         |
 | 4780495                                                                   | 23774           |        |        |        |         |
 | Function Name                                                             | min             | avg    | median | max    | # calls |
-| _validateSenderAndPaymaster                                               | 960             | 1334   | 1082   | 3582   | 19      |
+| _validateSenderAndPaymaster                                               | 960             | 1322   | 1082   | 3582   | 20      |
 | addStake                                                                  | 25915           | 25915  | 25915  | 25915  | 5       |
 | depositTo                                                                 | 24498           | 24498  | 24498  | 24498  | 5       |
-| getNonce                                                                  | 681             | 1681   | 1681   | 2681   | 12      |
-| getUserOpHash                                                             | 2133            | 2154   | 2160   | 2223   | 17      |
-| handleOps                                                                 | 64472           | 162240 | 128604 | 515663 | 15      |
-| innerHandleOp                                                             | 25852           | 48720  | 41971  | 82097  | 15      |
-| receive                                                                   | 0               | 13259  | 22103  | 22103  | 32      |
-| simulateValidation                                                        | 32968           | 120753 | 72752  | 466615 | 19      |
+| getNonce                                                                  | 681             | 1757   | 2681   | 2681   | 13      |
+| getUserOpHash                                                             | 2133            | 2153   | 2151   | 2223   | 18      |
+| handleOps                                                                 | 63897           | 161941 | 142688 | 515604 | 16      |
+| innerHandleOp                                                             | 25852           | 49796  | 44510  | 81733  | 16      |
+| receive                                                                   | 0               | 13779  | 22103  | 22103  | 34      |
+| simulateValidation                                                        | 32683           | 118021 | 70634  | 466556 | 20      |
 
 
 

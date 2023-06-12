@@ -17,7 +17,7 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
         return AccountStorage.layout().approvedHashes;
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature)
+    function isValidSignature(bytes32 hash, bytes calldata signature)
         external
         view
         override

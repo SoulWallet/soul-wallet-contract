@@ -67,8 +67,12 @@ contract Upgrade is BaseDelegateCallPlugin, IUpgrade {
         hookType = 0;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external pure override {
-        (userOp, userOpHash);
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData)
+        external
+        pure
+        override
+    {
+        (userOp, userOpHash, guardData);
         revert("not support");
     }
 

@@ -5,6 +5,7 @@ library SignatureDecoder {
     /*
     
     A:
+        # `signType` 0x00:
         +----------------------------------------+
         |            raw signature               |
         +----------------------------------------+
@@ -19,17 +20,35 @@ library SignatureDecoder {
         |      uint8 1byte     |             ...           |
         +--------------------------------------------------+
 
-        # `signType` 0x00:
-        - EOA signature with validationData ( validAfter and validUntil )
-        +----------------------------------------------------------------------+  
-        |                        dynamic data                                  |  
-        +----------------------------------------------------------------------+  
-        |     validationData        |                   signature              |
-        +---------------------------+------------------------------------------+  
-        |    uint256 32 bytes       |             65 length signature          |  
-        +----------------------------------------------------------------------+
+        # `signType` 0x01:
+        - EOA signature with validationData ( validAfter and validUntil ) and Plugin guardHook input data
+        +--------------------------------------------------------------------------------------+  
+        |                                   dynamic data                                       |  
+        +--------------------------------------------------------------------------------------+  
+        |     validationData    |        signature        |    multi-guardHookInputData       |
+        +-----------------------+--------------------------------------------------------------+  
+        |    uint256 32 bytes   |   65 length signature   | dynamic data without length header |
+        +--------------------------------------------------------------------------------------+
 
-        # `signType` 0x01: (Not implemented yet)
+        +--------------------------------------------------------------------------------+  
+        |                            multi-guardHookInputData                            |  
+        +--------------------------------------------------------------------------------+  
+        |   guardHookInputData  |  guardHookInputData   |   ...  |  guardHookInputData   |
+        +-----------------------+--------------------------------------------------------+  
+        |     dynamic data      |     dynamic data      |   ...  |     dynamic data      |
+        +--------------------------------------------------------------------------------+
+
+        +----------------------------------------------------------------------+  
+        |                                guardHookInputData                    |  
+        +----------------------------------------------------------------------+  
+        |   guardHook address  |   input data length   |      input data       |
+        +----------------------+-----------------------------------------------+  
+        |        20bytes       |     6bytes(uint48)    |         bytes         |
+        +----------------------------------------------------------------------+
+        Note: The order of guardHookInputData must be the same as the order in PluginManager.guardHook()!
+
+
+        # `signType` 0x02: (Not implemented yet)
         - EIP-1271 signature without validationData
         +-----------------------------------------------------------------+
         |                        dynamic data                             |
@@ -41,54 +60,23 @@ library SignatureDecoder {
 
      */
 
-    struct SignatureData {
-        uint256 validationData;
-        bytes signature;
-    }
-
-    function decodeSignature(bytes memory signature) internal pure returns (SignatureData memory) {
-        if (signature.length == 65) {
-            return SignatureData(0, signature);
+    function decodeSignature(bytes calldata userOpsignature)
+        internal
+        pure
+        returns (uint8 signType, bytes calldata signature, uint256 validationData, bytes calldata guardHookInputData)
+    {
+        if (userOpsignature.length == 65) {
+            signature = userOpsignature;
+            guardHookInputData = userOpsignature[0:0];
         } else {
-            uint256 _validationData;
-            bytes memory _signature;
-            assembly {
-                /*
-                    signType: uint8  1byte
-                    offset: 32 `header of bytes` - (  32 ` mload 32` - 1 ` uint8 1bytes`  )
-                    `& 0xff to get the last byte`
-                */
-                let signType := and(mload(add(signature, 1)), 0xff)
-                switch signType
-                case 0x0 {
-                    // signType 0x0, EOA signature with validationData ( validAfter and validUntil )
-                    /*
-                        validationData: uint256 32bytes
-                        offset: 32 `header of bytes` + 1 `signType`
-                     */
-                    _validationData := mload(add(signature, 33))
-                    /*
-                        signature: bytes
-                        offset: 32 `header of bytes` + 1 `signType` + 32 `validationData`
-                        length: 65 `signature length`
-                     */
-                    // set _signature length to 65
-                    _signature := mload(0x40)
-                    mstore(0x40, add(_signature, 128))
-                    mstore(_signature, 65)
-                    // copy signature to _signature
-                    mstore(add(_signature, 32), mload(add(signature, 65)))
-                    mstore(add(_signature, 64), mload(add(signature, 97)))
-                    mstore(add(_signature, 96), mload(add(signature, 129)))
-                }
-                case 0x1 {
-                    // signType 0x1, EIP-1271 signature withOut validationData ( validAfter and validUntil )
-                    // not implemented yet
-                    revert(0, 0)
-                }
-                default { revert(0, 0) }
+            signType = uint8(userOpsignature[0]);
+            if (signType == 0x1) {
+                validationData = abi.decode(userOpsignature[1:33], (uint256));
+                signature = userOpsignature[33:98];
+                guardHookInputData = userOpsignature[98:];
+            } else {
+                revert("signType not implemented yet");
             }
-            return SignatureData(_validationData, _signature);
         }
     }
 }

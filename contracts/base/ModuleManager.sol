@@ -5,11 +5,10 @@ import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IModuleManager.sol";
 import "../interfaces/IPluginManager.sol";
-import "./PluginManager.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../libraries/SelectorLinkedList.sol";
 
-abstract contract ModuleManager is IModuleManager, PluginManager {
+abstract contract ModuleManager is IModuleManager, Authority {
     using AddressLinkedList for mapping(address => address);
     using SelectorLinkedList for mapping(bytes4 => bytes4);
 

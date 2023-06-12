@@ -14,8 +14,11 @@ contract DemoPlugin is BaseCallPlugin {
         hookType = GUARD_HOOK | PRE_HOOK | POST_HOOK;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external override {
-        (userOp, userOpHash);
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData)
+        external
+        override
+    {
+        (userOp, userOpHash, guardData);
         emit OnGuardHook();
     }
 

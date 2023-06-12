@@ -11,27 +11,32 @@ abstract contract SignatureValidator is OwnerAuth {
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
-    function _packSignatureHash(bytes32 hash, SignatureDecoder.SignatureData memory signatureData)
+    function _packSignatureHash(bytes32 hash, uint8 signType, uint256 validationData)
         private
         pure
         returns (bytes32 packedHash)
     {
-        if (signatureData.validationData == 0) {
+        if (signType == 0) {
             packedHash = hash;
+        } else if (signType == 1) {
+            packedHash = keccak256(abi.encodePacked(hash, validationData));
         } else {
-            packedHash = keccak256(abi.encodePacked(hash, signatureData.validationData));
+            revert("invalid signType");
         }
     }
 
-    function _isValidateSignature(bytes32 rawHash, bytes memory rawSignature)
+    function _isValidateSignature(bytes32 rawHash, bytes calldata rawSignature)
         internal
         view
         returns (uint256 validationData, bool sigValid)
     {
-        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(rawSignature);
-        validationData = signatureData.validationData;
-        bytes32 hash = _packSignatureHash(rawHash, signatureData);
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
+        uint8 signType;
+        bytes calldata signature;
+        bytes calldata guardHookInputData;
+        (signType, signature, validationData, guardHookInputData) = SignatureDecoder.decodeSignature(rawSignature);
+
+        bytes32 hash = _packSignatureHash(rawHash, signType, validationData).toEthSignedMessageHash();
+        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
@@ -42,12 +47,13 @@ abstract contract SignatureValidator is OwnerAuth {
     function _isValidUserOp(bytes32 userOpHash, bytes calldata userOpSignature)
         internal
         view
-        returns (uint256 validationData, bool sigValid)
+        returns (uint256 validationData, bool sigValid, bytes calldata guardHookInputData)
     {
-        SignatureDecoder.SignatureData memory signatureData = SignatureDecoder.decodeSignature(userOpSignature);
-        validationData = signatureData.validationData;
-        bytes32 hash = _packSignatureHash(userOpHash, signatureData).toEthSignedMessageHash();
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signatureData.signature);
+        uint8 signType;
+        bytes calldata signature;
+        (signType, signature, validationData, guardHookInputData) = SignatureDecoder.decodeSignature(userOpSignature);
+        bytes32 hash = _packSignatureHash(userOpHash, signType, validationData).toEthSignedMessageHash();
+        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signature);
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {

@@ -74,11 +74,6 @@ abstract contract PluginManager is IPluginManager, Authority {
         plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
     }
 
-    function listGuardHookPlugin() external view override returns (address[] memory plugins) {
-        mapping(address => address) storage _plugins = AccountStorage.layout().guardHookPlugins;
-        plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
-    }
-
     function _nextGuardHookData(bytes calldata guardHookData, uint256 cursor)
         private
         pure

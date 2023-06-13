@@ -1,6 +1,6 @@
 |----------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                              | Deployment Size |        |        |        |         |
-| 4900893                                      | 24737           |        |        |        |         |
+| 4900293                                      | 24734           |        |        |        |         |
 | Function Name                                | min             | avg    | median | max    | # calls |
 | addModule                                    | 104565          | 105398 | 104565 | 107065 | 3       |
 | addOwner                                     | 27780           | 27780  | 27780  | 27780  | 3       |
@@ -18,7 +18,7 @@
 | moduleEntryPoint                             | 13224           | 201867 | 147053 | 452464 | 17      |
 | onERC721Received                             | 1518            | 2118   | 1518   | 6018   | 15      |
 | removeModule                                 | 7242            | 7242   | 7242   | 7242   | 1       |
-| validateUserOp                               | 9534            | 36921  | 38509  | 60066  | 36      |
+| validateUserOp                               | 9528            | 36915  | 38503  | 60060  | 36      |
 
 
 | contracts/SoulWalletFactory.sol:SoulWalletFactory contract |                 |        |        |        |         |
@@ -51,7 +51,7 @@
 | moduleEntryPoint                                       | 13475           | 202210 | 147378 | 452873 | 17      |
 | onERC721Received                                       | 1840            | 3040   | 1840   | 10840  | 15      |
 | removeModule                                           | 7480            | 7480   | 7480   | 7480   | 1       |
-| validateUserOp                                         | 14507           | 38640  | 43344  | 60539  | 36      |
+| validateUserOp                                         | 14501           | 38634  | 43339  | 60533  | 36      |
 
 
 | contracts/modules/SecurityControlModule/SecurityControlModule.sol:SecurityControlModule contract |                 |        |        |        |         |
@@ -146,10 +146,10 @@
 | depositTo                                                                 | 24498           | 24498  | 24498  | 24498  | 5       |
 | getNonce                                                                  | 681             | 1757   | 2681   | 2681   | 13      |
 | getUserOpHash                                                             | 2133            | 2153   | 2151   | 2223   | 18      |
-| handleOps                                                                 | 63891           | 161934 | 142680 | 515596 | 16      |
+| handleOps                                                                 | 63886           | 161929 | 142674 | 515590 | 16      |
 | innerHandleOp                                                             | 25852           | 49796  | 44510  | 81733  | 16      |
 | receive                                                                   | 0               | 13779  | 22103  | 22103  | 34      |
-| simulateValidation                                                        | 32676           | 118014 | 70628  | 466548 | 20      |
+| simulateValidation                                                        | 32672           | 118009 | 70623  | 466542 | 20      |
 
 
 

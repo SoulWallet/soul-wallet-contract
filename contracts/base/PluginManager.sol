@@ -80,13 +80,8 @@ abstract contract PluginManager is IPluginManager, Authority {
         returns (address _guardAddr, uint256 _cursorFrom, uint256 _cursorEnd)
     {
         uint256 dataLen = guardHookData.length;
-        uint256 guardMinInputLen;
         uint48 guardSigLen;
-        unchecked {
-            guardMinInputLen = cursor + 26; /* 20+6 */
-        }
-
-        if (dataLen > guardMinInputLen) {
+        if (dataLen > cursor) {
             unchecked {
                 _cursorEnd = cursor + 20;
             }
@@ -94,6 +89,7 @@ abstract contract PluginManager is IPluginManager, Authority {
             assembly {
                 _guardAddr := shr(0x60, calldataload(_guardAddrBytes.offset))
             }
+            require(_guardAddr != address(0));
             unchecked {
                 cursor = _cursorEnd;
                 _cursorEnd = cursor + 6;

@@ -4,7 +4,7 @@
 | Function Name                                | min             | avg    | median | max    | # calls |
 | addModule                                    | 104565          | 105398 | 104565 | 107065 | 3       |
 | addOwner                                     | 27780           | 27780  | 27780  | 27780  | 3       |
-| addPlugin                                    | 122215          | 292265 | 295649 | 445596 | 10      |
+| addPlugin                                    | 122563          | 292300 | 295649 | 445596 | 10      |
 | execDelegateCall                             | 1913            | 2590   | 2058   | 28953  | 64      |
 | execute                                      | 955             | 20854  | 14568  | 55256  | 25      |
 | executeBatch                                 | 684             | 21591  | 21591  | 42498  | 2       |
@@ -15,10 +15,10 @@
 | isOwner                                      | 568             | 1723   | 2568   | 2568   | 45      |
 | listModule                                   | 6805            | 8673   | 6805   | 17623  | 9       |
 | listPlugin                                   | 2034            | 2034   | 2034   | 2034   | 6       |
-| moduleEntryPoint                             | 13224           | 201846 | 147053 | 452464 | 17      |
+| moduleEntryPoint                             | 13224           | 201867 | 147053 | 452464 | 17      |
 | onERC721Received                             | 1518            | 2118   | 1518   | 6018   | 15      |
 | removeModule                                 | 7242            | 7242   | 7242   | 7242   | 1       |
-| validateUserOp                               | 9534            | 36920  | 38509  | 60066  | 36      |
+| validateUserOp                               | 9534            | 36921  | 38509  | 60066  | 36      |
 
 
 | contracts/SoulWalletFactory.sol:SoulWalletFactory contract |                 |        |        |        |         |
@@ -37,7 +37,7 @@
 | Function Name                                          | min             | avg    | median | max    | # calls |
 | addModule                                              | 104872          | 105705 | 104872 | 107372 | 3       |
 | addOwner                                               | 28078           | 28078  | 28078  | 28078  | 3       |
-| addPlugin                                              | 122528          | 292615 | 295998 | 445987 | 10      |
+| addPlugin                                              | 122876          | 292650 | 295998 | 445987 | 10      |
 | execDelegateCall                                       | 2235            | 2913   | 2380   | 29314  | 64      |
 | execute                                                | 1305            | 21508  | 14881  | 55587  | 25      |
 | executeBatch                                           | 1094            | 21994  | 21994  | 42895  | 2       |
@@ -48,10 +48,10 @@
 | isOwner                                                | 869             | 3624   | 2869   | 7369   | 45      |
 | listModule                                             | 7157            | 9028   | 7157   | 17999  | 9       |
 | listPlugin                                             | 2338            | 2338   | 2338   | 2338   | 6       |
-| moduleEntryPoint                                       | 13475           | 202190 | 147378 | 452873 | 17      |
+| moduleEntryPoint                                       | 13475           | 202210 | 147378 | 452873 | 17      |
 | onERC721Received                                       | 1840            | 3040   | 1840   | 10840  | 15      |
 | removeModule                                           | 7480            | 7480   | 7480   | 7480   | 1       |
-| validateUserOp                                         | 14507           | 38640  | 43341  | 60539  | 36      |
+| validateUserOp                                         | 14507           | 38640  | 43344  | 60539  | 36      |
 
 
 | contracts/modules/SecurityControlModule/SecurityControlModule.sol:SecurityControlModule contract |                 |        |        |        |         |
@@ -61,7 +61,7 @@
 | Function Name                                                                                    | min             | avg    | median | max    | # calls |
 | cancel                                                                                           | 3539            | 3877   | 3877   | 4215   | 2       |
 | cancelAll                                                                                        | 3772            | 7658   | 7658   | 11544  | 2       |
-| execute                                                                                          | 3581            | 165717 | 130996 | 477369 | 22      |
+| execute                                                                                          | 3581            | 165733 | 130996 | 477369 | 22      |
 | getTxId                                                                                          | 1154            | 1154   | 1154   | 1154   | 1       |
 | getWalletConfig                                                                                  | 755             | 755    | 755    | 755    | 1       |
 | queue                                                                                            | 3332            | 38111  | 51019  | 62567  | 5       |
@@ -106,13 +106,13 @@
 | contracts/plugin/Simple2FA/Simple2FA.sol:Simple2FA contract |                 |       |        |       |         |
 |-------------------------------------------------------------|-----------------|-------|--------|-------|---------|
 | Deployment Cost                                             | Deployment Size |       |        |       |         |
-| 1079072                                                     | 5660            |       |        |       |         |
+| 1096892                                                     | 5749            |       |        |       |         |
 | Function Name                                               | min             | avg   | median | max   | # calls |
-| guardHook                                                   | 4721            | 4721  | 4721   | 4721  | 2       |
-| signerAddress                                               | 436             | 436   | 436    | 436   | 1       |
+| guardHook                                                   | 4727            | 4727  | 4727   | 4727  | 2       |
+| signerAddress                                               | 442             | 442   | 442    | 442   | 1       |
 | supportsHook                                                | 328             | 328   | 328    | 328   | 1       |
 | supportsInterface                                           | 190             | 190   | 190    | 190   | 1       |
-| walletInit                                                  | 25692           | 25692 | 25692  | 25692 | 1       |
+| walletInit                                                  | 26040           | 26040 | 26040  | 26040 | 1       |
 
 
 | contracts/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol:TrustedModuleManager contract |                 |       |        |       |         |

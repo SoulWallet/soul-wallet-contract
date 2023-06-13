@@ -11,7 +11,12 @@ import "../../libraries/DecodeCalldata.sol";
 contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
     using ECDSA for bytes32;
 
-    mapping(address => address) private _2FA;
+    struct User2FA {
+        bool initialized;
+        address _2FAAddr;
+    }
+
+    mapping(address => User2FA) private _2FA;
 
     constructor() SafeLock("PLUGIN_SIMPLE2FA_SAFELOCK_SLOT", 2 days) {}
 
@@ -31,7 +36,7 @@ contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
         override
     {
         (userOp);
-        address _2FAAddr = _2FA[msg.sender];
+        address _2FAAddr = _2FA[msg.sender]._2FAAddr;
         if (_2FAAddr != address(0)) {
             if (guardData.length == 0) {
                 // # 1. function execute(address dest, uint256 value, bytes calldata func)
@@ -68,7 +73,7 @@ contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
 
     function _init(bytes calldata data) internal virtual override {
         (address _2FAAddr) = abi.decode(data, (address));
-        _2FA[msg.sender] = _2FAAddr;
+        _2FA[msg.sender] = User2FA({initialized: true, _2FAAddr: _2FAAddr});
     }
 
     function _deInit() internal virtual override {
@@ -80,11 +85,11 @@ contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
     }
 
     function inited(address wallet) internal view virtual override returns (bool) {
-        return _2FA[wallet] != address(0);
+        return _2FA[wallet].initialized;
     }
 
     function reset2FA(address new2FA) external override {
-        _2FA[msg.sender] = new2FA;
+        _2FA[msg.sender]._2FAAddr = new2FA;
     }
 
     function preReset2FA(address new2FA) external override {
@@ -95,10 +100,10 @@ contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
     function comfirmReset2FA(address new2FA) external override {
         bytes32 hash = keccak256(abi.encode(msg.sender, new2FA));
         _unlock(hash);
-        _2FA[msg.sender] = new2FA;
+        _2FA[msg.sender]._2FAAddr = new2FA;
     }
 
     function signerAddress(address addr) external view override returns (address) {
-        return _2FA[addr];
+        return _2FA[addr]._2FAAddr;
     }
 }

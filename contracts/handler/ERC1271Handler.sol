@@ -51,14 +51,18 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
 
     function approveHash(bytes32 hash) external override onlyExecutionManagerOrModule {
         mapping(bytes32 => uint256) storage approvedHashes = _approvedHashes();
-        require(approvedHashes[hash] != 1, "ERC1271Handler: hash already approved");
+        if (approvedHashes[hash] == 1) {
+            revert Errors.HASH_ALREADY_APPROVED();
+        }
         approvedHashes[hash] = 1;
         emit ApproveHash(hash);
     }
 
     function rejectHash(bytes32 hash) external override onlyExecutionManagerOrModule {
         mapping(bytes32 => uint256) storage approvedHashes = _approvedHashes();
-        require(approvedHashes[hash] != 0, "ERC1271Handler: hash already rejected");
+        if (approvedHashes[hash] == 0) {
+            revert Errors.HASH_ALREADY_REJECTED();
+        }
         approvedHashes[hash] = 0;
         emit RejectHash(hash);
     }

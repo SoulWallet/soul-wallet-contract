@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./Bundler.sol";
 import "@source/dev/Tokens/TokenERC721.sol";
 import "@source/handler/DefaultCallbackHandler.sol";
+import "@source/libraries/Errors.sol";
 
 contract ExecutionManagerTest is Test {
     using ECDSA for bytes32;
@@ -109,14 +110,14 @@ contract ExecutionManagerTest is Test {
             {
                 tokenERC721.safeMint(sender, 1);
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint"));
+                vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
                 soulWallet.execute(
                     address(tokenERC721),
                     0,
                     abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 1)
                 );
 
-                vm.expectRevert(bytes("require from Entrypoint"));
+                vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
                 vm.prank(sender);
                 soulWallet.execute(
                     address(tokenERC721),
@@ -127,7 +128,7 @@ contract ExecutionManagerTest is Test {
             {
                 tokenERC721.safeMint(sender, 2);
                 vm.prank(walletOwner);
-                vm.expectRevert(bytes("require from Entrypoint"));
+                vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
                 soulWallet.execute(
                     address(tokenERC721),
                     0,
@@ -162,7 +163,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 5);
 
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint"));
+                vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
                 soulWallet.executeBatch(dest, func);
             }
             {
@@ -200,7 +201,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 5);
 
                 vm.prank(address(0x111));
-                vm.expectRevert(bytes("require from Entrypoint"));
+                vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
                 soulWallet.executeBatchWithValue(dest, value, func);
             }
             {

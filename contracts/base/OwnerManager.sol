@@ -5,6 +5,7 @@ import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IOwnerManager.sol";
 import "../libraries/AddressLinkedList.sol";
+import "../libraries/Errors.sol";
 
 abstract contract OwnerManager is IOwnerManager, Authority {
     using AddressLinkedList for mapping(address => address);
@@ -60,10 +61,12 @@ abstract contract OwnerManager is IOwnerManager, Authority {
 
     function removeOwner(address owner) external override onlyExecutionManagerOrModule {
         _ownerMapping().remove(owner);
-        require(!_ownerMapping().isEmpty(), "no owner");
+        if (_ownerMapping().isEmpty()) {
+            revert Errors.NO_OWNER();
+        }
         emit OwnerRemoved(owner);
     }
-    
+
     function listOwner() external view override returns (address[] memory owners) {
         uint256 size = _ownerMapping().size();
         owners = _ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);

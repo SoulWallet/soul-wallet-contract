@@ -8,9 +8,9 @@ interface IPlugin is IPluggable {
     /**
      * @dev
      * hookType structure:
-     * 0b1: GuardHook
-     * 0b10: PreHook
-     * 0b100: PostHook
+     * GuardHook: 1<<0
+     * PreHook:   1<<1
+     * PostHook:  1<<2
      *
      * callType structure:
      * 0: call

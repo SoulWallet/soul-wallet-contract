@@ -28,7 +28,6 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         if (walletConfigs[_target].seed == 0) {
             revert NotInitializedError();
         }
-        // TODO: require wallet is not locked
     }
 
     function inited(address _target) internal view override returns (bool) {

@@ -7,6 +7,7 @@ import "../interfaces/IExecutionManager.sol";
 import "../interfaces/IModuleManager.sol";
 import "./ModuleGuard.sol";
 import "./ExecutionManagerGuard.sol";
+import "../libraries/Errors.sol";
 
 abstract contract Authority is EntryPointAuth, OwnerAuth, ModuleGuard, ExecutionManagerGuard {
     /*
@@ -62,7 +63,9 @@ abstract contract Authority is EntryPointAuth, OwnerAuth, ModuleGuard, Execution
     └───────────────────────────────────────────────────────────────────────────────────────────────────┘
     */
     modifier onlyExecutionManagerOrSimulate() {
-        require(_callFromExecutionManager() || msg.sender == address(0), "require from Entrypoint or Simulate");
+        if (!_callFromExecutionManager() && msg.sender != address(0)) {
+            revert Errors.CALLER_MUST_BE_EXECUTION_MANAGER_OR_SIMULATE();
+        }
         _;
     }
 
@@ -131,7 +134,9 @@ abstract contract Authority is EntryPointAuth, OwnerAuth, ModuleGuard, Execution
     └───────────────────────────────────────────────────────────────────────────────────────────────────┘
     */
     modifier onlyExecutionManagerOrModule() {
-        require(_callFromExecutionManager() || _callFromModule(), "require from ExecutionManager or Module");
+        if (!_callFromExecutionManager() && !_callFromModule()) {
+            revert Errors.CALLER_MUST_BE_EXECUTION_MANAGER_OR_MODULE();
+        }
         _;
     }
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
+import "../libraries/Errors.sol";
+
 library SignatureDecoder {
     /*
     
@@ -75,7 +77,7 @@ library SignatureDecoder {
                 signature = userOpsignature[33:98];
                 guardHookInputData = userOpsignature[98:];
             } else {
-                revert("signType not implemented yet");
+                revert Errors.UNSUPPORTED_SIGNTYPE();
             }
         }
     }

@@ -14,7 +14,7 @@ contract SoulWalletProxy {
      * @param logic Address of the initial implementation.
      */
     constructor(address logic) {
-        assembly {
+        assembly ("memory-safe") {
             sstore(_IMPLEMENTATION_SLOT, logic)
         }
     }
@@ -24,6 +24,7 @@ contract SoulWalletProxy {
      */
     fallback() external payable {
         assembly {
+            /* not memory-safe */
             let _singleton := and(sload(_IMPLEMENTATION_SLOT), 0xffffffffffffffffffffffffffffffffffffffff)
             calldatacopy(0, 0, calldatasize())
             let success := delegatecall(gas(), _singleton, 0, calldatasize(), 0, 0)

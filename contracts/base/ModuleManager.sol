@@ -45,13 +45,19 @@ abstract contract ModuleManager is IModuleManager, Authority {
     }
 
     function _addModule(bytes calldata moduleAndData) internal {
-        require(moduleAndData.length >= 20, "module address empty");
+        if (moduleAndData.length < 20) {
+            revert Errors.MODULE_ADDRESS_EMPTY();
+        }
         address moduleAddress = address(bytes20(moduleAndData[:20]));
         bytes calldata initData = moduleAndData[20:];
         IModule aModule = IModule(moduleAddress);
-        require(aModule.supportsInterface(type(IModule).interfaceId), "unknown module");
+        if (!aModule.supportsInterface(type(IModule).interfaceId)) {
+            revert Errors.MODULE_NOT_SUPPORT_INTERFACE();
+        }
         bytes4[] memory requiredFunctions = aModule.requiredFunctions();
-        require(requiredFunctions.length > 0, "selectors empty");
+        if (requiredFunctions.length == 0) {
+            revert Errors.MODULE_SELECTORS_EMPTY();
+        }
         mapping(address => address) storage modules = _modulesMapping();
         modules.add(moduleAddress);
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
@@ -114,9 +120,11 @@ abstract contract ModuleManager is IModuleManager, Authority {
 
     function moduleEntryPoint(bytes calldata data) external override {
         bytes4 selector = bytes4(data[0:4]);
-        require(_isAuthorizedSelector(msg.sender, selector), "unauthorized module selector");
+        if (!_isAuthorizedSelector(msg.sender, selector)) {
+            revert Errors.MODULE_SELECTOR_UNAUTHORIZED();
+        }
         (bool succ, bytes memory ret) = _moduleExec(data);
-        assembly {
+        assembly ("memory-safe") {
             if iszero(succ) { revert(add(ret, 0x20), mload(ret)) }
             return(add(ret, 0x20), mload(ret))
         }
@@ -128,6 +136,7 @@ abstract contract ModuleManager is IModuleManager, Authority {
 
     function executeFromModule(address to, uint256 value, bytes memory data) external override onlyModule {
         assembly {
+            /* not memory-safe */
             let result := call(gas(), to, value, add(data, 0x20), mload(data), 0, 0)
             if iszero(result) {
                 returndatacopy(0, 0, returndatasize())

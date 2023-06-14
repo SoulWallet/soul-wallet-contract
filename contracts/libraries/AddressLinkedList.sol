@@ -1,17 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
+import "../libraries/Errors.sol";
+
 library AddressLinkedList {
     address internal constant SENTINEL_ADDRESS = address(1);
     uint160 internal constant SENTINEL_UINT = 1;
 
     modifier onlyAddress(address addr) {
-        require(uint160(addr) > SENTINEL_UINT, "invalid address");
+        if (uint160(addr) <= SENTINEL_UINT) {
+            revert Errors.INVALID_ADDRESS();
+        }
         _;
     }
 
     function add(mapping(address => address) storage self, address addr) internal onlyAddress(addr) {
-        require(self[addr] == address(0), "address already exists");
+        if (self[addr] != address(0)) {
+            revert Errors.ADDRESS_ALREADY_EXISTS();
+        }
         address _prev = self[SENTINEL_ADDRESS];
         if (_prev == address(0)) {
             self[SENTINEL_ADDRESS] = addr;
@@ -23,8 +29,12 @@ library AddressLinkedList {
     }
 
     function replace(mapping(address => address) storage self, address oldAddr, address newAddr) internal {
-        require(isExist(self, oldAddr), "address not exists");
-        require(!isExist(self, newAddr), "new address already exists");
+        if (!isExist(self, oldAddr)) {
+            revert Errors.ADDRESS_NOT_EXISTS();
+        }
+        if (isExist(self, newAddr)) {
+            revert Errors.ADDRESS_ALREADY_EXISTS();
+        }
 
         address cursor = SENTINEL_ADDRESS;
         while (true) {
@@ -41,7 +51,9 @@ library AddressLinkedList {
     }
 
     function remove(mapping(address => address) storage self, address addr) internal {
-        require(tryRemove(self, addr), "address not exists");
+        if (!tryRemove(self, addr)) {
+            revert Errors.ADDRESS_NOT_EXISTS();
+        }
     }
 
     function tryRemove(mapping(address => address) storage self, address addr) internal returns (bool) {

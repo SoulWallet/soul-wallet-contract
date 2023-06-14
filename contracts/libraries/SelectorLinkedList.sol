@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
+import "../libraries/Errors.sol";
+
 library SelectorLinkedList {
     bytes4 internal constant SENTINEL_SELECTOR = 0x00000001;
     uint32 internal constant SENTINEL_UINT = 1;
@@ -10,12 +12,16 @@ library SelectorLinkedList {
     }
 
     modifier onlySelector(bytes4 selector) {
-        require(isSafeSelector(selector), "only safe bytes4");
+        if (!isSafeSelector(selector)) {
+            revert Errors.INVALID_SELECTOR();
+        }
         _;
     }
 
     function add(mapping(bytes4 => bytes4) storage self, bytes4 selector) internal onlySelector(selector) {
-        require(self[selector] == 0, "bytes4 already exists");
+        if (self[selector] != 0) {
+            revert Errors.SELECTOR_ALREADY_EXISTS();
+        }
         bytes4 _prev = self[SENTINEL_SELECTOR];
         if (_prev == 0) {
             self[SENTINEL_SELECTOR] = selector;
@@ -36,8 +42,12 @@ library SelectorLinkedList {
     }
 
     function replace(mapping(bytes4 => bytes4) storage self, bytes4 oldSelector, bytes4 newSelector) internal {
-        require(isExist(self, oldSelector), "bytes4 not exists");
-        require(!isExist(self, newSelector), "new bytes4 already exists");
+        if (!isExist(self, oldSelector)) {
+            revert Errors.SELECTOR_NOT_EXISTS();
+        }
+        if (isExist(self, newSelector)) {
+            revert Errors.SELECTOR_ALREADY_EXISTS();
+        }
 
         bytes4 cursor = SENTINEL_SELECTOR;
         while (true) {
@@ -54,7 +64,9 @@ library SelectorLinkedList {
     }
 
     function remove(mapping(bytes4 => bytes4) storage self, bytes4 selector) internal {
-        require(isExist(self, selector), "bytes4 not exists");
+        if (!isExist(self, selector)) {
+            revert Errors.SELECTOR_NOT_EXISTS();
+        }
 
         bytes4 cursor = SENTINEL_SELECTOR;
         while (true) {

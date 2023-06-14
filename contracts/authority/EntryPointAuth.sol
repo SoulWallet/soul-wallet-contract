@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "../libraries/Errors.sol";
 
 abstract contract EntryPointAuth {
     function _entryPoint() internal view virtual returns (IEntryPoint);
@@ -18,7 +19,9 @@ abstract contract EntryPointAuth {
 
     */
     modifier onlyEntryPoint() {
-        require(msg.sender == address(_entryPoint()), "require from Entrypoint");
+        if (msg.sender != address(_entryPoint())) {
+            revert Errors.CALLER_MUST_BE_ENTRYPOINT();
+        }
         _;
     }
 }

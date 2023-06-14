@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../authority/OwnerAuth.sol";
 import "../libraries/SignatureDecoder.sol";
+import "../libraries/Errors.sol";
 
 abstract contract SignatureValidator is OwnerAuth {
     using ECDSA for bytes32;
@@ -21,7 +22,7 @@ abstract contract SignatureValidator is OwnerAuth {
         } else if (signType == 1) {
             packedHash = keccak256(abi.encodePacked(hash, validationData));
         } else {
-            revert("invalid signType");
+            revert Errors.INVALID_SIGNTYPE();
         }
     }
 

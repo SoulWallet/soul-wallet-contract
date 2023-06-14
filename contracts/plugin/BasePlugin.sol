@@ -5,12 +5,9 @@ import "../interfaces/IPlugin.sol";
 import "../interfaces/ISoulWallet.sol";
 
 abstract contract BasePlugin is IPlugin {
-    // GUARD_HOOK: 0b1
-    uint8 internal constant GUARD_HOOK = 0x1;
-    // PRE_HOOK: 0b10
-    uint8 internal constant PRE_HOOK = 0x2;
-    // POST_HOOK: 0b100
-    uint8 internal constant POST_HOOK = 0x4;
+    uint8 internal constant GUARD_HOOK = 1 << 0;
+    uint8 internal constant PRE_HOOK = 1 << 1;
+    uint8 internal constant POST_HOOK = 1 << 2;
 
     uint8 internal constant CALL = 0x0;
     uint8 internal constant DELEGATECALL = 0x1;

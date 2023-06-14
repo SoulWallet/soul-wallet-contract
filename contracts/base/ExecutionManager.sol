@@ -48,11 +48,12 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
     }
 
     function _call(address target, uint256 value, bytes memory data) private executeHook(target, value, data) {
-        assembly {
+        assembly ("memory-safe") {
             let result := call(gas(), target, value, add(data, 0x20), mload(data), 0, 0)
             if iszero(result) {
-                returndatacopy(0, 0, returndatasize())
-                revert(0, returndatasize())
+                let ptr := mload(0x40)
+                returndatacopy(ptr, 0, returndatasize())
+                revert(ptr, returndatasize())
             }
         }
     }

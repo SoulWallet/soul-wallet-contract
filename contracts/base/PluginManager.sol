@@ -19,14 +19,21 @@ abstract contract PluginManager is IPluginManager, Authority {
     }
 
     function _addPlugin(bytes calldata pluginAndData) internal {
-        require(pluginAndData.length >= 20, "plugin address empty");
+        if (pluginAndData.length < 20) {
+            revert Errors.PLUGIN_ADDRESS_EMPTY();
+        }
         address pluginAddress = address(bytes20(pluginAndData[:20]));
         bytes calldata initData = pluginAndData[20:];
         IPlugin aPlugin = IPlugin(pluginAddress);
-        require(aPlugin.supportsInterface(type(IPlugin).interfaceId), "unknown plugin");
+        if (!aPlugin.supportsInterface(type(IPlugin).interfaceId)) {
+            revert Errors.PLUGIN_NOT_SUPPORT_INTERFACE();
+        }
         AccountStorage.Layout storage l = AccountStorage.layout();
         (uint8 hookType, uint8 _callType) = aPlugin.supportsHook();
-        require(_callType < 2, "unknow call type");
+        if (_callType > 1) {
+            revert Errors.PLUGIN_CALL_TYPE_ERROR();
+        }
+
         uint256 callType = uint96(_callType);
         /*
             uint8 internal constant GUARD_HOOK = 0x1;
@@ -44,10 +51,9 @@ abstract contract PluginManager is IPluginManager, Authority {
         }
         l.pluginCallTypes[pluginAddress] = callType;
         l.plugins.add(pluginAddress);
-        require(
-            call(callType, pluginAddress, abi.encodeWithSelector(IPluggable.walletInit.selector, initData)),
-            "plugin init failed"
-        );
+        if (!call(callType, pluginAddress, abi.encodeWithSelector(IPluggable.walletInit.selector, initData))) {
+            revert Errors.PLUGIN_INIT_FAILED();
+        }
         emit PluginAdded(pluginAddress);
     }
 
@@ -86,7 +92,7 @@ abstract contract PluginManager is IPluginManager, Authority {
                 _cursorEnd = cursor + 20;
             }
             bytes calldata _guardAddrBytes = guardHookData[cursor:_cursorEnd];
-            assembly {
+            assembly ("memory-safe") {
                 _guardAddr := shr(0x60, calldataload(_guardAddrBytes.offset))
             }
             require(_guardAddr != address(0));
@@ -95,7 +101,7 @@ abstract contract PluginManager is IPluginManager, Authority {
                 _cursorEnd = cursor + 6;
             }
             bytes calldata _guardSigLen = guardHookData[cursor:_cursorEnd];
-            assembly {
+            assembly ("memory-safe") {
                 guardSigLen := shr(0xd0, calldataload(_guardSigLen.offset))
             }
             unchecked {
@@ -162,7 +168,7 @@ abstract contract PluginManager is IPluginManager, Authority {
             addr = _plugins[addr];
         }
         if (_guardAddr != address(0)) {
-            revert("invalid guardHookData");
+            revert Errors.INVALID_GUARD_HOOK_DATA();
         }
         return true;
     }
@@ -175,10 +181,11 @@ abstract contract PluginManager is IPluginManager, Authority {
             while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
                 {
                     address plugin = addr;
-                    require(
-                        call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data))),
-                        "preHook failed"
-                    );
+                    if (
+                        !call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data)))
+                    ) {
+                        revert Errors.PLUGIN_PRE_HOOK_FAILED();
+                    }
                 }
                 addr = _preHookPlugins[addr];
             }
@@ -191,10 +198,11 @@ abstract contract PluginManager is IPluginManager, Authority {
             while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
                 {
                     address plugin = addr;
-                    require(
-                        call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data))),
-                        "postHook failed"
-                    );
+                    if (
+                        !call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data)))
+                    ) {
+                        revert Errors.PLUGIN_POST_HOOK_FAILED();
+                    }
                 }
                 addr = _postHookPlugins[addr];
             }
@@ -202,8 +210,11 @@ abstract contract PluginManager is IPluginManager, Authority {
     }
 
     function execDelegateCall(address target, bytes memory data) external onlyExecutionManagerOrSimulate {
-        require(AccountStorage.layout().pluginCallTypes[target] == 1, "not delegatecall plugin");
+        if (AccountStorage.layout().pluginCallTypes[target] != 1) {
+            revert Errors.PLUGIN_CALL_TYPE_ERROR();
+        }
         assembly {
+            /* not memory-safe */
             let succ := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0)
             returndatacopy(0, 0, returndatasize())
             if eq(succ, 0) { revert(0, returndatasize()) }
@@ -212,7 +223,7 @@ abstract contract PluginManager is IPluginManager, Authority {
     }
 
     function call(uint256 callType, address target, bytes memory data) private returns (bool success) {
-        assembly {
+        assembly ("memory-safe") {
             switch callType
             case 0 { success := call(gas(), target, 0, add(data, 0x20), mload(data), 0, 0) }
             default { success := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0) }

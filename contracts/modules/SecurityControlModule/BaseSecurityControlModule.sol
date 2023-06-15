@@ -106,7 +106,7 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
         WalletConfig memory walletConfig = walletConfigs[_target];
         bytes32 txId = _getTxId(walletConfig.seed, _target, _data);
         _preExecute(_target, _data, txId);
-        (bool succ, bytes memory ret) = _target.call{value: 0}(packExecuteData(_data));
+        (bool succ, bytes memory ret) = _target.call{value: 0}(_data);
         if (succ) {
             emit Execute(txId, _target, sender(), _data);
         } else {

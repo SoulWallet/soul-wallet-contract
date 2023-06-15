@@ -9,6 +9,10 @@ import "../libraries/AddressLinkedList.sol";
 import "../interfaces/IPluggable.sol";
 
 abstract contract PluginManager is IPluginManager, Authority {
+    uint8 private constant _GUARD_HOOK = 1 << 0;
+    uint8 private constant _PRE_HOOK = 1 << 1;
+    uint8 private constant _POST_HOOK = 1 << 2;
+
     using AddressLinkedList for mapping(address => address);
 
     /**
@@ -35,18 +39,14 @@ abstract contract PluginManager is IPluginManager, Authority {
         }
 
         uint256 callType = uint96(_callType);
-        /*
-            uint8 internal constant GUARD_HOOK = 0x1;
-            uint8 internal constant PRE_HOOK = 0x2;
-            uint8 internal constant POST_HOOK = 0x4;
-         */
-        if (hookType & 0x1 == 0x1) {
+
+        if (hookType & _GUARD_HOOK == _GUARD_HOOK) {
             l.guardHookPlugins.add(pluginAddress);
         }
-        if (hookType & 0x2 == 0x2) {
+        if (hookType & _PRE_HOOK == _PRE_HOOK) {
             l.preHookPlugins.add(pluginAddress);
         }
-        if (hookType & 0x4 == 0x4) {
+        if (hookType & _POST_HOOK == _POST_HOOK) {
             l.postHookPlugins.add(pluginAddress);
         }
         l.pluginCallTypes[pluginAddress] = callType;
@@ -75,9 +75,22 @@ abstract contract PluginManager is IPluginManager, Authority {
         return AccountStorage.layout().plugins.isExist(plugin);
     }
 
-    function listPlugin() external view override returns (address[] memory plugins) {
-        mapping(address => address) storage _plugins = AccountStorage.layout().plugins;
-        plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+    function listPlugin(uint8 hookType) external view override returns (address[] memory plugins) {
+        if (hookType == 0) {
+            mapping(address => address) storage _plugins = AccountStorage.layout().plugins;
+            plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        } else if (hookType == _GUARD_HOOK) {
+            mapping(address => address) storage _plugins = AccountStorage.layout().guardHookPlugins;
+            plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        } else if (hookType == _PRE_HOOK) {
+            mapping(address => address) storage _plugins = AccountStorage.layout().preHookPlugins;
+            plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        } else if (hookType == _POST_HOOK) {
+            mapping(address => address) storage _plugins = AccountStorage.layout().postHookPlugins;
+            plugins = _plugins.list(AddressLinkedList.SENTINEL_ADDRESS, _plugins.size());
+        } else {
+            revert Errors.PLUGIN_HOOK_TYPE_ERROR();
+        }
     }
 
     function _nextGuardHookData(bytes calldata guardHookData, uint256 cursor)
@@ -209,9 +222,9 @@ abstract contract PluginManager is IPluginManager, Authority {
         }
     }
 
-    function execDelegateCall(address target, bytes memory data) external onlyExecutionManagerOrSimulate {
-        if (AccountStorage.layout().pluginCallTypes[target] != 1) {
-            revert Errors.PLUGIN_CALL_TYPE_ERROR();
+    function execDelegateCall(address target, bytes memory data) external onlyEntryPoint {
+        if (AccountStorage.layout().pluginCallTypes[target] != _GUARD_HOOK) {
+            revert Errors.PLUGIN_HOOK_TYPE_ERROR();
         }
         assembly {
             /* not memory-safe */

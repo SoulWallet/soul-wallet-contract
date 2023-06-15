@@ -268,8 +268,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
 
         ISoulWallet soulwallet = ISoulWallet(payable(_wallet));
         // update owners
-        soulwallet.moduleEntryPoint(abi.encodeCall(IOwnerManager.resetOwners, _newOwners));
-
+        soulwallet.resetOwners(_newOwners);
         // emit RecoverySuccess
         emit SocialRecovery(_wallet, _newOwners);
     }
@@ -411,7 +410,7 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
         return walletGuardian[_wallet].threshold;
     }
 
-    function requiredFunctions() external pure override returns (bytes4[] memory){
+    function requiredFunctions() external pure override returns (bytes4[] memory) {
         bytes4[] memory functions = new bytes4[](2);
         functions[0] = _FUNC_RESET_OWNER;
         functions[1] = _FUNC_RESET_OWNERS;

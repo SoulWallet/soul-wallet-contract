@@ -16,7 +16,5 @@ interface IModuleManager {
 
     function listModule() external view returns (address[] memory modules, bytes4[][] memory selectors);
 
-    function moduleEntryPoint(bytes calldata data) external;
-
     function executeFromModule(address dest, uint256 value, bytes calldata func) external;
 }

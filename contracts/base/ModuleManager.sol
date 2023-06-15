@@ -24,20 +24,17 @@ abstract contract ModuleManager is IModuleManager, Authority {
         moduleSelectors = AccountStorage.layout().moduleSelectors;
     }
 
-    function _isAuthorizedModule(address module) private view returns (bool) {
-        return _modulesMapping().isExist(module);
-    }
-
-    function _isAuthorizedSelector(address module, bytes4 selector) private view returns (bool) {
+    function _isAuthorizedModule() internal view override returns (bool) {
+        address module = msg.sender;
         if (!_modulesMapping().isExist(module)) {
             return false;
         }
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
-        return moduleSelectors[module].isExist(selector);
+        return moduleSelectors[module].isExist(msg.sig);
     }
 
     function isAuthorizedModule(address module) external view override returns (bool) {
-        return _isAuthorizedModule(module);
+        return _modulesMapping().isExist(module);
     }
 
     function addModule(bytes calldata moduleAndData) external override onlyModule {
@@ -118,23 +115,8 @@ abstract contract ModuleManager is IModuleManager, Authority {
         }
     }
 
-    function moduleEntryPoint(bytes calldata data) external override {
-        bytes4 selector = bytes4(data[0:4]);
-        if (!_isAuthorizedSelector(msg.sender, selector)) {
-            revert Errors.MODULE_SELECTOR_UNAUTHORIZED();
-        }
-        (bool succ, bytes memory ret) = _moduleExec(data);
-        assembly ("memory-safe") {
-            if iszero(succ) { revert(add(ret, 0x20), mload(ret)) }
-            return(add(ret, 0x20), mload(ret))
-        }
-    }
-
-    function _moduleExec(bytes calldata data) private moduleHook returns (bool succ, bytes memory ret) {
-        (succ, ret) = address(this).call{value: 0}(data);
-    }
-
     function executeFromModule(address to, uint256 value, bytes memory data) external override onlyModule {
+        if (to == address(this)) revert Errors.MODULE_EXECUTE_FROM_MODULE_RECURSIVE();
         assembly {
             /* not memory-safe */
             let result := call(gas(), to, value, add(data, 0x20), mload(data), 0, 0)

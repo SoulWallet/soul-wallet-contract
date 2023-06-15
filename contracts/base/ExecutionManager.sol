@@ -9,19 +9,14 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
     /**
      * execute a transaction
      */
-    function execute(address dest, uint256 value, bytes calldata func) external override onlyEntryPoint executionHook {
+    function execute(address dest, uint256 value, bytes calldata func) external override onlyEntryPoint {
         _call(dest, value, func);
     }
 
     /**
      * execute a sequence of transactions
      */
-    function executeBatch(address[] calldata dest, bytes[] calldata func)
-        external
-        override
-        onlyEntryPoint
-        executionHook
-    {
+    function executeBatch(address[] calldata dest, bytes[] calldata func) external override onlyEntryPoint {
         for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], 0, func[i]);
             unchecked {
@@ -37,7 +32,6 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
         external
         override
         onlyEntryPoint
-        executionHook
     {
         for (uint256 i = 0; i < dest.length;) {
             _call(dest[i], value[i], func[i]);

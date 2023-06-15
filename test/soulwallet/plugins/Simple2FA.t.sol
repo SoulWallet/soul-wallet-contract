@@ -69,7 +69,7 @@ contract Simple2FATest is Test {
             )
         );
 
-        address[] memory plugins = soulWallet.listPlugin();
+        address[] memory plugins = soulWallet.listPlugin(0);
         assertEq(plugins.length, 1);
         assertEq(plugins[0], address(simple2FAPlugin));
 

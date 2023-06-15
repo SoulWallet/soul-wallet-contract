@@ -98,7 +98,7 @@ contract DailylimitTest is Test {
             abi.encodeWithSelector(bytes4(keccak256("addPlugin(bytes)")), abi.encodePacked(dailylimitPlugin, initData))
         );
 
-        address[] memory plugins = soulWallet.listPlugin();
+        address[] memory plugins = soulWallet.listPlugin(0);
         assertEq(plugins.length, 1);
         assertEq(plugins[0], dailylimitPlugin);
     }

@@ -104,7 +104,7 @@ contract DailylimitTest is Test {
     }
 
     function execDelegateCall_staticcall(bytes memory data) private returns (bytes memory) {
-        vm.prank(address(0));
+        vm.prank(address(entryPoint));
         (bool success, bytes memory returnData) = address(soulWallet).staticcall(
             abi.encodeWithSelector(soulWallet.execDelegateCall.selector, dailylimitPlugin, data)
         );
@@ -378,10 +378,9 @@ contract DailylimitTest is Test {
         assertEq(_token1, 1 ether);
 
         {
-            /*
-                1. function execute(address dest, uint256 value, bytes calldata func)
-                2. function execDelegateCall(address target, bytes memory data) external
-                3. function reduceDailyLimits( address[] calldata token, uint256[] calldata amount) external;
+            /* 
+                1. function execDelegateCall(address target, bytes memory data) external
+                2. function reduceDailyLimits( address[] calldata token, uint256[] calldata amount) external;
             */
 
             address[] memory _token = new address[](2);
@@ -394,14 +393,8 @@ contract DailylimitTest is Test {
             _limit[1] = 0.6 ether;
 
             vm.prank(address(entryPoint));
-            soulWallet.execute(
-                address(soulWallet),
-                0,
-                abi.encodeWithSelector(
-                    soulWallet.execDelegateCall.selector,
-                    dailylimitPlugin,
-                    abi.encodeWithSelector(IDailylimit.reduceDailyLimits.selector, _token, _limit)
-                )
+            soulWallet.execDelegateCall(
+                dailylimitPlugin, abi.encodeWithSelector(IDailylimit.reduceDailyLimits.selector, _token, _limit)
             );
             (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
             assertEq(_eth, 0.5 ether);
@@ -422,11 +415,10 @@ contract DailylimitTest is Test {
         assertEq(_token1, 1 ether);
 
         {
-            /*
-                1. function execute(address dest, uint256 value, bytes calldata func)
-                2. function execDelegateCall(address target, bytes memory data) external
-                3. function preSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
-                4. function comfirmSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
+            /* 
+                1. function execDelegateCall(address target, bytes memory data) external
+                2. function preSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
+                3. function comfirmSetDailyLimit( address[] calldata token, uint256[] calldata limit ) external;
             */
 
             address[] memory _token = new address[](2);
@@ -440,14 +432,8 @@ contract DailylimitTest is Test {
 
             {
                 vm.prank(address(entryPoint));
-                soulWallet.execute(
-                    address(soulWallet),
-                    0,
-                    abi.encodeWithSelector(
-                        soulWallet.execDelegateCall.selector,
-                        dailylimitPlugin,
-                        abi.encodeWithSelector(IDailylimit.preSetDailyLimit.selector, _token, _limit)
-                    )
+                soulWallet.execDelegateCall(
+                    dailylimitPlugin, abi.encodeWithSelector(IDailylimit.preSetDailyLimit.selector, _token, _limit)
                 );
                 // vm.prank(address(entryPoint));
                 // soulWallet.execute(
@@ -463,25 +449,13 @@ contract DailylimitTest is Test {
             uint256 PLUGIN_DAILYLIMIT_SAFELOCK_SLOT = 2 days;
             vm.prank(address(entryPoint));
             vm.expectRevert("SafeLock: not unlock time");
-            soulWallet.execute(
-                address(soulWallet),
-                0,
-                abi.encodeWithSelector(
-                    soulWallet.execDelegateCall.selector,
-                    dailylimitPlugin,
-                    abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
-                )
+            soulWallet.execDelegateCall(
+                dailylimitPlugin, abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
             );
             vm.warp(block.timestamp + PLUGIN_DAILYLIMIT_SAFELOCK_SLOT);
             vm.prank(address(entryPoint));
-            soulWallet.execute(
-                address(soulWallet),
-                0,
-                abi.encodeWithSelector(
-                    soulWallet.execDelegateCall.selector,
-                    dailylimitPlugin,
-                    abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
-                )
+            soulWallet.execDelegateCall(
+                dailylimitPlugin, abi.encodeWithSelector(IDailylimit.comfirmSetDailyLimit.selector, _token, _limit)
             );
             (_eth, _token1, _token2, _token3, _token4) = getDailylimit();
             assertEq(_eth, 2 ether);

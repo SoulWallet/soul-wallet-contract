@@ -16,8 +16,12 @@ contract DemoDelegataCallPlugin is BaseDelegateCallPlugin {
         hookType = GUARD_HOOK | PRE_HOOK | POST_HOOK;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external override onlyDelegateCall {
-        (userOp, userOpHash);
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData)
+        external
+        override
+        onlyDelegateCall
+    {
+        (userOp, userOpHash, guardData);
         emit OnGuardHook();
     }
 

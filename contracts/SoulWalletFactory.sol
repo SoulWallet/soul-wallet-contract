@@ -35,13 +35,13 @@ contract SoulWalletFactory {
     function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
         bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
-        assembly {
+        assembly ("memory-safe") {
             proxy := create2(0x0, add(deploymentData, 0x20), mload(deploymentData), salt)
         }
         if (proxy == address(0)) {
             revert();
         }
-        assembly {
+        assembly ("memory-safe") {
             let succ := call(gas(), proxy, 0, add(_initializer, 0x20), mload(_initializer), 0, 0)
             if eq(succ, 0) { revert(0, 0) }
         }

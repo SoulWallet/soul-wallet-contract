@@ -3,33 +3,16 @@ pragma solidity ^0.8.17;
 
 import "./EntryPointAuth.sol";
 import "./OwnerAuth.sol";
+import "../interfaces/IExecutionManager.sol";
+import "../interfaces/IModuleManager.sol";
+import "../libraries/Errors.sol";
+import "./ModuleAuth.sol";
 
-abstract contract Authority is EntryPointAuth, OwnerAuth {
-    function _requireFromEntryPointOrOwner() internal view {
-        address addr = msg.sender;
-        require(
-            addr == address(_entryPoint()) || _isOwner(addr),
-            "require from Entrypoint or owner"
-        );
-    }
-
-    function _requireFromEntryPointOrSelf() internal view {
-        address addr = msg.sender;
-        require(
-            addr == address(_entryPoint()) ||
-                addr == address(this) ||
-                _isOwner(addr),
-            "require from Entrypoint or owner or self"
-        );
-    }
-
-    modifier onlyEntryPointOrOwner() {
-        _requireFromEntryPointOrOwner();
-        _;
-    }
-
-    modifier onlyEntryPointOrSelf() {
-        _requireFromEntryPointOrSelf();
+abstract contract Authority is EntryPointAuth, OwnerAuth, ModuleAuth {
+    modifier onlySelfOrModule() {
+        if (msg.sender != address(this) && !_isAuthorizedModule()) {
+            revert Errors.CALLER_MUST_BE_SELF_OR_MODULE();
+        }
         _;
     }
 }

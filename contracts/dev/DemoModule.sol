@@ -35,8 +35,7 @@ contract DemoModule is BaseModule {
 
     function addOwner(address target, address newOwner) external {
         require(inited(target));
-        (bool ok, bytes memory res) =
-            target.call{value: 0}(packExecuteData(abi.encodeWithSelector(_function, newOwner)));
+        (bool ok, bytes memory res) = target.call{value: 0}(abi.encodeWithSelector(_function, newOwner));
         require(ok, string(res));
     }
 }

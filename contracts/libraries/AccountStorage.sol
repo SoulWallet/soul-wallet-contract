@@ -35,14 +35,14 @@ library AccountStorage {
         mapping(address => address) preHookPlugins;
         mapping(address => address) postHookPlugins;
         uint256[50] __gap_3;
+        // └───────────────────┘
     }
-    // └───────────────────┘
 
     //#TODO
 
     function layout() internal pure returns (Layout storage l) {
         bytes32 slot = _ACCOUNT_SLOT;
-        assembly {
+        assembly ("memory-safe") {
             l.slot := slot
         }
     }

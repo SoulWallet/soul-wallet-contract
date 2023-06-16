@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 library DecodeCalldata {
     function decodeMethodId(bytes memory data) internal pure returns (bytes4 methodId) {
-        assembly {
+        assembly ("memory-safe") {
             let dataLength := mload(data)
             if lt(dataLength, 0x04) { revert(0, 0) }
             methodId := mload(add(data, 0x20))
@@ -11,7 +11,7 @@ library DecodeCalldata {
     }
 
     function decodeMethodCalldata(bytes memory data) internal pure returns (bytes memory MethodCalldata) {
-        assembly {
+        assembly ("memory-safe") {
             let dataLength := mload(data)
             if lt(dataLength, 0x04) { revert(0, 0) }
             let methodDataLength := sub(dataLength, 0x04)

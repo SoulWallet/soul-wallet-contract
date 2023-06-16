@@ -3,12 +3,11 @@ pragma solidity ^0.8.17;
 
 import "../interfaces/IModule.sol";
 import "../interfaces/ISoulWallet.sol";
+import "../interfaces/IModuleManager.sol";
 
 abstract contract BaseModule is IModule {
     event ModuleInit(address indexed wallet);
     event ModuleDeInit(address indexed wallet);
-
-    bytes4 internal constant FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
 
     function inited(address wallet) internal view virtual returns (bool);
 
@@ -40,11 +39,6 @@ abstract contract BaseModule is IModule {
             _deInit();
             emit ModuleDeInit(_sender);
         }
-    }
-
-    function packExecuteData(bytes memory _data) internal pure returns (bytes memory) {
-        bytes memory packedData = abi.encodeWithSelector(FUNC_EXEC_FROM_MODULE, _data);
-        return packedData;
     }
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {

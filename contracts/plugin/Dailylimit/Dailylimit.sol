@@ -7,7 +7,8 @@ import "../../safeLock/SafeLock.sol";
 import "../../libraries/AddressLinkedList.sol";
 import "../../libraries/SignatureDecoder.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
-import "../../libraries/DecodeCalldata.sol";
+import "../../interfaces/IExecutionManager.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     using AddressLinkedList for mapping(address => address);
@@ -15,15 +16,9 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     address private constant _ETH_TOKEN_ADDRESS = address(2);
     uint256 private constant _MAX_TIMERANGE = 1 hours;
 
-    bytes4 private constant _FUNC_EXECUTE = bytes4(keccak256("execute(address,uint256,bytes)"));
-    bytes4 private constant _FUNC_EXECUTE_BATCH = bytes4(keccak256("executeBatch(address[],bytes[])"));
-    bytes4 private constant _FUNC_EXECUTE_BATCH_VALUE = bytes4(keccak256("executeBatch(address[],uint256[],bytes[])"));
-    bytes4 private constant _FUNC_EXEC_FROM_MODULE = bytes4(keccak256("execFromModule(bytes)"));
-
-    bytes4 private constant _ERC20_TRANSFER = bytes4(keccak256("transfer(address,uint256)"));
-    bytes4 private constant _ERC20_APPROVE = bytes4(keccak256("approve(address,uint256)"));
-    bytes4 private constant _ERC20_TRANSFER_FROM = bytes4(keccak256("transferFrom(address,address,uint256)"));
-
+    /**
+     * @dev all constructor parameters must be `immutable` type (Dailylimit plugin is a `delegatecall` plugin)
+     */
     constructor()
         BaseDelegateCallPlugin(keccak256("PLUGIN_DAILYLIMIT_SLOT"))
         SafeLock("PLUGIN_DAILYLIMIT_SAFELOCK_SLOT", 2 days)
@@ -109,13 +104,13 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         view
         returns (address token, uint256 spent)
     {
-        if (selector == _ERC20_TRANSFER) {
+        if (selector == IERC20.transfer.selector) {
             (, spent) = abi.decode(data, (address, uint256));
             token = to;
-        } else if (selector == _ERC20_APPROVE) {
+        } else if (selector == IERC20.approve.selector) {
             (, spent) = abi.decode(data, (address, uint256));
             token = to;
-        } else if (selector == _ERC20_TRANSFER_FROM) {
+        } else if (selector == IERC20.transferFrom.selector) {
             (address sender,, uint256 amount) = abi.decode(data, (address, address, uint256));
             if (sender == _wallet()) {
                 token = to;
@@ -129,9 +124,12 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         requiredPrefund = requiredGas * userOp.maxFeePerGas;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash) external override {
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData) external override {
         (userOpHash);
-        uint256 _validationData = SignatureDecoder.decodeSignature(userOp.signature).validationData;
+        require(guardData.length == 0, "Dailylimit: guard signature not allowed");
+        uint256 _validationData;
+        (,, _validationData,) = SignatureDecoder.decodeSignature(userOp.signature);
+
         if (_validationData == 0) revert("Dailylimit: signature timerange invalid");
 
         ValidationData memory validationData = _parseValidationData(_validationData);

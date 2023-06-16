@@ -16,6 +16,7 @@ abstract contract FallbackManager is Authority, IFallbackManager {
         // all requests are forwarded to the fallback contract use STATICCALL
         address fallbackContract = AccountStorage.layout().defaultFallbackContract;
         assembly {
+            /* not memory-safe */
             calldatacopy(0, 0, calldatasize())
             let result := staticcall(gas(), fallbackContract, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
@@ -25,7 +26,7 @@ abstract contract FallbackManager is Authority, IFallbackManager {
         }
     }
 
-    function setFallbackHandler(address fallbackContract) external override onlyEntryPointOrSelf {
+    function setFallbackHandler(address fallbackContract) external override onlySelfOrModule {
         _setFallbackHandler(fallbackContract);
         emit FallbackChanged(fallbackContract);
     }

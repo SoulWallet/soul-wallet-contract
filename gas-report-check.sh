@@ -1,4 +1,5 @@
 #!/bin/bash
+forge build
 if [[ $1 == "save" ]]; then
     `forge test --gas-report | awk '/-/{p=1} p' > gas-report.txt`
 else

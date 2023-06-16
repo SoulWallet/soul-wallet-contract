@@ -20,8 +20,10 @@ contract DeployDirectTest is Test {
 
         TokenERC20 token = new TokenERC20(18);
 
+        vm.startPrank(address(soulWalletInstence.entryPoint()));
         // execute(address dest, uint256 value, bytes calldata func)
         vm.expectRevert("ERC20: transfer amount exceeds balance");
         soulWallet.execute(address(token), 0, abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 1));
+        vm.stopPrank();
     }
 }

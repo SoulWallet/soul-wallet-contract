@@ -5,46 +5,33 @@ import "../helper/SignatureValidator.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "../interfaces/IERC1271Handler.sol";
 import "../authority/Authority.sol";
-
 import "../libraries/AccountStorage.sol";
 
-abstract contract ERC1271Handler is
-    Authority,
-    IERC1271Handler,
-    SignatureValidator
-{
+abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidator {
     // bytes4(keccak256("isValidSignature(bytes32,bytes)")
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
     bytes4 internal constant INVALID_ID = 0xffffffff;
     bytes4 internal constant INVALID_TIME_RANGE = 0xfffffffe;
 
-    function _approvedHashes()
-        private
-        view
-        returns (mapping(bytes32 => uint256) storage)
-    {
+    function _approvedHashes() private view returns (mapping(bytes32 => uint256) storage) {
         return AccountStorage.layout().approvedHashes;
     }
 
-    function isValidSignature(
-        bytes32 hash,
-        bytes memory signature
-    ) external view override returns (bytes4 magicValue) {
+    function isValidSignature(bytes32 hash, bytes calldata signature)
+        external
+        view
+        override
+        returns (bytes4 magicValue)
+    {
         if (signature.length > 0) {
-            (uint256 _validationData, bool sigValid) = _isValidateSignature(
-                hash,
-                signature
-            );
+            (uint256 _validationData, bool sigValid) = _isValidateSignature(hash, signature);
             if (!sigValid) {
                 return INVALID_ID;
             }
             if (_validationData > 0) {
-                ValidationData memory validationData = _parseValidationData(
-                    _validationData
-                );
-                bool outOfTimeRange = (block.timestamp >
-                    validationData.validUntil) ||
-                    (block.timestamp < validationData.validAfter);
+                ValidationData memory validationData = _parseValidationData(_validationData);
+                bool outOfTimeRange =
+                    (block.timestamp > validationData.validUntil) || (block.timestamp < validationData.validAfter);
                 if (outOfTimeRange) {
                     return INVALID_TIME_RANGE;
                 }
@@ -62,22 +49,20 @@ abstract contract ERC1271Handler is
         }
     }
 
-    function approveHash(bytes32 hash) external override onlyEntryPointOrSelf {
+    function approveHash(bytes32 hash) external override onlySelfOrModule {
         mapping(bytes32 => uint256) storage approvedHashes = _approvedHashes();
-        require(
-            approvedHashes[hash] != 1,
-            "ERC1271Handler: hash already approved"
-        );
+        if (approvedHashes[hash] == 1) {
+            revert Errors.HASH_ALREADY_APPROVED();
+        }
         approvedHashes[hash] = 1;
         emit ApproveHash(hash);
     }
 
-    function rejectHash(bytes32 hash) external override onlyEntryPointOrSelf {
+    function rejectHash(bytes32 hash) external override onlySelfOrModule {
         mapping(bytes32 => uint256) storage approvedHashes = _approvedHashes();
-        require(
-            approvedHashes[hash] != 0,
-            "ERC1271Handler: hash already rejected"
-        );
+        if (approvedHashes[hash] == 0) {
+            revert Errors.HASH_ALREADY_REJECTED();
+        }
         approvedHashes[hash] = 0;
         emit RejectHash(hash);
     }

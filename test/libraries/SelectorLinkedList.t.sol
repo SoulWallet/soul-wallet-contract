@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "@source/libraries/SelectorLinkedList.sol";
+import "@source/libraries/Errors.sol";
 
 contract SelectorLinkedListTest is Test {
     using SelectorLinkedList for mapping(bytes4 => bytes4);
@@ -12,7 +13,7 @@ contract SelectorLinkedListTest is Test {
     function setUp() public {}
 
     function test_add_address1() public {
-        vm.expectRevert(bytes("only safe bytes4"));
+        vm.expectRevert(Errors.INVALID_SELECTOR.selector);
         list.add(0x00000001);
     }
 

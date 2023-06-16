@@ -10,6 +10,9 @@ abstract contract BaseDelegateCallPlugin is BasePlugin {
 
     bytes32 internal immutable PLUGIN_SLOT;
 
+    /**
+     * @dev all constructor parameters must be `immutable` type
+     */
     constructor(bytes32 pluginSlot) {
         PLUGIN_SLOT = pluginSlot;
     }

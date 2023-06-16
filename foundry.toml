@@ -13,7 +13,9 @@ gas_reports = [
     "TrustedModuleManager",
     "TrustedPluginManager",
     "Dailylimit",
-    "Upgrade"
+    "Upgrade",
+    "ERC20Paymaster",
+    "Simple2FA"
 ]
 # gas_reports_ignore = ["dev","test"]
 solc = "0.8.20"

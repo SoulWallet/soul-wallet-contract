@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "@source/libraries/AddressLinkedList.sol";
+import "@source/libraries/Errors.sol";
 
 contract AddressLinkedListTest is Test {
     using AddressLinkedList for mapping(address => address);
@@ -12,7 +13,7 @@ contract AddressLinkedListTest is Test {
     function setUp() public {}
 
     function test_add_address1() public {
-        vm.expectRevert(bytes("invalid address"));
+        vm.expectRevert(Errors.INVALID_ADDRESS.selector);
         list.add(address(0x1));
     }
 

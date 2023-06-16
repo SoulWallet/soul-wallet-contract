@@ -2,19 +2,31 @@
 pragma solidity ^0.8.17;
 
 library Errors {
-    // require from Entrypoint or owner
-    error RequireFromEntryPointOrOwner();
-
-    // require from Entrypoint or owner or self
-    error RequireFromEntryPointOrOwnerOrSelf();
-
-    // can not call self
-    error CanNotCallSelf();
-
-    // wrong array lengths
-    error WrongArrayLength();
-
-    // fallbackContract is zero address
-    error FallbackContractIsZeroAddress();
-
+    error ADDRESS_ALREADY_EXISTS();
+    error ADDRESS_NOT_EXISTS();
+    error CALLER_MUST_BE_ENTRYPOINT();
+    error CALLER_MUST_BE_SELF_OR_MODULE();
+    error CALLER_MUST_BE_MODULE();
+    error HASH_ALREADY_APPROVED();
+    error HASH_ALREADY_REJECTED();
+    error INVALID_ADDRESS();
+    error INVALID_GUARD_HOOK_DATA();
+    error INVALID_SELECTOR();
+    error INVALID_SIGNTYPE();
+    error MODULE_ADDRESS_EMPTY();
+    error MODULE_NOT_SUPPORT_INTERFACE();
+    error MODULE_SELECTOR_UNAUTHORIZED();
+    error MODULE_SELECTORS_EMPTY();
+    error MODULE_EXECUTE_FROM_MODULE_RECURSIVE();
+    error NO_OWNER();
+    error PLUGIN_ADDRESS_EMPTY();
+    error PLUGIN_CALL_TYPE_ERROR();
+    error PLUGIN_HOOK_TYPE_ERROR();
+    error PLUGIN_INIT_FAILED();
+    error PLUGIN_NOT_SUPPORT_INTERFACE();
+    error PLUGIN_POST_HOOK_FAILED();
+    error PLUGIN_PRE_HOOK_FAILED();
+    error SELECTOR_ALREADY_EXISTS();
+    error SELECTOR_NOT_EXISTS();
+    error UNSUPPORTED_SIGNTYPE();
 }

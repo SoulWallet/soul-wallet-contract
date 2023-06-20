@@ -20,13 +20,17 @@ library Errors {
     error MODULE_EXECUTE_FROM_MODULE_RECURSIVE();
     error NO_OWNER();
     error PLUGIN_ADDRESS_EMPTY();
-    error PLUGIN_CALL_TYPE_ERROR();
     error PLUGIN_HOOK_TYPE_ERROR();
     error PLUGIN_INIT_FAILED();
     error PLUGIN_NOT_SUPPORT_INTERFACE();
     error PLUGIN_POST_HOOK_FAILED();
     error PLUGIN_PRE_HOOK_FAILED();
+    error PLUGIN_NOT_REGISTERED();
     error SELECTOR_ALREADY_EXISTS();
     error SELECTOR_NOT_EXISTS();
     error UNSUPPORTED_SIGNTYPE();
+    error INVALID_LOGIC_ADDRESS();
+    error SAME_LOGIC_ADDRESS();
+    error UPGRADE_FAILED();
+    error NOT_IMPLEMENTED();
 }

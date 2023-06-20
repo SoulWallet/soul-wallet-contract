@@ -7,17 +7,15 @@ import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../interfaces/IPluggable.sol";
+import "../interfaces/IPluginStorage.sol";
 
-abstract contract PluginManager is IPluginManager, Authority {
+abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
     uint8 private constant _GUARD_HOOK = 1 << 0;
     uint8 private constant _PRE_HOOK = 1 << 1;
     uint8 private constant _POST_HOOK = 1 << 2;
 
     using AddressLinkedList for mapping(address => address);
 
-    /**
-     * @dev Make sure the plugin code does not contain the F4 (DELEGATECALL) opcode
-     */
     function addPlugin(bytes calldata pluginAndData) external override onlyModule {
         _addPlugin(pluginAndData);
     }
@@ -33,12 +31,7 @@ abstract contract PluginManager is IPluginManager, Authority {
             revert Errors.PLUGIN_NOT_SUPPORT_INTERFACE();
         }
         AccountStorage.Layout storage l = AccountStorage.layout();
-        (uint8 hookType, uint8 _callType) = aPlugin.supportsHook();
-        if (_callType > 1) {
-            revert Errors.PLUGIN_CALL_TYPE_ERROR();
-        }
-
-        uint256 callType = uint96(_callType);
+        uint8 hookType = aPlugin.supportsHook();
 
         if (hookType & _GUARD_HOOK == _GUARD_HOOK) {
             l.guardHookPlugins.add(pluginAddress);
@@ -49,9 +42,8 @@ abstract contract PluginManager is IPluginManager, Authority {
         if (hookType & _POST_HOOK == _POST_HOOK) {
             l.postHookPlugins.add(pluginAddress);
         }
-        l.pluginCallTypes[pluginAddress] = callType;
         l.plugins.add(pluginAddress);
-        if (!call(callType, pluginAddress, abi.encodeWithSelector(IPluggable.walletInit.selector, initData))) {
+        if (!call(pluginAddress, abi.encodeWithSelector(IPluggable.walletInit.selector, initData))) {
             revert Errors.PLUGIN_INIT_FAILED();
         }
         emit PluginAdded(pluginAddress);
@@ -60,7 +52,7 @@ abstract contract PluginManager is IPluginManager, Authority {
     function removePlugin(address plugin) external override onlyModule {
         AccountStorage.Layout storage l = AccountStorage.layout();
         l.plugins.remove(plugin);
-        bool success = call(l.pluginCallTypes[plugin], plugin, abi.encodeWithSelector(IPluggable.walletDeInit.selector));
+        bool success = call(plugin, abi.encodeWithSelector(IPluggable.walletDeInit.selector));
         if (success) {
             emit PluginRemoved(plugin);
         } else {
@@ -169,11 +161,8 @@ abstract contract PluginManager is IPluginManager, Authority {
                 } else {
                     currentGuardHookData = guardHookData[0:0];
                 }
-                bool success = call(
-                    l.pluginCallTypes[plugin],
-                    plugin,
-                    abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash, currentGuardHookData))
-                );
+                bool success =
+                    call(plugin, abi.encodeCall(IPlugin.guardHook, (userOp, userOpHash, currentGuardHookData)));
                 if (!success) {
                     return false;
                 }
@@ -194,9 +183,7 @@ abstract contract PluginManager is IPluginManager, Authority {
             while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
                 {
                     address plugin = addr;
-                    if (
-                        !call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.preHook, (target, value, data)))
-                    ) {
+                    if (!call(plugin, abi.encodeCall(IPlugin.preHook, (target, value, data)))) {
                         revert Errors.PLUGIN_PRE_HOOK_FAILED();
                     }
                 }
@@ -211,9 +198,7 @@ abstract contract PluginManager is IPluginManager, Authority {
             while (uint160(addr) > AddressLinkedList.SENTINEL_UINT) {
                 {
                     address plugin = addr;
-                    if (
-                        !call(l.pluginCallTypes[plugin], plugin, abi.encodeCall(IPlugin.postHook, (target, value, data)))
-                    ) {
+                    if (!call(plugin, abi.encodeCall(IPlugin.postHook, (target, value, data)))) {
                         revert Errors.PLUGIN_POST_HOOK_FAILED();
                     }
                 }
@@ -222,24 +207,24 @@ abstract contract PluginManager is IPluginManager, Authority {
         }
     }
 
-    function execDelegateCall(address target, bytes memory data) external onlyEntryPoint {
-        if (AccountStorage.layout().pluginCallTypes[target] != _GUARD_HOOK) {
-            revert Errors.PLUGIN_HOOK_TYPE_ERROR();
-        }
-        assembly {
-            /* not memory-safe */
-            let succ := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0)
-            returndatacopy(0, 0, returndatasize())
-            if eq(succ, 0) { revert(0, returndatasize()) }
-            return(0, returndatasize())
+    function call(address target, bytes memory data) private returns (bool success) {
+        assembly ("memory-safe") {
+            success := call(gas(), target, 0, add(data, 0x20), mload(data), 0, 0)
         }
     }
 
-    function call(uint256 callType, address target, bytes memory data) private returns (bool success) {
-        assembly ("memory-safe") {
-            switch callType
-            case 0 { success := call(gas(), target, 0, add(data, 0x20), mload(data), 0, 0) }
-            default { success := delegatecall(gas(), target, add(data, 0x20), mload(data), 0, 0) }
+    modifier onlyPlugin() {
+        if (AccountStorage.layout().plugins[msg.sender] == address(0)) {
+            revert Errors.PLUGIN_NOT_REGISTERED();
         }
+        _;
+    }
+
+    function pluginDataStore(bytes32 key, bytes calldata value) external override onlyPlugin {
+        AccountStorage.layout().pluginDataBytes[msg.sender][key] = value;
+    }
+
+    function pluginDataLoad(address plugin, bytes32 key) external view override returns (bytes memory) {
+        return AccountStorage.layout().pluginDataBytes[plugin][key];
     }
 }

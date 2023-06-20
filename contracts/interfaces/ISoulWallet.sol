@@ -7,6 +7,7 @@ import "./IOwnerManager.sol";
 import "./IPluginManager.sol";
 import "./IFallbackManager.sol";
 import "@account-abstraction/contracts/interfaces/IAccount.sol";
+import "./IUpgradable.sol";
 
 interface ISoulWallet is
     IAccount,
@@ -14,5 +15,6 @@ interface ISoulWallet is
     IModuleManager,
     IOwnerManager,
     IPluginManager,
-    IFallbackManager
+    IFallbackManager,
+    IUpgradable
 {}

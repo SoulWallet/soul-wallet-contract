@@ -1,14 +1,14 @@
 |----------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                              | Deployment Size |        |        |        |         |
-| 4764695                                      | 24057           |        |        |        |         |
+| 4773913                                      | 24103           |        |        |        |         |
 | Function Name                                | min             | avg    | median | max    | # calls |
 | addModule                                    | 108836          | 109669 | 108836 | 111336 | 3       |
 | addOwner                                     | 28019           | 28019  | 28019  | 28019  | 3       |
-| addPlugin                                    | 124057          | 324583 | 472111 | 472111 | 9       |
+| addPlugin                                    | 124084          | 324610 | 472138 | 472138 | 9       |
 | execute                                      | 952             | 21983  | 16884  | 61635  | 21      |
 | executeBatch(address[],bytes[])              | 634             | 21280  | 21280  | 41927  | 2       |
 | executeBatch(address[],uint256[],bytes[])    | 977             | 20077  | 16678  | 42578  | 3       |
-| initialize                                   | 73245           | 248676 | 285931 | 494122 | 30      |
+| initialize                                   | 73245           | 248681 | 285931 | 494149 | 30      |
 | isAuthorizedModule                           | 610             | 610    | 610    | 610    | 22      |
 | isAuthorizedPlugin                           | 671             | 671    | 671    | 671    | 15      |
 | isOwner                                      | 544             | 1680   | 2544   | 2544   | 44      |
@@ -27,7 +27,7 @@
 | Deployment Cost                                            | Deployment Size |        |        |        |         |
 | 337051                                                     | 1870            |        |        |        |         |
 | Function Name                                              | min             | avg    | median | max    | # calls |
-| createWallet                                               | 159054          | 335039 | 371813 | 580059 | 30      |
+| createWallet                                               | 159054          | 335044 | 371813 | 580086 | 30      |
 | getWalletAddress                                           | 2231            | 2268   | 2279   | 2316   | 26      |
 
 
@@ -38,12 +38,12 @@
 | Function Name                                          | min             | avg    | median | max    | # calls |
 | addModule                                              | 109143          | 109976 | 109143 | 111643 | 3       |
 | addOwner                                               | 28317           | 28317  | 28317  | 28317  | 3       |
-| addPlugin                                              | 124370          | 324938 | 472502 | 472502 | 9       |
+| addPlugin                                              | 124397          | 324965 | 472529 | 472529 | 9       |
 | execute                                                | 1293            | 22738  | 17201  | 61966  | 21      |
 | executeBatch(address[],bytes[])                        | 1035            | 21679  | 21679  | 42324  | 2       |
 | executeBatch(address[],uint256[],bytes[])              | 1403            | 20501  | 17100  | 43000  | 3       |
 | hello                                                  | 765             | 765    | 765    | 765    | 1       |
-| initialize                                             | 73570           | 249519 | 286280 | 494489 | 30      |
+| initialize                                             | 73570           | 249524 | 286280 | 494516 | 30      |
 | isAuthorizedModule                                     | 911             | 911    | 911    | 911    | 22      |
 | isAuthorizedPlugin                                     | 972             | 972    | 972    | 972    | 15      |
 | isOwner                                                | 845             | 3515   | 2845   | 7345   | 44      |
@@ -64,7 +64,7 @@
 | Function Name                                                                                    | min             | avg    | median | max    | # calls |
 | cancel                                                                                           | 3520            | 3855   | 3855   | 4191   | 2       |
 | cancelAll                                                                                        | 3748            | 7634   | 7634   | 11520  | 2       |
-| execute                                                                                          | 3554            | 167892 | 127697 | 494972 | 21      |
+| execute                                                                                          | 3554            | 167903 | 127697 | 494999 | 21      |
 | getTxId                                                                                          | 1154            | 1154   | 1154   | 1154   | 1       |
 | getWalletConfig                                                                                  | 755             | 755    | 755    | 755    | 1       |
 | queue                                                                                            | 3308            | 38087  | 50995  | 62543  | 5       |

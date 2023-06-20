@@ -33,6 +33,10 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
         AccountStorage.Layout storage l = AccountStorage.layout();
         uint8 hookType = aPlugin.supportsHook();
 
+        if (hookType & 7 /*  _GUARD_HOOK | _PRE_HOOK | _POST_HOOK */ == 0) {
+            revert Errors.PLUGIN_HOOK_TYPE_ERROR();
+        }
+
         if (hookType & _GUARD_HOOK == _GUARD_HOOK) {
             l.guardHookPlugins.add(pluginAddress);
         }

@@ -11,13 +11,8 @@ interface IPlugin is IPluggable {
      * GuardHook: 1<<0
      * PreHook:   1<<1
      * PostHook:  1<<2
-     *
-     * callType structure:
-     * 0: call
-     * 1: delegatecall
-     * ...
      */
-    function supportsHook() external pure returns (uint8 hookType, uint8 callType);
+    function supportsHook() external pure returns (uint8 hookType);
 
     /**
      * @dev For flexibility, guardData does not participate in the userOp signature verification.

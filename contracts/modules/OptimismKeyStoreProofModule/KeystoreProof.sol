@@ -2,7 +2,6 @@ pragma solidity ^0.8.17;
 
 import "./IKnownStateRootWithHistory.sol";
 import "./MerklePatriciaVerifier.sol";
-import "./BytesLib.sol";
 import "./IKeystoreProof.sol";
 
 contract KeystoreProof is IKeystoreProof {

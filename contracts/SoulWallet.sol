@@ -12,6 +12,7 @@ import "./base/OwnerManager.sol";
 import "./helper/SignatureValidator.sol";
 import "./handler/ERC1271Handler.sol";
 import "./base/FallbackManager.sol";
+import "./base/UpgradeManager.sol";
 
 // Draft
 contract SoulWallet is
@@ -23,6 +24,7 @@ contract SoulWallet is
     SignatureValidator,
     PluginManager,
     ModuleManager,
+    UpgradeManager,
     ExecutionManager,
     FallbackManager,
     ERC1271Handler
@@ -74,5 +76,14 @@ contract SoulWallet is
         // validUntil and validAfter is already packed in signatureData.validationData,
         // and aggregator is address(0), so we just need to add sigFailed flag.
         validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
+    }
+
+    function upgradeTo(address newImplementation) external onlyModule {
+        UpgradeManager._upgradeTo(newImplementation);
+    }
+
+    function upgradeFrom(address oldImplementation) external pure override {
+        (oldImplementation);
+        revert Errors.NOT_IMPLEMENTED(); //Initial version no need data migration
     }
 }

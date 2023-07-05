@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../plugin/BaseCallPlugin.sol";
+import "../plugin/BasePlugin.sol";
 
-contract DemoPlugin is BaseCallPlugin {
+contract DemoPlugin is BasePlugin {
     mapping(address => bool) registry;
 
     event OnGuardHook();

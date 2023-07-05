@@ -202,7 +202,7 @@ contract ExecutionManagerTest is Test {
 
                 vm.prank(address(0x111));
                 vm.expectRevert(Errors.CALLER_MUST_BE_ENTRYPOINT.selector);
-                soulWallet.executeBatchWithValue(dest, value, func);
+                soulWallet.executeBatch(dest, value, func);
             }
             {
                 tokenERC721.safeMint(sender, 6);
@@ -212,7 +212,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 7);
 
                 vm.prank(address(entryPoint));
-                soulWallet.executeBatchWithValue(dest, value, func);
+                soulWallet.executeBatch(dest, value, func);
             }
             {
                 tokenERC721.safeMint(sender, 8);
@@ -222,7 +222,7 @@ contract ExecutionManagerTest is Test {
                 func[1] = abi.encodeWithSelector(tokenERC721.transferFrom.selector, sender, address(0x111), 9);
 
                 vm.prank(address(entryPoint));
-                soulWallet.executeBatchWithValue(dest, value, func);
+                soulWallet.executeBatch(dest, value, func);
             }
             vm.revertTo(snapshotId);
         }

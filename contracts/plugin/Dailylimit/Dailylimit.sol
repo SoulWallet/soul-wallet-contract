@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../BaseDelegateCallPlugin.sol";
+import "../BasePlugin.sol";
 import "./IDailylimit.sol";
 import "../../safeLock/SafeLock.sol";
 import "../../libraries/AddressLinkedList.sol";
@@ -9,20 +9,28 @@ import "../../libraries/SignatureDecoder.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "../../interfaces/IExecutionManager.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../../interfaces/IPluginStorage.sol";
 
-contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
-    using AddressLinkedList for mapping(address => address);
+contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
+    //using AddressLinkedList for mapping(address => address);
 
     address private constant _ETH_TOKEN_ADDRESS = address(2);
     uint256 private constant _MAX_TIMERANGE = 1 hours;
 
-    /**
-     * @dev all constructor parameters must be `immutable` type (Dailylimit plugin is a `delegatecall` plugin)
-     */
-    constructor()
-        BaseDelegateCallPlugin(keccak256("PLUGIN_DAILYLIMIT_SLOT"))
-        SafeLock("PLUGIN_DAILYLIMIT_SAFELOCK_SLOT", 2 days)
-    {}
+    uint256 private __seed;
+
+    function _newSeed() private returns (uint256) {
+        return ++__seed;
+    }
+
+    struct initSeed {
+        uint256 currentDay;
+        uint256 seed;
+    }
+
+    mapping(address => initSeed) private _currentDay;
+
+    constructor() SafeLock("PLUGIN_DAILYLIMIT_SAFELOCK_SLOT", 2 days) {}
 
     struct DaySpent {
         uint256 dailyLimit;
@@ -36,44 +44,89 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         mapping(address => DaySpent) daySpent;
     }
 
-    function _layout() internal view returns (Layout storage l) {
-        bytes32 slot = PLUGIN_SLOT;
-        assembly {
-            l.slot := slot
+    function _packedToken(address token) private view returns (bytes32 packedToken) {
+        packedToken = _packedToken(_wallet(), token);
+    }
+
+    function _packedToken(address wallet, address token) private view returns (bytes32 packedToken) {
+        address _token = _getTokenAddress(token);
+        uint256 seed = _currentDay[wallet].seed;
+        packedToken = keccak256(abi.encodePacked(_token, seed));
+    }
+
+    function _packDaySpent(uint256 dailyLimit, uint256 day, uint256 spent) private pure returns (bytes memory) {
+        return abi.encodePacked(dailyLimit, day, spent);
+    }
+
+    function _unpackDaySpent(bytes memory data) private pure returns (uint256 dailyLimit, uint256 day, uint256 spent) {
+        require(data.length == 96, "Dailylimit: invalid data");
+        (dailyLimit, day, spent) = abi.decode(data, (uint256, uint256, uint256));
+    }
+
+    function _saveTokenDaySpent(address token, uint256 dailyLimit, uint256 day, uint256 spent) private {
+        bytes32 _token = _packedToken(token);
+        bytes memory data = _packDaySpent(dailyLimit, day, spent);
+        IPluginStorage pluginStorage = IPluginStorage(_wallet());
+        pluginStorage.pluginDataStore(_token, data);
+    }
+
+    function _initTokenDaySpent(address token, uint256 dailyLimit) private {
+        bytes32 _token = _packedToken(token);
+        IPluginStorage pluginStorage = IPluginStorage(_wallet());
+        require(pluginStorage.pluginDataLoad(address(this), _token).length == 0, "Dailylimit: token already added");
+        bytes memory data = _packDaySpent(dailyLimit, 0, 0);
+        pluginStorage.pluginDataStore(_token, data);
+    }
+
+    function _loadTokenDaySpent(address token)
+        private
+        view
+        returns (bool isExist, uint256 dailyLimit, uint256 day, uint256 spent)
+    {
+        bytes32 _token = _packedToken(token);
+        IPluginStorage pluginStorage = IPluginStorage(_wallet());
+        bytes memory data = pluginStorage.pluginDataLoad(address(this), _token);
+        if (data.length == 0) {
+            return (false, 0, 0, 0);
         }
+        isExist = true;
+        (dailyLimit, day, spent) = _unpackDaySpent(data);
+    }
+
+    function _removeTokenDaySpent(address token) private {
+        bytes32 _token = _packedToken(token);
+        IPluginStorage pluginStorage = IPluginStorage(_wallet());
+        pluginStorage.pluginDataStore(_token, "");
     }
 
     function _supportsHook() internal pure override returns (uint8 hookType) {
         hookType = GUARD_HOOK | POST_HOOK;
     }
 
-    function inited() internal view override returns (bool) {
-        return _layout().currentDay != 0;
+    function inited(address wallet) internal view override returns (bool) {
+        return _currentDay[wallet].currentDay != 0;
     }
 
-    function _init(bytes calldata data) internal override onlyDelegateCall {
-        Layout storage l = _layout();
-        if (l.currentDay == 0) {
-            l.currentDay = _getDay(block.timestamp);
+    function _init(bytes calldata data) internal override {
+        if (_currentDay[_wallet()].currentDay == 0) {
+            _currentDay[_wallet()].seed = _newSeed();
+            _currentDay[_wallet()].currentDay = _getDay(block.timestamp);
             // decode data
             (address[] memory tokens, uint256[] memory limits) = abi.decode(data, (address[], uint256[]));
             require(tokens.length == limits.length, "Dailylimit: invalid data");
             for (uint256 i = 0; i < tokens.length; i++) {
-                address _token = _getTokenAddress(tokens[i]);
+                address _token = tokens[i];
                 uint256 limit = limits[i];
                 require(limit > 0, "Dailylimit: invalid limit");
-                l.tokens.add(_token);
-                l.daySpent[_token] = DaySpent(limit, 0, 0);
+                _initTokenDaySpent(_token, limit);
             }
             emit DailyLimitChanged(tokens, limits);
         }
     }
 
-    function _deInit() internal override onlyDelegateCall {
-        Layout storage l = _layout();
-        if (l.currentDay != 0) {
-            l.currentDay = 0;
-            l.tokens.clear();
+    function _deInit() internal override {
+        if (_currentDay[_wallet()].currentDay != 0) {
+            _currentDay[_wallet()].currentDay = 0;
         }
     }
 
@@ -81,22 +134,8 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         return token == address(0) ? _ETH_TOKEN_ADDRESS : token;
     }
 
-    function _getTokenDailyLimit(address token) private view returns (uint256) {
-        return _layout().daySpent[_getTokenAddress(token)].dailyLimit;
-    }
-
     function _getDay(uint256 timeNow) private pure returns (uint256) {
         return timeNow / 1 days;
-    }
-
-    function _getDaySpent(address token, uint256 timeNow) private view returns (uint128) {
-        uint256 day = _getDay(timeNow);
-        Layout storage l = _layout();
-        DaySpent storage daySpent = l.daySpent[_getTokenAddress(token)];
-        if (daySpent.day != day) {
-            return 0;
-        }
-        return uint128(daySpent.spent);
     }
 
     function _decodeERC20Spent(bytes4 selector, address to, bytes memory data)
@@ -137,22 +176,15 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
             validationData.validUntil - validationData.validAfter < _MAX_TIMERANGE, "Dailylimit: exceed max timerange"
         );
         uint256 currentDay = _getDay(validationData.validAfter);
-        Layout storage l = _layout();
-        l.currentDay = currentDay;
-        if (l.tokens.isExist(_ETH_TOKEN_ADDRESS)) {
+
+        _currentDay[_wallet()].currentDay = currentDay;
+        (bool isExist, uint256 dailyLimit, uint256 day, uint256 spent) = _loadTokenDaySpent(_ETH_TOKEN_ADDRESS);
+        if (isExist) {
             if (userOp.paymasterAndData.length == 0) {
                 uint256 ethGasFee = _calcRequiredPrefund(userOp);
-                DaySpent storage _DaySpent = l.daySpent[_ETH_TOKEN_ADDRESS];
-
-                uint256 _ethSpent;
-                if (_DaySpent.day == currentDay) {
-                    _ethSpent = _DaySpent.spent;
-                } else {
-                    _DaySpent.day = currentDay;
-                }
-                uint256 _newSpent = _ethSpent + ethGasFee;
-                require(_newSpent <= _DaySpent.dailyLimit, "Dailylimit: ETH daily limit reached");
-                _DaySpent.spent = _newSpent;
+                uint256 _newSpent = (day == currentDay ? spent : 0) + ethGasFee;
+                require(_newSpent <= dailyLimit, "Dailylimit: ETH daily limit reached");
+                _saveTokenDaySpent(_ETH_TOKEN_ADDRESS, dailyLimit, day == currentDay ? day : currentDay, _newSpent);
             }
         }
     }
@@ -163,50 +195,50 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
     }
 
     function postHook(address target, uint256 value, bytes calldata data) external override {
-        uint256 day = _getDay(block.timestamp);
-        Layout storage l = _layout();
-        if (value > 0 && l.tokens.isExist(_ETH_TOKEN_ADDRESS)) {
-            DaySpent storage _DaySpent = l.daySpent[_ETH_TOKEN_ADDRESS];
-            uint256 spent;
-            if (_DaySpent.day == day) {
-                spent = _DaySpent.spent;
-            } else {
-                _DaySpent.day = day;
-            }
-            uint256 _newSpent = spent + value;
-            require(_newSpent <= _DaySpent.dailyLimit, "Dailylimit: ETH daily limit reached");
-            _DaySpent.spent = _newSpent;
-        }
-        if (uint160(target) > 1 && l.tokens.isExist(target)) {
-            (, uint256 _spent) = _decodeERC20Spent(bytes4(data[0:4]), target, data[4:]);
+        uint256 _day = _getDay(block.timestamp);
 
-            if (_spent > 0) {
-                DaySpent storage _DaySpent = l.daySpent[target];
-                uint256 spent;
-                if (_DaySpent.day == day) {
-                    spent = _DaySpent.spent;
-                } else {
-                    _DaySpent.day = day;
-                    _DaySpent.spent = 0;
+        if (value > 0) {
+            (bool isExist, uint256 dailyLimit, uint256 day, uint256 spent) = _loadTokenDaySpent(_ETH_TOKEN_ADDRESS);
+            if (isExist) {
+                uint256 _newSpent = (day == _day ? spent : 0) + value;
+                require(_newSpent <= dailyLimit, "Dailylimit: ETH daily limit reached");
+                _saveTokenDaySpent(_ETH_TOKEN_ADDRESS, dailyLimit, day == _day ? day : _day, _newSpent);
+            }
+        }
+
+        if (uint160(target) > 1) {
+            (bool isExist, uint256 dailyLimit, uint256 day, uint256 spent) = _loadTokenDaySpent(target);
+            if (isExist) {
+                (, uint256 _spent) = _decodeERC20Spent(bytes4(data[0:4]), target, data[4:]);
+                if (_spent > 0) {
+                    uint256 spentNow;
+                    if (day == _day) {
+                        spentNow = spent;
+                    } else {
+                        day = _day;
+                        spent = 0;
+                    }
+                    uint256 _newSpent = spentNow + _spent;
+                    require(_newSpent <= dailyLimit, "Dailylimit: token daily limit reached");
+                    _saveTokenDaySpent(target, dailyLimit, day, _newSpent);
                 }
-                uint256 _newSpent = spent + _spent;
-                require(_newSpent <= _DaySpent.dailyLimit, "Dailylimit: token daily limit reached");
-                _DaySpent.spent = _newSpent;
             }
         }
     }
 
     function reduceDailyLimits(address[] calldata token, uint256[] calldata limit) external override {
         require(token.length == limit.length, "Dailylimit: invalid data");
-        Layout storage l = _layout();
         for (uint256 i = 0; i < token.length; i++) {
             uint256 _amount = limit[i];
             require(_amount > 0, "Dailylimit: invalid amount");
-            address _token = _getTokenAddress(token[i]);
-            DaySpent storage daySpent = l.daySpent[_token];
-            require(daySpent.dailyLimit > _amount, "Dailylimit: exceed daily limit");
-
-            daySpent.dailyLimit = _amount;
+            address _token = token[i];
+            (bool isExist, uint256 dailyLimit, uint256 day, uint256 spent) = _loadTokenDaySpent(_token);
+            if (isExist) {
+                require(dailyLimit > _amount, "Dailylimit: exceed daily limit");
+                _saveTokenDaySpent(_token, _amount, day, spent);
+            } else {
+                revert("Dailylimit: token not exist");
+            }
         }
 
         emit DailyLimitChanged(token, limit);
@@ -230,20 +262,19 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         bytes32 hash = keccak256(abi.encode(token, limit));
         _unlock(hash);
         require(token.length == limit.length, "Dailylimit: invalid data");
-        Layout storage l = _layout();
         for (uint256 i = 0; i < token.length; i++) {
             uint256 _amount = limit[i];
-            address _token = _getTokenAddress(token[i]);
-            if (l.tokens.isExist(_token)) {
+            address _token = token[i];
+            (bool isExist,, uint256 day, uint256 spent) = _loadTokenDaySpent(_token);
+            if (isExist) {
                 if (_amount == 0) {
-                    l.tokens.remove(_token);
+                    _removeTokenDaySpent(_token);
                 } else {
-                    l.daySpent[_token].dailyLimit = _amount;
+                    _saveTokenDaySpent(_token, _amount, day, spent);
                 }
             } else {
                 if (_amount > 0) {
-                    l.tokens.add(_token);
-                    l.daySpent[_token] = DaySpent(_amount, 0, 0);
+                    _initTokenDaySpent(_token, _amount);
                 }
             }
         }
@@ -251,11 +282,23 @@ contract Dailylimit is BaseDelegateCallPlugin, IDailylimit, SafeLock {
         emit DailyLimitChanged(token, limit);
     }
 
-    function getDailyLimit(address token) external view override returns (uint256) {
-        return _getTokenDailyLimit(token);
+    function getDailyLimit(address wallet, address token) external view override returns (uint256 dailyLimit) {
+        bytes32 _token = _packedToken(wallet, token);
+        IPluginStorage pluginStorage = IPluginStorage(wallet);
+        bytes memory data = pluginStorage.pluginDataLoad(address(this), _token);
+        if (data.length == 0) {
+            return 0;
+        }
+        (dailyLimit,,) = _unpackDaySpent(data);
     }
 
-    function getSpentToday(address token) external view override returns (uint256) {
-        return _getDaySpent(token, block.timestamp);
+    function getSpentToday(address wallet, address token) external view override returns (uint256 spent) {
+        bytes32 _token = _packedToken(wallet, token);
+        IPluginStorage pluginStorage = IPluginStorage(wallet);
+        bytes memory data = pluginStorage.pluginDataLoad(address(this), _token);
+        if (data.length == 0) {
+            return 0;
+        }
+        (,, spent) = _unpackDaySpent(data);
     }
 }

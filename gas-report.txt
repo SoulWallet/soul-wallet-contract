@@ -9,7 +9,7 @@
 | execute                                      | 883             | 20212  | 13690  | 54702  | 21      |
 | executeBatch                                 | 621             | 21264  | 21264  | 41908  | 2       |
 | executeBatchWithValue                        | 1285            | 20329  | 16902  | 42802  | 3       |
-| initialize                                   | 73179           | 258117 | 285799 | 496446 | 35      |
+| initialize                                   | 73179           | 258126 | 285799 | 496446 | 35      |
 | isAuthorizedModule                           | 544             | 544    | 544    | 544    | 27      |
 | isAuthorizedPlugin                           | 583             | 583    | 583    | 583    | 16      |
 | isOwner                                      | 522             | 1522   | 1522   | 2522   | 58      |
@@ -26,7 +26,7 @@
 | Deployment Cost                                            | Deployment Size |        |        |        |         |
 | 337051                                                     | 1870            |        |        |        |         |
 | Function Name                                              | min             | avg    | median | max    | # calls |
-| createWallet                                               | 158988          | 344413 | 371681 | 582383 | 35      |
+| createWallet                                               | 158988          | 344422 | 371681 | 582383 | 35      |
 | getWalletAddress                                           | 2231            | 2271   | 2279   | 2316   | 31      |
 
 
@@ -42,7 +42,7 @@
 | execute                                                | 1224            | 20964  | 14007  | 55033  | 21      |
 | executeBatch                                           | 1022            | 21663  | 21663  | 42305  | 2       |
 | executeBatchWithValue                                  | 1711            | 20753  | 17324  | 43224  | 3       |
-| initialize                                             | 73504           | 258890 | 286148 | 496813 | 35      |
+| initialize                                             | 73504           | 258899 | 286148 | 496813 | 35      |
 | isAuthorizedModule                                     | 845             | 845    | 845    | 845    | 27      |
 | isAuthorizedPlugin                                     | 884             | 884    | 884    | 884    | 16      |
 | isOwner                                                | 823             | 3064   | 1823   | 7323   | 58      |

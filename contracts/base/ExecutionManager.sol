@@ -28,7 +28,7 @@ abstract contract ExecutionManager is IExecutionManager, Authority, PluginManage
     /**
      * execute a sequence of transactions
      */
-    function executeBatchWithValue(address[] calldata dest, uint256[] calldata value, bytes[] calldata func)
+    function executeBatch(address[] calldata dest, uint256[] calldata value, bytes[] calldata func)
         external
         override
         onlyEntryPoint

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "../BaseCallPlugin.sol";
+import "../BasePlugin.sol";
 import "./ISimple2FA.sol";
 import "../../safeLock/SafeLock.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../../base/ExecutionManager.sol";
 import "../../libraries/DecodeCalldata.sol";
 
-contract Simple2FA is BaseCallPlugin, ISimple2FA, SafeLock {
+contract Simple2FA is BasePlugin, ISimple2FA, SafeLock {
     using ECDSA for bytes32;
 
     struct User2FA {

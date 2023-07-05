@@ -30,10 +30,10 @@ library AccountStorage {
         // ┌───────────────────┐
         // │       Plugin      │
         mapping(address => address) plugins;
-        mapping(address => uint256) pluginCallTypes;
         mapping(address => address) guardHookPlugins;
         mapping(address => address) preHookPlugins;
         mapping(address => address) postHookPlugins;
+        mapping(address => mapping(bytes32 => bytes)) pluginDataBytes;
         uint256[50] __gap_3;
         // └───────────────────┘
     }

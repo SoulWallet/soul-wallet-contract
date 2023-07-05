@@ -9,10 +9,10 @@ contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
     uint256 public constant ROOT_HISTORY_SIZE = 10;
     uint256 public currentRootIndex = 0;
     // https://community.optimism.io/docs/developers/build/differences/#accessing-l1-information
-    address public immutable L1_BLOCK;
+    IL1Block public immutable L1_BLOCK;
 
     constructor(address _l1block) {
-        L1_BLOCK = _l1block;
+        L1_BLOCK = IL1Block(_l1block);
     }
 
     function isKnownStateRoot(bytes32 _stateRoot) public view override returns (bool) {
@@ -36,7 +36,7 @@ contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
     }
 
     function insertNewStateRoot(bytes memory blockInfo) external override {
-        bytes32 blockHash = IL1Block(L1_BLOCK).hash();
+        bytes32 blockHash = L1_BLOCK.hash();
         (bytes32 stateRoot, uint256 blockTimestamp, uint256 blockNumber) =
             BlockVerifier.extractStateRootAndTimestamp(blockInfo, blockHash);
         require(!isKnownStateRoot(stateRoot), "duplicate state root");
@@ -50,7 +50,7 @@ contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
         stateRoots[newRootIndex].blockTimestamp = blockTimestamp;
     }
 
-    function findStateRootInfo(bytes32 _stateRoot)
+    function stateRootInfo(bytes32 _stateRoot)
         external
         view
         override

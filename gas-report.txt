@@ -9,14 +9,15 @@
 | execute                                      | 883             | 20212  | 13690  | 54702  | 21      |
 | executeBatch                                 | 621             | 21264  | 21264  | 41908  | 2       |
 | executeBatchWithValue                        | 1285            | 20329  | 16902  | 42802  | 3       |
-| initialize                                   | 73179           | 259188 | 285799 | 496446 | 30      |
-| isAuthorizedModule                           | 544             | 544    | 544    | 544    | 22      |
+| initialize                                   | 73179           | 258117 | 285799 | 496446 | 35      |
+| isAuthorizedModule                           | 544             | 544    | 544    | 544    | 27      |
 | isAuthorizedPlugin                           | 583             | 583    | 583    | 583    | 16      |
-| isOwner                                      | 522             | 1677   | 2522   | 2522   | 45      |
-| listModule                                   | 6783            | 8651   | 6783   | 17601  | 9       |
+| isOwner                                      | 522             | 1522   | 1522   | 2522   | 58      |
+| listModule                                   | 5308            | 8317   | 6783   | 17601  | 10      |
 | listPlugin                                   | 2308            | 2308   | 2308   | 2308   | 6       |
 | onERC721Received                             | 1496            | 2096   | 1496   | 5996   | 15      |
 | removeModule                                 | 9082            | 9082   | 9082   | 9082   | 1       |
+| resetOwner                                   | 35790           | 36323  | 35790  | 37390  | 3       |
 | validateUserOp                               | 9488            | 36725  | 38431  | 59792  | 36      |
 
 
@@ -25,8 +26,8 @@
 | Deployment Cost                                            | Deployment Size |        |        |        |         |
 | 337051                                                     | 1870            |        |        |        |         |
 | Function Name                                              | min             | avg    | median | max    | # calls |
-| createWallet                                               | 158988          | 345554 | 371681 | 582383 | 30      |
-| getWalletAddress                                           | 2231            | 2270   | 2279   | 2316   | 26      |
+| createWallet                                               | 158988          | 344413 | 371681 | 582383 | 35      |
+| getWalletAddress                                           | 2231            | 2271   | 2279   | 2316   | 31      |
 
 
 | contracts/SoulWalletProxy.sol:SoulWalletProxy contract |                 |        |        |        |         |
@@ -41,14 +42,15 @@
 | execute                                                | 1224            | 20964  | 14007  | 55033  | 21      |
 | executeBatch                                           | 1022            | 21663  | 21663  | 42305  | 2       |
 | executeBatchWithValue                                  | 1711            | 20753  | 17324  | 43224  | 3       |
-| initialize                                             | 73504           | 260032 | 286148 | 496813 | 30      |
-| isAuthorizedModule                                     | 845             | 845    | 845    | 845    | 22      |
+| initialize                                             | 73504           | 258890 | 286148 | 496813 | 35      |
+| isAuthorizedModule                                     | 845             | 845    | 845    | 845    | 27      |
 | isAuthorizedPlugin                                     | 884             | 884    | 884    | 884    | 16      |
-| isOwner                                                | 823             | 3578   | 2823   | 7323   | 45      |
-| listModule                                             | 7135            | 9006   | 7135   | 17977  | 9       |
+| isOwner                                                | 823             | 3064   | 1823   | 7323   | 58      |
+| listModule                                             | 5648            | 8670   | 7135   | 17977  | 10      |
 | listPlugin                                             | 2615            | 2615   | 2615   | 2615   | 6       |
 | onERC721Received                                       | 1818            | 3018   | 1818   | 10818  | 15      |
 | removeModule                                           | 9320            | 9320   | 9320   | 9320   | 1       |
+| resetOwner                                             | 36028           | 36561  | 36028  | 37628  | 3       |
 | validateUserOp                                         | 14461           | 38445  | 43159  | 60265  | 36      |
 
 

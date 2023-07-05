@@ -24,7 +24,7 @@ contract KeystoreProof is IKeystoreProof {
         bytes memory keyProof
     ) external {
         (bool searchResult, BlockInfo memory currentBlockInfo) =
-            IKnownStateRootWithHistory(STATE_ROOT_HISTORY_ADDESS).findStateRootInfo(stateRoot);
+            IKnownStateRootWithHistory(STATE_ROOT_HISTORY_ADDESS).stateRootInfo(stateRoot);
         require(searchResult, "unkown root");
         bytes memory keyStoreAccountDetailsBytes = MerklePatriciaVerifier.getValueFromProof(
             currentBlockInfo.storageRootHash, keccak256(abi.encodePacked(L1_KEYSTORE_ADDRESS)), accountProof
@@ -44,7 +44,7 @@ contract KeystoreProof is IKeystoreProof {
         lastProofBlock[l1Slot] = currentBlockInfo.blockNumber;
     }
 
-    function getKeystoreBySlot(bytes32 l1Slot) external view returns (address signingKey, uint256 blockNumber) {
-        return (l1SlotToSigningKey[l1Slot], lastProofBlock[l1Slot]);
+    function keystoreBySlot(bytes32 l1Slot) external view returns (address signingKey) {
+        return (l1SlotToSigningKey[l1Slot]);
     }
 }

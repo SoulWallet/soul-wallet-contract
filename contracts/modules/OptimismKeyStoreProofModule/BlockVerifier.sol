@@ -5,10 +5,15 @@ pragma solidity ^0.8.17;
 library BlockVerifier {
 	function extractStateRootAndTimestamp(bytes memory rlpBytes, bytes32 blockHash) internal view returns (bytes32 stateRoot, uint256 blockTimestamp, uint256 blockNumber) {
 		assembly {
+
 			function revertWithReason(message, length) {
+				// 4-byte function selector of `Error(string)` which is `0x08c379a0`
 				mstore(0, 0x08c379a000000000000000000000000000000000000000000000000000000000)
+				// Offset of string return value
 				mstore(4, 0x20)
+				// Length of string return value (the revert reason)
 				mstore(0x24, length)
+				// actuall revert message
 				mstore(0x44, message)
 				revert(0, add(0x44, length))
 			}

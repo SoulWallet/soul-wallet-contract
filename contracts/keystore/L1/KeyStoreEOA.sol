@@ -36,8 +36,8 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
         assembly ("memory-safe") {
             signer := key
         }
-        signHash = signHash.toEthSignedMessageHash();
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(signHash, keySignature);
+        (address recovered, ECDSA.RecoverError error) =
+            ECDSA.tryRecover(signHash.toEthSignedMessageHash(), keySignature);
         if (error != ECDSA.RecoverError.NoError && signer != recovered) {
             revert Errors.INVALID_SIGNATURE();
         }
@@ -151,10 +151,12 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
         uint8 v;
         bytes32 r;
         bytes32 s;
-        uint256 i;
         uint256 cursor = 0;
 
-        for (i = 0; i < guardiansLen; i++) {
+        uint256 skipCount = 0;
+        uint256 keySignatureLen = keySignature.length;
+        for (uint256 i = 0; i < guardiansLen;) {
+            if (cursor >= keySignatureLen) break;
             bytes calldata signatures = keySignature[cursor:];
             assembly ("memory-safe") {
                 v := byte(0, calldataload(signatures.offset))
@@ -172,7 +174,7 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                     s := calldataload(add(signatures.offset, 1))
                 }
                 uint256 cursorEnd = 33 + uint256(s);
-                bytes calldata dynamicData = keySignature[1:cursorEnd];
+                bytes calldata dynamicData = signatures[33:cursorEnd];
                 {
                     (bool success, bytes memory result) = guardians[i].staticcall(
                         abi.encodeWithSelector(IERC1271.isValidSignature.selector, signHash, dynamicData)
@@ -206,8 +208,12 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                 assembly ("memory-safe") {
                     s := calldataload(add(signatures.offset, 1))
                 }
-                uint256 skipTimes = uint256(r);
+                uint256 skipTimes = uint256(s);
                 i += skipTimes;
+
+                unchecked {
+                    skipCount += (skipTimes + 1);
+                }
 
                 cursor += 33;
             } else {
@@ -219,10 +225,20 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                     s := calldataload(add(signatures.offset, 1))
                     r := calldataload(add(signatures.offset, 33))
                 }
-                require(guardians[i] == ECDSA.recover(signHash, v, r, s), "guardian signature invalid");
+                address signer = ECDSA.recover(signHash.toEthSignedMessageHash(), v, r, s);
+                require(
+                    guardians[i] == ECDSA.recover(signHash.toEthSignedMessageHash(), v, r, s),
+                    "guardian signature invalid"
+                );
 
                 cursor += 65;
             }
+            unchecked {
+                i++;
+            }
+        }
+        if (guardiansLen - skipCount < threshold) {
+            revert Errors.GUARDIAN_SIGNATURE_INVALID();
         }
     }
 }

@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./KeyStoreStorage.sol";
 
 abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
-    using ECDSA for bytes32;
-
     function _validateKeySignature(bytes32 key, bytes32 signHash, bytes calldata keySignature) internal virtual;
 
     function _validateKeySignature(bytes32 slot, bytes32 key, bytes32 data, bytes calldata keySignature) private {
@@ -65,7 +62,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
              - Removing the chainId essentially allows the signature to be replayed in multiple Layer1s, 
                which may give us the feature of consistent multi-Layer1 addresses.
          */
-        return keccak256(abi.encode(address(this), slot, _nonce, data)).toEthSignedMessageHash();
+        return keccak256(abi.encode(address(this), slot, _nonce, data));
     }
 
     modifier onlyInitialized(bytes32 slot) {
@@ -158,6 +155,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         _autoSetupGuardian(slot);
 
         _validateGuardianSignature(slot, _getGuardianInfo(slot).guardianHash, rawGuardian, newKey, guardianSignature);
+
         _saveKey(slot, newKey);
     }
 

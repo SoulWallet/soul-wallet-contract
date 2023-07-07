@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./BaseKeyStore.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@solmate/utils/MerkleProofLib.sol";
 
 contract KeyStoreMerkleTree is BaseKeyStore {

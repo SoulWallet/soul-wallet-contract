@@ -40,4 +40,5 @@ library Errors {
     error INVALID_TIME_RANGE();
     error UNAUTHORIZED();
     error INVALID_DATA();
+    error GUARDIAN_SIGNATURE_INVALID();
 }

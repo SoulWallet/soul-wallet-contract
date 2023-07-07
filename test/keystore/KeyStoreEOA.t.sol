@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "@source/keystore/L1/KeyStoreEOA.sol";
 import "@source/keystore/L1/interfaces/IKeyStore.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@source/dev/EIP1271Wallet.sol";
 
 contract KeyStoreEOATest is Test {
     using ECDSA for bytes32;
@@ -153,5 +154,113 @@ contract KeyStoreEOATest is Test {
                 require(_keyStoreInfo.key == initialKey_new_2, "keyStoreInfo.key != initialKey_new");
             }
         }
+    }
+
+    function _signMsg(bytes32 messageHash, uint256 privateKey) private view returns (bytes memory) {
+        if (privateKey == 0) {
+            // SC wallet
+            bool _valid = true;
+            bytes memory sig = abi.encode(messageHash, _valid);
+            return sig;
+        } else {
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash.toEthSignedMessageHash());
+            return abi.encodePacked(v, s, r);
+        }
+    }
+
+    function test_socialRecovery() public {
+        EIP1271Wallet SCwallet1 = new EIP1271Wallet();
+        EIP1271Wallet SCwallet2 = new EIP1271Wallet();
+        EIP1271Wallet SCwallet3 = new EIP1271Wallet();
+        (address EOAWallet1, uint256 EOAPrivatekey1) = makeAddrAndKey("1");
+        (address EOAWallet2, uint256 EOAPrivatekey2) = makeAddrAndKey("2");
+        (address EOAWallet3, uint256 EOAPrivatekey3) = makeAddrAndKey("3");
+        (address EOAWallet4, uint256 EOAPrivatekey4) = makeAddrAndKey("4");
+
+        /*
+            (address[] memory guardians, uint256 threshold, uint256 salt) = abi.decode(rawGuardian, (address[], uint256, uint256));
+        */
+        address[] memory guardians = new address[](7);
+        guardians[0] = EOAWallet1;
+        guardians[1] = address(SCwallet1);
+        guardians[2] = EOAWallet2;
+        guardians[3] = EOAWallet3;
+        guardians[4] = EOAWallet4;
+        guardians[5] = address(SCwallet2);
+        guardians[6] = address(SCwallet3);
+        uint256 threshold = 3;
+        uint256 salt = 0x12345678;
+        bytes memory rawGuardian = abi.encode(guardians, threshold, salt);
+        bytes32 initialGuardianHash = keccak256(rawGuardian);
+
+        bytes32 initialKey = keccak256("0x123");
+        uint64 initialGuardianSafePeriod = 2 days;
+
+        bytes32 slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+
+        /* 
+        function setKey(
+                bytes32 initialKey,
+                bytes32 initialGuardianHash,
+                uint64 initialGuardianSafePeriod,
+                bytes32 newKey,
+                bytes calldata rawGuardian,
+                bytes calldata guardianSignature
+            ) external;
+        */
+        address _newKey = address(0x111);
+        bytes32 newKey = bytes32(uint256(uint160(_newKey)));
+        uint256 nonce = keyStoreEOA.nonce(slot);
+
+        // return keccak256(abi.encode(address(this), slot, _nonce, data));
+        bytes32 signMessageHash = keccak256(abi.encode(address(keyStoreEOA), slot, nonce, newKey));
+
+        uint8 v;
+        bytes32 s;
+
+        // sign [0],skip
+        v = 2;
+        s = 0;
+        bytes memory _sign0 = abi.encodePacked(v, s);
+
+        // sign [1],  approvedHashes
+        vm.prank(address(SCwallet1));
+        keyStoreEOA.approveHash(signMessageHash);
+        v = 1;
+        bytes memory _sign1 = abi.encodePacked(v);
+
+        // sign [2~3], skip
+        v = 2;
+        s = bytes32(uint256(1));
+        bytes memory _sign2 = abi.encodePacked(v, s);
+
+        // sign [4]
+        bytes memory _sign4 = _signMsg(signMessageHash, EOAPrivatekey4);
+
+        // sign [5], skip
+        v = 2;
+        s = 0;
+        bytes memory _sign5 = abi.encodePacked(v, s);
+
+        // sign [6]
+        /* 
+         EIP-1271 signature
+                    s: Length of signature data 
+                    r: no set
+                    dynamic data: signature data
+         */
+        v = 0;
+        bytes memory _signTemp = _signMsg(signMessageHash, 0);
+        s = bytes32(uint256(_signTemp.length));
+        bytes memory _sign6 = abi.encodePacked(v, s, _signTemp);
+
+        bytes memory guardianSignature = abi.encodePacked(_sign0, _sign1, _sign2, _sign4, _sign5, _sign6);
+
+        keyStoreEOA.setKey(
+            initialKey, initialGuardianHash, initialGuardianSafePeriod, newKey, rawGuardian, guardianSignature
+        );
+
+        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+        require(_keyStoreInfo.key == newKey, "keyStoreInfo.key != newKey");
     }
 }

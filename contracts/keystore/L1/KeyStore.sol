@@ -6,7 +6,7 @@ import "../interfaces/IKeystoreProof.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
+contract KeyStore is BaseKeyStore, IKeystoreProof {
     using ECDSA for bytes32;
 
     event ApproveHash(address indexed guardian, bytes32 hash);

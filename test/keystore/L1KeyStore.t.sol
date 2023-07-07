@@ -2,18 +2,18 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "@source/keystore/L1/KeyStoreEOA.sol";
+import "@source/keystore/L1/KeyStore.sol";
 import "@source/keystore/L1/interfaces/IKeyStore.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/EIP1271Wallet.sol";
 
-contract KeyStoreEOATest is Test {
+contract L1KeyStoreEOATest is Test {
     using ECDSA for bytes32;
 
-    KeyStoreEOA keyStoreEOA;
+    KeyStore keyStoreEOA;
 
     function setUp() public {
-        keyStoreEOA = new KeyStoreEOA();
+        keyStoreEOA = new KeyStore();
     }
 
     function test_storageLayout() public {
@@ -106,6 +106,7 @@ contract KeyStoreEOATest is Test {
             (_initialKey_new_1, _initialPrivateKey_new_1) = makeAddrAndKey("initialKey_new_1");
             bytes32 initialKey_new_1 = bytes32(uint256(uint160(_initialKey_new_1)));
             uint256 nonce = keyStoreEOA.nonce(slot);
+            assertEq(nonce, 0, "nonce != 0");
             //return keccak256(abi.encode(address(this), slot, _nonce, data)).toEthSignedMessageHash();
             bytes32 messageHash =
                 keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_1)).toEthSignedMessageHash();
@@ -142,6 +143,7 @@ contract KeyStoreEOATest is Test {
             (_initialKey_new_2, _initialPrivateKey_new_2) = makeAddrAndKey("initialKey_new_2");
             bytes32 initialKey_new_2 = bytes32(uint256(uint160(_initialKey_new_2)));
             nonce = keyStoreEOA.nonce(slot);
+            assertEq(nonce, 1, "nonce != 1");
             messageHash =
                 keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_2)).toEthSignedMessageHash();
             (v, r, s) = vm.sign(_initialPrivateKey_new_2, messageHash);
@@ -149,6 +151,8 @@ contract KeyStoreEOATest is Test {
             keyStoreEOA.setKey(
                 initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_2, keySignature
             );
+            nonce = keyStoreEOA.nonce(slot);
+            assertEq(nonce, 2, "nonce != 2");
             {
                 IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
                 require(_keyStoreInfo.key == initialKey_new_2, "keyStoreInfo.key != initialKey_new");

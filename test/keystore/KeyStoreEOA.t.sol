@@ -172,9 +172,9 @@ contract KeyStoreEOATest is Test {
         EIP1271Wallet SCwallet1 = new EIP1271Wallet();
         EIP1271Wallet SCwallet2 = new EIP1271Wallet();
         EIP1271Wallet SCwallet3 = new EIP1271Wallet();
-        (address EOAWallet1, uint256 EOAPrivatekey1) = makeAddrAndKey("1");
-        (address EOAWallet2, uint256 EOAPrivatekey2) = makeAddrAndKey("2");
-        (address EOAWallet3, uint256 EOAPrivatekey3) = makeAddrAndKey("3");
+        (address EOAWallet1,) = makeAddrAndKey("1");
+        (address EOAWallet2,) = makeAddrAndKey("2");
+        (address EOAWallet3,) = makeAddrAndKey("3");
         (address EOAWallet4, uint256 EOAPrivatekey4) = makeAddrAndKey("4");
 
         /*
@@ -216,12 +216,12 @@ contract KeyStoreEOATest is Test {
         bytes32 signMessageHash = keccak256(abi.encode(address(keyStoreEOA), slot, nonce, newKey));
 
         uint8 v;
-        bytes32 s;
+        bytes4 s_bytes4;
 
         // sign [0],skip
         v = 2;
-        s = 0;
-        bytes memory _sign0 = abi.encodePacked(v, s);
+        s_bytes4 = 0;
+        bytes memory _sign0 = abi.encodePacked(v, s_bytes4);
 
         // sign [1],  approvedHashes
         vm.prank(address(SCwallet1));
@@ -231,28 +231,28 @@ contract KeyStoreEOATest is Test {
 
         // sign [2~3], skip
         v = 2;
-        s = bytes32(uint256(1));
-        bytes memory _sign2 = abi.encodePacked(v, s);
+        s_bytes4 = bytes4(uint32(1));
+        bytes memory _sign2 = abi.encodePacked(v, s_bytes4);
 
         // sign [4]
         bytes memory _sign4 = _signMsg(signMessageHash, EOAPrivatekey4);
 
         // sign [5], skip
         v = 2;
-        s = 0;
-        bytes memory _sign5 = abi.encodePacked(v, s);
+        s_bytes4 = 0;
+        bytes memory _sign5 = abi.encodePacked(v, s_bytes4);
 
         // sign [6]
         /* 
          EIP-1271 signature
-                    s: Length of signature data 
+                    s: bytes4 Length of signature data 
                     r: no set
                     dynamic data: signature data
          */
         v = 0;
         bytes memory _signTemp = _signMsg(signMessageHash, 0);
-        s = bytes32(uint256(_signTemp.length));
-        bytes memory _sign6 = abi.encodePacked(v, s, _signTemp);
+        s_bytes4 = bytes4(uint32(_signTemp.length));
+        bytes memory _sign6 = abi.encodePacked(v, s_bytes4, _signTemp);
 
         bytes memory guardianSignature = abi.encodePacked(_sign0, _sign1, _sign2, _sign4, _sign5, _sign6);
 

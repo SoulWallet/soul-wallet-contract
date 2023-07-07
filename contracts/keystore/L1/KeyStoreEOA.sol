@@ -19,7 +19,7 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
         assembly {
             /* not memory-safe */
             // if ((key >> 160) > 0) { revert Errors.INVALID_KEY(); }
-            if gt(sar(160, key), 0) {
+            if gt(shr(160, key), 0) {
                 // 0xce7045bd == Errors.INVALID_KEY.selector
                 mstore(0, 0xce7045bd)
                 revert(0, 4)
@@ -121,17 +121,17 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
             └──────────────┴──────────────┴──────────────┴──────────────┘
 
             one signature structure:
-            ┌──────────┬──────────┬──────────┬────────────────┐
-            │          │          │          │                │
-            │    v     │     s    │   r      │  dynamic data  │
-            │  bytes1  │  bytes32 │ bytes32  │     dynamic    │
-            │  (must)  │(optional)│(optional)│   (optional)   │
-            └──────────┴──────────┴──────────┴────────────────┘
+            ┌──────────┬──────────────┬──────────┬────────────────┐
+            │          │              │          │                │
+            │    v     │       s      │   r      │  dynamic data  │
+            │  bytes1  │bytes4|bytes32│  bytes32 │     dynamic    │
+            │  (must)  │  (optional)  │(optional)│   (optional)   │
+            └──────────┴──────────────┴──────────┴────────────────┘
 
             data logic description:
                 v = 0
                     EIP-1271 signature
-                    s: Length of signature data 
+                    s: bytes4 Length of signature data 
                     r: no set
                     dynamic data: signature data
 
@@ -142,15 +142,21 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                 
                 v = 2
                     skip
-                    s: skip tims
+                    s: bytes4 skip tims
                     r: no set
 
                 v > 2
                     EOA signature
+                    r: bytes32
+                    s: bytes32
+
+            ==============================================================
+            Note: Why is the definition of 's' unstable (bytes4|bytes32)?
+                  If 's' is defined as bytes32, it incurs lower read costs( shr(224, calldataload() -> calldataload() ). However, to prevent arithmetic overflow, all calculations involving 's' need to be protected against overflow, which leads to higher overhead.
+                  If, in certain cases, 's' is defined as bytes4 (up to 4GB), there is no need to perform overflow prevention under the current known block gas limit.
+                  Overall, it is more suitable for both Layer1 and Layer2. 
          */
         uint8 v;
-        bytes32 r;
-        bytes32 s;
         uint256 cursor = 0;
 
         uint256 skipCount = 0;
@@ -166,15 +172,21 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                 /*
                     v = 0
                         EIP-1271 signature
-                        s: Length of signature data 
+                        s: bytes4 Length of signature data 
                         r: no set
                         dynamic data: signature data
                  */
+                uint256 sigLen;
+                uint256 cursorEnd;
                 assembly ("memory-safe") {
-                    s := calldataload(add(signatures.offset, 1))
+                    // read 's' as bytes4
+                    sigLen := shr(224, calldataload(add(signatures.offset, 1)))
+
+                    cursorEnd := add(5, sigLen) // see Note line 154
+                    cursor := add(cursor, cursorEnd)
                 }
-                uint256 cursorEnd = 33 + uint256(s);
-                bytes calldata dynamicData = signatures[33:cursorEnd];
+
+                bytes calldata dynamicData = signatures[5:cursorEnd];
                 {
                     (bool success, bytes memory result) = guardians[i].staticcall(
                         abi.encodeWithSelector(IERC1271.isValidSignature.selector, signHash, dynamicData)
@@ -185,8 +197,6 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                         "contract signature invalid"
                     );
                 }
-
-                cursor += cursorEnd;
             } else if (v == 1) {
                 /* 
                     v = 1
@@ -196,44 +206,45 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                  */
                 bytes32 key = _approveKey(guardians[i], signHash);
                 require(approvedHashes[key] == 1, "hash not approved");
-
-                cursor += 1;
+                unchecked {
+                    cursor += 1; // see Note line 154
+                }
             } else if (v == 2) {
                 /* 
                     v = 2
                         skip
-                        s: skip tims
+                        s: bytes4 skip tims
                         r: no set
                  */
+                uint256 skipTimes;
                 assembly ("memory-safe") {
-                    s := calldataload(add(signatures.offset, 1))
-                }
-                uint256 skipTimes = uint256(s);
-                i += skipTimes;
+                    // read 's' as bytes4
+                    skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
 
-                unchecked {
-                    skipCount += (skipTimes + 1);
+                    i := add(i, skipTimes) // see Note line 154
+                    skipCount := add(skipCount, add(skipTimes, 1))
+                    cursor := add(cursor, 5)
                 }
-
-                cursor += 33;
             } else {
                 /* 
                     v > 2
                         EOA signature
                  */
+                bytes32 s;
+                bytes32 r;
                 assembly ("memory-safe") {
                     s := calldataload(add(signatures.offset, 1))
                     r := calldataload(add(signatures.offset, 33))
+
+                    cursor := add(cursor, 65) // see Note line 154
                 }
                 require(
                     guardians[i] == ECDSA.recover(signHash.toEthSignedMessageHash(), v, r, s),
                     "guardian signature invalid"
                 );
-
-                cursor += 65;
             }
             unchecked {
-                i++;
+                i++; // see Note line 154
             }
         }
         if (guardiansLen - skipCount < threshold) {

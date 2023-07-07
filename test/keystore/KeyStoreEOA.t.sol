@@ -156,7 +156,7 @@ contract KeyStoreEOATest is Test {
         }
     }
 
-    function _signMsg(bytes32 messageHash, uint256 privateKey) private view returns (bytes memory) {
+    function _signMsg(bytes32 messageHash, uint256 privateKey) private pure returns (bytes memory) {
         if (privateKey == 0) {
             // SC wallet
             bool _valid = true;
@@ -262,5 +262,77 @@ contract KeyStoreEOATest is Test {
 
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
         require(_keyStoreInfo.key == newKey, "keyStoreInfo.key != newKey");
+    }
+
+    function test_updateGuardian() public {
+        bytes32 initialKey;
+        address _initialKey;
+        uint256 _initialPrivateKey;
+        (_initialKey, _initialPrivateKey) = makeAddrAndKey("initialKey");
+        initialKey = bytes32(uint256(uint160(_initialKey)));
+        bytes32 initialGuardianHash = keccak256("0x1");
+        uint64 initialGuardianSafePeriod = 2 days;
+
+        bytes32 slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+
+        /*
+                function setGuardian(
+                    bytes32 initialKey,
+                    bytes32 initialGuardianHash,
+                    uint64 initialGuardianSafePeriod,
+                    bytes32 newGuardianHash,
+                    bytes calldata keySignature
+                ) external 
+             */
+        bytes32 newGuardianHash = keccak256("0x2");
+        uint256 nonce = keyStoreEOA.nonce(slot);
+        //return keccak256(abi.encode(address(this), slot, _nonce, data)).toEthSignedMessageHash();
+        bytes32 messageHash =
+            keccak256(abi.encode(address(keyStoreEOA), slot, nonce, newGuardianHash)).toEthSignedMessageHash();
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, messageHash);
+        bytes memory keySignature = abi.encodePacked(r, s, v);
+        keyStoreEOA.setGuardian(
+            initialKey, initialGuardianHash, initialGuardianSafePeriod, newGuardianHash, keySignature
+        );
+        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+        require(
+            _keyStoreInfo.pendingGuardianHash == newGuardianHash, "keyStoreInfo.pendingGuardianHash != newGuardianHash"
+        );
+        require(_keyStoreInfo.guardianHash == initialGuardianHash, "keyStoreInfo.guardianHash != initialGuardianHash");
+        require(
+            _keyStoreInfo.guardianActivateAt == (block.timestamp + initialGuardianSafePeriod),
+            "keyStoreInfo.guardianActivateAt != ( block.timestamp+initialGuardianSafePeriod)"
+        );
+        for (uint256 i = 0; i < 5; i += 0.6 days) {
+            uint256 snapshotId = vm.snapshot();
+
+            bytes32 initialKey_new_1 = bytes32(uint256(uint160(address(0x2))));
+            nonce = keyStoreEOA.nonce(slot);
+            messageHash =
+                keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_1)).toEthSignedMessageHash();
+            (v, r, s) = vm.sign(_initialPrivateKey, messageHash);
+            keySignature = abi.encodePacked(r, s, v);
+            keyStoreEOA.setKey(
+                initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_1, keySignature
+            );
+
+            _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+            require(_keyStoreInfo.key == initialKey_new_1, "keyStoreInfo.key != initialKey_new_1");
+            if (i < initialGuardianSafePeriod) {
+                require(
+                    _keyStoreInfo.guardianHash == initialGuardianHash,
+                    "keyStoreInfo.guardianHash != initialGuardianHash"
+                );
+                require(
+                    _keyStoreInfo.pendingGuardianHash == newGuardianHash,
+                    "keyStoreInfo.pendingGuardianHash != newGuardianHash"
+                );
+            } else {
+                require(_keyStoreInfo.guardianHash == newGuardianHash, "keyStoreInfo.guardianHash != newGuardianHash");
+                require(_keyStoreInfo.pendingGuardianHash == 0, "keyStoreInfo.pendingGuardianHash != 0");
+            }
+
+            vm.revertTo(snapshotId);
+        }
     }
 }

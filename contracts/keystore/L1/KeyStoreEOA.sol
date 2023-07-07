@@ -225,7 +225,6 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                     s := calldataload(add(signatures.offset, 1))
                     r := calldataload(add(signatures.offset, 33))
                 }
-                address signer = ECDSA.recover(signHash.toEthSignedMessageHash(), v, r, s);
                 require(
                     guardians[i] == ECDSA.recover(signHash.toEthSignedMessageHash(), v, r, s),
                     "guardian signature invalid"

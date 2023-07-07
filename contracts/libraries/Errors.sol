@@ -33,4 +33,11 @@ library Errors {
     error SAME_LOGIC_ADDRESS();
     error UPGRADE_FAILED();
     error NOT_IMPLEMENTED();
+    error INVALID_SIGNATURE();
+    error ALERADY_INITIALIZED();
+    error INVALID_KEY();
+    error NOT_INITIALIZED();
+    error INVALID_TIME_RANGE();
+    error UNAUTHORIZED();
+    error INVALID_DATA();
 }

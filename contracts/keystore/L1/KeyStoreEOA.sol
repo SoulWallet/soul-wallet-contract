@@ -176,11 +176,10 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                         r: no set
                         dynamic data: signature data
                  */
-                uint256 sigLen;
                 uint256 cursorEnd;
                 assembly ("memory-safe") {
                     // read 's' as bytes4
-                    sigLen := shr(224, calldataload(add(signatures.offset, 1)))
+                    let sigLen := shr(224, calldataload(add(signatures.offset, 1)))
 
                     cursorEnd := add(5, sigLen) // see Note line 154
                     cursor := add(cursor, cursorEnd)
@@ -216,10 +215,9 @@ contract KeyStoreEOA is BaseKeyStore, IKeystoreProof {
                         s: bytes4 skip tims
                         r: no set
                  */
-                uint256 skipTimes;
                 assembly ("memory-safe") {
                     // read 's' as bytes4
-                    skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
+                    let skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
 
                     i := add(i, skipTimes) // see Note line 154
                     skipCount := add(skipCount, add(skipTimes, 1))

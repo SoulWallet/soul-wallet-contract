@@ -35,7 +35,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         return _getNonce(slot);
     }
 
-    function _getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
+    function _getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod)
         private
         pure
         returns (bytes32 slot)

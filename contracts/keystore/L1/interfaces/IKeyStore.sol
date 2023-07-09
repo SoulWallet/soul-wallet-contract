@@ -74,11 +74,11 @@ interface IKeyStore {
         ├──────────┼────────────────────────────────┤  KeyStoreInfo  │                  │
         │  offset 4│ guardianActivateAt             │                │                  │
         ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 5│ guardianSafePeriod             │                │   guardianInfo   │
+        │  offset 4│ guardianSafePeriod             │                │   guardianInfo   │
+        ├─────────-┼────────────────────────────────┤                │                  │
+        │  offset 4│ pendingGuardianSafePeriod      │                │                  │
         ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 6│ pendingGuardianSafePeriod      │                │                  │
-        ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 7│ guardianSafePeriodActivateAt   │                │                  │
+        │  offset 4│ guardianSafePeriodActivateAt   │                │                  │
         └──────────┴────────────────────────────────┴────────────────┴──────────────────┘
     
     */

@@ -2,3 +2,4 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @source/=contracts/
+@solmate/=lib/solmate/src/

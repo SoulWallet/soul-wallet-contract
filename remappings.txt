@@ -3,3 +3,4 @@
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @source/=contracts/
 @solmate/=lib/solmate/src/
+@arbitrum/nitro-contracts=lib/nitro-contracts/

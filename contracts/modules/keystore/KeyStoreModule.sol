@@ -1,12 +1,12 @@
 pragma solidity ^0.8.17;
 
 import "../BaseModule.sol";
-import "./IOptimismKeyStoreModule.sol";
+import "./IKeyStoreModule.sol";
 import "./BlockVerifier.sol";
 import "./MerklePatriciaVerifier.sol";
 import "./IKeystoreProof.sol";
 
-contract OptimismKeyStoreModule is IOptimismKeyStoreModule, BaseModule {
+contract KeyStoreModule is IKeyStoreModule, BaseModule {
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
     bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
 

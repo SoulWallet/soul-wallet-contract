@@ -10,6 +10,5 @@ struct BlockInfo {
 
 interface IKnownStateRootWithHistory {
     function isKnownStateRoot(bytes32 _stateRoot) external returns (bool);
-    function insertNewStateRoot(bytes memory blockInfo) external;
     function stateRootInfo(bytes32 _stateRoot) external view returns (bool result, BlockInfo memory info);
 }

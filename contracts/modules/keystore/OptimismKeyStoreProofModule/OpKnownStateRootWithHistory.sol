@@ -1,12 +1,12 @@
 pragma solidity ^0.8.17;
 
-import "./IKnownStateRootWithHistory.sol";
+import "../IKnownStateRootWithHistory.sol";
 import "./IL1Block.sol";
-import "./BlockVerifier.sol";
+import "../BlockVerifier.sol";
 
-contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
+contract OpKnownStateRootWithHistory is IKnownStateRootWithHistory {
     mapping(uint256 => BlockInfo) public stateRoots;
-    uint256 public constant ROOT_HISTORY_SIZE = 10;
+    uint256 public constant ROOT_HISTORY_SIZE = 30;
     uint256 public currentRootIndex = 0;
     // https://community.optimism.io/docs/developers/build/differences/#accessing-l1-information
     IL1Block public immutable L1_BLOCK;
@@ -35,7 +35,7 @@ contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
         return false;
     }
 
-    function insertNewStateRoot(bytes memory blockInfo) external override {
+    function insertNewStateRoot(bytes memory blockInfo) external {
         bytes32 blockHash = L1_BLOCK.hash();
         (bytes32 stateRoot, uint256 blockTimestamp, uint256 blockNumber) =
             BlockVerifier.extractStateRootAndTimestamp(blockInfo, blockHash);
@@ -50,12 +50,7 @@ contract KnownStateRootWithHistory is IKnownStateRootWithHistory {
         stateRoots[newRootIndex].blockTimestamp = blockTimestamp;
     }
 
-    function stateRootInfo(bytes32 _stateRoot)
-        external
-        view
-        override
-        returns (bool result, BlockInfo memory info)
-    {
+    function stateRootInfo(bytes32 _stateRoot) external view override returns (bool result, BlockInfo memory info) {
         if (_stateRoot == 0) {
             return (false, info);
         }

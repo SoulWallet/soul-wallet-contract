@@ -142,7 +142,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof {
                 
                 v = 2
                     skip
-                    s: bytes4 skip tims
+                    s: bytes4 skip times
                     r: no set
 
                 v > 2
@@ -212,7 +212,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof {
                 /* 
                     v = 2
                         skip
-                        s: bytes4 skip tims
+                        s: bytes4 skip times
                         r: no set
                  */
                 assembly ("memory-safe") {

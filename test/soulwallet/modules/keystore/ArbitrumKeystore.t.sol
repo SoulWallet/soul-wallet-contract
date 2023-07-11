@@ -18,11 +18,11 @@ contract ArbKeystoreTest is Test, MockKeyStoreData {
         l1Contract = new L1BlockInfoPassing(address(0), address(inboxMock));
         l2Contract.updateL1Target(address(l1Contract));
         l1Contract.updateL2Target(address(l2Contract));
+        vm.roll(TEST_BLOCK_NUMBER);
     }
 
     function testL1ToL2Message() public {
-        uint256 currentBlockNumber = block.number;
-        l1Contract.passBlockHashInL2{value: 1 ether}(currentBlockNumber, 0.1 ether, 1_000_000, 10 gwei);
+        l1Contract.passBlockHashInL2{value: 1 ether}(0.1 ether, 1_000_000, 10 gwei);
     }
 
     function testMockSetHash() public {

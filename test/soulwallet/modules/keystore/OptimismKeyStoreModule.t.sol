@@ -13,6 +13,10 @@ contract MockL1Block is IL1Block, MockKeyStoreData {
     function hash() external returns (bytes32) {
         return TEST_BLOCK_HASH;
     }
+
+    function number() external returns (uint256) {
+        return TEST_BLOCK_NUMBER;
+    }
 }
 
 contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
@@ -56,7 +60,8 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
 
     function proofL1KeyStore() internal {
         bytes memory blockInfoParameter = BLOCK_INFO_BYTES;
-        knownStateRootWithHistory.insertNewStateRoot(blockInfoParameter);
+        knownStateRootWithHistory.setBlockHash();
+        knownStateRootWithHistory.insertNewStateRoot(TEST_BLOCK_NUMBER, blockInfoParameter);
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
         keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER, TEST_KEY_PROOF);
     }

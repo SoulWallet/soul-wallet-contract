@@ -20,12 +20,15 @@ contract L1BlockInfoPassing is Ownable {
         l2Target = _l2Target;
     }
 
-    function passBlockHashInL2(uint256 _blockNumber, uint256 _maxSubmissionCost, uint256 _maxGas, uint256 _gasPriceBid)
+    function passBlockHashInL2(uint256 _maxSubmissionCost, uint256 _maxGas, uint256 _gasPriceBid)
         public
         payable
         returns (uint256)
     {
-        // does it need check blockNumber not to new, to prevent blockhash reorg?
+        // should not get the current blockhash,
+        // block.blockhash(uint blockNumber) returns (bytes32): hash of the given block - only works for 256 most recent, excluding current, blocks
+        // check https://github.com/foundry-rs/foundry/pull/1890
+        uint256 _blockNumber = block.number - 1;
         bytes32 _blockhash = blockhash(_blockNumber);
 
         bytes memory data = abi.encodeCall(ArbKnownStateRootWithHistory.setBlockHash, (_blockNumber, _blockhash));

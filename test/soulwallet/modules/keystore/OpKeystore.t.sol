@@ -11,6 +11,10 @@ contract MockL1Block is IL1Block, MockKeyStoreData {
     function hash() external returns (bytes32) {
         return TEST_BLOCK_HASH;
     }
+
+    function number() external returns (uint256) {
+        return TEST_BLOCK_NUMBER;
+    }
 }
 
 contract OpKeystoreTest is Test, MockKeyStoreData {
@@ -65,7 +69,8 @@ contract OpKeystoreTest is Test, MockKeyStoreData {
 
     function insertStateRoot() internal {
         bytes memory blockInfoParameter = BLOCK_INFO_BYTES;
-        knownStateRootWithHistory.insertNewStateRoot(blockInfoParameter);
+        knownStateRootWithHistory.setBlockHash();
+        knownStateRootWithHistory.insertNewStateRoot(TEST_BLOCK_NUMBER, blockInfoParameter);
     }
     /*
     {

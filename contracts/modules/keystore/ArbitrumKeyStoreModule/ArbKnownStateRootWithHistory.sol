@@ -7,11 +7,14 @@ import "@arbitrum/nitro-contracts/src/libraries/AddressAliasHelper.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ArbKnownStateRootWithHistory is IKnownStateRootWithHistory, Ownable {
-    mapping(uint256 => BlockInfo) public stateRoots;
-    mapping(uint256 => bytes32) public blockHashs;
     uint256 public constant ROOT_HISTORY_SIZE = 30;
     uint256 public currentRootIndex = 0;
     address public l1Target;
+
+    mapping(uint256 => BlockInfo) public stateRoots;
+    mapping(uint256 => bytes32) public blockHashs;
+
+    event L1BLockSyncd(uint256 indexed blockNumber, bytes32 blockHash);
 
     constructor(address _l1Target) {
         l1Target = _l1Target;
@@ -84,6 +87,9 @@ contract ArbKnownStateRootWithHistory is IKnownStateRootWithHistory, Ownable {
     function setBlockHash(uint256 l1BlockNumber, bytes32 l1BlockHash) external {
         // To check that message came from L1, we check that the sender is the L1 contract's L2 alias.
         require(msg.sender == AddressAliasHelper.applyL1ToL2Alias(l1Target), "blockhash only updateable by L1Target");
+        require(l1BlockNumber != 0, "l1 block number is 0");
+        require(l1BlockHash != bytes32(0), "l1 block hash is 0");
         blockHashs[l1BlockNumber] = l1BlockHash;
+        emit L1BLockSyncd(l1BlockNumber, l1BlockHash);
     }
 }

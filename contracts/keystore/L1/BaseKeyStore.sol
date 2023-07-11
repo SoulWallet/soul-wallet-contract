@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./KeyStoreStorage.sol";
+import "../../libraries/KeyStoreSlotLib.sol";
 
 abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
     function _validateKeySignature(bytes32 key, bytes32 signHash, bytes calldata keySignature) internal virtual;
@@ -40,7 +41,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         pure
         returns (bytes32 slot)
     {
-        return keccak256(abi.encode(initialKey, initialGuardianHash, guardianSafePeriod));
+        return KeyStoreSlotLib.getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
     }
 
     function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod)

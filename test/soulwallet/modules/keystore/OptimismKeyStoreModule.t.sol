@@ -8,6 +8,7 @@ import "@source/modules/keystore/OptimismKeyStoreProofModule/IL1Block.sol";
 import "@source/modules/keystore/KeyStoreModule.sol";
 import "../../base/SoulWalletInstence.sol";
 import "./MockKeyStoreData.sol";
+import "@source/libraries/KeyStoreSlotLib.sol";
 
 contract MockL1Block is IL1Block, MockKeyStoreData {
     function hash() external returns (bytes32) {
@@ -20,6 +21,8 @@ contract MockL1Block is IL1Block, MockKeyStoreData {
 }
 
 contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
+    using stdStorage for StdStorage;
+
     OpKnownStateRootWithHistory knownStateRootWithHistory;
     MockL1Block mockL1Block;
     KeystoreProof keystoreProofContract;
@@ -30,6 +33,11 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
     address public walletOwner;
     address public newOwner = TEST_NEW_OWNER;
     uint256 public walletOwnerPrivateKey;
+    bytes32 public walletL1Slot;
+    address public initialKey;
+    bytes32 public initialKeyBytes32;
+    bytes32 public initialGuardianHash;
+    uint64 public initialGuardianSafePeriod;
 
     function setUp() public {
         (walletOwner, walletOwnerPrivateKey) = makeAddrAndKey("owner");
@@ -38,16 +46,39 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         keystoreProofContract =
             new KeystoreProof(0xACB5b53F9F193b99bcd8EF8544ddF4c398DE24a3,address(knownStateRootWithHistory));
         optimismKeyStoreModule = new KeyStoreModule(address(keystoreProofContract));
+
+        initialKey = makeAddr("initialKey");
+        initialKeyBytes32 = bytes32(uint256(uint160(initialKey)));
+        initialGuardianHash = keccak256("0x1");
+        initialGuardianSafePeriod = 2 days;
+        walletL1Slot = KeyStoreSlotLib.getSlot(initialKeyBytes32, initialGuardianHash, initialGuardianSafePeriod);
     }
 
     function deployWallet() private {
         bytes[] memory modules = new bytes[](1);
         // mock encode slot postion in l1
-        modules[0] = abi.encodePacked(optimismKeyStoreModule, abi.encode(0x5));
+        bytes memory keystoreModuleInitData =
+            abi.encode(initialKeyBytes32, initialGuardianHash, initialGuardianSafePeriod);
+        modules[0] = abi.encodePacked(optimismKeyStoreModule, keystoreModuleInitData);
         bytes32 salt = bytes32(0);
         bytes[] memory plugins = new bytes[](0);
         soulWalletInstence = new SoulWalletInstence(address(0), walletOwner,  modules, plugins,  salt);
         soulWallet = soulWalletInstence.soulWallet();
+
+        bytes32 l1Slot = stdstore.target(address(optimismKeyStoreModule)).sig("l1Slot(address)").with_key(
+            address(soulWallet)
+        ).depth(0).read_bytes32();
+        assertEq(walletL1Slot, l1Slot);
+        hackModifyKeyStoreSLot();
+    }
+
+    function hackModifyKeyStoreSLot() private {
+        // hack: modify the wallet slot to TEST_SLOT for hardcoding proof testing
+        stdstore.target(address(optimismKeyStoreModule)).sig("l1Slot(address)").with_key(address(soulWallet)).depth(0)
+            .checked_write(TEST_SLOT);
+        stdstore.target(address(keystoreProofContract)).sig("l1SlotToSigningKey(bytes32)").with_key(walletL1Slot).depth(
+            0
+        ).checked_write(TEST_NEW_OWNER);
     }
 
     function test_setUp() public {
@@ -67,6 +98,11 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
     }
 
     function test_setUpWithKeyStoreValueExist() public {
+        // hack manually set the proofy key owner
+        stdstore.target(address(keystoreProofContract)).sig("l1SlotToSigningKey(bytes32)").with_key(walletL1Slot).depth(
+            0
+        ).checked_write(TEST_NEW_OWNER);
+
         proofL1KeyStore();
         deployWallet();
         assertEq(soulWallet.isOwner(walletOwner), false);

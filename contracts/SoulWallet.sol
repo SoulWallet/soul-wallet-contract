@@ -70,12 +70,21 @@ contract SoulWallet is
         bytes calldata guardHookInputData;
         (validationData, sigValid, guardHookInputData) = _isValidUserOp(userOpHash, userOp.signature);
 
-        sigValid = sigValid && guardHook(userOp, userOpHash, guardHookInputData);
+        /* 
+          Why using the current "non-gas-optimized" approach instead of using 
+          `sigValid = sigValid && guardHook(userOp, userOpHash, guardHookInputData);` :
+          
+          When data is executed on the blockchain, if `sigValid = true`, the gas cost remains consistent.
+          However, the benefits of using this approach are quite apparent:
+          By using "semi-valid" signatures off-chain to estimate gas fee (sigValid will always be false), 
+          the estimated fee can include a portion of the execution cost of `guardHook`. 
+         */
+        bool guardHookResult = guardHook(userOp, userOpHash, guardHookInputData);
 
         // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
         // validUntil and validAfter is already packed in signatureData.validationData,
         // and aggregator is address(0), so we just need to add sigFailed flag.
-        validationData = validationData | (sigValid ? 0 : SIG_VALIDATION_FAILED);
+        validationData = validationData | ((sigValid && guardHookResult) ? 0 : SIG_VALIDATION_FAILED);
     }
 
     function upgradeTo(address newImplementation) external onlyModule {

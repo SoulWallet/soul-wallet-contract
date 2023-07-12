@@ -4,8 +4,8 @@ import "../BaseModule.sol";
 import "./IKeyStoreModule.sol";
 import "./BlockVerifier.sol";
 import "./MerklePatriciaVerifier.sol";
-import "./IKeystoreProof.sol";
 import "../../libraries/KeyStoreSlotLib.sol";
+import "@source/keystore/interfaces/IKeystoreProof.sol";
 
 contract KeyStoreModule is IKeyStoreModule, BaseModule {
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));

@@ -2,7 +2,7 @@ pragma solidity ^0.8.17;
 
 import "./IKnownStateRootWithHistory.sol";
 import "./MerklePatriciaVerifier.sol";
-import "./IKeystoreProof.sol";
+import "@source/keystore/interfaces/IKeystoreProof.sol";
 
 contract KeystoreProof is IKeystoreProof {
     mapping(bytes32 => address) public l1SlotToSigningKey;

@@ -3,6 +3,8 @@
   "scripts": {
     "build": "forge build --sizes",
     "test": "forge test -vvv",
+    "deploy:keystore": "forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --fork-url $RPC_URL --broadcast",
+    "deploy:soulwallet": "forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --fork-url $RPC_URL --broadcast",
     "gas-report": "forge test --gas-report"
   },
   "devDependencies": {

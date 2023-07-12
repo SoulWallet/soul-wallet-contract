@@ -1,14 +1,17 @@
 name: test
 
 on:
-    push:
-      branches:
-        - '*'
-    pull_request:
-      types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - "*"
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 permissions:
   pull-requests: write
+  contents: "read"
+  id-token: "write"
+  issues: "write"
 
 jobs:
   check:
@@ -31,7 +34,7 @@ jobs:
         run: |
           forge --version
           forge build --sizes
-        id: build         
+        id: build
 
       # Add any step generating a gas report to a temporary file named gasreport.ansi. For example:
       - name: Run tests

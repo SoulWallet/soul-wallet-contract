@@ -20,3 +20,6 @@
 [submodule "lib/solmate"]
 	path = lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "lib/nitro-contracts"]
+	path = lib/nitro-contracts
+	url = https://github.com/OffchainLabs/nitro-contracts

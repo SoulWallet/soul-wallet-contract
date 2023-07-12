@@ -1,12 +1,13 @@
 pragma solidity ^0.8.17;
 
 import "../BaseModule.sol";
-import "./IOptimismKeyStoreModule.sol";
+import "./IKeyStoreModule.sol";
 import "./BlockVerifier.sol";
 import "./MerklePatriciaVerifier.sol";
 import "./IKeystoreProof.sol";
+import "../../libraries/KeyStoreSlotLib.sol";
 
-contract OptimismKeyStoreModule is IOptimismKeyStoreModule, BaseModule {
+contract KeyStoreModule is IKeyStoreModule, BaseModule {
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
     bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
 
@@ -55,9 +56,11 @@ contract OptimismKeyStoreModule is IOptimismKeyStoreModule, BaseModule {
     }
     // when wallet add keystore module, it will call this function to set the l1keystore slot mapping
 
-    function _init(bytes calldata data) internal virtual override {
+    function _init(bytes calldata _data) internal virtual override {
         address _sender = sender();
-        (bytes32 walletKeyStoreSlot) = abi.decode(data, (bytes32));
+        (bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod) =
+            abi.decode(_data, (bytes32, bytes32, uint64));
+        bytes32 walletKeyStoreSlot = KeyStoreSlotLib.getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
         require(walletKeyStoreSlot != bytes32(0), "wallet slot needs to set");
         l1Slot[_sender] = walletKeyStoreSlot;
 

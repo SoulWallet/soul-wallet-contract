@@ -15,8 +15,6 @@ import "@source/keystore/L1/KeyStore.sol";
 import "./DeployHelper.sol";
 
 contract KeystoreDeployer is Script, DeployHelper {
-    address deployer;
-    uint256 privateKey;
     address private constant OP_L1_BLOCK_ADDRESS = 0x4200000000000000000000000000000000000015;
 
     address l1KeyStoreAddress;
@@ -25,17 +23,17 @@ contract KeystoreDeployer is Script, DeployHelper {
     address arbL1KeyStorePassingAddress;
 
     function run() public {
-        privateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
-
         proxyAdminPrivateKey = vm.envUint("PROXY_ADMIN_PRIVATE_KEY");
         proxyAdminAddress = vm.addr(proxyAdminPrivateKey);
         require(proxyAdminAddress != address(0), "proxyAdminAddress not provided");
-        deployer = vm.addr(privateKey);
-        console.log("deployer address", deployer);
         vm.startBroadcast(privateKey);
         Network network = getNetwork();
         if (network == Network.Mainnet) {
             console.log("deploy keystore contract on mainnet");
+            mainnetDeploy();
+        } else if (network == Network.Goerli) {
+            console.log("deploy keystore contract on Goerli");
+            //Goerli deploy same logic as mainnet
             mainnetDeploy();
         } else if (network == Network.Arbitrum) {
             console.log("deploy keystore contract on Arbitrum");
@@ -46,6 +44,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         } else if (network == Network.Anvil) {
             console.log("deploy keystore contract on Anvil");
             AnvilDeploy();
+        } else if (network == Network.OptimismGoerli) {
+            console.log("deploy soul wallet contract on OptimismGoerli");
+            opDeploy();
         } else {
             console.log("deploy keystore contract on testnet");
         }
@@ -56,30 +57,6 @@ contract KeystoreDeployer is Script, DeployHelper {
         // opDeploy();
         // arbDeploy();
         mainnetDeploy();
-    }
-
-    function deploySingletonFactory() internal {
-        if (address(SINGLETON_FACTORY).code.length == 0) {
-            console.log("send 1 eth to SINGLE_USE_FACTORY_ADDRESS");
-            string[] memory sendEthInputs = new string[](7);
-            sendEthInputs[0] = "cast";
-            sendEthInputs[1] = "send";
-            sendEthInputs[2] = "--private-key";
-            sendEthInputs[3] = LibString.toHexString(privateKey);
-            // ABI encoded "gm", as a hex string
-            sendEthInputs[4] = LibString.toHexString(SINGLE_USE_FACTORY_ADDRESS);
-            sendEthInputs[5] = "--value";
-            sendEthInputs[6] = "1ether";
-            bytes memory sendEthRes = vm.ffi(sendEthInputs);
-            console.log("deploy singleton factory");
-            string[] memory inputs = new string[](3);
-            inputs[0] = "cast";
-            inputs[1] = "publish";
-            // ABI encoded "gm", as a hex string
-            inputs[2] =
-                "0xf9016c8085174876e8008303c4d88080b90154608060405234801561001057600080fd5b50610134806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80634af63f0214602d575b600080fd5b60cf60048036036040811015604157600080fd5b810190602081018135640100000000811115605b57600080fd5b820183602082011115606c57600080fd5b80359060200191846001830284011164010000000083111715608d57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550509135925060eb915050565b604080516001600160a01b039092168252519081900360200190f35b6000818351602085016000f5939250505056fea26469706673582212206b44f8a82cb6b156bfcc3dc6aadd6df4eefd204bc928a4397fd15dacf6d5320564736f6c634300060200331b83247000822470";
-            bytes memory res = vm.ffi(inputs);
-        }
     }
 
     function mainnetDeploy() private {
@@ -104,8 +81,11 @@ contract KeystoreDeployer is Script, DeployHelper {
     function arbDeploy() private {
         l1KeyStoreAddress = vm.envAddress("L1_KEYSTORE_ADDRESS");
         require(l1KeyStoreAddress != address(0), "L1_KEYSTORE_ADDRESS not provided");
+        require(l1KeyStoreAddress.code.length > 0, "l1KeyStoreAddress not deployed");
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
         arbL1KeyStorePassingAddress = vm.envAddress("ARB_L1_KEYSTORE_PASSING_ADDRESS");
+        require(arbL1KeyStorePassingAddress != address(0), "ARB_L1_KEYSTORE_PASSING_ADDRESS not provided");
+        require(arbL1KeyStorePassingAddress.code.length > 0, "arbL1KeyStorePassingAddress needs be deployed");
 
         address arbKnownStateRootWithHistory = deploy(
             "ArbKnownStateRootWithHistory",

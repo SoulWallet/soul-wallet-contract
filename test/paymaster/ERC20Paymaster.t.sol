@@ -11,7 +11,6 @@ import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
 
-
 using ECDSA for bytes32;
 
 import "../libraries/BytesLib.t.sol";
@@ -52,7 +51,6 @@ contract ERC20PaymasterTest is Test {
 
         paymaster = new ERC20Paymaster(entryPoint, paymasterOwner, soulWalletInstence.soulWalletFactory.address);
 
-
         vm.deal(paymasterOwner, 10000e18);
         vm.startPrank(paymasterOwner);
         entryPoint.depositTo{value: 1000e18}(address(paymaster));
@@ -69,13 +67,13 @@ contract ERC20PaymasterTest is Test {
         vm.warp(1685300000);
     }
 
-     function testSetup() external {
+    function testSetup() external {
         assertEq(address(paymaster.entryPoint()), address(entryPoint));
         assertEq(paymaster.isSupportToken(address(token)), true);
         assertEq(address(paymaster.owner()), paymasterOwner);
     }
 
-     function testWithdrawToken(uint256 _amount) external {
+    function testWithdrawToken(uint256 _amount) external {
         vm.assume(_amount < token.totalSupply());
         token.sudoMint(address(paymaster), _amount);
         vm.startPrank(paymasterOwner);
@@ -102,7 +100,7 @@ contract ERC20PaymasterTest is Test {
         bundler.post(IEntryPoint(entryPoint), op);
     }
 
-     function testERC20Paymaster() external {
+    function testERC20Paymaster() external {
         vm.deal(address(soulWallet), 1e18);
         paymaster.updatePrice(address(token));
         token.sudoMint(address(soulWallet), 1000e6);
@@ -111,12 +109,12 @@ contract ERC20PaymasterTest is Test {
         (UserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
         vm.breakpoint("a");
-        op.paymasterAndData = BytesLibTest.concat(abi.encodePacked(address(paymaster)), abi.encode(address(token),  uint256(1000e6)));
+        op.paymasterAndData =
+            BytesLibTest.concat(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
         vm.breakpoint("b");
         op.signature = signUserOp(op, ownerKey);
         bundler.post(IEntryPoint(entryPoint), op);
     }
-
 
     function fillUserOp(ISoulWallet _sender, uint256 _key, address _to, uint256 _value, bytes memory _data)
         public
@@ -180,6 +178,4 @@ contract ERC20PaymasterTest is Test {
         vm.stopPrank();
         require(false, string(r));
     }
-
-
 }

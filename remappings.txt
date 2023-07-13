@@ -4,3 +4,4 @@
 @source/=contracts/
 @solmate/=lib/solmate/src/
 @arbitrum/nitro-contracts=lib/nitro-contracts/
+@solady=lib/solady/

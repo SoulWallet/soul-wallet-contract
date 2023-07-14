@@ -17,12 +17,16 @@ import "@openzeppelin/contracts/utils/Create2.sol";
  */
 
 contract SoulWalletFactory {
-    uint256 public immutable WALLETIMPL;
+    uint256 private immutable _WALLETIMPL;
     string public constant VERSION = "0.0.1";
 
     constructor(address _walletImpl) {
         require(_walletImpl != address(0));
-        WALLETIMPL = uint256(uint160(_walletImpl));
+        _WALLETIMPL = uint256(uint160(_walletImpl));
+    }
+
+    function walletImpl() external view returns (address) {
+        return address(uint160(_WALLETIMPL));
     }
 
     function _calcSalt(bytes memory _initializer, bytes32 _salt) private pure returns (bytes32 salt) {
@@ -33,7 +37,7 @@ contract SoulWalletFactory {
      * @notice  deploy the soul wallet contract using proxy and returns the address of the proxy. should be called by entrypoint with useropeartoin.initcode > 0
      */
     function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
-        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, WALLETIMPL);
+        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, _WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
         assembly ("memory-safe") {
             proxy := create2(0x0, add(deploymentData, 0x20), mload(deploymentData), salt)
@@ -70,7 +74,7 @@ contract SoulWalletFactory {
      * @notice  return the counterfactual address of soul wallet as it would be return by createWallet()
      */
     function getWalletAddress(bytes memory _initializer, bytes32 _salt) external view returns (address proxy) {
-        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, WALLETIMPL);
+        bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, _WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
         proxy = Create2.computeAddress(salt, keccak256(deploymentData));
     }

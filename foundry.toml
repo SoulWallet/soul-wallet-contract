@@ -25,6 +25,15 @@ via_ir = true
 
 # RPC config in .env file
 [rpc_endpoints]
-goerli = "${ETH_GOERLI_PROVIDER}"
+goerli = "${GOERLI_RPC_URL}"
+arbitrumgoerli = "${ARBITRUM_GOERLI_RPC_URL}"
+optimismgoerli = "${OPTIMISM_GOERLI_RPC_URL}"
+etherum = "${ETHERUM_RPC_URL}"
+arbitrum = "${ARBITRUM_RPC_URL}"
+optimism = "${OPTIMISM_RPC_URL}"
+
+[etherscan]
+goerli = { key = "${GOERLI_SCAN_API_KEY}", chain = "goerli" }
+optimismgoerli = { key = "${OPTIMISM_GOERLI_SCAN_API_KEY}", chain = "optimism-goerli" }
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

@@ -44,7 +44,7 @@ contract PaymasterDeployer is Script, DeployHelper {
             delpoyLocal();
         } else if (network == Network.OptimismGoerli) {
             console.log("deploy soul wallet contract on OptimismGoerli");
-            deploy();
+            delpoyLocal();
         } else {
             console.log("deploy paymaster contract on testnet");
             deploy();

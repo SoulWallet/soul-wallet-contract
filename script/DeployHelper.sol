@@ -21,6 +21,32 @@ enum Network {
     Anvil
 }
 
+library NetWorkLib {
+    function getNetwork() internal view returns (Network network) {
+        if (block.chainid == 1) {
+            return Network.Mainnet;
+        } else if (block.chainid == 3) {
+            return Network.Ropsten;
+        } else if (block.chainid == 4) {
+            return Network.Rinkeby;
+        } else if (block.chainid == 5) {
+            return Network.Goerli;
+        } else if (block.chainid == 42) {
+            return Network.Kovan;
+        } else if (block.chainid == 10) {
+            return Network.Optimism;
+        } else if (block.chainid == 42161) {
+            return Network.Arbitrum;
+        } else if (block.chainid == 31337) {
+            return Network.Anvil;
+        } else if (block.chainid == 420) {
+            return Network.OptimismGoerli;
+        } else if (block.chainid == 421613) {
+            return Network.OptimismGoerli;
+        }
+    }
+}
+
 abstract contract DeployHelper is Script {
     address deployer;
     uint256 privateKey;
@@ -68,27 +94,7 @@ abstract contract DeployHelper is Script {
     }
 
     function getNetwork() internal view returns (Network network) {
-        if (block.chainid == 1) {
-            return Network.Mainnet;
-        } else if (block.chainid == 3) {
-            return Network.Ropsten;
-        } else if (block.chainid == 4) {
-            return Network.Rinkeby;
-        } else if (block.chainid == 5) {
-            return Network.Goerli;
-        } else if (block.chainid == 42) {
-            return Network.Kovan;
-        } else if (block.chainid == 10) {
-            return Network.Optimism;
-        } else if (block.chainid == 42161) {
-            return Network.Arbitrum;
-        } else if (block.chainid == 31337) {
-            return Network.Anvil;
-        } else if (block.chainid == 420) {
-            return Network.OptimismGoerli;
-        } else if (block.chainid == 421613) {
-            return Network.OptimismGoerli;
-        }
+        return NetWorkLib.getNetwork();
     }
 
     function deploySingletonFactory() internal {

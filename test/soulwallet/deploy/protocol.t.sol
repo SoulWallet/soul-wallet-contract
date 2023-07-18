@@ -23,7 +23,10 @@ contract DeployProtocolTest is Test {
     function setUp() public {
         entryPoint = new EntryPoint();
         soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
-        soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
+        address logic = address(soulWalletLogicInstence.soulWalletLogic());
+
+        soulWalletFactory = new SoulWalletFactory(logic);
+        require(soulWalletFactory.walletImpl() == logic, "logic address not match");
 
         bundler = new Bundler();
     }

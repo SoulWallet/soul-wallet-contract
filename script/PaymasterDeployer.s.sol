@@ -28,7 +28,7 @@ contract PaymasterDeployer is Script, DeployHelper {
             console.log("deploy paymaster contract on mainnet");
             deploy();
         } else if (network == Network.Goerli) {
-            console.log("deploy keystore contract on Goerli");
+            console.log("deploy paymaster contract on Goerli");
             // same logic as localtestnet
             delpoyLocal();
         } else if (network == Network.Arbitrum) {
@@ -43,7 +43,7 @@ contract PaymasterDeployer is Script, DeployHelper {
             delpoylocalEntryPoint();
             delpoyLocal();
         } else if (network == Network.OptimismGoerli) {
-            console.log("deploy soul wallet contract on OptimismGoerli");
+            console.log("deploy paymaster contract on OptimismGoerli");
             delpoyLocal();
         } else {
             console.log("deploy paymaster contract on testnet");

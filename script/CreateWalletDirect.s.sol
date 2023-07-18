@@ -57,10 +57,10 @@ contract CreateWalletDirect is Script {
             console.log("create wallet process on mainnet");
         } else if (network == Network.Goerli) {
             console.log("create wallet process on Goerli");
-            // createWallet();
+            createWallet();
             // changeKeyStoreKeyByGuardian();
             // syncKeyStore();
-            getSlot();
+            // getSlot();
         } else if (network == Network.Arbitrum) {
             console.log("create wallet process on Arbitrum");
         } else if (network == Network.Optimism) {
@@ -103,9 +103,9 @@ contract CreateWalletDirect is Script {
             "initialize(address,address,bytes[],bytes[])", walletSigner, defaultCallbackHandler, modules, plugins
         );
         soulwalletFactory = SoulWalletFactory(loadEnvContract("SOULWALLET_FACTORY_ADDRESS"));
-        address cacluatedAddress = soulwalletFactory.getWalletAddress(initializer, bytes32(0));
+        address cacluatedAddress = soulwalletFactory.getWalletAddress(initializer, salt);
 
-        soulwalletAddress = payable(soulwalletFactory.createWallet(initializer, bytes32(0)));
+        soulwalletAddress = payable(soulwalletFactory.createWallet(initializer, salt));
         require(cacluatedAddress == soulwalletAddress, "calculated address not match");
         console.log("wallet address: ", soulwalletAddress);
     }

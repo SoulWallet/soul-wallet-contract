@@ -18,8 +18,8 @@ contract PaymasterDeployer is Script, DeployHelper {
         require(paymasterOwnerPrivateKey != 0, "PAYMASTER_OWNER_PRIVATE_KEY not provided");
         paymasterOwner = vm.addr(paymasterOwnerPrivateKey);
         require(paymasterOwner != address(0), "PAYMASTER_OWNER_ADDRESS not provided");
-        soulwalletFactory = vm.envAddress("SOUL_WALLET_FACTORY");
-        require(soulwalletFactory != address(0), "SOUL_WALLET_FACTORY not provided");
+        soulwalletFactory = vm.envAddress("SOULWALLET_FACTORY_ADDRESS");
+        require(soulwalletFactory != address(0), "SOULWALLET_FACTORY_ADDRESS not provided");
         require(address(soulwalletFactory).code.length > 0, "soulwalletFactory needs be deployed");
         vm.startBroadcast(privateKey);
 
@@ -44,6 +44,9 @@ contract PaymasterDeployer is Script, DeployHelper {
             delpoyLocal();
         } else if (network == Network.OptimismGoerli) {
             console.log("deploy paymaster contract on OptimismGoerli");
+            delpoyLocal();
+        } else if (network == Network.ArbitrumGoerli) {
+            console.log("deploy paymaster contract on ArbitrumGoerli");
             delpoyLocal();
         } else {
             console.log("deploy paymaster contract on testnet");

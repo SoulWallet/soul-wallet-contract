@@ -3,18 +3,18 @@
   "scripts": {
     "build": "forge build --sizes",
     "test": "forge test -vvv",
-    "deploy:keystore": "forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $RPC_URL --broadcast",
-    "deploy:soulwallet": "forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $RPC_URL --broadcast",
-    "deploy:singletonFactory": "forge script script/SingletonFactory.s.sol:SingletonFactory --ffi --rpc-url $RPC_URL --broadcast",
-    "deploy:paymaster": "forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $RPC_URL --broadcast",
-    "deploy:local": "npm run deploy:singletonFactory && npm run deploy:keystore && npm run deploy:soulwallet && npm run deploy:paymaster",
-    "deploy:goeril:keystore": "forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
-    "deploy:goeril:soulwallet": "forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
-    "deploy:goeril:paymaster": "forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
-    "deploy:goeril:testCreateWallet": "forge script script/CreateWalletDirect.s.sol:CreateWalletDirect --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
-    "deploy:op-goerli:keystore": "forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_SCAN_API_KEY",
-    "deploy:op-goerli:soulwallet": "forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_RPC_URL",
-    "deploy:op-goerli:paymaster": "forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_RPC_URL",
+    "deploy:keystore": "source .env && forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $RPC_URL --broadcast",
+    "deploy:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $RPC_URL --broadcast",
+    "deploy:singletonFactory": "source .env && forge script script/SingletonFactory.s.sol:SingletonFactory --ffi --rpc-url $RPC_URL --broadcast",
+    "deploy:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $RPC_URL --broadcast",
+    "deploy:local": "npm-run-all -s deploy:singletonFactory deploy:keystore deploy:soulwallet deploy:paymaster",
+    "deploy:goeril:keystore": "source .env && forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
+    "deploy:goeril:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
+    "deploy:goeril:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
+    "deploy:goeril:testCreateWallet": "source .env && forge script script/CreateWalletDirect.s.sol:CreateWalletDirect --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
+    "deploy:op-goerli:keystore": "source .env && forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_SCAN_API_KEY",
+    "deploy:op-goerli:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_RPC_URL",
+    "deploy:op-goerli:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_RPC_URL",
     "gas-report": "forge test --gas-report"
   },
   "devDependencies": {
@@ -23,6 +23,7 @@
     "dotenv": "^16.0.3",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.6.9",
+    "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
   }

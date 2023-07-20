@@ -8,6 +8,7 @@ import {
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWithHistory.sol";
 import "@source/modules/keystore/ArbitrumKeyStoreModule/ArbKnownStateRootWithHistory.sol";
+import "@source/modules/keystore/ArbitrumKeyStoreModule/L1BlockInfoPassing.sol";
 import "@source/modules/keystore/KeystoreProof.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/IL1Block.sol";
 import "@source/modules/keystore/KeyStoreModule.sol";
@@ -16,6 +17,11 @@ import "./DeployHelper.sol";
 
 contract KeystoreDeployer is Script, DeployHelper {
     address private constant OP_L1_BLOCK_ADDRESS = 0x4200000000000000000000000000000000000015;
+
+    //arb inbox contract address, https://developer.arbitrum.io/for-devs/useful-addresses
+    address private constant ARB_ONE_INBOX_ADDRESS = 0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f;
+    address private constant ARB_GOERLI_INBOX_ADDRESS = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
+    address private ARB_RUNTIME_INBOX_ADDRESS;
 
     address l1KeyStoreAddress;
     address proxyAdminAddress;
@@ -30,12 +36,17 @@ contract KeystoreDeployer is Script, DeployHelper {
         Network network = getNetwork();
         if (network == Network.Mainnet) {
             console.log("deploy keystore contract on mainnet");
+            ARB_RUNTIME_INBOX_ADDRESS = ARB_ONE_INBOX_ADDRESS;
             mainnetDeploy();
         } else if (network == Network.Goerli) {
             console.log("deploy keystore contract on Goerli");
             //Goerli deploy same logic as mainnet
+            ARB_RUNTIME_INBOX_ADDRESS = ARB_GOERLI_INBOX_ADDRESS;
             mainnetDeploy();
         } else if (network == Network.Arbitrum) {
+            console.log("deploy keystore contract on Arbitrum");
+            arbDeploy();
+        } else if (network == Network.ArbitrumGoerli) {
             console.log("deploy keystore contract on Arbitrum");
             arbDeploy();
         } else if (network == Network.Optimism) {
@@ -62,6 +73,7 @@ contract KeystoreDeployer is Script, DeployHelper {
     function mainnetDeploy() private {
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
         address keyStore = deploy("KeyStore", type(KeyStore).creationCode);
+        writeAddressToEnv("L1_KEYSTORE_ADDRESS", keyStore);
         address keyStoreModule =
             deploy("KeyStoreModule", bytes.concat(type(KeyStoreModule).creationCode, abi.encode(keyStore)));
         // deploy keystore module using proxy, the initial implemention address to SINGLE_USE_FACTORY_ADDRESS for keeping the same address with other network
@@ -72,6 +84,13 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
+        // deploy arb l1blockinfo passing on l1
+        address arbL1BlockInfoPassing = deploy(
+            "L1BlockInfoPassing",
+            bytes.concat(type(L1BlockInfoPassing).creationCode, abi.encode(EMPTY_ADDRESS, ARB_RUNTIME_INBOX_ADDRESS))
+        );
+        writeAddressToEnv("ARB_L1_KEYSTORE_PASSING_ADDRESS", arbL1BlockInfoPassing);
+
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);

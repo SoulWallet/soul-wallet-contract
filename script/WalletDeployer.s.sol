@@ -28,6 +28,9 @@ contract WalletDeployer is Script, DeployHelper {
         } else if (network == Network.Optimism) {
             console.log("deploy soul wallet contract on Optimism");
             delpoy();
+        } else if (network == Network.ArbitrumGoerli) {
+            console.log("deploy soul wallet contract on ArbitrumGoerli");
+            delpoy();
         } else if (network == Network.Anvil) {
             console.log("deploy soul wallet contract on Anvil");
             deploySingletonFactory();
@@ -45,7 +48,10 @@ contract WalletDeployer is Script, DeployHelper {
     function delpoy() private {
         address soulwalletInstance =
             deploy("SoulwalletInstance", bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS)));
-        deploy("SoulwalletFactory", bytes.concat(type(SoulWalletFactory).creationCode, abi.encode(soulwalletInstance)));
+        address soulwalletFactoryAddress = deploy(
+            "SoulwalletFactory", bytes.concat(type(SoulWalletFactory).creationCode, abi.encode(soulwalletInstance))
+        );
+        writeAddressToEnv("SOULWALLET_FACTORY_ADDRESS", soulwalletFactoryAddress);
         address managerAddress = vm.envAddress("MANAGER_ADDRESS");
         require(managerAddress != address(0), "MANAGER_ADDRESS not provided");
 

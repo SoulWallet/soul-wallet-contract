@@ -14,8 +14,8 @@ contract ArbKeystoreTest is Test, MockKeyStoreData {
 
     function setUp() public {
         inboxMock = new ArbitrumInboxMock();
-        l2Contract = new ArbKnownStateRootWithHistory(address(0));
-        l1Contract = new L1BlockInfoPassing(address(0), address(inboxMock));
+        l2Contract = new ArbKnownStateRootWithHistory(address(0), msg.sender);
+        l1Contract = new L1BlockInfoPassing(address(0), address(inboxMock), msg.sender);
         l2Contract.updateL1Target(address(l1Contract));
         l1Contract.updateL2Target(address(l2Contract));
         vm.roll(TEST_BLOCK_NUMBER);

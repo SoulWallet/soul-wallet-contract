@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ArbKnownStateRootWithHistory is KnownStateRootWithHistoryBase, Ownable {
     address public l1Target;
 
-    constructor(address _l1Target) {
+    constructor(address _l1Target, address _owner) {
         l1Target = _l1Target;
+        transferOwnership(_owner);
     }
 
     function updateL1Target(address _l1Target) public onlyOwner {

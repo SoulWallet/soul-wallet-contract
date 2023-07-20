@@ -11,9 +11,10 @@ contract L1BlockInfoPassing is Ownable {
 
     event BlockHashPassingTickedCreated(uint256 ticketId, uint256 blockNumber, bytes32 blockHash);
 
-    constructor(address _l2Target, address _inbox) {
+    constructor(address _l2Target, address _inbox, address _owner) {
         l2Target = _l2Target;
         inbox = IInbox(_inbox);
+        transferOwnership(_owner);
     }
 
     function updateL2Target(address _l2Target) public onlyOwner {

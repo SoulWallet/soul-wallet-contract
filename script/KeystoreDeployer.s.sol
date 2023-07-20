@@ -42,7 +42,8 @@ contract KeystoreDeployer is Script, DeployHelper {
             console.log("deploy keystore contract on Goerli");
             //Goerli deploy same logic as mainnet
             ARB_RUNTIME_INBOX_ADDRESS = ARB_GOERLI_INBOX_ADDRESS;
-            mainnetDeploy();
+            // mainnetDeploy();
+            deployArbL1BlockInfoPassing();
         } else if (network == Network.Arbitrum) {
             console.log("deploy keystore contract on Arbitrum");
             arbDeploy();
@@ -84,12 +85,7 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
-        // deploy arb l1blockinfo passing on l1
-        address arbL1BlockInfoPassing = deploy(
-            "L1BlockInfoPassing",
-            bytes.concat(type(L1BlockInfoPassing).creationCode, abi.encode(EMPTY_ADDRESS, ARB_RUNTIME_INBOX_ADDRESS))
-        );
-        writeAddressToEnv("ARB_L1_KEYSTORE_PASSING_ADDRESS", arbL1BlockInfoPassing);
+        deployArbL1BlockInfoPassing();
 
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
@@ -97,18 +93,29 @@ contract KeystoreDeployer is Script, DeployHelper {
         ITransparentUpgradeableProxy(keyStoreProxy).upgradeTo(keyStoreModule);
     }
 
+    function deployArbL1BlockInfoPassing() private {
+        // deploy arb l1blockinfo passing on l1
+        address arbL1BlockInfoPassing = deploy(
+            "L1BlockInfoPassing",
+            bytes.concat(
+                type(L1BlockInfoPassing).creationCode,
+                abi.encode(EMPTY_ADDRESS, ARB_RUNTIME_INBOX_ADDRESS, proxyAdminAddress)
+            )
+        );
+        writeAddressToEnv("ARB_L1_KEYSTORE_PASSING_ADDRESS", arbL1BlockInfoPassing);
+    }
+
     function arbDeploy() private {
         l1KeyStoreAddress = vm.envAddress("L1_KEYSTORE_ADDRESS");
+        console.log("using l1Keystore address", l1KeyStoreAddress);
         require(l1KeyStoreAddress != address(0), "L1_KEYSTORE_ADDRESS not provided");
-        require(l1KeyStoreAddress.code.length > 0, "l1KeyStoreAddress not deployed");
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
         arbL1KeyStorePassingAddress = vm.envAddress("ARB_L1_KEYSTORE_PASSING_ADDRESS");
         require(arbL1KeyStorePassingAddress != address(0), "ARB_L1_KEYSTORE_PASSING_ADDRESS not provided");
-        require(arbL1KeyStorePassingAddress.code.length > 0, "arbL1KeyStorePassingAddress needs be deployed");
-
+        // set l1 keystore address to adress(0) first, and then using owner to update true address
         address arbKnownStateRootWithHistory = deploy(
             "ArbKnownStateRootWithHistory",
-            bytes.concat(type(ArbKnownStateRootWithHistory).creationCode, abi.encode(arbL1KeyStorePassingAddress))
+            bytes.concat(type(ArbKnownStateRootWithHistory).creationCode, abi.encode(EMPTY_ADDRESS, proxyAdminAddress))
         );
 
         address keystoreProof = deploy(
@@ -130,6 +137,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
         ITransparentUpgradeableProxy(keyStoreProxy).upgradeTo(keyStoreModule);
+        // setup l1 target
+        ArbKnownStateRootWithHistory(arbKnownStateRootWithHistory).updateL1Target(arbL1KeyStorePassingAddress);
+        writeAddressToEnv("ARB_KNOWN_STATE_ROOT_WITH_HISTORY_ADDRESS", arbKnownStateRootWithHistory);
     }
 
     function opDeploy() private {

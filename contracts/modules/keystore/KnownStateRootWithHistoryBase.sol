@@ -74,4 +74,8 @@ abstract contract KnownStateRootWithHistoryBase is IKnownStateRootWithHistory {
         } while (i != _currentRootIndex);
         return (false, info);
     }
+
+    function lastestStateRootInfo() external view returns (BlockInfo memory info) {
+        return stateRoots[currentRootIndex];
+    }
 }

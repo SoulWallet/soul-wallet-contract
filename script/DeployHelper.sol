@@ -43,6 +43,8 @@ library NetWorkLib {
             return Network.OptimismGoerli;
         } else if (block.chainid == 421613) {
             return Network.ArbitrumGoerli;
+        } else {
+            revert("unsupported network");
         }
     }
 }

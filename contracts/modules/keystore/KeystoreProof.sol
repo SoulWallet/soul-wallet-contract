@@ -11,6 +11,8 @@ contract KeystoreProof is IKeystoreProof {
 
     address public immutable STATE_ROOT_HISTORY_ADDESS;
     address public immutable L1_KEYSTORE_ADDRESS;
+    // the latest block number in l1 that proofed
+    uint256 public lastestProofL1BlockNumber;
 
     event KeyStoreStorageProofed(bytes32 stateRoot, bytes32 storageRoot);
     event L1KeyStoreProofed(bytes32 l1Slot, address signingKey);
@@ -31,6 +33,9 @@ contract KeystoreProof is IKeystoreProof {
         Rlp.Item[] memory keyStoreDetails = Rlp.toList(Rlp.toItem(keyStoreAccountDetailsBytes));
         bytes32 keyStoreStorageRootHash = Rlp.toBytes32(keyStoreDetails[2]);
         stateRootToKeystoreStorageRoot[stateRoot] = keyStoreStorageRootHash;
+        if (currentBlockInfo.blockNumber > lastestProofL1BlockNumber) {
+            lastestProofL1BlockNumber = currentBlockInfo.blockNumber;
+        }
         emit KeyStoreStorageProofed(stateRoot, keyStoreStorageRootHash);
     }
 

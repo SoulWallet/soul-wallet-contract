@@ -11,13 +11,18 @@ contract ArbKeystoreTest is Test, MockKeyStoreData {
     L1BlockInfoPassing l1Contract;
     ArbKnownStateRootWithHistory l2Contract;
     ArbitrumInboxMock inboxMock;
+    address owner;
 
     function setUp() public {
+        owner = makeAddr("owner");
+        vm.deal(owner, 10 ether);
+        vm.startPrank(owner);
         inboxMock = new ArbitrumInboxMock();
-        l2Contract = new ArbKnownStateRootWithHistory(address(0));
-        l1Contract = new L1BlockInfoPassing(address(0), address(inboxMock));
+        l2Contract = new ArbKnownStateRootWithHistory(address(0), owner);
+        l1Contract = new L1BlockInfoPassing(address(0), address(inboxMock), owner);
         l2Contract.updateL1Target(address(l1Contract));
         l1Contract.updateL2Target(address(l2Contract));
+        vm.stopPrank();
         vm.roll(TEST_BLOCK_NUMBER);
     }
 

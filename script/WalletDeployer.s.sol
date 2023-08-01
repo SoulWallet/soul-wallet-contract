@@ -48,8 +48,13 @@ contract WalletDeployer is Script, DeployHelper {
     function delpoy() private {
         address soulwalletInstance =
             deploy("SoulwalletInstance", bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS)));
+        address soulwalletFactoryOwner = vm.envAddress("SOULWALLET_FACTORY_OWNER");
         address soulwalletFactoryAddress = deploy(
-            "SoulwalletFactory", bytes.concat(type(SoulWalletFactory).creationCode, abi.encode(soulwalletInstance))
+            "SoulwalletFactory",
+            bytes.concat(
+                type(SoulWalletFactory).creationCode,
+                abi.encode(soulwalletInstance, ENTRYPOINT_ADDRESS, soulwalletFactoryOwner)
+            )
         );
         writeAddressToEnv("SOULWALLET_FACTORY_ADDRESS", soulwalletFactoryAddress);
         address managerAddress = vm.envAddress("MANAGER_ADDRESS");

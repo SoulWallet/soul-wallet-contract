@@ -74,6 +74,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
             emit KeyStoreSyncd(_sender, keystoreSignKey);
         }
         walletInited[_sender] = true;
+        emit KeyStoreInited(_sender, initialKey, initialGuardianHash, guardianSafePeriod);
     }
 
     function _deInit() internal virtual override {

@@ -8,6 +8,8 @@ pragma solidity ^0.8.17;
 import "./SoulWalletProxy.sol";
 import "./SoulWallet.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
+import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @author  soulwallet team.
@@ -16,13 +18,19 @@ import "@openzeppelin/contracts/utils/Create2.sol";
  * @notice  .
  */
 
-contract SoulWalletFactory {
+contract SoulWalletFactory is Ownable {
     uint256 private immutable _WALLETIMPL;
+    IEntryPoint public immutable entryPoint;
     string public constant VERSION = "0.0.1";
 
-    constructor(address _walletImpl) {
+    event SoulWalletCreation(address proxy);
+
+    constructor(address _walletImpl, address _entryPoint, address _owner) {
         require(_walletImpl != address(0));
         _WALLETIMPL = uint256(uint160(_walletImpl));
+        require(_entryPoint != address(0));
+        entryPoint = IEntryPoint(_entryPoint);
+        transferOwnership(_owner);
     }
 
     function walletImpl() external view returns (address) {
@@ -49,6 +57,7 @@ contract SoulWalletFactory {
             let succ := call(gas(), proxy, 0, add(_initializer, 0x20), mload(_initializer), 0, 0)
             if eq(succ, 0) { revert(0, 0) }
         }
+        emit SoulWalletCreation(proxy);
         return proxy;
     }
 
@@ -77,5 +86,25 @@ contract SoulWalletFactory {
         bytes memory deploymentData = abi.encodePacked(type(SoulWalletProxy).creationCode, _WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
         proxy = Create2.computeAddress(salt, keccak256(deploymentData));
+    }
+
+    function deposit() public payable {
+        entryPoint.depositTo{value: msg.value}(address(this));
+    }
+
+    function withdrawTo(address payable withdrawAddress, uint256 amount) public onlyOwner {
+        entryPoint.withdrawTo(withdrawAddress, amount);
+    }
+
+    function addStake(uint32 unstakeDelaySec) external payable onlyOwner {
+        entryPoint.addStake{value: msg.value}(unstakeDelaySec);
+    }
+
+    function unlockStake() external onlyOwner {
+        entryPoint.unlockStake();
+    }
+
+    function withdrawStake(address payable withdrawAddress) external onlyOwner {
+        entryPoint.withdrawStake(withdrawAddress);
     }
 }

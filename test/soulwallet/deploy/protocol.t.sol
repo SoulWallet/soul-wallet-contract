@@ -25,7 +25,7 @@ contract DeployProtocolTest is Test {
         soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
         address logic = address(soulWalletLogicInstence.soulWalletLogic());
 
-        soulWalletFactory = new SoulWalletFactory(logic);
+        soulWalletFactory = new SoulWalletFactory(logic, address(entryPoint), address(this));
         require(soulWalletFactory.walletImpl() == logic, "logic address not match");
 
         bundler = new Bundler();

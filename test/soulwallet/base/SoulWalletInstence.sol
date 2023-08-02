@@ -25,7 +25,8 @@ contract SoulWalletInstence {
         entryPoint = new EntryPoint();
         singletonFactory = new SingletonFactory();
         soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
-        soulWalletFactory = new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()));
+        soulWalletFactory =
+        new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()), address(entryPoint), address(this));
 
         /*
         address anOwner,

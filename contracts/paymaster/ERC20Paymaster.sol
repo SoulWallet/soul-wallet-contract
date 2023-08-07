@@ -43,11 +43,10 @@ contract ERC20Paymaster is BasePaymaster {
         WALLET_FACTORY = _walletFactory;
     }
 
-    function setToken(
-        address[] calldata _tokens,
-        address[] calldata _tokenOracles,
-        uint32[] calldata _priceMarkups
-    ) external onlyOwner {
+    function setToken(address[] calldata _tokens, address[] calldata _tokenOracles, uint32[] calldata _priceMarkups)
+        external
+        onlyOwner
+    {
         require(
             _tokens.length == _tokenOracles.length && _tokenOracles.length == _priceMarkups.length,
             "Paymaster: length mismatch"
@@ -62,7 +61,7 @@ contract ERC20Paymaster is BasePaymaster {
             require(IOracle(_tokenOracle).decimals() == 8, "Paymaster: token oracle decimals must be 8");
             supportedToken[_token].priceMarkup = _priceMarkup;
             supportedToken[_token].tokenOracle = IOracle(_tokenOracle);
-            supportedToken[_token].tokenDecimals =  IERC20Metadata(_token).decimals();
+            supportedToken[_token].tokenDecimals = IERC20Metadata(_token).decimals();
 
             emit ConfigUpdated(_token, _tokenOracle, _priceMarkup);
         }
@@ -82,9 +81,9 @@ contract ERC20Paymaster is BasePaymaster {
         return address(supportedToken[token].tokenOracle) != address(0);
     }
 
-
     function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32, uint256 requiredPreFund)
         internal
+        view
         override
         returns (bytes memory context, uint256 validationResult)
     {
@@ -167,7 +166,6 @@ contract ERC20Paymaster is BasePaymaster {
         }
     }
 
-
     function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
         if (mode == PostOpMode.postOpReverted) {
             return; // Do nothing here to not revert the whole bundle and harm reputation
@@ -181,7 +179,7 @@ contract ERC20Paymaster is BasePaymaster {
         // update oracle
         uint192 lasestTokenPrice = fetchPrice(supportedToken[token].tokenOracle);
         supportedToken[token].previousPrice = lasestTokenPrice;
-  
+
         emit UserOperationSponsored(sender, token, tokenRequiredFund, actualGasCost);
     }
 

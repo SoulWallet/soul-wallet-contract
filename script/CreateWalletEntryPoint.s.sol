@@ -113,7 +113,7 @@ contract CreateWalletEntryPoint is Script {
         entrypoint.handleOps(ops, payable(walletSigner));
     }
 
-    function logUserOp(UserOperation memory op) private {
+    function logUserOp(UserOperation memory op) private view {
         console.log("sender: ", op.sender);
         console.log("nonce: ", op.nonce);
         console.log("initCode: ");
@@ -138,7 +138,7 @@ contract CreateWalletEntryPoint is Script {
         require(addr == ECDSA.recover(hash.toEthSignedMessageHash(), signature));
     }
 
-    function loadEnvContract(string memory label) private returns (address) {
+    function loadEnvContract(string memory label) private view returns (address) {
         address contractAddress = vm.envAddress(label);
         require(contractAddress != address(0), string(abi.encodePacked(label, " not provided")));
         require(contractAddress.code.length > 0, string(abi.encodePacked(label, " needs be deployed")));

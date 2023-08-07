@@ -43,32 +43,11 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
         }
     }
 
-    /**
-     * @dev Verify the signature of the `signKey`
-     * @param slot KeyStore slot
-     * @param slotNonce used to prevent replay attack
-     * @param signKey Current sign key
-     * @param action Action type, See ./interfaces/IKeyStore.sol: enum Action
-     * @param data {new key(Action.SET_KEY) | new guardian hash(Action.SET_GUARDIAN) | new guardian safe period(Action.SET_GUARDIAN_SAFE_PERIOD) | empty(Action.CANCEL_SET_GUARDIAN | Action.CANCEL_SET_GUARDIAN_SAFE_PERIOD )}
-     * @param keySignature `signature of current sign key`
-     *
-     * Note Implementer must revert if the signature is invalid
-     */
-    function verifySignature(
-        bytes32 slot,
-        uint256 slotNonce,
-        bytes32 signKey,
-        Action action,
-        bytes32 data,
-        bytes calldata keySignature
-    ) internal view override {
-        address signer;
-        assembly ("memory-safe") {
-            signer := signKey
-        }
-
-        bytes32 digest;
-
+    function _verifyStructHash(bytes32 slot, uint256 slotNonce, Action action, bytes32 data)
+        private
+        view
+        returns (bytes32 digest)
+    {
         if (action == Action.SET_KEY) {
             // SetKey(bytes32 slot,uint256 nonce,bytes32 newKey)
             digest = _hashTypedDataV4(keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, slotNonce, data)));
@@ -96,7 +75,32 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
         } else {
             revert Errors.INVALID_DATA();
         }
+    }
 
+    /**
+     * @dev Verify the signature of the `signKey`
+     * @param slot KeyStore slot
+     * @param slotNonce used to prevent replay attack
+     * @param signKey Current sign key
+     * @param action Action type, See ./interfaces/IKeyStore.sol: enum Action
+     * @param data {new key(Action.SET_KEY) | new guardian hash(Action.SET_GUARDIAN) | new guardian safe period(Action.SET_GUARDIAN_SAFE_PERIOD) | empty(Action.CANCEL_SET_GUARDIAN | Action.CANCEL_SET_GUARDIAN_SAFE_PERIOD )}
+     * @param keySignature `signature of current sign key`
+     *
+     * Note Implementer must revert if the signature is invalid
+     */
+    function verifySignature(
+        bytes32 slot,
+        uint256 slotNonce,
+        bytes32 signKey,
+        Action action,
+        bytes32 data,
+        bytes calldata keySignature
+    ) internal view override {
+        address signer;
+        assembly ("memory-safe") {
+            signer := signKey
+        }
+        bytes32 digest = _verifyStructHash(slot, slotNonce, action, data);
         address recoveredAddress = ECDSA.recover(digest, keySignature);
         if (signer != recoveredAddress) {
             revert Errors.INVALID_SIGNATURE();
@@ -172,10 +176,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
         bytes calldata guardianSignature
     ) internal view override {
         bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(_TYPE_HASH_SOCIAL_RECOVERY, slot, slotNonce, newKey)));
-
-        (address[] memory guardians, uint256 threshold, uint256 salt) =
-            abi.decode(rawGuardian, (address[], uint256, uint256));
-        (salt);
+        (address[] memory guardians, uint256 threshold,) = abi.decode(rawGuardian, (address[], uint256, uint256));
         uint256 guardiansLen = guardians.length;
         // for extreme cases
         if (threshold > guardiansLen) threshold = guardiansLen;
@@ -249,7 +250,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
                     // read 's' as bytes4
                     let sigLen := shr(224, calldataload(add(signatures.offset, 1)))
 
-                    cursorEnd := add(5, sigLen) // see Note line 219
+                    cursorEnd := add(5, sigLen) // see Note line 223
                     cursor := add(cursor, cursorEnd)
                 }
 
@@ -274,7 +275,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
                 bytes32 key = _approveKey(guardians[i], digest);
                 require(approvedHashes[key] == 1, "hash not approved");
                 unchecked {
-                    cursor += 1; // see Note line 219
+                    cursor += 1; // see Note line 223
                 }
             } else if (v == 2) {
                 /* 
@@ -287,7 +288,7 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
                     // read 's' as bytes4
                     let skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
 
-                    i := add(i, skipTimes) // see Note line 219
+                    i := add(i, skipTimes) // see Note line 223
                     skipCount := add(skipCount, add(skipTimes, 1))
                     cursor := add(cursor, 5)
                 }
@@ -302,12 +303,12 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
                     s := calldataload(add(signatures.offset, 1))
                     r := calldataload(add(signatures.offset, 33))
 
-                    cursor := add(cursor, 65) // see Note line 219
+                    cursor := add(cursor, 65) // see Note line 223
                 }
                 require(guardians[i] == ECDSA.recover(digest, v, r, s), "guardian signature invalid");
             }
             unchecked {
-                i++; // see Note line 219
+                i++; // see Note line 223
             }
         }
         if (guardiansLen - skipCount < threshold) {

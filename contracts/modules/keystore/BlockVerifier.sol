@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
+/*
+This code is based on https://github.com/Keydonix/uniswap-oracle/blob/master/contracts/source/BlockVerifier.sol
+Credit to the original authors and contributors.
+*/
+
 pragma solidity ^0.8.17;
 
 library BlockVerifier {

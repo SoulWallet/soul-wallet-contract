@@ -1,8 +1,11 @@
 pragma solidity ^0.8.17;
 
 import {Rlp} from "./Rlp.sol";
+/*
+This code is based on https://github.com/Keydonix/uniswap-oracle/blob/master/contracts/source/MerklePatriciaVerifier.sol
+Credit to the original authors and contributors.
+*/
 
-// source: https://github.com/Keydonix/uniswap-oracle/blob/master/contracts/source/MerklePatriciaVerifier.sol
 library MerklePatriciaVerifier {
     /*
     * @dev Extracts the value from a merkle proof

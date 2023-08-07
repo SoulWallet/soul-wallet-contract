@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
+/*
+This code is based on the pimlicolabs erc20-paymaster-contracts found at https://github.com/pimlicolabs/erc20-paymaster-contracts.
+Credit to the original authors and contributors.
+*/
 pragma solidity ^0.8.0;
 
 // Import the required libraries and contracts
@@ -43,11 +47,10 @@ contract ERC20Paymaster is BasePaymaster {
         WALLET_FACTORY = _walletFactory;
     }
 
-    function setToken(
-        address[] calldata _tokens,
-        address[] calldata _tokenOracles,
-        uint32[] calldata _priceMarkups
-    ) external onlyOwner {
+    function setToken(address[] calldata _tokens, address[] calldata _tokenOracles, uint32[] calldata _priceMarkups)
+        external
+        onlyOwner
+    {
         require(
             _tokens.length == _tokenOracles.length && _tokenOracles.length == _priceMarkups.length,
             "Paymaster: length mismatch"
@@ -62,8 +65,7 @@ contract ERC20Paymaster is BasePaymaster {
             require(IOracle(_tokenOracle).decimals() == 8, "Paymaster: token oracle decimals must be 8");
             supportedToken[_token].priceMarkup = _priceMarkup;
             supportedToken[_token].tokenOracle = IOracle(_tokenOracle);
-            supportedToken[_token].tokenDecimals =  IERC20Metadata(_token).decimals();
-
+            supportedToken[_token].tokenDecimals = IERC20Metadata(_token).decimals();
             emit ConfigUpdated(_token, _tokenOracle, _priceMarkup);
         }
     }
@@ -81,7 +83,6 @@ contract ERC20Paymaster is BasePaymaster {
     function isSupportToken(address token) public view returns (bool) {
         return address(supportedToken[token].tokenOracle) != address(0);
     }
-
 
     function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32, uint256 requiredPreFund)
         internal
@@ -130,13 +131,11 @@ contract ERC20Paymaster is BasePaymaster {
         address factory = address(bytes20(userOp.initCode));
         require(factory == WALLET_FACTORY, "Paymaster: unknown wallet factory");
         require(
-            bytes4(userOp.callData)
-                == bytes4(0x2763604f /* 0x2763604f execFromEntryPoint(address[],uint256[],bytes[]) */ ),
+            bytes4(userOp.callData) == bytes4(0x18dfb3c7 /* 0x18dfb3c7 executeBatch(address[],bytes[]) */ ),
             "invalid callData"
         );
-        (address[] memory dest, uint256[] memory value, bytes[] memory func) =
-            abi.decode(userOp.callData[4:], (address[], uint256[], bytes[]));
-        require(dest.length == value.length && dest.length == func.length, "Paymaster: invalid callData");
+        (address[] memory dest, bytes[] memory func) = abi.decode(userOp.callData[4:], (address[], bytes[]));
+        require(dest.length == func.length, "Paymaster: invalid callData length");
 
         address _destAddress = address(0);
         for (uint256 i = 0; i < dest.length; i++) {
@@ -167,7 +166,6 @@ contract ERC20Paymaster is BasePaymaster {
         }
     }
 
-
     function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
         if (mode == PostOpMode.postOpReverted) {
             return; // Do nothing here to not revert the whole bundle and harm reputation
@@ -181,7 +179,6 @@ contract ERC20Paymaster is BasePaymaster {
         // update oracle
         uint192 lasestTokenPrice = fetchPrice(supportedToken[token].tokenOracle);
         supportedToken[token].previousPrice = lasestTokenPrice;
-  
         emit UserOperationSponsored(sender, token, tokenRequiredFund, actualGasCost);
     }
 

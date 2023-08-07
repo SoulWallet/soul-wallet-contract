@@ -1,6 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
+/**
+ * @dev Action of Signature
+ */
+enum Action
+{
+    /**
+     * @dev Set KeyStore.key to `new key`
+     */
+    SET_KEY,
+    /**
+     * @dev Set KeyStore.guardianHash to `new guardianHash`
+     */
+    SET_GUARDIAN,
+    /**
+     * @dev Cancel the pending guardianHash change
+     */
+    CANCEL_SET_GUARDIAN,
+    /**
+     * @dev Set KeyStore.guardianSafePeriod to `new guardianSafePeriod`
+     */
+    SET_GUARDIAN_SAFE_PERIOD,
+    /**
+     * @dev Cancel the pending guardianSafePeriod change
+     */
+    CANCEL_SET_GUARDIAN_SAFE_PERIOD
+}
+
 interface IKeyStore {
     /* 
     #######################################################################################################################################

@@ -38,13 +38,28 @@ contract KeyStoreMerkleTree is BaseKeyStore {
         }
     }
 
-    function _validateKeySignature(bytes32 keyRoot, bytes32 signHash, bytes calldata keySignature)
-        internal
-        virtual
-        override
-    {
+    /**
+     * @dev Verify the signature of the `signKey`
+     * @param slot KeyStore slot
+     * @param slotNonce used to prevent replay attack
+     * @param signKey Current sign key
+     * @param action Action type, See ./interfaces/IKeyStore.sol: enum Action
+     * @param data {new key(Action.SET_KEY) | new guardian hash(Action.SET_GUARDIAN) | new guardian safe period(Action.SET_GUARDIAN_SAFE_PERIOD) | empty(Action.CANCEL_SET_GUARDIAN | Action.CANCEL_SET_GUARDIAN_SAFE_PERIOD )}
+     * @param keySignature `signature of current sign key`
+     *
+     * Note Implementer must revert if the signature is invalid
+     */
+    function verifySignature(
+        bytes32 slot,
+        uint256 slotNonce,
+        bytes32 signKey,
+        Action action,
+        bytes32 data,
+        bytes calldata keySignature
+    ) internal view override {
         // @pseudocode
         {
+            (action);
             bytes32 leaf = bytes32(keySignature[0:32]);
             bytes32[] calldata proof;
             bytes calldata signature;
@@ -55,12 +70,13 @@ contract KeyStoreMerkleTree is BaseKeyStore {
             assembly ("memory-safe") {
                 proof.offset := _proof.offset
             }
-            bool isValid = MerkleProofLib.verify(proof, keyRoot, leaf);
+            bool isValid = MerkleProofLib.verify(proof, signKey, leaf);
             if (!isValid) {
                 revert Errors.INVALID_SIGNATURE();
             }
 
             address signer = _bytes32ToAddress(leaf);
+            bytes32 signHash = keccak256(abi.encode(slot, slotNonce, data));
             signHash = signHash.toEthSignedMessageHash();
             (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(signHash, signature);
             if (error != ECDSA.RecoverError.NoError && signer != recovered) {
@@ -69,13 +85,23 @@ contract KeyStoreMerkleTree is BaseKeyStore {
         }
     }
 
-    function _validateGuardianSignature(
-        bytes32 guardianHash,
+    /**
+     * @dev Verify the signature of the `guardian`
+     * @param slot KeyStore slot
+     * @param slotNonce used to prevent replay attack
+     * @param rawGuardian The raw data of the `guardianHash`
+     * @param newKey New key
+     * @param guardianSignature `signature of current guardian`
+     */
+    function verifyGuardianSignature(
+        bytes32 slot,
+        uint256 slotNonce,
         bytes calldata rawGuardian,
-        bytes32 signHash,
-        bytes calldata keySignature
-    ) internal virtual override {
-        (guardianHash, rawGuardian, signHash, keySignature);
+        bytes32 newKey,
+        bytes calldata guardianSignature
+    ) internal pure override {
+        // @pseudocode
+        (slot, slotNonce, rawGuardian, newKey, guardianSignature);
         revert("TODO: social recovery is not supported yet");
     }
 }

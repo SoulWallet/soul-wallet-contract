@@ -15,16 +15,17 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
 
     mapping(bytes32 => uint256) approvedHashes;
 
-    bytes32 private constant _TYPE_HASH_SET_KEY = keccak256("SetKey(bytes32 slot,uint256 nonce,bytes32 newKey)");
+    bytes32 private constant _TYPE_HASH_SET_KEY = keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newKey)");
     bytes32 private constant _TYPE_HASH_SET_GUARDIAN =
-        keccak256("SetGuardian(bytes32 slot,uint256 nonce,bytes32 newGuardianHash)");
+        keccak256("SetGuardian(bytes32 keyStoreSlot,uint256 nonce,bytes32 newGuardianHash)");
     bytes32 private constant _TYPE_HASH_SET_GUARDIAN_SAFE_PERIOD =
-        keccak256("SetGuardianSafePeriod(bytes32 slot,uint256 nonce,uint64 newGuardianSafePeriod)");
-    bytes32 private constant _TYPE_HASH_CANCEL_SET_GUARDIAN = keccak256("CancelSetGuardian(bytes32 slot,uint256 nonce)");
+        keccak256("SetGuardianSafePeriod(bytes32 keyStoreSlot,uint256 nonce,uint64 newGuardianSafePeriod)");
+    bytes32 private constant _TYPE_HASH_CANCEL_SET_GUARDIAN =
+        keccak256("CancelSetGuardian(bytes32 keyStoreSlot,uint256 nonce)");
     bytes32 private constant _TYPE_HASH_CANCEL_SET_GUARDIAN_SAFE_PERIOD =
-        keccak256("CancelSetGuardianSafePeriod(bytes32 slot,uint256 nonce)");
+        keccak256("CancelSetGuardianSafePeriod(bytes32 keyStoreSlot,uint256 nonce)");
     bytes32 private constant _TYPE_HASH_SOCIAL_RECOVERY =
-        keccak256("SocialRecovery(bytes32 slot,uint256 nonce,bytes32 newKey)");
+        keccak256("SocialRecovery(bytes32 keyStoreSlot,uint256 nonce,bytes32 newKey)");
 
     constructor() EIP712("KeyStore", "1") {}
 

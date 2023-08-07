@@ -3,15 +3,12 @@ name: test
 on:
   push:
     branches:
-      - "*"
+      - '*'
   pull_request:
     types: [opened, reopened, synchronize]
 
-permissions:
-  pull-requests: write
-  contents: "write"
-  id-token: "write"
-  issues: "write"
+env:
+  FOUNDRY_PROFILE: ci
 
 jobs:
   check:
@@ -36,28 +33,7 @@ jobs:
           forge build --sizes
         id: build
 
-      # Add any step generating a gas report to a temporary file named gasreport.ansi. For example:
-      - name: Run tests
-        run: forge test --gas-report > gasreport.ansi # <- this file name should be unique in your repository!
-        env:
-          # make fuzzing semi-deterministic to avoid noisy gas cost estimation
-          # due to non-deterministic fuzzing (but still use pseudo-random fuzzing seeds)
-          FOUNDRY_FUZZ_SEED: 0x${{ github.event.pull_request.base.sha || github.sha }}
-
-      - name: Compare gas reports
-        uses: Rubilmax/foundry-gas-diff@v3.16
-        with:
-          summaryQuantile: 0.9 # only display the 10% most significant gas diffs in the summary (defaults to 20%)
-          sortCriteria: avg,max # sort diff rows by criteria
-          sortOrders: desc,asc # and directions
-          ignore: test-foundry/**/* # filter out gas reports from specific paths (test/ is included by default)
-        id: gas_diff
-
-      - name: Add gas diff to sticky comment
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # delete the comment in case changes no longer impact gas costs
-          delete: ${{ !steps.gas_diff.outputs.markdown }}
-          message: ${{ steps.gas_diff.outputs.markdown }}
+      - name: Run Forge tests
+        run: |
+          forge test -vvv
+        id: test

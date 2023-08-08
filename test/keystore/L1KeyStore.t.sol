@@ -10,10 +10,33 @@ import "@source/dev/EIP1271Wallet.sol";
 contract L1KeyStoreEOATest is Test {
     using ECDSA for bytes32;
 
-    KeyStore keyStoreEOA;
+    KeyStore keyStoreContract;
+
+    bytes32 private constant _TYPE_HASH_SET_KEY =
+        keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
+    bytes32 private constant _TYPE_HASH_SET_GUARDIAN =
+        keccak256("SetGuardian(bytes32 keyStoreSlot,uint256 nonce,bytes32 newGuardianHash)");
+    bytes32 private constant _TYPE_HASH_SET_GUARDIAN_SAFE_PERIOD =
+        keccak256("SetGuardianSafePeriod(bytes32 keyStoreSlot,uint256 nonce,uint64 newGuardianSafePeriod)");
+    bytes32 private constant _TYPE_HASH_CANCEL_SET_GUARDIAN =
+        keccak256("CancelSetGuardian(bytes32 keyStoreSlot,uint256 nonce)");
+    bytes32 private constant _TYPE_HASH_CANCEL_SET_GUARDIAN_SAFE_PERIOD =
+        keccak256("CancelSetGuardianSafePeriod(bytes32 keyStoreSlot,uint256 nonce)");
+    bytes32 private constant _TYPE_HASH_SOCIAL_RECOVERY =
+        keccak256("SocialRecovery(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
+
+    bytes32 private constant _TYPEHASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+
+    bytes32 private DOMAIN_SEPARATOR;
 
     function setUp() public {
-        keyStoreEOA = new KeyStore();
+        keyStoreContract = new KeyStore();
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                _TYPEHASH, keccak256(bytes("KeyStore")), keccak256(bytes("1")), block.chainid, address(keyStoreContract)
+            )
+        );
     }
 
     function test_storageLayout() public {
@@ -47,7 +70,7 @@ contract L1KeyStoreEOATest is Test {
         address _slot_0;
         (_slot_0,) = makeAddrAndKey("0");
         bytes32 slot_0 = bytes32(uint256(uint160(_slot_0)));
-        vm.store(address(keyStoreEOA), slot_start, slot_0);
+        vm.store(address(keyStoreContract), slot_start, slot_0);
 
         // solt #1
         uint256 _slot_1 = 1;
@@ -56,7 +79,7 @@ contract L1KeyStoreEOATest is Test {
         assembly {
             slot_offset1 := add(slot_start, 1)
         }
-        vm.store(address(keyStoreEOA), slot_offset1, slot_1);
+        vm.store(address(keyStoreContract), slot_offset1, slot_1);
 
         // solt #2
         bytes32 _slot_2 = bytes32(uint256(uint160(address(this))));
@@ -64,9 +87,9 @@ contract L1KeyStoreEOATest is Test {
         assembly {
             slot_offset2 := add(slot_start, 2)
         }
-        vm.store(address(keyStoreEOA), slot_offset2, _slot_2);
+        vm.store(address(keyStoreContract), slot_offset2, _slot_2);
 
-        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot_start);
+        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot_start);
 
         require(_keyStoreInfo.key == slot_0, "keyStoreInfo.key != slot_0");
         require(_keyStoreInfo.nonce == _slot_1, "keyStoreInfo.nonce != slot_1");
@@ -82,9 +105,9 @@ contract L1KeyStoreEOATest is Test {
         bytes32 initialGuardianHash = keccak256("0x1");
         uint64 initialGuardianSafePeriod = 2 days;
 
-        bytes32 slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        bytes32 slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
         {
-            IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+            IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
             require(_keyStoreInfo.key == 0, "keyStoreInfo.key != 0");
             require(_keyStoreInfo.nonce == 0, "keyStoreInfo.nonce != 0");
             require(_keyStoreInfo.guardianHash == 0, "keyStoreInfo.guardianHash != 0");
@@ -105,20 +128,21 @@ contract L1KeyStoreEOATest is Test {
             uint256 _initialPrivateKey_new_1;
             (_initialKey_new_1, _initialPrivateKey_new_1) = makeAddrAndKey("initialKey_new_1");
             bytes32 initialKey_new_1 = bytes32(uint256(uint160(_initialKey_new_1)));
-            uint256 nonce = keyStoreEOA.nonce(slot);
+            uint256 nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 0, "nonce != 0");
-            //return keccak256(abi.encode(address(this), slot, _nonce, data)).toEthSignedMessageHash();
-            bytes32 messageHash =
-                keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_1)).toEthSignedMessageHash();
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey_new_1, messageHash);
+
+            bytes32 structHash = keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, nonce, initialKey_new_1));
+            bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, typedDataHash);
+
             bytes memory keySignature = abi.encodePacked(r, s, v);
-            keyStoreEOA.setKey(
+            keyStoreContract.setKey(
                 initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_1, keySignature
             );
 
-            slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+            slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
             {
-                IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+                IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
                 require(_keyStoreInfo.key == initialKey_new_1, "keyStoreInfo.key != initialKey_new");
                 require(_keyStoreInfo.nonce == 1, "keyStoreInfo.nonce != 1");
                 require(
@@ -142,19 +166,21 @@ contract L1KeyStoreEOATest is Test {
             uint256 _initialPrivateKey_new_2;
             (_initialKey_new_2, _initialPrivateKey_new_2) = makeAddrAndKey("initialKey_new_2");
             bytes32 initialKey_new_2 = bytes32(uint256(uint160(_initialKey_new_2)));
-            nonce = keyStoreEOA.nonce(slot);
+            nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 1, "nonce != 1");
-            messageHash =
-                keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_2)).toEthSignedMessageHash();
-            (v, r, s) = vm.sign(_initialPrivateKey_new_2, messageHash);
+
+            structHash = keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, nonce, initialKey_new_2));
+            typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+            (v, r, s) = vm.sign(_initialPrivateKey_new_1, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
-            keyStoreEOA.setKey(
+
+            keyStoreContract.setKey(
                 initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_2, keySignature
             );
-            nonce = keyStoreEOA.nonce(slot);
+            nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 2, "nonce != 2");
             {
-                IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+                IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
                 require(_keyStoreInfo.key == initialKey_new_2, "keyStoreInfo.key != initialKey_new");
             }
         }
@@ -167,7 +193,7 @@ contract L1KeyStoreEOATest is Test {
             bytes memory sig = abi.encode(messageHash, _valid);
             return sig;
         } else {
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash.toEthSignedMessageHash());
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, messageHash /*.toEthSignedMessageHash()*/ );
             return abi.encodePacked(v, s, r);
         }
     }
@@ -200,7 +226,7 @@ contract L1KeyStoreEOATest is Test {
         bytes32 initialKey = keccak256("0x123");
         uint64 initialGuardianSafePeriod = 2 days;
 
-        bytes32 slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        bytes32 slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
 
         /* 
         function setKey(
@@ -214,10 +240,10 @@ contract L1KeyStoreEOATest is Test {
         */
         address _newKey = address(0x111);
         bytes32 newKey = bytes32(uint256(uint160(_newKey)));
-        uint256 nonce = keyStoreEOA.nonce(slot);
+        uint256 nonce = keyStoreContract.nonce(slot);
 
-        // return keccak256(abi.encode(address(this), slot, _nonce, data));
-        bytes32 signMessageHash = keccak256(abi.encode(address(keyStoreEOA), slot, nonce, newKey));
+        bytes32 structHash = keccak256(abi.encode(_TYPE_HASH_SOCIAL_RECOVERY, slot, nonce, newKey));
+        bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
 
         uint8 v;
         bytes4 s_bytes4;
@@ -229,7 +255,7 @@ contract L1KeyStoreEOATest is Test {
 
         // sign [1],  approvedHashes
         vm.prank(address(SCwallet1));
-        keyStoreEOA.approveHash(signMessageHash);
+        keyStoreContract.approveHash(typedDataHash);
         v = 1;
         bytes memory _sign1 = abi.encodePacked(v);
 
@@ -239,7 +265,9 @@ contract L1KeyStoreEOATest is Test {
         bytes memory _sign2 = abi.encodePacked(v, s_bytes4);
 
         // sign [4]
-        bytes memory _sign4 = _signMsg(signMessageHash, EOAPrivatekey4);
+        console.log("EOAPrivatekey4:");
+        console.log(EOAWallet4);
+        bytes memory _sign4 = _signMsg(typedDataHash, EOAPrivatekey4);
 
         // sign [5], skip
         v = 2;
@@ -254,17 +282,17 @@ contract L1KeyStoreEOATest is Test {
                     dynamic data: signature data
          */
         v = 0;
-        bytes memory _signTemp = _signMsg(signMessageHash, 0);
+        bytes memory _signTemp = _signMsg(typedDataHash, 0);
         s_bytes4 = bytes4(uint32(_signTemp.length));
         bytes memory _sign6 = abi.encodePacked(v, s_bytes4, _signTemp);
 
         bytes memory guardianSignature = abi.encodePacked(_sign0, _sign1, _sign2, _sign4, _sign5, _sign6);
 
-        keyStoreEOA.setKey(
+        keyStoreContract.setKey(
             initialKey, initialGuardianHash, initialGuardianSafePeriod, newKey, rawGuardian, guardianSignature
         );
 
-        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
         require(_keyStoreInfo.key == newKey, "keyStoreInfo.key != newKey");
     }
 
@@ -277,7 +305,7 @@ contract L1KeyStoreEOATest is Test {
         bytes32 initialGuardianHash = keccak256("0x1");
         uint64 initialGuardianSafePeriod = 2 days;
 
-        bytes32 slot = keyStoreEOA.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        bytes32 slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
 
         /*
                 function setGuardian(
@@ -287,18 +315,19 @@ contract L1KeyStoreEOATest is Test {
                     bytes32 newGuardianHash,
                     bytes calldata keySignature
                 ) external 
-             */
+        */
         bytes32 newGuardianHash = keccak256("0x2");
-        uint256 nonce = keyStoreEOA.nonce(slot);
-        //return keccak256(abi.encode(address(this), slot, _nonce, data)).toEthSignedMessageHash();
-        bytes32 messageHash =
-            keccak256(abi.encode(address(keyStoreEOA), slot, nonce, newGuardianHash)).toEthSignedMessageHash();
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, messageHash);
+        uint256 nonce = keyStoreContract.nonce(slot);
+
+        bytes32 structHash = keccak256(abi.encode(_TYPE_HASH_SET_GUARDIAN, slot, nonce, newGuardianHash));
+        bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, typedDataHash);
         bytes memory keySignature = abi.encodePacked(r, s, v);
-        keyStoreEOA.setGuardian(
+
+        keyStoreContract.setGuardian(
             initialKey, initialGuardianHash, initialGuardianSafePeriod, newGuardianHash, keySignature
         );
-        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
         require(
             _keyStoreInfo.pendingGuardianHash == newGuardianHash, "keyStoreInfo.pendingGuardianHash != newGuardianHash"
         );
@@ -311,16 +340,18 @@ contract L1KeyStoreEOATest is Test {
             uint256 snapshotId = vm.snapshot();
 
             bytes32 initialKey_new_1 = bytes32(uint256(uint160(address(0x2))));
-            nonce = keyStoreEOA.nonce(slot);
-            messageHash =
-                keccak256(abi.encode(address(keyStoreEOA), slot, nonce, initialKey_new_1)).toEthSignedMessageHash();
-            (v, r, s) = vm.sign(_initialPrivateKey, messageHash);
+            nonce = keyStoreContract.nonce(slot);
+
+            structHash = keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, nonce, initialKey_new_1));
+            typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+            (v, r, s) = vm.sign(_initialPrivateKey, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
-            keyStoreEOA.setKey(
+
+            keyStoreContract.setKey(
                 initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_1, keySignature
             );
 
-            _keyStoreInfo = keyStoreEOA.getKeyStoreInfo(slot);
+            _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
             require(_keyStoreInfo.key == initialKey_new_1, "keyStoreInfo.key != initialKey_new_1");
             if (i < initialGuardianSafePeriod) {
                 require(

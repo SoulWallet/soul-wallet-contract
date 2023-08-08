@@ -71,10 +71,10 @@ library MerklePatriciaVerifier {
 
                 nodeKey = Rlp.toBytes32(currentNodeList[1]);
             } else {
-                require(false, "unexpected length array");
+                revert("unexpected length array");
             }
         }
-        require(false, "not enough proof nodes");
+        revert("not enough proof nodes");
     }
 
     function _nibblesToTraverse(bytes memory encodedPartialPath, bytes memory path, uint256 pathPtr)

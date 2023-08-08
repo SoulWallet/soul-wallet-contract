@@ -223,7 +223,7 @@ contract CreateWalletDirect is Script {
         );
     }
 
-    function loadEnvContract(string memory label) private returns (address) {
+    function loadEnvContract(string memory label) private view returns (address) {
         address contractAddress = vm.envAddress(label);
         require(contractAddress != address(0), string(abi.encodePacked(label, " not provided")));
         require(contractAddress.code.length > 0, string(abi.encodePacked(label, " needs be deployed")));

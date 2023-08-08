@@ -9,7 +9,7 @@ pragma solidity ^0.8.17;
 library BlockVerifier {
     function extractStateRootAndTimestamp(bytes memory rlpBytes, bytes32 blockHash)
         internal
-        view
+        pure
         returns (bytes32 stateRoot, uint256 blockTimestamp, uint256 blockNumber)
     {
         assembly {

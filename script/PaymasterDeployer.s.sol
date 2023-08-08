@@ -54,7 +54,7 @@ contract PaymasterDeployer is Script, DeployHelper {
         }
     }
 
-    function deploy() private {
+    function deploy() private pure {
         revert("not implemented");
     }
 

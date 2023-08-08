@@ -14,6 +14,7 @@ contract ArbitrumInboxMock is Test {
         uint256 maxFeePerGas,
         bytes calldata data
     ) public payable returns (uint256 _msgNum) {
+        (l2CallValue, maxSubmissionCost, excessFeeRefundAddress, callValueRefundAddress, gasLimit, maxFeePerGas);
         // modify to call l2 contract directly
         address l2Alias = AddressAliasHelper.applyL1ToL2Alias(address(msg.sender));
         vm.deal(l2Alias, 100 ether);
@@ -21,5 +22,6 @@ contract ArbitrumInboxMock is Test {
         (bool success,) = to.call(data);
         vm.stopPrank();
         require(success, "call failed");
+        return 0;
     }
 }

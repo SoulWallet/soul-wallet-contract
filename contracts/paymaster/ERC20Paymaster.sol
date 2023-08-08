@@ -86,6 +86,7 @@ contract ERC20Paymaster is BasePaymaster {
 
     function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32, uint256 requiredPreFund)
         internal
+        view
         override
         returns (bytes memory context, uint256 validationResult)
     {

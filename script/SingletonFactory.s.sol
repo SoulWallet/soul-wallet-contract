@@ -12,7 +12,7 @@ import "@account-abstraction/contracts/core/EntryPoint.sol";
 import "./DeployHelper.sol";
 
 contract SingletonFactory is Script, DeployHelper {
-    function run() public {
+    function run() public view {
         deploySingletonFactory();
     }
 }

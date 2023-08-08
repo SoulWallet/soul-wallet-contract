@@ -8,11 +8,11 @@ import "@source/modules/keystore/OptimismKeyStoreProofModule/IL1Block.sol";
 import "./MockKeyStoreData.sol";
 
 contract MockL1Block is IL1Block, MockKeyStoreData {
-    function hash() external returns (bytes32) {
+    function hash() external view returns (bytes32) {
         return TEST_BLOCK_HASH;
     }
 
-    function number() external returns (uint256) {
+    function number() external view returns (uint256) {
         return TEST_BLOCK_NUMBER;
     }
 }

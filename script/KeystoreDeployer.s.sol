@@ -73,7 +73,7 @@ contract KeystoreDeployer is Script, DeployHelper {
 
     function deployKeystore() private {
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
-        address keyStore = deploy("KeyStore", type(KeyStore).creationCode);
+        deploy("KeyStore", type(KeyStore).creationCode);
     }
 
     function mainnetDeploy() private {

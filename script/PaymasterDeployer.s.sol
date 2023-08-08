@@ -30,7 +30,7 @@ contract PaymasterDeployer is Script, DeployHelper {
         } else if (network == Network.Goerli) {
             console.log("deploy paymaster contract on Goerli");
             // same logic as localtestnet
-            delpoyLocal();
+            delpoyGoerli();
         } else if (network == Network.Arbitrum) {
             console.log("deploy paymaster contract on Arbitrum");
             deploy();
@@ -78,6 +78,33 @@ contract PaymasterDeployer is Script, DeployHelper {
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
         ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
+    }
+
+    function delpoyGoerli() private {
+        address testUsdc = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
+        address testOracle = 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e;
+        address paymaster = deploy(
+            "Paymaster",
+            bytes.concat(
+                type(ERC20Paymaster).creationCode, abi.encode(ENTRYPOINT_ADDRESS, paymasterOwner, soulwalletFactory)
+            )
+        );
+        address[] memory tokens = new address[](1);
+        tokens[0] = testUsdc;
+        address[] memory oracles = new address[](1);
+        oracles[0] = testOracle;
+        uint32[] memory priceMarkups = new uint32[](1);
+        priceMarkups[0] = 1e6;
+
+        vm.stopBroadcast();
+        // start broadcast using  paymasterOwner
+        vm.startBroadcast(paymasterOwnerPrivateKey);
+
+        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.01 ether}(address(paymaster));
+        ERC20Paymaster(paymaster).addStake{value: 0.01 ether}(1);
+
+        ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
+        ERC20Paymaster(paymaster).updatePrice(address(testUsdc));
     }
 
     function delpoylocalEntryPoint() private {

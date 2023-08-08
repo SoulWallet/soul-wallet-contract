@@ -14,7 +14,7 @@ import "@source/modules/keystore/KeystoreProof.sol";
 import {NetWorkLib} from "./DeployHelper.sol";
 import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 
-contract CreateWalletEntryPoint is Script {
+contract CreateWalletEntryPointPaymaster is Script {
     using ECDSA for bytes32;
 
     uint256 guardianThreshold = 1;
@@ -59,7 +59,7 @@ contract CreateWalletEntryPoint is Script {
     }
 
     function createWallet() private {
-        bytes32 salt = bytes32(uint256(3));
+        bytes32 salt = bytes32(uint256(4));
         bytes[] memory modules = new bytes[](2);
         // security control module setup
         securityControlModuleAddress = loadEnvContract("SECURITY_CONTROL_MODULE_ADDRESS");
@@ -88,20 +88,33 @@ contract CreateWalletEntryPoint is Script {
         bytes memory initCode = abi.encodePacked(address(soulwalletFactory), soulWalletFactoryCall);
         console.log("cacluatedAddress", cacluatedAddress);
 
-        entrypoint.depositTo{value: 1 ether}(cacluatedAddress);
+        address[] memory tokenAddressList = new address[](1);
+
+        address payToken = loadEnvContract("PAYTOKEN_ADDRESS");
+        address paymaster = loadEnvContract("PAYMASTER_ADDRESS");
+
+        tokenAddressList[0] = address(payToken);
+
+        bytes[] memory tokenCallData = new bytes[](1);
+        tokenCallData[0] = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 1000e6);
+        bytes memory callData =
+            abi.encodeWithSignature("executeBatch(address[],bytes[])", tokenAddressList, tokenCallData);
+        bytes memory paymasterAndData =
+            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(payToken), uint256(1000e6)));
+
         UserOperation[] memory ops = new UserOperation[](1);
 
         UserOperation memory userOperation = UserOperation({
             sender: cacluatedAddress,
             nonce: 0,
             initCode: initCode,
-            callData: hex"",
-            callGasLimit: 1000000,
+            callData: callData,
+            callGasLimit: 5000000,
             verificationGasLimit: 1000000,
-            preVerificationGas: 300000,
-            maxFeePerGas: 10000,
-            maxPriorityFeePerGas: 10000,
-            paymasterAndData: hex"",
+            preVerificationGas: 500000,
+            maxFeePerGas: 10 gwei,
+            maxPriorityFeePerGas: 10 gwei,
+            paymasterAndData: paymasterAndData,
             signature: hex""
         });
         userOperation.signature = signUserOp(userOperation, walletSigner, walletSingerPrivateKey);
@@ -109,11 +122,12 @@ contract CreateWalletEntryPoint is Script {
 
         ops[0] = userOperation;
 
-        vm.startBroadcast(walletSigner);
-        entrypoint.handleOps(ops, payable(walletSigner));
+        uint256 bundlerSinger = vm.envUint("WALLET_SIGNGER_PRIVATE_KEY");
+        vm.startBroadcast(bundlerSinger);
+        entrypoint.handleOps(ops, payable(vm.addr(bundlerSinger)));
     }
 
-    function logUserOp(UserOperation memory op) private view {
+    function logUserOp(UserOperation memory op) private {
         console.log("sender: ", op.sender);
         console.log("nonce: ", op.nonce);
         console.log("initCode: ");
@@ -138,7 +152,7 @@ contract CreateWalletEntryPoint is Script {
         require(addr == ECDSA.recover(hash.toEthSignedMessageHash(), signature));
     }
 
-    function loadEnvContract(string memory label) private view returns (address) {
+    function loadEnvContract(string memory label) private returns (address) {
         address contractAddress = vm.envAddress(label);
         require(contractAddress != address(0), string(abi.encodePacked(label, " not provided")));
         require(contractAddress.code.length > 0, string(abi.encodePacked(label, " needs be deployed")));

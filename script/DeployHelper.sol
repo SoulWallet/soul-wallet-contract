@@ -55,7 +55,7 @@ abstract contract DeployHelper is Script {
     address internal constant SINGLE_USE_FACTORY_ADDRESS = 0xBb6e024b9cFFACB947A71991E386681B1Cd1477D;
     ISingletonFactory internal constant SINGLETON_FACTORY =
         ISingletonFactory(0xce0042B868300000d44A59004Da54A005ffdcf9f);
-    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x1));
+    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x24));
     address internal constant EMPTY_ADDRESS = 0x0000000000000000000000000000000000000000;
     bytes emptyBytes;
     address internal ENTRYPOINT_ADDRESS = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;

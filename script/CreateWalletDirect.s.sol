@@ -57,8 +57,8 @@ contract CreateWalletDirect is Script {
             console.log("create wallet process on mainnet");
         } else if (network == Network.Goerli) {
             console.log("create wallet process on Goerli");
-            changeKeyStoreKeyByGuardian();
-            // createWallet();
+            // changeKeyStoreKeyByGuardian();
+            createWallet();
             // changeKeyStoreKeyByGuardian();
             // syncKeyStore();
             // getSlot();

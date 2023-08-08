@@ -42,8 +42,8 @@ contract KeystoreDeployer is Script, DeployHelper {
             console.log("deploy keystore contract on Goerli");
             //Goerli deploy same logic as mainnet
             ARB_RUNTIME_INBOX_ADDRESS = ARB_GOERLI_INBOX_ADDRESS;
-            // mainnetDeploy();
-            deployArbL1BlockInfoPassing();
+            mainnetDeploy();
+            // deployKeystore();
         } else if (network == Network.Arbitrum) {
             console.log("deploy keystore contract on Arbitrum");
             arbDeploy();
@@ -69,6 +69,11 @@ contract KeystoreDeployer is Script, DeployHelper {
         // opDeploy();
         // arbDeploy();
         mainnetDeploy();
+    }
+
+    function deployKeystore() private {
+        require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
+        address keyStore = deploy("KeyStore", type(KeyStore).creationCode);
     }
 
     function mainnetDeploy() private {
@@ -117,15 +122,18 @@ contract KeystoreDeployer is Script, DeployHelper {
             "ArbKnownStateRootWithHistory",
             bytes.concat(type(ArbKnownStateRootWithHistory).creationCode, abi.encode(EMPTY_ADDRESS, proxyAdminAddress))
         );
+        require(address(arbKnownStateRootWithHistory).code.length > 0, "arbKnownStateRootWithHistory deployed failed");
 
         address keystoreProof = deploy(
             "KeystoreProof",
             bytes.concat(type(KeystoreProof).creationCode, abi.encode(l1KeyStoreAddress, arbKnownStateRootWithHistory))
         );
+        require(address(keystoreProof).code.length > 0, "keystoreProof deployed failed");
 
         address keyStoreModule =
             deploy("KeyStoreModule", bytes.concat(type(KeyStoreModule).creationCode, abi.encode(keystoreProof)));
         // deploy keystore module using proxy, the initial implemention address to SINGLE_USE_FACTORY_ADDRESS for keeping the same address with other network
+        require(address(keyStoreModule).code.length > 0, "keyStoreModule deployed failed");
         address keyStoreProxy = deploy(
             "KeyStoreModuleProxy",
             bytes.concat(
@@ -133,6 +141,7 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
+        require(address(keyStoreProxy).code.length > 0, "keyStoreProxy deployed failed");
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);

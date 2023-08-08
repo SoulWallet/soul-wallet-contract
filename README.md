@@ -1,15 +1,10 @@
 <div align="center">
-  <h1 align="center">SoulWallet Contracts [draft version]</h1>
-   
+  <h1 align="center">SoulWallet Contracts [draft version]</h1>  
 </div>
 
 <div align="center">
-<img src="https://github.com/davidinsuomi/soul-wallet-contract/assets/1399563/162b4ee9-669b-427d-a52d-97a43b47f88e">
+<img src="https://github.com/SoulWallet/soul-wallet-contract/assets/1399563/8678c33d-2e86-4cd8-99b3-4a856e8ee60e">
 </div>
-
-
-
-
 
 ## Features
 + Support [ERC-4337: Account Abstraction](https://eips.ethereum.org/EIPS/eip-4337)
@@ -19,7 +14,7 @@
 + Stablecoin pay gas: Users can pay transaction gas fees with stablecoins such as USDC, USDT, DAI, etc.
 
 ## Architecutre
-![architecure](https://github.com/davidinsuomi/soul-wallet-contract/assets/1399563/987aa0f2-dfaa-4a6e-8065-edc07796eb22)
+![architecure](https://github.com/SoulWallet/soul-wallet-contract/assets/1399563/0e22bd9f-4438-475c-93f0-3f35a3c19c27)
 
 
 The smart contract comprises three main logic components:
@@ -153,8 +148,3 @@ contract NewPlugin is BasePlugin {
 This project is provided "as is" with no warranties or guarantees of any kind, express or implied. The developers make no claims about the suitability, reliability, availability, timeliness, security or accuracy of the software or its related documentation. The use of this software is at your own risk.
 
 The developers will not be liable for any damages or losses, whether direct, indirect, incidental or consequential, arising from the use of or inability to use this software or its related documentation, even if advised of the possibility of such damages.
-
-## Acknowledgments
-* <a href='https://eips.ethereum.org/EIPS/eip-4337'>ERC-4337: Account Abstraction Using Alt Mempool</a>
-* <a href='https://github.com/eth-infinitism/account-abstraction'>Infinitism account abstraction contract</a>
-* <a href='https://github.com/safe-global/safe-contracts'>Gnosis Safe Contracts</a>

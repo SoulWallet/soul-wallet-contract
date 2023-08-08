@@ -148,3 +148,8 @@ contract NewPlugin is BasePlugin {
 This project is provided "as is" with no warranties or guarantees of any kind, express or implied. The developers make no claims about the suitability, reliability, availability, timeliness, security or accuracy of the software or its related documentation. The use of this software is at your own risk.
 
 The developers will not be liable for any damages or losses, whether direct, indirect, incidental or consequential, arising from the use of or inability to use this software or its related documentation, even if advised of the possibility of such damages.
+
+## Acknowledgments
+* <a href='https://eips.ethereum.org/EIPS/eip-4337'>ERC-4337: Account Abstraction Using Alt Mempool</a>
+* <a href='https://github.com/eth-infinitism/account-abstraction'>Infinitism account abstraction contract</a>
+* <a href='https://github.com/safe-global/safe-contracts'>Gnosis Safe Contracts</a>

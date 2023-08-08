@@ -1,60 +1,148 @@
 <div align="center">
-  <h1 align="center">SoulWallet Contracts [draft version]</h1>
+  <h1 align="center">SoulWallet Contracts [draft version]</h1>  
 </div>
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/proofofsoulprotocol/soul-wallet-packages/main/src/assets/logo.svg">
+<img src="https://github.com/SoulWallet/soul-wallet-contract/assets/1399563/8678c33d-2e86-4cd8-99b3-4a856e8ee60e">
 </div>
 
 ## Features
 + Support [ERC-4337: Account Abstraction](https://eips.ethereum.org/EIPS/eip-4337)
-+ Social Recovery with Anonymous Guardians: Users can specify trusted contacts, or guardians, when creating a wallet. These guardians are anonymous and are only revealed on-chain during a recovery process, providing some level of privacy. The anonymous guardian setup can help prevent vulnerability to social attacks that attempt to gain control of the wallet by targeting the guardians.
++ [Modular design ](https://hackmd.io/3gbndH7tSl2J1EbNePJ3Yg)
++ Implement [asset / keystore](https://hackmd.io/-YY8jD7IQ7qfEZaDepXZsA?view) separation architecture 
 + Upgradability: The smart contract for this wallet can be upgraded in a secure way to add new features or fix vulnerabilities in the future.
 + Stablecoin pay gas: Users can pay transaction gas fees with stablecoins such as USDC, USDT, DAI, etc.
 
-## Repository overview
+## Architecutre
+![architecure](https://github.com/SoulWallet/soul-wallet-contract/assets/1399563/0e22bd9f-4438-475c-93f0-3f35a3c19c27)
 
-Below is a brief overview of the repository contracts
 
-### SoulWalletFactory
+The smart contract comprises three main logic components:
 
-"SoulWalletFactory" is a factory contract. It is used to create a new wallet contract. The wallet contract is created using the singleton contract with the CREATE2 opcode, which allows the wallet contract to be created with a deterministic address.
+1. SoulWallet Core:
 
-### SoulWalletProxy
-"SoulWalletProxy" is a proxy contract that manages the implementation contract address and is responsible for forwarding delegate calls to the implementation contract. Additionally, users' contract wallet data is stored in the proxy contract.
++ This is the primary wallet logic.
++ Handles signature validation.
++ Supports the ERC4337 interface.
++ Manages modules and plugins.
+2. Modules:
 
-### SoulWallet
-"SoulWallet" is the implementation contract. It is responsible for the core logic of the wallet
-+ Using diamond storage pattern to store the data. All contract data is stored in specific slots in the contract. This approach has the advantage of making it easier to upgrade the logic contract in the future while avoiding data conflicts in slots compare the default contract storage from slot 0.
-+ Guardian management.
-  1. The initial guardian settings take effect immediately. If guardians are updated, there is a time lock, meaning that changes will only take effect after the set time has passed.
-  2. During social recovery, an anonymous guardian multi-signature contract is deployed, and the guardian's signatures are verified. If the signatures are all correct, social recovery is successful, and the signing key of the wallet contract is replaced.
-  3. Execute transactions from the entry point, the wallet contract will first verify the transaction or user operation signature and then execute the call to the target contract.
-+ Upgradability: The smart contract for this wallet can be upgraded in a secure way to add new features or fix vulnerabilities in the future. SoulWallet can be upgraded to a new logic contract. The upgrade process also has a time lock, which means that the upgrade can only be successful after the set time has passed.
++ Modules provide extended functionality.
++ A module is a whitelisted contract capable of executing transactions on behalf of the smart contract wallet.
++ Modules enhance the functionality of the contracts by adding extra access logic for transaction execution.
+3. Plugins (Hooks):
 
-| Method                        | Owner  | Guardians| Anyone | Comment                                                                                         |
-| ----------------------------  | ------ | ------   | ------ | ----------------------------------------------------------------------------------------------- |
-| `transferOwner`               | X      | X        |        |  The owner has the ability to replace the signing key, and the guardians (multi-signature contract) can also replace the signing key through social recovery.
-|`setGuardian`     | X      |          |        |  The owner can update the guardians.                                               |
-| `preUpgradeTo`              | X      |          |        |  Let the owner perform a contract upgrade                                             |
-| `upgrade`            |        |          |   X    | Finalizes an ongoing contract upgrade if the set time period has elapsed. The method is public and can be called by anyone. |
++ Plugins empower the smart contract wallet to invoke calls to the plugin contract.
++ Plugins can be set up to perform additional checks on transactions before they're executed.
++ There are three defined hook points within the contract wallet. `guardHook` `preHook` `postHook`. The `prehook` and `posthook` are executed before and after the execution of a transaction, while the `guardhook` is executed before signature validation.
 
-### AccountStorage
-"AccountStorage" is a library contract that uses the diamond storage pattern to store data in a particular position in the contract storage.
 
-### GuardianMultiSigWallet
-"GuardianMultiSigWallet" is a multi-signature contract that is used to verify the signatures of the guardians during social recovery. This multi-sig wallet is only deployed on the fly during social recovery, and guardians are only revealed at that point.
+## Repository Structure
 
-### TokenPaymaster
-"TokenPaymaster" is a paymaster contract that is used to pay gas fees with stablecoins such as USDC, USDT, DAI, etc.
+All contracts are held within the `soul-wallet-contract/contracts` folder.
+ 
+
+```
+contracts
+├── authority
+├── base
+├── handler
+├── helper
+├── interfaces
+├── keystore
+│   ├── L1
+│   │   └── interfaces
+│   └── interfaces
+├── libraries
+├── miscellaneous
+├── modules
+│   ├── SecurityControlModule
+│   ├── SocialRecoveryModule
+│   ├── Upgrade
+│   └── keystore
+│       ├── ArbitrumKeyStoreModule
+│       └── OptimismKeyStoreProofModule
+├── paymaster
+│   └── interfaces
+├── plugin
+│   ├── Dailylimit
+│   └── Simple2FA
+├── safeLock
+└── trustedContractManager
+    ├── trustedModuleManager
+    └── trustedPluginManager
+```
 
 ## Test
 ```shell
 npm run test
 ```
 
-```shell
-npm run deploy:optimisticGoerli
+## Integration
+Third parties can build new modules/plugins on top of SoulWallet to add additional functionality. 
+### Module
+To add a new module, the contract can inherit from `BaseModule`
+``` solidity
+import "./BaseModule.sol";
+
+contract NewModule is BaseModule {
+    function requiredFunctions()
+        external
+        pure
+        override
+        returns (bytes4[] memory)
+    {}
+
+    function inited(
+        address wallet
+    ) internal view virtual override returns (bool) {}
+
+    function _init(bytes calldata data) internal virtual override {}
+
+    function _deInit() internal virtual override {}
+}
+
+```
+### Plugin
+To add a new plugin, the contract can inherit from `BasePlugin`
+``` solidity
+import "./BasePlugin.sol";
+
+contract NewPlugin is BasePlugin {
+    function guardHook(
+        UserOperation calldata userOp,
+        bytes32 userOpHash,
+        bytes calldata guardData
+    ) external override {}
+
+    function preHook(
+        address target,
+        uint256 value,
+        bytes calldata data
+    ) external override {}
+
+    function postHook(
+        address target,
+        uint256 value,
+        bytes calldata data
+    ) external override {}
+
+    function _init(bytes calldata data) internal virtual override {}
+
+    function _deInit() internal virtual override {}
+
+    function _supportsHook()
+        internal
+        pure
+        virtual
+        override
+        returns (uint8 hookType)
+    {}
+
+    function inited(
+        address wallet
+    ) internal view virtual override returns (bool) {}
+}
 ```
 ## Disclaimer
 This project is provided "as is" with no warranties or guarantees of any kind, express or implied. The developers make no claims about the suitability, reliability, availability, timeliness, security or accuracy of the software or its related documentation. The use of this software is at your own risk.

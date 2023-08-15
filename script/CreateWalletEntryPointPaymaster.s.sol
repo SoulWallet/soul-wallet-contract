@@ -118,12 +118,15 @@ contract CreateWalletEntryPointPaymaster is Script {
             signature: hex""
         });
         userOperation.signature = signUserOp(userOperation, walletSigner, walletSingerPrivateKey);
-        logUserOp(userOperation);
 
         ops[0] = userOperation;
 
         uint256 bundlerSinger = vm.envUint("WALLET_SIGNGER_PRIVATE_KEY");
+        console.log("bundelr address ", vm.addr(bundlerSinger));
         vm.startBroadcast(bundlerSinger);
+        logUserOp(userOperation);
+        console.log("entrypoint", address(entrypoint));
+        console.log("beneficiary ", vm.addr(bundlerSinger));
         entrypoint.handleOps(ops, payable(vm.addr(bundlerSinger)));
     }
 
@@ -134,6 +137,16 @@ contract CreateWalletEntryPointPaymaster is Script {
         console.logBytes(op.initCode);
         console.log("callData: ");
         console.logBytes(op.callData);
+        console.log("callGasLimit: ");
+        console.log(op.callGasLimit);
+        console.log("verificationGasLimit: ");
+        console.log(op.verificationGasLimit);
+        console.log("preVerificationGas: ");
+        console.log(op.preVerificationGas);
+        console.log("maxFeePerGas: ");
+        console.log(op.maxFeePerGas);
+        console.log("maxPriorityFeePerGas: ");
+        console.log(op.maxPriorityFeePerGas);
         console.log("paymasterAndData: ");
         console.logBytes(op.paymasterAndData);
         console.log("signature: ");

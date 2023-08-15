@@ -108,7 +108,7 @@ contract OpKeystoreTest is Test, MockKeyStoreData {
     function test_proofL1KeystoreProofTwice() public {
         insertStateRoot();
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
-        vm.expectRevert("storage root already proofed");
+        vm.expectRevert("storage root already proved");
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
     }
 

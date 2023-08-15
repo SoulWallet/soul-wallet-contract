@@ -11,11 +11,11 @@ contract KeystoreProof is IKeystoreProof {
 
     address public immutable STATE_ROOT_HISTORY_ADDESS;
     address public immutable L1_KEYSTORE_ADDRESS;
-    // the latest block number in l1 that proofed
+    // the latest block number in l1 that proved
     uint256 public lastestProofL1BlockNumber;
 
-    event KeyStoreStorageProofed(bytes32 stateRoot, bytes32 storageRoot);
-    event L1KeyStoreProofed(bytes32 l1Slot, address signingKey);
+    event KeyStoreStorageProved(bytes32 stateRoot, bytes32 storageRoot);
+    event L1KeyStoreProved(bytes32 l1Slot, address signingKey);
 
     constructor(address _l1KeystoreAddress, address _stateRootHistoryAddress) {
         L1_KEYSTORE_ADDRESS = _l1KeystoreAddress;
@@ -26,7 +26,7 @@ contract KeystoreProof is IKeystoreProof {
         (bool searchResult, BlockInfo memory currentBlockInfo) =
             IKnownStateRootWithHistory(STATE_ROOT_HISTORY_ADDESS).stateRootInfo(stateRoot);
         require(searchResult, "unkown root");
-        require(stateRootToKeystoreStorageRoot[stateRoot] == bytes32(0), "storage root already proofed");
+        require(stateRootToKeystoreStorageRoot[stateRoot] == bytes32(0), "storage root already proved");
         bytes memory keyStoreAccountDetailsBytes = MerklePatriciaVerifier.getValueFromProof(
             currentBlockInfo.storageRootHash, keccak256(abi.encodePacked(L1_KEYSTORE_ADDRESS)), accountProof
         );
@@ -36,7 +36,7 @@ contract KeystoreProof is IKeystoreProof {
         if (currentBlockInfo.blockNumber > lastestProofL1BlockNumber) {
             lastestProofL1BlockNumber = currentBlockInfo.blockNumber;
         }
-        emit KeyStoreStorageProofed(stateRoot, keyStoreStorageRootHash);
+        emit KeyStoreStorageProved(stateRoot, keyStoreStorageRootHash);
     }
 
     function proofL1Keystore(bytes32 l1Slot, bytes32 stateRoot, address newSigningKey, bytes memory keyProof)
@@ -60,7 +60,7 @@ contract KeystoreProof is IKeystoreProof {
 
         l1SlotToSigningKey[l1Slot] = newSigningKey;
         lastProofBlock[l1Slot] = currentBlockInfo.blockNumber;
-        emit L1KeyStoreProofed(l1Slot, newSigningKey);
+        emit L1KeyStoreProved(l1Slot, newSigningKey);
     }
 
     function keystoreBySlot(bytes32 l1Slot) external view returns (address signingKey) {

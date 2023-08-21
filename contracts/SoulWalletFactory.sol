@@ -58,7 +58,6 @@ contract SoulWalletFactory is Ownable {
             if eq(succ, 0) { revert(0, 0) }
         }
         emit SoulWalletCreation(proxy);
-        return proxy;
     }
 
     /**

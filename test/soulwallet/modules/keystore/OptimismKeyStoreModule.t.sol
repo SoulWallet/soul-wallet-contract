@@ -43,8 +43,7 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         (walletOwner, walletOwnerPrivateKey) = makeAddrAndKey("owner");
         mockL1Block = new MockL1Block();
         knownStateRootWithHistory = new OpKnownStateRootWithHistory(address(mockL1Block));
-        keystoreProofContract =
-            new KeystoreProof(0xACB5b53F9F193b99bcd8EF8544ddF4c398DE24a3,address(knownStateRootWithHistory));
+        keystoreProofContract = new KeystoreProof(TEST_L1_KEYSTORE,address(knownStateRootWithHistory));
         optimismKeyStoreModule = new KeyStoreModule(address(keystoreProofContract));
 
         initialKey = makeAddr("initialKey");

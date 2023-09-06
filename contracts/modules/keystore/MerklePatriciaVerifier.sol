@@ -58,16 +58,14 @@ library MerklePatriciaVerifier {
                 nodeKey = Rlp.toBytes32(currentNodeList[nextPathNibble]);
                 pathPtr += 1;
             } else if (currentNodeList.length == 2) {
-                pathPtr += _nibblesToTraverse(Rlp.toData(currentNodeList[0]), nibblePath, pathPtr);
+                uint256 nibblesToTravers = _nibblesToTraverse(Rlp.toData(currentNodeList[0]), nibblePath, pathPtr);
+                pathPtr += nibblesToTravers;
                 // leaf node
                 if (pathPtr == nibblePath.length) {
                     return Rlp.toData(currentNodeList[1]);
                 }
                 //extension node
-                require(
-                    _nibblesToTraverse(Rlp.toData(currentNodeList[0]), nibblePath, pathPtr) != 0,
-                    "invalid extension node"
-                );
+                require(nibblesToTravers != 0, "invalid extension node");
 
                 nodeKey = Rlp.toBytes32(currentNodeList[1]);
             } else {

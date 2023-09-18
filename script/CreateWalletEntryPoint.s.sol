@@ -13,9 +13,11 @@ import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWit
 import "@source/modules/keystore/KeystoreProof.sol";
 import {NetWorkLib} from "./DeployHelper.sol";
 import "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract CreateWalletEntryPoint is Script {
     using ECDSA for bytes32;
+    using TypeConversion for address;
 
     uint256 guardianThreshold = 1;
     uint64 initialGuardianSafePeriod = 2 days;
@@ -79,7 +81,11 @@ contract CreateWalletEntryPoint is Script {
 
         defaultCallbackHandler = loadEnvContract("DEFAULT_CALLBACK_HANDLER_ADDRESS");
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,bytes[],bytes[])", walletSigner, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32,address,bytes[],bytes[])",
+            walletSigner.toBytes32(),
+            defaultCallbackHandler,
+            modules,
+            plugins
         );
         soulwalletFactory = SoulWalletFactory(loadEnvContract("SOULWALLET_FACTORY_ADDRESS"));
         address cacluatedAddress = soulwalletFactory.getWalletAddress(initializer, salt);

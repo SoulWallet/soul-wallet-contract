@@ -9,7 +9,7 @@ contract DemoModule is BaseModule {
     event initEvent(address wallet);
     event deInitEvent(address wallet);
 
-    bytes4 constant _function = bytes4(keccak256("addOwner(address)"));
+    bytes4 constant _function = bytes4(keccak256("addOwner(bytes32)"));
 
     function requiredFunctions() external pure override returns (bytes4[] memory) {
         // addOwner(address owner)
@@ -33,7 +33,7 @@ contract DemoModule is BaseModule {
         emit deInitEvent(sender());
     }
 
-    function addOwner(address target, address newOwner) external {
+    function addOwner(address target, bytes32 newOwner) external {
         require(inited(target));
         (bool ok, bytes memory res) = target.call{value: 0}(abi.encodeWithSelector(_function, newOwner));
         require(ok, string(res));

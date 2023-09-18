@@ -5,7 +5,7 @@ import "./MerklePatriciaVerifier.sol";
 import "../../keystore/interfaces/IKeystoreProof.sol";
 
 contract KeystoreProof is IKeystoreProof {
-    mapping(bytes32 => address) public l1SlotToSigningKey;
+    mapping(bytes32 => bytes32) public l1SlotToSigningKey;
     mapping(bytes32 => uint256) public lastProofBlock;
     mapping(bytes32 => bytes32) public stateRootToKeystoreStorageRoot;
 
@@ -15,7 +15,7 @@ contract KeystoreProof is IKeystoreProof {
     uint256 public lastestProofL1BlockNumber;
 
     event KeyStoreStorageProved(bytes32 stateRoot, bytes32 storageRoot);
-    event L1KeyStoreProved(bytes32 l1Slot, address signingKey);
+    event L1KeyStoreProved(bytes32 l1Slot, bytes32 signingKey);
 
     constructor(address _l1KeystoreAddress, address _stateRootHistoryAddress) {
         L1_KEYSTORE_ADDRESS = _l1KeystoreAddress;
@@ -39,7 +39,7 @@ contract KeystoreProof is IKeystoreProof {
         emit KeyStoreStorageProved(stateRoot, keyStoreStorageRootHash);
     }
 
-    function proofL1Keystore(bytes32 l1Slot, bytes32 stateRoot, address newSigningKey, bytes memory keyProof)
+    function proofL1Keystore(bytes32 l1Slot, bytes32 stateRoot, bytes32 newSigningKey, bytes memory keyProof)
         external
     {
         (bool searchResult, BlockInfo memory currentBlockInfo) =
@@ -49,10 +49,10 @@ contract KeystoreProof is IKeystoreProof {
         require(keyStoreStorageRootHash != bytes32(0), "storage root not set");
 
         // when verify merkel patricia proof for storage value, the tree path = keccaka256("l1slot")
-        address proofAddress = Rlp.rlpBytesToAddress(
+        bytes32 proofSigningKey = Rlp.rlpBytesToBytes32(
             MerklePatriciaVerifier.getValueFromProof(keyStoreStorageRootHash, keccak256(abi.encode(l1Slot)), keyProof)
         );
-        require(proofAddress == newSigningKey, "key not match");
+        require(proofSigningKey == newSigningKey, "key not match");
         // store the new proof signing key to slot mapping
 
         uint256 blockNumber = lastProofBlock[l1Slot];
@@ -63,7 +63,7 @@ contract KeystoreProof is IKeystoreProof {
         emit L1KeyStoreProved(l1Slot, newSigningKey);
     }
 
-    function keystoreBySlot(bytes32 l1Slot) external view returns (address signingKey) {
+    function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKey) {
         return (l1SlotToSigningKey[l1Slot]);
     }
 }

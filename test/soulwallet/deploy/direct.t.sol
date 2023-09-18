@@ -4,8 +4,11 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../base/SoulWalletInstence.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract DeployDirectTest is Test {
+    using TypeConversion for address;
+
     function setUp() public {}
 
     function test_Deploy() public {
@@ -15,8 +18,8 @@ contract DeployDirectTest is Test {
         SoulWalletInstence soulWalletInstence =
             new SoulWalletInstence(address(0), address(this),  modules, plugins,  salt);
         ISoulWallet soulWallet = soulWalletInstence.soulWallet();
-        assertEq(soulWallet.isOwner(address(this)), true);
-        assertEq(soulWallet.isOwner(address(0x1111)), false);
+        assertEq(soulWallet.isOwner(address(this).toBytes32()), true);
+        assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), false);
 
         TokenERC20 token = new TokenERC20(18);
 

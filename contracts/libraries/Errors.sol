@@ -4,6 +4,8 @@ pragma solidity ^0.8.17;
 library Errors {
     error ADDRESS_ALREADY_EXISTS();
     error ADDRESS_NOT_EXISTS();
+    error DATA_ALREADY_EXISTS();
+    error DATA_NOT_EXISTS();
     error CALLER_MUST_BE_ENTRYPOINT();
     error CALLER_MUST_BE_SELF_OR_MODULE();
     error CALLER_MUST_BE_MODULE();

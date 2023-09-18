@@ -5,9 +5,11 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../authority/OwnerAuth.sol";
 import "../libraries/SignatureDecoder.sol";
 import "../libraries/Errors.sol";
+import "../libraries/TypeConversion.sol";
 
 abstract contract SignatureValidator is OwnerAuth {
     using ECDSA for bytes32;
+    using TypeConversion for address;
 
     /**
      * @dev pack hash message with `signatureData.validationData`
@@ -41,7 +43,7 @@ abstract contract SignatureValidator is OwnerAuth {
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
-            sigValid = _isOwner(recovered);
+            sigValid = _isOwner(recovered.toBytes32());
         }
     }
 
@@ -58,7 +60,7 @@ abstract contract SignatureValidator is OwnerAuth {
         if (error != ECDSA.RecoverError.NoError) {
             sigValid = false;
         } else {
-            sigValid = _isOwner(recovered);
+            sigValid = _isOwner(recovered.toBytes32());
         }
     }
 }

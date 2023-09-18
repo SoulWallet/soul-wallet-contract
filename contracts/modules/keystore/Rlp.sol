@@ -407,4 +407,8 @@ library Rlp {
     function rlpBytesToAddress(bytes memory source) internal pure returns (address result) {
         return Rlp.toAddress(Rlp.toItem(source));
     }
+
+    function rlpBytesToBytes32(bytes memory source) internal pure returns (bytes32 result) {
+        return Rlp.toBytes32(Rlp.toItem(source));
+    }
 }

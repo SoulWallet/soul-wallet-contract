@@ -11,6 +11,7 @@ import "@source/paymaster/ERC20Paymaster.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
+import "@source/libraries/TypeConversion.sol";
 
 using ECDSA for bytes32;
 
@@ -23,6 +24,8 @@ contract ERC20PaymasterActiveWalletTest is Test {
     ISoulWallet soulWallet;
     ERC20Paymaster paymaster;
     Bundler bundler;
+
+    using TypeConversion for address;
 
     address ownerAddr;
     uint256 ownerKey;
@@ -96,7 +99,11 @@ contract ERC20PaymasterActiveWalletTest is Test {
 
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,bytes[],bytes[])", ownerAddr, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32,address,bytes[],bytes[])",
+            ownerAddr.toBytes32(),
+            defaultCallbackHandler,
+            modules,
+            plugins
         );
         sender = soulWalletFactory.getWalletAddress(initializer, salt);
         // send wallet with testtoken
@@ -137,7 +144,7 @@ contract ERC20PaymasterActiveWalletTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, userOpHash.toEthSignedMessageHash());
         userOperation.signature = abi.encodePacked(r, s, v);
         bundler.post(entryPoint, userOperation);
-        ISoulWallet soulWallet = ISoulWallet(sender);
-        assertEq(soulWallet.isOwner(ownerAddr), true);
+        soulWallet = ISoulWallet(sender);
+        assertEq(soulWallet.isOwner(ownerAddr.toBytes32()), true);
     }
 }

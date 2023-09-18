@@ -11,10 +11,12 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/modules/keystore/KeyStoreModule.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWithHistory.sol";
 import "@source/modules/keystore/KeystoreProof.sol";
+import "@source/libraries/TypeConversion.sol";
 import {NetWorkLib} from "./DeployHelper.sol";
 
 contract CreateWalletDirect is Script {
     using ECDSA for bytes32;
+    using TypeConversion for address;
 
     uint256 guardianThreshold = 1;
     uint64 initialGuardianSafePeriod = 2 days;
@@ -100,14 +102,18 @@ contract CreateWalletDirect is Script {
         bytes32 initialGuardianHash = keccak256(rawGuardian);
 
         bytes memory keystoreModuleInitData =
-            abi.encode(bytes32(uint256(uint160(walletSigner))), initialGuardianHash, initialGuardianSafePeriod);
+            abi.encode(walletSigner.toBytes32(), initialGuardianHash, initialGuardianSafePeriod);
         modules[1] = abi.encodePacked(keystoreModuleAddress, keystoreModuleInitData);
 
         bytes[] memory plugins = new bytes[](0);
 
         defaultCallbackHandler = loadEnvContract("DEFAULT_CALLBACK_HANDLER_ADDRESS");
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,bytes[],bytes[])", walletSigner, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32,address,bytes[],bytes[])",
+            walletSigner.toBytes32(),
+            defaultCallbackHandler,
+            modules,
+            plugins
         );
         soulwalletFactory = SoulWalletFactory(loadEnvContract("SOULWALLET_FACTORY_ADDRESS"));
         address cacluatedAddress = soulwalletFactory.getWalletAddress(initializer, salt);
@@ -123,9 +129,8 @@ contract CreateWalletDirect is Script {
         guardians[0] = guardianAddress;
         bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
         bytes32 initialGuardianHash = keccak256(rawGuardian);
-        bytes32 slot = keystoreContract.getSlot(
-            bytes32(uint256(uint160(walletSigner))), initialGuardianHash, initialGuardianSafePeriod
-        );
+        bytes32 slot =
+            keystoreContract.getSlot(walletSigner.toBytes32(), initialGuardianHash, initialGuardianSafePeriod);
         console.logBytes32(slot);
         return slot;
     }
@@ -139,38 +144,37 @@ contract CreateWalletDirect is Script {
         bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
         bytes32 initialGuardianHash = keccak256(rawGuardian);
 
-        bytes32 slot = keystoreContract.getSlot(
-            bytes32(uint256(uint160(walletSigner))), initialGuardianHash, initialGuardianSafePeriod
-        );
+        bytes32 slot =
+            keystoreContract.getSlot(walletSigner.toBytes32(), initialGuardianHash, initialGuardianSafePeriod);
 
         uint256 nonce = keystoreContract.nonce(slot);
 
         // return keccak256(abi.encode(address(this), slot, _nonce, data));
         bytes32 signMessageHash =
-            keccak256(abi.encode(address(keystoreContract), slot, nonce, bytes32(uint256(uint160(newWalletSigner)))));
+            keccak256(abi.encode(address(keystoreContract), slot, nonce, newWalletSigner.toBytes32()));
         bytes memory guardianSig = _signMsg(signMessageHash, guardianPrivateKey);
 
         keystoreContract.setKey(
-            bytes32(uint256(uint160(walletSigner))),
+            walletSigner.toBytes32(),
             initialGuardianHash,
             initialGuardianSafePeriod,
-            bytes32(uint256(uint160(newWalletSigner))),
+            newWalletSigner.toBytes32(),
             rawGuardian,
             guardianSig
         );
 
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keystoreContract.getKeyStoreInfo(slot);
-        require(_keyStoreInfo.key == bytes32(uint256(uint160(newWalletSigner))), "keyStoreInfo.key != newKey");
+        require(_keyStoreInfo.key == newWalletSigner.toBytes32(), "keyStoreInfo.key != newKey");
         console.log("changeKeyStoreKeyByGuardian success");
         console.log("newWalletSigner", newWalletSigner);
     }
 
     function syncKeyStore() private {
-        bool beforeSync = SoulWallet(soulwalletAddress).isOwner(newWalletSigner);
+        bool beforeSync = SoulWallet(soulwalletAddress).isOwner(newWalletSigner.toBytes32());
         require(beforeSync == false, "before sync should not be new owner");
         KeyStoreModule(keystoreModuleAddress).syncL1Keystore(address(soulwalletAddress));
 
-        bool afterSync = SoulWallet(soulwalletAddress).isOwner(newWalletSigner);
+        bool afterSync = SoulWallet(soulwalletAddress).isOwner(newWalletSigner.toBytes32());
         require(afterSync == true, "after sync new owner not match");
     }
 
@@ -208,7 +212,7 @@ contract CreateWalletDirect is Script {
         keystoreProofContract.proofL1Keystore(
             0x30c04d81b7c8fcca55a64a5ffbf2ced4517744fd2b68928b8080a96465ec9f6f,
             0xded104e47ed0c60db0fda3b8395286420fb65e5686854ea627f9d5b60ca00600,
-            0x598991c9D726cBac7EB023Ca974fe6e7e7a57Ce8,
+            address(0x598991c9D726cBac7EB023Ca974fe6e7e7a57Ce8).toBytes32(),
             hex"f8cbf8918080808080a06ed5c01b2444c8373690836388d91d9227b9999821522c6c66b2565fb246efb9808080a0be05134e40d2fc74e8e4e62b8766ffa4b44f402501c8b29c59c3e929b64162dc8080a03d0324ec4704a293545dbccab4fe7096cf56f96f75ec163131d43fe487b2efcb80a0aeeeee702f51c895c5c005029966cc66cf16052d7930446e36563dcde2f1a9b38080f7a03f025a1553395601db3a10ebbbbbb1e6e2a959fa5964eaa63a45a14e3dcb994b9594598991c9d726cbac7eb023ca974fe6e7e7a57ce8"
         );
     }
@@ -218,7 +222,7 @@ contract CreateWalletDirect is Script {
         keystoreProofContract.proofL1Keystore(
             0x30c04d81b7c8fcca55a64a5ffbf2ced4517744fd2b68928b8080a96465ec9f6f,
             0xab5981a1bcec73ae9dd1fb096640e8f7f52946b045fabe538542af07123ef3f2,
-            0x68D9Fb9427175aF4d3c65fc9754C7383C70277bc,
+            address(0x68D9Fb9427175aF4d3c65fc9754C7383C70277bc).toBytes32(),
             hex"f8cbf8918080808080a02155da169730f5d618ef5c813543c49d66415688a7d0f7c81dd7237bce87fb9e808080a0be05134e40d2fc74e8e4e62b8766ffa4b44f402501c8b29c59c3e929b64162dc8080a060d8ed27c8022702fc0cadf1ce5d49a59371442e5f5ab15b008fdcd5a963418880a0aeeeee702f51c895c5c005029966cc66cf16052d7930446e36563dcde2f1a9b38080f7a03f025a1553395601db3a10ebbbbbb1e6e2a959fa5964eaa63a45a14e3dcb994b959468d9fb9427175af4d3c65fc9754c7383c70277bc"
         );
     }

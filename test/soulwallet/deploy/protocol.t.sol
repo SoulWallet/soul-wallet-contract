@@ -11,9 +11,11 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../Bundler.sol";
 import "@source/dev/Tokens/TokenERC721.sol";
 import "@source/handler/DefaultCallbackHandler.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract DeployProtocolTest is Test {
     using ECDSA for bytes32;
+    using TypeConversion for address;
 
     EntryPoint public entryPoint;
     SoulWalletLogicInstence public soulWalletLogicInstence;
@@ -62,7 +64,11 @@ contract DeployProtocolTest is Test {
 
             DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(address,address,bytes[],bytes[])", walletOwner, defaultCallbackHandler, modules, plugins
+                "initialize(bytes32,address,bytes[],bytes[])",
+                walletOwner.toBytes32(),
+                defaultCallbackHandler,
+                modules,
+                plugins
             );
             sender = soulWalletFactory.getWalletAddress(initializer, salt);
 
@@ -104,7 +110,7 @@ contract DeployProtocolTest is Test {
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length > 0, true, "A2:sender.code.length == 0");
         ISoulWallet soulWallet = ISoulWallet(sender);
-        assertEq(soulWallet.isOwner(walletOwner), true);
-        assertEq(soulWallet.isOwner(address(0x1111)), false);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
+        assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), false);
     }
 }

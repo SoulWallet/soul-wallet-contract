@@ -9,7 +9,7 @@ library AccountStorage {
     struct Layout {
         // ┌───────────────────┐
         // │     base data     │
-        mapping(address => address) owners;
+        mapping(bytes32 => bytes32) owners;
         address defaultFallbackContract;
         uint256[50] __gap_0;
         // └───────────────────┘
@@ -35,8 +35,8 @@ library AccountStorage {
         mapping(address => address) postHookPlugins;
         mapping(address => mapping(bytes32 => bytes)) pluginDataBytes;
         uint256[50] __gap_3;
-        // └───────────────────┘
     }
+    // └───────────────────┘
 
     //#TODO
 

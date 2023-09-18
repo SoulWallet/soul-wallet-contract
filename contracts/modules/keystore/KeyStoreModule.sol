@@ -8,13 +8,13 @@ import "../../libraries/KeyStoreSlotLib.sol";
 import "../../keystore/interfaces/IKeystoreProof.sol";
 
 contract KeyStoreModule is IKeyStoreModule, BaseModule {
-    bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
-    bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
+    bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(bytes32)"));
+    bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(bytes32[])"));
 
     IKeystoreProof public immutable keyStoreProof;
 
     mapping(address => bytes32) public l1Slot;
-    mapping(address => address) public lastKeyStoreSyncSignKey;
+    mapping(address => bytes32) public lastKeyStoreSyncSignKey;
 
     mapping(address => bool) walletInited;
     uint128 private __seed = 0;
@@ -32,10 +32,10 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
     function syncL1Keystore(address wallet) external override {
         bytes32 slotInfo = l1Slot[wallet];
         require(slotInfo != bytes32(0), "wallet slot not set");
-        address keystoreSignKey = keyStoreProof.keystoreBySlot(slotInfo);
-        require(keystoreSignKey != address(0), "keystore proof not sync");
-        address lastSyncKeyStore = lastKeyStoreSyncSignKey[wallet];
-        if (lastSyncKeyStore != address(0) && lastSyncKeyStore == keystoreSignKey) {
+        bytes32 keystoreSignKey = keyStoreProof.keystoreBySlot(slotInfo);
+        require(keystoreSignKey != bytes32(0), "keystore proof not sync");
+        bytes32 lastSyncKeyStore = lastKeyStoreSyncSignKey[wallet];
+        if (lastSyncKeyStore != bytes32(0) && lastSyncKeyStore == keystoreSignKey) {
             revert("keystore already synced");
         }
         ISoulWallet soulwallet = ISoulWallet(payable(wallet));
@@ -64,9 +64,9 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
         require(walletKeyStoreSlot != bytes32(0), "wallet slot needs to set");
         l1Slot[_sender] = walletKeyStoreSlot;
 
-        address keystoreSignKey = keyStoreProof.keystoreBySlot(walletKeyStoreSlot);
+        bytes32 keystoreSignKey = keyStoreProof.keystoreBySlot(walletKeyStoreSlot);
         // if keystore already sync, change to keystore signer
-        if (keystoreSignKey != address(0)) {
+        if (keystoreSignKey != bytes32(0)) {
             ISoulWallet soulwallet = ISoulWallet(payable(_sender));
             // sync keystore signing key
             soulwallet.resetOwner(keystoreSignKey);

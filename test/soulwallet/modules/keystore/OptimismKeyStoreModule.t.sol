@@ -9,6 +9,7 @@ import "@source/modules/keystore/KeyStoreModule.sol";
 import "../../base/SoulWalletInstence.sol";
 import "./MockKeyStoreData.sol";
 import "@source/libraries/KeyStoreSlotLib.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract MockL1Block is IL1Block, MockKeyStoreData {
     function hash() external view returns (bytes32) {
@@ -22,6 +23,7 @@ contract MockL1Block is IL1Block, MockKeyStoreData {
 
 contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
     using stdStorage for StdStorage;
+    using TypeConversion for address;
 
     OpKnownStateRootWithHistory knownStateRootWithHistory;
     MockL1Block mockL1Block;
@@ -85,7 +87,7 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         (address[] memory _modules,) = soulWallet.listModule();
         assertEq(_modules.length, 1, "module length error");
         assertEq(_modules[0], address(optimismKeyStoreModule), "module address error");
-        assertEq(soulWallet.isOwner(walletOwner), true);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
     }
 
     function proofL1KeyStore() internal {
@@ -93,7 +95,7 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         knownStateRootWithHistory.setBlockHash();
         knownStateRootWithHistory.insertNewStateRoot(TEST_BLOCK_NUMBER, blockInfoParameter);
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER, TEST_KEY_PROOF);
+        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER.toBytes32(), TEST_KEY_PROOF);
     }
 
     function test_setUpWithKeyStoreValueExist() public {
@@ -104,31 +106,31 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
 
         proofL1KeyStore();
         deployWallet();
-        assertEq(soulWallet.isOwner(walletOwner), false);
-        assertEq(soulWallet.isOwner(newOwner), true);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), false);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), true);
     }
 
     function test_keyStoreSyncWithModule() public {
         deployWallet();
-        assertEq(soulWallet.isOwner(walletOwner), true);
-        assertEq(soulWallet.isOwner(newOwner), false);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), false);
         proofL1KeyStore();
         vm.startPrank(walletOwner);
         optimismKeyStoreModule.syncL1Keystore(address(soulWallet));
-        assertEq(soulWallet.isOwner(walletOwner), false);
-        assertEq(soulWallet.isOwner(newOwner), true);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), false);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), true);
         vm.stopPrank();
     }
 
     function test_keyStoreSyncWithModuleSyncAgain() public {
         deployWallet();
-        assertEq(soulWallet.isOwner(walletOwner), true);
-        assertEq(soulWallet.isOwner(newOwner), false);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), false);
         proofL1KeyStore();
         vm.startPrank(walletOwner);
         optimismKeyStoreModule.syncL1Keystore(address(soulWallet));
-        assertEq(soulWallet.isOwner(walletOwner), false);
-        assertEq(soulWallet.isOwner(newOwner), true);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), false);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), true);
         vm.expectRevert("keystore already synced");
         optimismKeyStoreModule.syncL1Keystore(address(soulWallet));
         vm.stopPrank();
@@ -136,8 +138,8 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
 
     function test_keyStoreSyncWithoutKeyStoreInfo() public {
         deployWallet();
-        assertEq(soulWallet.isOwner(walletOwner), true);
-        assertEq(soulWallet.isOwner(newOwner), false);
+        assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
+        assertEq(soulWallet.isOwner(newOwner.toBytes32()), false);
         vm.startPrank(walletOwner);
         vm.expectRevert("keystore proof not sync");
         optimismKeyStoreModule.syncL1Keystore(address(soulWallet));

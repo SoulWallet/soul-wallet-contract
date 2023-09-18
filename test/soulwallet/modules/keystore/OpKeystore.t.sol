@@ -6,6 +6,7 @@ import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWit
 import "@source/modules/keystore/KeystoreProof.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/IL1Block.sol";
 import "./MockKeyStoreData.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract MockL1Block is IL1Block, MockKeyStoreData {
     function hash() external view returns (bytes32) {
@@ -21,6 +22,8 @@ contract OpKeystoreTest is Test, MockKeyStoreData {
     OpKnownStateRootWithHistory knownStateRootWithHistory;
     MockL1Block mockL1Block;
     KeystoreProof keystoreProofContract;
+
+    using TypeConversion for address;
 
     function setUp() public {
         mockL1Block = new MockL1Block();
@@ -171,17 +174,17 @@ contract OpKeystoreTest is Test, MockKeyStoreData {
         insertStateRoot();
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
 
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER, TEST_KEY_PROOF);
+        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER.toBytes32(), TEST_KEY_PROOF);
 
-        address newSignKey = keystoreProofContract.keystoreBySlot(TEST_SLOT);
-        assertEq(newSignKey, TEST_NEW_OWNER);
+        bytes32 newSignKey = keystoreProofContract.keystoreBySlot(TEST_SLOT);
+        assertEq(newSignKey, TEST_NEW_OWNER.toBytes32());
     }
 
     function testFuzz_proofL1KeystoreWrongProof(bytes memory _keyProof) public {
         insertStateRoot();
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
         vm.expectRevert();
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER, _keyProof);
+        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER.toBytes32(), _keyProof);
     }
 
     function test_proofL1KeystoreProofTwice() public {
@@ -194,13 +197,13 @@ contract OpKeystoreTest is Test, MockKeyStoreData {
     function test_proofL1KeystoreWitoutStorageRoot() public {
         insertStateRoot();
         vm.expectRevert("storage root not set");
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER, TEST_KEY_PROOF);
+        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER.toBytes32(), TEST_KEY_PROOF);
     }
 
     function testFuzz_proofL1KeystoreUnknownStorageRoot(bytes32 _stateRoots) public {
         insertStateRoot();
         vm.expectRevert();
         console.logBytes32(_stateRoots);
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, _stateRoots, TEST_NEW_OWNER, TEST_KEY_PROOF);
+        keystoreProofContract.proofL1Keystore(TEST_SLOT, _stateRoots, TEST_NEW_OWNER.toBytes32(), TEST_KEY_PROOF);
     }
 }

@@ -4,11 +4,13 @@ pragma solidity ^0.8.17;
 import "./ISocialRecoveryModule.sol";
 import "../BaseModule.sol";
 import "../../libraries/AddressLinkedList.sol";
+import "../../libraries/TypeConversion.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "../../interfaces/ISoulWallet.sol";
 
 contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     using AddressLinkedList for mapping(address => address);
+    using TypeConversion for address;
 
     string public constant NAME = "Soulwallet Social Recovery Module";
     string public constant VERSION = "0.0.1";
@@ -21,8 +23,8 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     bytes32 private constant _SOCIAL_RECOVERY_TYPEHASH =
         0x333ef7ecc7b8a82065578df0879cefc36c32344d49afdf1e0370a60babe64feb;
 
-    bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(address)"));
-    bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(address[])"));
+    bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(bytes32)"));
+    bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(bytes32[])"));
 
     mapping(address => uint256) walletRecoveryNonce;
     mapping(address => uint256) walletInitSeed;
@@ -267,8 +269,9 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
         delete recoveryEntries[_wallet];
 
         ISoulWallet soulwallet = ISoulWallet(payable(_wallet));
+        bytes32[] memory convertedOwners = TypeConversion.addressesToBytes32Array(_newOwners);
         // update owners
-        soulwallet.resetOwners(_newOwners);
+        soulwallet.resetOwners(convertedOwners);
         // emit RecoverySuccess
         emit SocialRecovery(_wallet, _newOwners);
     }

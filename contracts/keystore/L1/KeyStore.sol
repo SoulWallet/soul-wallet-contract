@@ -128,11 +128,8 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
         _saveKey(slot, newKey);
     }
 
-    function keystoreBySlot(bytes32 l1Slot) external view override returns (address signingKey) {
-        bytes32 key = _getKey(l1Slot);
-        assembly ("memory-safe") {
-            signingKey := key
-        }
+    function keystoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKey) {
+        return _getKey(l1Slot);
     }
 
     function _approveKey(address sender, bytes32 hash) private pure returns (bytes32 key) {

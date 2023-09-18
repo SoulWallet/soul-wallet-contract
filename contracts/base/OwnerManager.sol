@@ -4,22 +4,22 @@ pragma solidity ^0.8.17;
 import "../libraries/AccountStorage.sol";
 import "../authority/Authority.sol";
 import "../interfaces/IOwnerManager.sol";
-import "../libraries/AddressLinkedList.sol";
+import "../libraries/Bytes32LinkedList.sol";
 import "../libraries/Errors.sol";
 
 abstract contract OwnerManager is IOwnerManager, Authority {
-    using AddressLinkedList for mapping(address => address);
+    using Bytes32LinkedList for mapping(bytes32 => bytes32);
 
-    function _ownerMapping() private view returns (mapping(address => address) storage owners) {
+    function _ownerMapping() private view returns (mapping(bytes32 => bytes32) storage owners) {
         owners = AccountStorage.layout().owners;
     }
 
-    function _isOwner(address addr) internal view override returns (bool) {
-        return _ownerMapping().isExist(addr);
+    function _isOwner(bytes32 owner) internal view override returns (bool) {
+        return _ownerMapping().isExist(owner);
     }
 
-    function isOwner(address addr) external view override returns (bool) {
-        return _isOwner(addr);
+    function isOwner(bytes32 owner) external view override returns (bool) {
+        return _isOwner(owner);
     }
 
     function _clearOwner() private {
@@ -27,17 +27,17 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerCleared();
     }
 
-    function resetOwner(address newOwner) external override onlySelfOrModule {
+    function resetOwner(bytes32 newOwner) external override onlySelfOrModule {
         _clearOwner();
         _addOwner(newOwner);
     }
 
-    function resetOwners(address[] calldata newOwners) external override onlySelfOrModule {
+    function resetOwners(bytes32[] calldata newOwners) external override onlySelfOrModule {
         _clearOwner();
         _addOwners(newOwners);
     }
 
-    function _addOwners(address[] calldata owners) private {
+    function _addOwners(bytes32[] calldata owners) private {
         for (uint256 i = 0; i < owners.length;) {
             _addOwner(owners[i]);
             unchecked {
@@ -46,20 +46,20 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         }
     }
 
-    function addOwner(address owner) external override onlySelfOrModule {
+    function addOwner(bytes32 owner) external override onlySelfOrModule {
         _addOwner(owner);
     }
 
-    function addOwners(address[] calldata owners) external override onlySelfOrModule {
+    function addOwners(bytes32[] calldata owners) external override onlySelfOrModule {
         _addOwners(owners);
     }
 
-    function _addOwner(address owner) internal {
+    function _addOwner(bytes32 owner) internal {
         _ownerMapping().add(owner);
         emit OwnerAdded(owner);
     }
 
-    function removeOwner(address owner) external override onlySelfOrModule {
+    function removeOwner(bytes32 owner) external override onlySelfOrModule {
         _ownerMapping().remove(owner);
         if (_ownerMapping().isEmpty()) {
             revert Errors.NO_OWNER();
@@ -67,8 +67,8 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         emit OwnerRemoved(owner);
     }
 
-    function listOwner() external view override returns (address[] memory owners) {
+    function listOwner() external view override returns (bytes32[] memory owners) {
         uint256 size = _ownerMapping().size();
-        owners = _ownerMapping().list(AddressLinkedList.SENTINEL_ADDRESS, size);
+        owners = _ownerMapping().list(Bytes32LinkedList.SENTINEL_BYTES32, size);
     }
 }

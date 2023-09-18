@@ -7,6 +7,7 @@ import "./SoulWalletLogicInstence.sol";
 import "@source/dev/SingletonFactory.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
 import "forge-std/Test.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract SoulWalletInstence {
     SoulWalletLogicInstence public soulWalletLogicInstence;
@@ -14,6 +15,8 @@ contract SoulWalletInstence {
     SingletonFactory public singletonFactory;
     ISoulWallet public soulWallet;
     EntryPoint public entryPoint;
+
+    using TypeConversion for address;
 
     constructor(
         address defaultCallbackHandler,
@@ -35,7 +38,11 @@ contract SoulWalletInstence {
         Plugin[] calldata plugins
          */
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(address,address,bytes[],bytes[])", ownerAddr, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32,address,bytes[],bytes[])",
+            ownerAddr.toBytes32(),
+            defaultCallbackHandler,
+            modules,
+            plugins
         );
         address walletAddress1 = soulWalletFactory.getWalletAddress(initializer, salt);
         address walletAddress2 = soulWalletFactory.createWallet(initializer, salt);

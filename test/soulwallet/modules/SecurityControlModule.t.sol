@@ -11,9 +11,11 @@ import "@source/dev/DemoPlugin.sol";
 import "../Bundler.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract SecurityControlModuleTest is Test {
     using ECDSA for bytes32;
+    using TypeConversion for address;
 
     SoulWalletInstence public soulWalletInstence;
     ISoulWallet public soulWallet;
@@ -172,9 +174,9 @@ contract SecurityControlModuleTest is Test {
 
             assertEq(_modules[0], address(demoModule), "module address error");
 
-            assertEq(soulWallet.isOwner(address(0x1111)), false);
-            demoModule.addOwner(address(soulWallet), address(0x1111));
-            assertEq(soulWallet.isOwner(address(0x1111)), true, "addOwner error");
+            assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), false);
+            demoModule.addOwner(address(soulWallet), address(0x1111).toBytes32());
+            assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), true, "addOwner error");
         }
     }
 
@@ -194,9 +196,9 @@ contract SecurityControlModuleTest is Test {
         addModule_execute();
         vm.stopPrank();
 
-        assertEq(soulWallet.isOwner(address(0x1111)), false);
-        demoModule.addOwner(address(soulWallet), address(0x1111));
-        assertEq(soulWallet.isOwner(address(0x1111)), true, "addOwner error");
+        assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), false);
+        demoModule.addOwner(address(soulWallet), address(0x1111).toBytes32());
+        assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), true, "addOwner error");
     }
 
     //function queue(address _target, bytes calldata _data) external returns (bytes32);
@@ -226,7 +228,7 @@ contract SecurityControlModuleTest is Test {
     function test_removeModule() public {
         test_addModule();
 
-        assertEq(soulWallet.isOwner(address(0x1111)), true, "addOwner error");
+        assertEq(soulWallet.isOwner(address(0x1111).toBytes32()), true, "addOwner error");
 
         vm.startPrank(walletOwner);
         removeModule_queue();
@@ -239,8 +241,8 @@ contract SecurityControlModuleTest is Test {
         removeModule_execute();
 
         vm.expectRevert();
-        demoModule.addOwner(address(soulWallet), address(0x2222));
-        assertEq(soulWallet.isOwner(address(0x2222)), false, "addOwner error");
+        demoModule.addOwner(address(soulWallet), address(0x2222).toBytes32());
+        assertEq(soulWallet.isOwner(address(0x2222).toBytes32()), false, "addOwner error");
 
         vm.stopPrank();
 

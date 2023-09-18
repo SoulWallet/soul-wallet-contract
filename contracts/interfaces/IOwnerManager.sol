@@ -2,21 +2,15 @@
 pragma solidity ^0.8.17;
 
 interface IOwnerManager {
+    event OwnerAdded(bytes32 indexed owner);
+    event OwnerRemoved(bytes32 indexed owner);
     event OwnerCleared();
-    event OwnerAdded(address indexed owner);
-    event OwnerRemoved(address indexed owner);
 
-    function isOwner(address addr) external view returns (bool);
-
-    function resetOwner(address newOwner) external;
-
-    function addOwner(address owner) external;
-
-    function addOwners(address[] calldata owners) external;
-
-    function resetOwners(address[] calldata newOwners) external;
-
-    function removeOwner(address owner) external;
-
-    function listOwner() external returns (address[] memory owners);
+    function isOwner(bytes32 owner) external view returns (bool);
+    function addOwner(bytes32 owner) external;
+    function removeOwner(bytes32 owner) external;
+    function resetOwner(bytes32 newOwner) external;
+    function addOwners(bytes32[] calldata owners) external;
+    function resetOwners(bytes32[] calldata newOwners) external;
+    function listOwner() external view returns (bytes32[] memory owners);
 }

@@ -4,12 +4,15 @@ pragma solidity ^0.8.17;
 import "../BaseModule.sol";
 import "./IBaseSecurityControlModule.sol";
 import "../../trustedContractManager/ITrustedContractManager.sol";
+import "../../libraries/TypeConversion.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
 abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
     uint256 public constant MIN_DELAY = 1 days;
     uint256 public constant MAX_DELAY = 14 days;
+
+    using TypeConversion for address;
 
     mapping(bytes32 => Tx) private queued;
     mapping(address => WalletConfig) private walletConfigs;
@@ -22,7 +25,7 @@ abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseM
 
     function _authorized(address _target) private view {
         address _sender = sender();
-        if (_sender != _target && !ISoulWallet(_target).isOwner(_sender)) {
+        if (_sender != _target && !ISoulWallet(_target).isOwner(_sender.toBytes32())) {
             revert NotOwnerError();
         }
         if (walletConfigs[_target].seed == 0) {

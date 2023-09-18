@@ -34,7 +34,7 @@ contract SoulWallet is
     }
 
     function initialize(
-        address anOwner,
+        bytes32 anOwner,
         address defalutCallbackHandler,
         bytes[] calldata modules,
         bytes[] calldata plugins

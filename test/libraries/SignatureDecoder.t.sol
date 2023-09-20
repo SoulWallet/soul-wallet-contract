@@ -5,66 +5,89 @@ import "forge-std/Test.sol";
 import "@source/libraries/SignatureDecoder.sol";
 
 contract SignatureDecoderTest is Test {
-    function signTypeDecode(
-        bytes calldata signature,
-        bytes memory assertSign,
-        uint256 assertValidationData,
-        bytes calldata assertGuardHookInputData
-    ) external {
-        (, bytes calldata _signature, uint256 validationData, bytes calldata guardHookInputData) =
-            SignatureDecoder.decodeSignature(signature);
-        assertEq(validationData, assertValidationData);
+    function signTypeDecode(bytes calldata signature, bytes memory assertSign, bytes calldata assertGuardHookInputData)
+        external
+    {
+        (bytes calldata guardHookInputData, bytes calldata _signature) = SignatureDecoder.decodeSignature(signature);
         assertEq(_signature, assertSign);
         assertEq(guardHookInputData, assertGuardHookInputData);
     }
 
-    function test_SignTypeA() public {
+    /*
+
+    A: data type 0: no plugin data
+    +-----------------------------------------------------------------------------------------------------+
+    |                                           |                                                         |
+    |                                           |                   validator signature                   |
+    |                                           |                                                         |
+    +---------------+---------------------------+--------------------------+-----------------------------+
+    |     data type | data type dynamic data    |     signature type       |       signature data        |
+    +---------------+---------------------------+--------------------------+-----------------------------+
+    |               |                           |                          |                             |
+    |     0x00      |      empty bytes          |        1 byte            |          ......             |
+    |               |                           |                          |                             |
+    +-----------------------------------------------------------------------------------------------------+
+    */
+    function test_SignDataTypeA() public {
         (, uint256 ownerKey) = makeAddrAndKey("owner");
         bytes32 hash = keccak256(abi.encodePacked("hello world"));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, hash);
         bytes memory sig = abi.encodePacked(r, s, v);
         assertEq(sig.length, 65);
+        uint8 signType = 0;
+        bytes memory validatorSignature = abi.encodePacked(signType, sig);
+        uint8 dataType = 0;
+        bytes memory opSig = abi.encodePacked(dataType, validatorSignature);
         bytes memory guardHookInputData;
+
         (bool succ,) = address(this).call(
-            abi.encodeWithSelector(this.signTypeDecode.selector, sig, sig, uint256(0), guardHookInputData)
+            abi.encodeWithSelector(this.signTypeDecode.selector, opSig, validatorSignature, guardHookInputData)
         );
         require(succ, "failed");
         //signTypeDecode(sig, sig, 0);
     }
 
-    function test_SignTypeB() public {
-        (, uint256 ownerKey) = makeAddrAndKey("owner");
-        bytes32 hash = keccak256(abi.encodePacked("hello world"));
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, hash);
-        bytes memory sig = abi.encodePacked(r, s, v);
-        uint48 validUntil = 0;
-        uint48 validAfter = 0;
-        uint256 validationData = (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));
-        uint8 signType = 1;
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
-        assertEq(packedSig.length, 65 + 32 + 1);
-        bytes memory guardHookInputData;
-        (bool succ,) = address(this).call(
-            abi.encodeWithSelector(this.signTypeDecode.selector, packedSig, sig, validationData, guardHookInputData)
-        );
-        require(succ, "failed");
-    }
+    /*
+     B: data type 1: plugin data
 
-    function test_SignTypeC() public {
+    +-----------------------------------------------------------------------------------------------------+
+    |                                           |                                                         |
+    |                                           |                   validator signature                   |
+    |                                           |                                                         |
+    +---------------+---------------------------+--------------------------+-----------------------------+
+    |     data type | data type dynamic data    |     signature type       |       signature data        |
+    +---------------+---------------------------+--------------------------+-----------------------------+
+    |               |                           |                          |                             |
+    |     0x01      |      .............        |        1 byte            |          ......             |
+    |               |                           |                          |                             |
+    +-----------------------------------------------------------------------------------------------------+
+    +-------------------------+-------------------------------------+
+    |                                                               |
+    |                  data type dynamic data                       |
+    |                                                               |
+    +-------------------------+-------------------------------------+
+    | dynamic data length     | multi-guardHookInputData            |
+    +-------------------------+-------------------------------------+
+    | uint256 32 bytes        | dynamic data without length header  |
+    +-------------------------+-------------------------------------+
+    */
+
+    function test_SignDataTypeB() public {
         (, uint256 ownerKey) = makeAddrAndKey("owner");
         bytes32 hash = keccak256(abi.encodePacked("hello world"));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, hash);
         bytes memory sig = abi.encodePacked(r, s, v);
-        uint48 validUntil = 0;
-        uint48 validAfter = 0;
-        uint256 validationData = (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));
-        uint8 signType = 1;
+        assertEq(sig.length, 65);
+        uint8 signType = 0;
+        bytes memory validatorSignature = abi.encodePacked(signType, sig);
+        uint8 dataType = 1;
         bytes memory guardHookInputData = abi.encodePacked("guardHookInputData Test");
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig, guardHookInputData);
-        assertEq(packedSig.length, 65 + 32 + 1 + guardHookInputData.length);
-        // signTypeDecode(packedSig, sig, validationData);
+        uint256 dynamicDataLength = guardHookInputData.length;
+
+        bytes memory opSig = abi.encodePacked(dataType, dynamicDataLength, guardHookInputData, validatorSignature);
+
         (bool succ,) = address(this).call(
-            abi.encodeWithSelector(this.signTypeDecode.selector, packedSig, sig, validationData, guardHookInputData)
+            abi.encodeWithSelector(this.signTypeDecode.selector, opSig, validatorSignature, guardHookInputData)
         );
         require(succ, "failed");
     }

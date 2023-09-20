@@ -12,18 +12,19 @@ import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
 import "@source/libraries/TypeConversion.sol";
-
-using ECDSA for bytes32;
-
+import "@source/validator/DefaultValidator.sol";
+import "../helper/UserOpHelper.t.sol";
 import "../libraries/BytesLib.t.sol";
 
-contract ERC20PaymasterActiveWalletTest is Test {
-    EntryPoint entryPoint;
+contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
+    using ECDSA for bytes32;
+
     SoulWalletLogicInstence public soulWalletLogicInstence;
     SoulWalletFactory public soulWalletFactory;
     ISoulWallet soulWallet;
     ERC20Paymaster paymaster;
     Bundler bundler;
+    DefaultValidator defaultValidator;
 
     using TypeConversion for address;
 
@@ -48,7 +49,8 @@ contract ERC20PaymasterActiveWalletTest is Test {
         bundler = new Bundler();
 
         entryPoint = new EntryPoint();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
+        defaultValidator = new DefaultValidator();
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint, defaultValidator);
         address logic = address(soulWalletLogicInstence.soulWalletLogic());
         soulWalletFactory = new SoulWalletFactory(logic, address(entryPoint), address(this));
         require(soulWalletFactory.walletImpl() == logic, "logic address not match");
@@ -140,9 +142,7 @@ contract ERC20PaymasterActiveWalletTest is Test {
             signature
         );
 
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, userOpHash.toEthSignedMessageHash());
-        userOperation.signature = abi.encodePacked(r, s, v);
+        userOperation.signature = signUserOp(userOperation, ownerKey);
         bundler.post(entryPoint, userOperation);
         soulWallet = ISoulWallet(sender);
         assertEq(soulWallet.isOwner(ownerAddr.toBytes32()), true);

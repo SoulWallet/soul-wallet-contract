@@ -13,19 +13,22 @@ import "@source/dev/Tokens/TokenERC721.sol";
 import "@source/handler/DefaultCallbackHandler.sol";
 import "@source/libraries/Errors.sol";
 import "@source/libraries/TypeConversion.sol";
+import "@source/validator/DefaultValidator.sol";
+import "../helper/UserOpHelper.t.sol";
 
-contract ExecutionManagerTest is Test {
+contract ExecutionManagerTest is Test, UserOpHelper {
     using ECDSA for bytes32;
     using TypeConversion for address;
 
-    EntryPoint public entryPoint;
     SoulWalletLogicInstence public soulWalletLogicInstence;
     SoulWalletFactory public soulWalletFactory;
     Bundler public bundler;
+    DefaultValidator defaultValidator;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
+        defaultValidator = new DefaultValidator();
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint, defaultValidator);
         soulWalletFactory =
         new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()), address(entryPoint), address(this));
 
@@ -88,9 +91,7 @@ contract ExecutionManagerTest is Test {
             signature
         );
 
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, userOpHash.toEthSignedMessageHash());
-        userOperation.signature = abi.encodePacked(r, s, v);
+        userOperation.signature = signUserOp(userOperation, walletOwnerPrivateKey);
         vm.expectRevert(abi.encodeWithSelector(IEntryPoint.FailedOp.selector, 0, "AA21 didn't pay prefund"));
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length, 0, "A1:sender.code.length != 0");

@@ -3,47 +3,33 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "../authority/OwnerAuth.sol";
-import "../libraries/SignatureDecoder.sol";
+import "../base/Validator.sol";
 import "../libraries/Errors.sol";
 import "../libraries/TypeConversion.sol";
+import "../libraries/SignatureDecoder.sol";
 
-abstract contract SignatureValidator is OwnerAuth {
+abstract contract SignatureValidator is OwnerAuth, Validator {
     using ECDSA for bytes32;
     using TypeConversion for address;
-
-    /**
-     * @dev pack hash message with `signatureData.validationData`
-     */
-    function _packSignatureHash(bytes32 hash, uint8 signType, uint256 validationData)
-        private
-        pure
-        returns (bytes32 packedHash)
-    {
-        if (signType == 0) {
-            packedHash = hash;
-        } else if (signType == 1) {
-            packedHash = keccak256(abi.encodePacked(hash, validationData));
-        } else {
-            revert Errors.INVALID_SIGNTYPE();
-        }
-    }
 
     function _isValidateSignature(bytes32 rawHash, bytes calldata rawSignature)
         internal
         view
         returns (uint256 validationData, bool sigValid)
     {
-        uint8 signType;
-        bytes calldata signature;
+        bytes32 recovered;
+        bool success;
         bytes calldata guardHookInputData;
-        (signType, signature, validationData, guardHookInputData) = SignatureDecoder.decodeSignature(rawSignature);
+        bytes calldata validatorSignature;
 
-        bytes32 hash = _packSignatureHash(rawHash, signType, validationData).toEthSignedMessageHash();
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signature);
-        if (error != ECDSA.RecoverError.NoError) {
+        (guardHookInputData, validatorSignature) = SignatureDecoder.decodeSignature(rawSignature);
+
+        (validationData, recovered, success) = validator().recoverSignature(rawHash, validatorSignature);
+
+        if (!success) {
             sigValid = false;
         } else {
-            sigValid = _isOwner(recovered.toBytes32());
+            sigValid = _isOwner(recovered);
         }
     }
 
@@ -52,15 +38,17 @@ abstract contract SignatureValidator is OwnerAuth {
         view
         returns (uint256 validationData, bool sigValid, bytes calldata guardHookInputData)
     {
-        uint8 signType;
-        bytes calldata signature;
-        (signType, signature, validationData, guardHookInputData) = SignatureDecoder.decodeSignature(userOpSignature);
-        bytes32 hash = _packSignatureHash(userOpHash, signType, validationData).toEthSignedMessageHash();
-        (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, signature);
-        if (error != ECDSA.RecoverError.NoError) {
+        bytes32 recovered;
+        bool success;
+        bytes calldata validatorSignature;
+
+        (guardHookInputData, validatorSignature) = SignatureDecoder.decodeSignature(userOpSignature);
+
+        (validationData, recovered, success) = validator().recoverSignature(userOpHash, validatorSignature);
+        if (!success) {
             sigValid = false;
         } else {
-            sigValid = _isOwner(recovered.toBytes32());
+            sigValid = _isOwner(recovered);
         }
     }
 }

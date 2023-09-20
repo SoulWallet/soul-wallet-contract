@@ -6,6 +6,7 @@ import "@source/SoulWalletFactory.sol";
 import "./SoulWalletLogicInstence.sol";
 import "@source/dev/SingletonFactory.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
+import "@source/validator/DefaultValidator.sol";
 import "forge-std/Test.sol";
 import "@source/libraries/TypeConversion.sol";
 
@@ -15,6 +16,7 @@ contract SoulWalletInstence {
     SingletonFactory public singletonFactory;
     ISoulWallet public soulWallet;
     EntryPoint public entryPoint;
+    DefaultValidator public defaultValidator;
 
     using TypeConversion for address;
 
@@ -26,8 +28,10 @@ contract SoulWalletInstence {
         bytes32 salt
     ) {
         entryPoint = new EntryPoint();
+
         singletonFactory = new SingletonFactory();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint);
+        defaultValidator = new DefaultValidator();
+        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint, defaultValidator);
         soulWalletFactory =
         new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()), address(entryPoint), address(this));
 

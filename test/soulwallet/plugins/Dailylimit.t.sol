@@ -28,6 +28,7 @@ contract DailylimitTest is Test {
     SecurityControlModule public securityControlModule;
     TrustedModuleManager public trustedModuleManager;
     TrustedPluginManager public trustedPluginManager;
+    DefaultValidator defaultValidator;
 
     event DailyLimitChanged(address[] token, uint256[] limit);
 
@@ -46,7 +47,6 @@ contract DailylimitTest is Test {
         token2 = new TokenERC20(18);
         token3 = new TokenERC20(18);
         token4 = new TokenERC20(18);
-
         dailylimitPlugin = new Dailylimit();
 
         bytes32 salt = bytes32(0);
@@ -185,9 +185,13 @@ contract DailylimitTest is Test {
         );
         bytes memory sig = abi.encodePacked(r, s, v);
 
+        uint8 dataType = 1;
+        uint256 dynamicDataLength = 0;
+        bytes memory dataSig = abi.encodePacked(dataType, dynamicDataLength);
+
         uint8 signType = 1;
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
-        userOperation.signature = packedSig;
+        bytes memory validatorSignature = abi.encodePacked(signType, validationData, sig);
+        userOperation.signature = abi.encodePacked(dataSig, validatorSignature);
 
         uint256 beforeBalance = to.balance;
         bundler.post(entryPoint, userOperation);
@@ -251,9 +255,13 @@ contract DailylimitTest is Test {
         );
         bytes memory sig = abi.encodePacked(r, s, v);
 
+        uint8 dataType = 1;
+        uint256 dynamicDataLength = 0;
+        bytes memory dataSig = abi.encodePacked(dataType, dynamicDataLength);
+
         uint8 signType = 1;
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig);
-        userOperation.signature = packedSig;
+        bytes memory validatorSignature = abi.encodePacked(signType, validationData, sig);
+        userOperation.signature = abi.encodePacked(dataSig, validatorSignature);
 
         uint256 beforeBalance = tokenContract.balanceOf(to);
         bundler.post(entryPoint, userOperation);

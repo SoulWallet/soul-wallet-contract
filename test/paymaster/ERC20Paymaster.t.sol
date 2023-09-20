@@ -10,13 +10,12 @@ import "@source/paymaster/ERC20Paymaster.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
-
-using ECDSA for bytes32;
-
+import "../helper/UserOpHelper.t.sol";
 import "../libraries/BytesLib.t.sol";
 
-contract ERC20PaymasterTest is Test {
-    EntryPoint entryPoint;
+contract ERC20PaymasterTest is Test, UserOpHelper {
+    using ECDSA for bytes32;
+
     SoulWalletInstence soulWalletInstence;
     ISoulWallet soulWallet;
     ERC20Paymaster paymaster;
@@ -131,12 +130,6 @@ contract ERC20PaymasterTest is Test {
         op.signature = signUserOp(op, _key);
         (op, prefund) = simulateVerificationGas(entryPoint, op);
         op.callGasLimit = simulateCallGas(entryPoint, op);
-    }
-
-    function signUserOp(UserOperation memory op, uint256 _key) public returns (bytes memory signature) {
-        bytes32 hash = entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
-        signature = abi.encodePacked(r, s, v);
     }
 
     function simulateVerificationGas(EntryPoint _entrypoint, UserOperation memory op)

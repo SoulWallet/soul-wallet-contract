@@ -10,6 +10,8 @@ import "@account-abstraction/contracts/core/Helpers.sol";
 import "../../interfaces/IExecutionManager.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../../interfaces/IPluginStorage.sol";
+import "../../interfaces/IValidator.sol";
+import "../../interfaces/IValidatorManager.sol";
 
 contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
     //using AddressLinkedList for mapping(address => address);
@@ -165,9 +167,11 @@ contract Dailylimit is BasePlugin, IDailylimit, SafeLock {
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData) external override {
         (userOpHash);
+        IValidator validator = (IValidatorManager(_wallet())).validator();
         require(guardData.length == 0, "Dailylimit: guard signature not allowed");
         uint256 _validationData;
-        (,, _validationData,) = SignatureDecoder.decodeSignature(userOp.signature);
+        (, bytes calldata validatorSignature) = SignatureDecoder.decodeSignature(userOp.signature);
+        (_validationData,,) = validator.recoverSignature(userOpHash, validatorSignature);
 
         if (_validationData == 0) revert("Dailylimit: signature timerange invalid");
 

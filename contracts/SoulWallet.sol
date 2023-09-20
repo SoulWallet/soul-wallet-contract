@@ -13,6 +13,7 @@ import "./helper/SignatureValidator.sol";
 import "./handler/ERC1271Handler.sol";
 import "./base/FallbackManager.sol";
 import "./base/UpgradeManager.sol";
+import "./base/ValidatorManager.sol";
 
 // Draft
 contract SoulWallet is
@@ -27,9 +28,13 @@ contract SoulWallet is
     UpgradeManager,
     ExecutionManager,
     FallbackManager,
-    ERC1271Handler
+    ERC1271Handler,
+    ValidatorManager
 {
-    constructor(IEntryPoint _EntryPoint) EntryPointManager(_EntryPoint) {
+    constructor(IEntryPoint _EntryPoint, IValidator _validator)
+        EntryPointManager(_EntryPoint)
+        ValidatorManager(_validator)
+    {
         _disableInitializers();
     }
 

@@ -139,16 +139,13 @@ contract Simple2FATest is Test {
             guardSig = abi.encodePacked(address(simple2FAPlugin), _sigLen, _sig);
         }
 
+        uint8 dataType = 1;
+        uint256 dynamicDataLength = guardSig.length;
+        bytes memory dataSig = abi.encodePacked(dataType, dynamicDataLength, guardSig);
         uint8 signType = 1;
-        bytes memory packedSig = abi.encodePacked(signType, validationData, sig, guardSig);
-        console.log("guardSig:");
-        console.logBytes(guardSig);
-        console.log("rawSig:");
-        console.logBytes(abi.encodePacked(signType, validationData, sig));
-        console.log("packedSig:");
-        console.logBytes(packedSig);
+        bytes memory validatorSignature = abi.encodePacked(signType, validationData, sig);
 
-        userOperation.signature = packedSig;
+        userOperation.signature = abi.encodePacked(dataSig, validatorSignature);
 
         uint256 beforeBalance = to.balance;
         bundler.post(entryPoint, userOperation);

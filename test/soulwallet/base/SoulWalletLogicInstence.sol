@@ -10,7 +10,7 @@ import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager
 contract SoulWalletLogicInstence {
     SoulWallet public soulWalletLogic;
 
-    constructor(EntryPoint _entryPoint) {
-        soulWalletLogic = new SoulWallet(_entryPoint);
+    constructor(EntryPoint _entryPoint, IValidator _validator) {
+        soulWalletLogic = new SoulWallet(_entryPoint, _validator);
     }
 }

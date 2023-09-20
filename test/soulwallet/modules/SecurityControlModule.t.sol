@@ -12,8 +12,9 @@ import "../Bundler.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/Tokens/TokenERC20.sol";
 import "@source/libraries/TypeConversion.sol";
+import "../../helper/UserOpHelper.t.sol";
 
-contract SecurityControlModuleTest is Test {
+contract SecurityControlModuleTest is Test, UserOpHelper {
     using ECDSA for bytes32;
     using TypeConversion for address;
 
@@ -359,9 +360,7 @@ contract SecurityControlModuleTest is Test {
             signature
         );
 
-        bytes32 userOpHash = soulWalletInstence.entryPoint().getUserOpHash(userOperation);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, userOpHash.toEthSignedMessageHash());
-        userOperation.signature = abi.encodePacked(r, s, v);
+        userOperation.signature = signUserOp(soulWalletInstence.entryPoint(), userOperation, walletOwnerPrivateKey);
 
         vm.deal(userOperation.sender, 10 ether);
 

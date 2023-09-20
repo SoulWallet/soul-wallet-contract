@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import {Base64Url} from "./Base64Url.sol";
 import {FCL_Elliptic_ZZ} from "./FCL_elliptic.sol";
 
 library WebAuthn {
@@ -32,7 +32,7 @@ library WebAuthn {
         bytes memory authenticatorData,
         string memory clientDataSuffix
     ) internal view returns (bool) {
-        string memory challengeBase64 = Base64.encode(bytes.concat(challenge));
+        string memory challengeBase64 = Base64Url.encode(bytes.concat(challenge));
         string memory clientDataJSON = string.concat(ClIENTDATA_PREFIX, challengeBase64, clientDataSuffix);
         bytes32 clientHash = sha256(bytes(clientDataJSON));
         bytes32 message = sha256(bytes.concat(authenticatorData, clientHash));
@@ -60,7 +60,7 @@ library WebAuthn {
         string memory clientDataPrefix,
         string memory clientDataSuffix
     ) internal view returns (bool) {
-        string memory challengeBase64 = Base64.encode(bytes.concat(challenge));
+        string memory challengeBase64 = Base64Url.encode(bytes.concat(challenge));
         string memory clientDataJSON = string.concat(clientDataPrefix, challengeBase64, clientDataSuffix);
         bytes32 clientHash = sha256(bytes(clientDataJSON));
         bytes32 message = sha256(bytes.concat(authenticatorData, clientHash));

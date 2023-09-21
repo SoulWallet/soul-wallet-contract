@@ -41,12 +41,10 @@ contract SoulWalletInstence {
         Module[] calldata modules,
         Plugin[] calldata plugins
          */
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = ownerAddr.toBytes32();
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(bytes32,address,bytes[],bytes[])",
-            ownerAddr.toBytes32(),
-            defaultCallbackHandler,
-            modules,
-            plugins
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
         );
         address walletAddress1 = soulWalletFactory.getWalletAddress(initializer, salt);
         address walletAddress2 = soulWalletFactory.createWallet(initializer, salt);

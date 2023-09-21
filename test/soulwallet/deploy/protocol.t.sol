@@ -66,12 +66,10 @@ contract DeployProtocolTest is Test, UserOpHelper {
             bytes32 salt = bytes32(0);
 
             DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
+            bytes32[] memory owners = new bytes32[](1);
+            owners[0] = walletOwner.toBytes32();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(bytes32,address,bytes[],bytes[])",
-                walletOwner.toBytes32(),
-                defaultCallbackHandler,
-                modules,
-                plugins
+                "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
             );
             sender = soulWalletFactory.getWalletAddress(initializer, salt);
 

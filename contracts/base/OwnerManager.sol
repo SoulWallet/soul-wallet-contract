@@ -37,7 +37,7 @@ abstract contract OwnerManager is IOwnerManager, Authority {
         _addOwners(newOwners);
     }
 
-    function _addOwners(bytes32[] calldata owners) private {
+    function _addOwners(bytes32[] calldata owners) internal {
         for (uint256 i = 0; i < owners.length;) {
             _addOwner(owners[i]);
             unchecked {

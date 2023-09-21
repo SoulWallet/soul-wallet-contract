@@ -98,14 +98,11 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         bytes[] memory plugins = new bytes[](0);
 
         bytes32 salt = bytes32(0);
-
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = ownerAddr.toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(bytes32,address,bytes[],bytes[])",
-            ownerAddr.toBytes32(),
-            defaultCallbackHandler,
-            modules,
-            plugins
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
         );
         sender = soulWalletFactory.getWalletAddress(initializer, salt);
         // send wallet with testtoken

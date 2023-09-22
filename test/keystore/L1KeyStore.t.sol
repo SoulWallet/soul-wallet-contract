@@ -45,7 +45,7 @@ contract L1KeyStoreEOATest is Test {
 
             slot offset
             ┌──────────┬────────────────────────────────┬────────────────┐
-            │  offset 0│ Key (EOA)                      │                │
+            │  offset 0│ KeyHash                        │                │
             ├──────────┼────────────────────────────────┤                │
             │  offset 1│ nonce                          │                │
             ├──────────┼────────────────────────────────┤                ├──────────────────┐
@@ -101,7 +101,9 @@ contract L1KeyStoreEOATest is Test {
         address _initialKey;
         uint256 _initialPrivateKey;
         (_initialKey, _initialPrivateKey) = makeAddrAndKey("initialKey");
-        initialKey = bytes32(uint256(uint160(_initialKey)));
+        address[] memory owners = new address[](1);
+        owners[0] = _initialKey;
+        initialKey = keccak256(abi.encode(owners));
         bytes32 initialGuardianHash = keccak256("0x1");
         uint64 initialGuardianSafePeriod = 2 days;
 
@@ -114,7 +116,7 @@ contract L1KeyStoreEOATest is Test {
             require(_keyStoreInfo.guardianSafePeriod == 0, "keyStoreInfo.guardianSafePeriod != 0");
         }
 
-        /* 
+        /*
         function setKey(
             bytes32 initialKey,
             bytes32 initialGuardianHash,
@@ -127,7 +129,9 @@ contract L1KeyStoreEOATest is Test {
             address _initialKey_new_1;
             uint256 _initialPrivateKey_new_1;
             (_initialKey_new_1, _initialPrivateKey_new_1) = makeAddrAndKey("initialKey_new_1");
-            bytes32 initialKey_new_1 = bytes32(uint256(uint160(_initialKey_new_1)));
+            address[] memory newOwners = new address[](1);
+            newOwners[0] = _initialKey_new_1;
+            bytes32 initialKey_new_1 = keccak256(abi.encode(newOwners));
             uint256 nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 0, "nonce != 0");
 
@@ -136,8 +140,13 @@ contract L1KeyStoreEOATest is Test {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, typedDataHash);
 
             bytes memory keySignature = abi.encodePacked(r, s, v);
-            keyStoreContract.setKey(
-                initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_1, keySignature
+            keyStoreContract.setKeyByOwner(
+                initialKey,
+                initialGuardianHash,
+                initialGuardianSafePeriod,
+                initialKey_new_1,
+                abi.encode(owners),
+                keySignature
             );
 
             slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
@@ -160,12 +169,18 @@ contract L1KeyStoreEOATest is Test {
                 require(
                     _keyStoreInfo.guardianSafePeriodActivateAt == 0, "keyStoreInfo.guardianSafePeriodActivateAt != 0"
                 );
+
+                bytes memory rawOwners = keyStoreContract.rawOwnersBySlot(slot);
+                assertEq(rawOwners, abi.encode(owners));
             }
 
             address _initialKey_new_2;
             uint256 _initialPrivateKey_new_2;
             (_initialKey_new_2, _initialPrivateKey_new_2) = makeAddrAndKey("initialKey_new_2");
-            bytes32 initialKey_new_2 = bytes32(uint256(uint160(_initialKey_new_2)));
+            address[] memory new_owners_2 = new address[](1);
+            new_owners_2[0] = _initialKey_new_2;
+            bytes32 initialKey_new_2 = keccak256(abi.encode(new_owners_2));
+
             nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 1, "nonce != 1");
 
@@ -173,15 +188,22 @@ contract L1KeyStoreEOATest is Test {
             typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
             (v, r, s) = vm.sign(_initialPrivateKey_new_1, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
-
-            keyStoreContract.setKey(
-                initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_2, keySignature
+            keyStoreContract.setKeyByOwner(
+                initialKey,
+                initialGuardianHash,
+                initialGuardianSafePeriod,
+                initialKey_new_2,
+                abi.encode(newOwners),
+                keySignature
             );
             nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 2, "nonce != 2");
             {
                 IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
                 require(_keyStoreInfo.key == initialKey_new_2, "keyStoreInfo.key != initialKey_new");
+
+                bytes memory rawOwners = keyStoreContract.rawOwnersBySlot(slot);
+                assertEq(rawOwners, abi.encode(newOwners));
             }
         }
     }
@@ -228,7 +250,7 @@ contract L1KeyStoreEOATest is Test {
 
         bytes32 slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
 
-        /* 
+        /*
         function setKey(
                 bytes32 initialKey,
                 bytes32 initialGuardianHash,
@@ -239,7 +261,9 @@ contract L1KeyStoreEOATest is Test {
             ) external;
         */
         address _newKey = address(0x111);
-        bytes32 newKey = bytes32(uint256(uint160(_newKey)));
+        address[] memory owners = new address[](1);
+        owners[0] = _newKey;
+        bytes32 newKey = keccak256(abi.encode(owners));
         uint256 nonce = keyStoreContract.nonce(slot);
 
         bytes32 structHash = keccak256(abi.encode(_TYPE_HASH_SOCIAL_RECOVERY, slot, nonce, newKey));
@@ -275,9 +299,9 @@ contract L1KeyStoreEOATest is Test {
         bytes memory _sign5 = abi.encodePacked(v, s_bytes4);
 
         // sign [6]
-        /* 
+        /*
          EIP-1271 signature
-                    s: bytes4 Length of signature data 
+                    s: bytes4 Length of signature data
                     r: no set
                     dynamic data: signature data
          */
@@ -288,8 +312,14 @@ contract L1KeyStoreEOATest is Test {
 
         bytes memory guardianSignature = abi.encodePacked(_sign0, _sign1, _sign2, _sign4, _sign5, _sign6);
 
-        keyStoreContract.setKey(
-            initialKey, initialGuardianHash, initialGuardianSafePeriod, newKey, rawGuardian, guardianSignature
+        keyStoreContract.setKeyByGuardian(
+            initialKey,
+            initialGuardianHash,
+            initialGuardianSafePeriod,
+            newKey,
+            abi.encode(owners),
+            rawGuardian,
+            guardianSignature
         );
 
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
@@ -301,7 +331,10 @@ contract L1KeyStoreEOATest is Test {
         address _initialKey;
         uint256 _initialPrivateKey;
         (_initialKey, _initialPrivateKey) = makeAddrAndKey("initialKey");
-        initialKey = bytes32(uint256(uint160(_initialKey)));
+        address[] memory owners = new address[](1);
+        owners[0] = _initialKey;
+        initialKey = keccak256(abi.encode(owners));
+
         bytes32 initialGuardianHash = keccak256("0x1");
         uint64 initialGuardianSafePeriod = 2 days;
 
@@ -314,7 +347,7 @@ contract L1KeyStoreEOATest is Test {
                     uint64 initialGuardianSafePeriod,
                     bytes32 newGuardianHash,
                     bytes calldata keySignature
-                ) external 
+                ) external
         */
         bytes32 newGuardianHash = keccak256("0x2");
         uint256 nonce = keyStoreContract.nonce(slot);
@@ -325,7 +358,12 @@ contract L1KeyStoreEOATest is Test {
         bytes memory keySignature = abi.encodePacked(r, s, v);
 
         keyStoreContract.setGuardian(
-            initialKey, initialGuardianHash, initialGuardianSafePeriod, newGuardianHash, keySignature
+            initialKey,
+            initialGuardianHash,
+            initialGuardianSafePeriod,
+            newGuardianHash,
+            abi.encode(owners),
+            keySignature
         );
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
         require(
@@ -339,7 +377,9 @@ contract L1KeyStoreEOATest is Test {
         for (uint256 i = 0; i < 5; i += 0.6 days) {
             uint256 snapshotId = vm.snapshot();
 
-            bytes32 initialKey_new_1 = bytes32(uint256(uint160(address(0x2))));
+            address[] memory newOwners = new address[](1);
+            newOwners[0] = address(0x2);
+            bytes32 initialKey_new_1 = keccak256(abi.encode(owners));
             nonce = keyStoreContract.nonce(slot);
 
             structHash = keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, nonce, initialKey_new_1));
@@ -347,8 +387,13 @@ contract L1KeyStoreEOATest is Test {
             (v, r, s) = vm.sign(_initialPrivateKey, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
 
-            keyStoreContract.setKey(
-                initialKey, initialGuardianHash, initialGuardianSafePeriod, initialKey_new_1, keySignature
+            keyStoreContract.setKeyByOwner(
+                initialKey,
+                initialGuardianHash,
+                initialGuardianSafePeriod,
+                initialKey_new_1,
+                abi.encode(owners),
+                keySignature
             );
 
             _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);

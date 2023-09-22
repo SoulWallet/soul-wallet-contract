@@ -47,9 +47,9 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         knownStateRootWithHistory = new OpKnownStateRootWithHistory(address(mockL1Block));
         keystoreProofContract = new KeystoreProof(TEST_L1_KEYSTORE,address(knownStateRootWithHistory));
         optimismKeyStoreModule = new KeyStoreModule(address(keystoreProofContract));
-
-        initialKey = makeAddr("initialKey");
-        initialKeyBytes32 = bytes32(uint256(uint160(initialKey)));
+        address[] memory owners = new address[](1);
+        owners[0] = walletOwner;
+        initialKeyBytes32 = keccak256(abi.encode(owners));
         initialGuardianHash = keccak256("0x1");
         initialGuardianSafePeriod = 2 days;
         walletL1Slot = KeyStoreSlotLib.getSlot(initialKeyBytes32, initialGuardianHash, initialGuardianSafePeriod);
@@ -77,9 +77,12 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         // hack: modify the wallet slot to TEST_SLOT for hardcoding proof testing
         stdstore.target(address(optimismKeyStoreModule)).sig("l1Slot(address)").with_key(address(soulWallet)).depth(0)
             .checked_write(TEST_SLOT);
+        bytes32[] memory newOwners = new bytes32[](1);
+        newOwners[0] = TEST_NEW_OWNER.toBytes32();
+        bytes32 ownerKeyHash = keccak256(abi.encode(newOwners));
         stdstore.target(address(keystoreProofContract)).sig("l1SlotToSigningKey(bytes32)").with_key(walletL1Slot).depth(
             0
-        ).checked_write(TEST_NEW_OWNER);
+        ).checked_write(ownerKeyHash);
     }
 
     function test_setUp() public {
@@ -95,7 +98,12 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         knownStateRootWithHistory.setBlockHash();
         knownStateRootWithHistory.insertNewStateRoot(TEST_BLOCK_NUMBER, blockInfoParameter);
         keystoreProofContract.proofKeystoreStorageRoot(TEST_STATE_ROOT, TEST_ACCOUNT_PROOF);
-        keystoreProofContract.proofL1Keystore(TEST_SLOT, TEST_STATE_ROOT, TEST_NEW_OWNER.toBytes32(), TEST_KEY_PROOF);
+        bytes32[] memory newOwners = new bytes32[](1);
+        newOwners[0] = TEST_NEW_OWNER.toBytes32();
+        bytes32 ownerKeyHash = keccak256(abi.encode(newOwners));
+        keystoreProofContract.proofL1Keystore(
+            TEST_SLOT, TEST_STATE_ROOT, ownerKeyHash, abi.encode(newOwners), TEST_KEY_PROOF
+        );
     }
 
     function test_setUpWithKeyStoreValueExist() public {
@@ -141,6 +149,11 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
         assertEq(soulWallet.isOwner(walletOwner.toBytes32()), true);
         assertEq(soulWallet.isOwner(newOwner.toBytes32()), false);
         vm.startPrank(walletOwner);
+        // clear the keystore proof data
+
+        stdstore.target(address(keystoreProofContract)).sig("l1SlotToSigningKey(bytes32)").with_key(walletL1Slot).depth(
+            0
+        ).checked_write(bytes32(0));
         vm.expectRevert("keystore proof not sync");
         optimismKeyStoreModule.syncL1Keystore(address(soulWallet));
         vm.stopPrank();

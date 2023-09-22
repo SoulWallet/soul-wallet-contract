@@ -6,6 +6,7 @@ import "../../keystore/interfaces/IKeystoreProof.sol";
 
 contract KeystoreProof is IKeystoreProof {
     mapping(bytes32 => bytes32) public l1SlotToSigningKey;
+    mapping(bytes32 => bytes) public l1SlotToRawOwners;
     mapping(bytes32 => uint256) public lastProofBlock;
     mapping(bytes32 => bytes32) public stateRootToKeystoreStorageRoot;
 
@@ -39,9 +40,14 @@ contract KeystoreProof is IKeystoreProof {
         emit KeyStoreStorageProved(stateRoot, keyStoreStorageRootHash);
     }
 
-    function proofL1Keystore(bytes32 l1Slot, bytes32 stateRoot, bytes32 newSigningKey, bytes memory keyProof)
-        external
-    {
+    function proofL1Keystore(
+        bytes32 l1Slot,
+        bytes32 stateRoot,
+        bytes32 newSigningKey,
+        bytes memory rawOwners,
+        bytes memory keyProof
+    ) external {
+        require(newSigningKey == keccak256(rawOwners), "invalid raw owner data");
         (bool searchResult, BlockInfo memory currentBlockInfo) =
             IKnownStateRootWithHistory(STATE_ROOT_HISTORY_ADDESS).stateRootInfo(stateRoot);
         require(searchResult, "unkown stateRoot root");
@@ -60,10 +66,15 @@ contract KeystoreProof is IKeystoreProof {
 
         l1SlotToSigningKey[l1Slot] = newSigningKey;
         lastProofBlock[l1Slot] = currentBlockInfo.blockNumber;
+        l1SlotToRawOwners[l1Slot] = rawOwners;
         emit L1KeyStoreProved(l1Slot, newSigningKey);
     }
 
     function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKey) {
         return (l1SlotToSigningKey[l1Slot]);
+    }
+
+    function rawOwnersBySlot(bytes32 l1Slot) external view override returns (bytes memory owners) {
+        return l1SlotToRawOwners[l1Slot];
     }
 }

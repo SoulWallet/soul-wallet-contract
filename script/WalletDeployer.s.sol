@@ -8,6 +8,7 @@ import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager
 import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager.sol";
 import "@source/modules/SecurityControlModule/SecurityControlModule.sol";
 import "@source/handler/DefaultCallbackHandler.sol";
+import "@source/validator/DefaultValidator.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
 import "./DeployHelper.sol";
 
@@ -46,8 +47,12 @@ contract WalletDeployer is Script, DeployHelper {
     }
 
     function delpoy() private {
-        address soulwalletInstance =
-            deploy("SoulwalletInstance", bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS)));
+        address defaultValidator = deploy("DefaultValidator", type(DefaultValidator).creationCode);
+        writeAddressToEnv("DEFAULT_VALIDATOR_ADDRESS", defaultValidator);
+        address soulwalletInstance = deploy(
+            "SoulwalletInstance",
+            bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS, defaultValidator))
+        );
         address soulwalletFactoryOwner = vm.envAddress("SOULWALLET_FACTORY_OWNER");
         address soulwalletFactoryAddress = deploy(
             "SoulwalletFactory",

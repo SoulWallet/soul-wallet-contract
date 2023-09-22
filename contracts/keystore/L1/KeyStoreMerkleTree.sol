@@ -8,7 +8,7 @@ import "@solmate/utils/MerkleProofLib.sol";
 contract KeyStoreMerkleTree is BaseKeyStore {
     /*
         Multiple Key support in this file.
-        The code in the current file is `pseudocode`, 
+        The code in the current file is `pseudocode`,
         and this file is purely for demonstrating the flexibility of BaseKeyStore.
     */
 
@@ -55,6 +55,7 @@ contract KeyStoreMerkleTree is BaseKeyStore {
         bytes32 signKey,
         Action action,
         bytes32 data,
+        bytes calldata rawOwners,
         bytes calldata keySignature
     ) internal view override {
         // @pseudocode

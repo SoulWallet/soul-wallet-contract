@@ -39,7 +39,9 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
             revert("keystore already synced");
         }
         ISoulWallet soulwallet = ISoulWallet(payable(wallet));
-        soulwallet.resetOwner(keystoreSignKey);
+        bytes memory rawOwners = keyStoreProof.rawOwnersBySlot(slotInfo);
+        bytes32[] memory owners = abi.decode(rawOwners, (bytes32[]));
+        soulwallet.resetOwners(owners);
         lastKeyStoreSyncSignKey[wallet] = keystoreSignKey;
         emit KeyStoreSyncd(wallet, keystoreSignKey);
     }
@@ -67,9 +69,11 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
         bytes32 keystoreSignKey = keyStoreProof.keystoreBySlot(walletKeyStoreSlot);
         // if keystore already sync, change to keystore signer
         if (keystoreSignKey != bytes32(0)) {
+            bytes memory rawOwners = keyStoreProof.rawOwnersBySlot(walletKeyStoreSlot);
+            bytes32[] memory owners = abi.decode(rawOwners, (bytes32[]));
             ISoulWallet soulwallet = ISoulWallet(payable(_sender));
             // sync keystore signing key
-            soulwallet.resetOwner(keystoreSignKey);
+            soulwallet.resetOwners(owners);
             lastKeyStoreSyncSignKey[_sender] = keystoreSignKey;
             emit KeyStoreSyncd(_sender, keystoreSignKey);
         }

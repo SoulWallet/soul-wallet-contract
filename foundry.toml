@@ -18,7 +18,7 @@ gas_reports = [
     "Simple2FA"
 ]
 # gas_reports_ignore = ["dev","test"]
-solc = "0.8.20"
+solc = "0.8.21"
 optimizer = true
 optimizer_runs = 100000
 via_ir = true

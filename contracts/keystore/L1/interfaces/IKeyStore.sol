@@ -5,10 +5,10 @@ pragma solidity ^0.8.17;
  * @dev Action of Signature
  */
 enum Action
+/**
+ * @dev Set KeyStore.key to `new key`
+ */
 {
-    /**
-     * @dev Set KeyStore.key to `new key`
-     */
     SET_KEY,
     /**
      * @dev Set KeyStore.guardianHash to `new guardianHash`
@@ -49,7 +49,7 @@ interface IKeyStore {
     /**
      * @dev Emitted when the slot is initialized.
      */
-    event Initialized(bytes32 indexed slot);
+    event Initialized(bytes32 indexed slot, bytes32 key);
 
     /**
      * @dev Emitted when `key` is changed in `slot`.
@@ -90,31 +90,32 @@ interface IKeyStore {
         # Storage Layout
 
         slot offset
-        ┌──────────┬────────────────────────────────┬────────────────┐
-        │  offset 0│ Key (EOA)                      │                │
-        ├──────────┼────────────────────────────────┤                │
-        │  offset 1│ nonce                          │                │
-        ├──────────┼────────────────────────────────┤                ├──────────────────┐
-        │  offset 2│ guardianHash                   │                │                  │
-        ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 3│ pendingGuardianHash            │                │                  │
-        ├──────────┼────────────────────────────────┤  KeyStoreInfo  │                  │
-        │  offset 4│ guardianActivateAt             │                │                  │
-        ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 4│ guardianSafePeriod             │                │   guardianInfo   │
-        ├─────────-┼────────────────────────────────┤                │                  │
-        │  offset 4│ pendingGuardianSafePeriod      │                │                  │
-        ├──────────┼────────────────────────────────┤                │                  │
-        │  offset 4│ guardianSafePeriodActivateAt   │                │                  │
-        └──────────┴────────────────────────────────┴────────────────┴──────────────────┘
+    +-------------------------------------------+----------------+
+    |  offset 0| Key Hash                       |                |
+    +-------------------------------------------+                |
+    |  offset 1| nonce                          |                |
+    |──────────|────────────────────────────────|                +------------------+
+    |  offset 2| guardianHash                   |                |                  |
+    |──────────|────────────────────────────────|                |                  |
+    |  offset 3| pendingGuardianHash            |                |                  |
+    |──────────|────────────────────────────────|  KeyStoreInfo  |                  |
+    |  offset 4| guardianActivateAt             |                |                  |
+    |──────────|────────────────────────────────|                |                  |
+    |  offset 4| guardianSafePeriod             |                |   guardianInfo   |
+    |─────────++────────────────────────────────|                |                  |
+    |  offset 4| pendingGuardianSafePeriod      |                |                  |
+    |──────────|────────────────────────────────|                |                  |
+    |  offset 4| guardianSafePeriodActi^ateAt   |                |                  |
+    +-------------------------------------------+                +------------------+
+    |  offset 5|   raw owners                   |                |  raw owner bytes |
+    +-------------------------------------------+----------------+------------------+
+
     
     */
 
     struct keyStoreInfo {
         /*
-         * @dev why use bytes32 instead of address?
-         * 1. if use EOA as a key, address is padded to 32 bytes anyway when used in the contract, so there is no performance difference
-         * 2. if use merkle tree root as a key root, bytes32 is required
+        key is the hash of the list of owners calcuated by using keccask256(abi.encode(owners))
          */
         bytes32 key;
         // prevent replay attack
@@ -159,7 +160,7 @@ interface IKeyStore {
     /**
      * @dev calculate slot
      */
-    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 initialGuardianSafePeriod)
+    function getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint64 initialGuardianSafePeriod)
         external
         pure
         returns (bytes32 slot);
@@ -170,6 +171,11 @@ interface IKeyStore {
     function getGuardianHash(bytes calldata rawGuardian) external pure returns (bytes32 guardianHash);
 
     /**
+     * @dev calculate key hash
+     */
+    function getOwnersKeyHash(bytes calldata rawOwners) external pure returns (bytes32 key);
+
+    /**
      * @dev get key is saved in slot
      */
     function getKey(bytes32 slot) external view returns (bytes32 key);
@@ -178,17 +184,19 @@ interface IKeyStore {
      * @dev change key
      * @param keySignature `signature of old key`
      */
-    function setKey(bytes32 slot, bytes32 newKey, bytes calldata keySignature) external;
+    function setKeyByOwner(bytes32 slot, bytes32 newKey, bytes calldata rawOwners, bytes calldata keySignature)
+        external;
 
     /**
      * @dev change key
      * @param keySignature `signature of old key`
      */
-    function setKey(
-        bytes32 initialKey,
+    function setKeyByOwner(
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint64 initialGuardianSafePeriod,
         bytes32 newKey,
+        bytes calldata rawOwners,
         bytes calldata keySignature
     ) external;
 
@@ -196,11 +204,12 @@ interface IKeyStore {
      * @dev social recovery
      * @param guardianSignature `signature of guardian`
      */
-    function setKey(
-        bytes32 initialKey,
+    function setKeyByGuardian(
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint64 initialGuardianSafePeriod,
         bytes32 newKey,
+        bytes calldata rawOwners,
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external;
@@ -209,8 +218,13 @@ interface IKeyStore {
      * @dev social recovery
      * @param guardianSignature `signature of guardian`
      */
-    function setKey(bytes32 slot, bytes32 newKey, bytes calldata rawGuardian, bytes calldata guardianSignature)
-        external;
+    function setKeyByGuardian(
+        bytes32 slot,
+        bytes32 newKey,
+        bytes calldata rawOwners,
+        bytes calldata rawGuardian,
+        bytes calldata guardianSignature
+    ) external;
 
     /**
      * @dev get keystore data
@@ -220,42 +234,51 @@ interface IKeyStore {
     /*
      * @dev pre change guardian
      */
-    function setGuardian(bytes32 slot, bytes32 newGuardianHash, bytes calldata keySignature) external;
+    function setGuardian(bytes32 slot, bytes32 newGuardianHash, bytes calldata rawOwners, bytes calldata keySignature)
+        external;
 
     /*
      * @dev pre change guardian
      */
     function setGuardian(
-        bytes32 initialKey,
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint64 initialGuardianSafePeriod,
         bytes32 newGuardianHash,
+        bytes calldata rawOwners,
         bytes calldata keySignature
     ) external;
 
     /*
      * @dev cancel change guardian
      */
-    function cancelSetGuardian(bytes32 slot, bytes calldata keySignature) external;
-
-    /*
-     * @dev pre change guardian safe period
-     */
-    function setGuardianSafePeriod(bytes32 slot, uint64 newGuardianSafePeriod, bytes calldata keySignature) external;
+    function cancelSetGuardian(bytes32 slot, bytes calldata rawOwners, bytes calldata keySignature) external;
 
     /*
      * @dev pre change guardian safe period
      */
     function setGuardianSafePeriod(
-        bytes32 initialKey,
+        bytes32 slot,
+        uint64 newGuardianSafePeriod,
+        bytes calldata rawOwners,
+        bytes calldata keySignature
+    ) external;
+
+    /*
+     * @dev pre change guardian safe period
+     */
+    function setGuardianSafePeriod(
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint64 initialGuardianSafePeriod,
         uint64 newGuardianSafePeriod,
+        bytes calldata rawOwners,
         bytes calldata keySignature
     ) external;
 
     /*
      * @dev cancel change guardian safe period
      */
-    function cancelSetGuardianSafePeriod(bytes32 slot, bytes calldata keySignature) external;
+    function cancelSetGuardianSafePeriod(bytes32 slot, bytes calldata rawOwners, bytes calldata keySignature)
+        external;
 }

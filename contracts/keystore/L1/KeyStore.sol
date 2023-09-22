@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
-contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
+contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore {
     using ECDSA for bytes32;
 
     event ApproveHash(address indexed guardian, bytes32 hash);
@@ -32,15 +32,6 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
 
     function _keyGuard(bytes32 key) internal view override {
         super._keyGuard(key);
-        assembly {
-            /* not memory-safe */
-            // if ((key >> 160) > 0) { revert Errors.INVALID_KEY(); }
-            if gt(shr(160, key), 0) {
-                // 0xce7045bd == Errors.INVALID_KEY.selector
-                mstore(0, 0xce7045bd)
-                revert(0, 4)
-            }
-        }
     }
 
     function _verifyStructHash(bytes32 slot, uint256 slotNonce, Action action, bytes32 data)
@@ -94,15 +85,23 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
         bytes32 signKey,
         Action action,
         bytes32 data,
+        bytes calldata rawOwners,
         bytes calldata keySignature
     ) internal view override {
-        address signer;
-        assembly ("memory-safe") {
-            signer := signKey
-        }
+        address[] memory owners = abi.decode(rawOwners, (address[]));
+        require(signKey == _getOwnersHash(rawOwners), "invaid rawOwners data");
+
         bytes32 digest = _verifyStructHash(slot, slotNonce, action, data);
         address recoveredAddress = ECDSA.recover(digest, keySignature);
-        if (signer != recoveredAddress) {
+
+        bool result = false;
+        for (uint256 i = 0; i < owners.length; i++) {
+            if (owners[i] == recoveredAddress) {
+                result = true;
+                break;
+            }
+        }
+        if (!result) {
             revert Errors.INVALID_SIGNATURE();
         }
     }
@@ -130,6 +129,10 @@ contract KeyStore is BaseKeyStore, IKeystoreProof, EIP712 {
 
     function keystoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKey) {
         return _getKey(l1Slot);
+    }
+
+    function rawOwnersBySlot(bytes32 l1Slot) external view override returns (bytes memory owners) {
+        return _getRawOwners(l1Slot);
     }
 
     function _approveKey(address sender, bytes32 hash) private pure returns (bytes32 key) {

@@ -3,4 +3,5 @@ pragma solidity ^0.8.17;
 
 interface IKeystoreProof {
     function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKey);
+    function rawOwnersBySlot(bytes32 l1Slot) external view returns (bytes memory owners);
 }

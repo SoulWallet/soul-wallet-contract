@@ -57,6 +57,47 @@ abstract contract KeyStoreStorage is IKeyStore {
         }
     }
 
+    function _storeRawOwnerBytes(bytes32 slot, bytes memory data) internal {
+        assembly {
+            // raw owners offset
+            slot := add(slot, 5)
+            // calcuate the length of raw owners
+            sstore(slot, mload(data))
+            /* rounding up when divide by 32
+            For a bytes length of 1: (1 + 31) / 32 equals 32 / 32, which is 1.
+            For a bytes length of 32: (32 + 31) / 32 also equals 63 / 32, which rounds down to 1.
+            For a bytes length of 33: (33 + 31) / 32 equals 64 / 32, which is 2.
+            */
+            let dataLength := div(add(mload(data), 31), 32)
+            // skip the length offset
+            let dataPtr := add(data, 0x20)
+
+            for { let i := 0 } lt(i, dataLength) { i := add(i, 1) } {
+                sstore(add(slot, add(i, 1)), mload(dataPtr))
+                dataPtr := add(dataPtr, 0x20)
+            }
+        }
+    }
+
+    function _getRawOwners(bytes32 slot) internal view returns (bytes memory rawOwners) {
+        uint256 length;
+        // get length of array
+        assembly {
+            length := sload(add(slot, 5))
+        }
+        rawOwners = new bytes(length);
+        for (uint256 i = 0; i < length; i += 32) {
+            bytes32 chunk;
+            assembly {
+                chunk := sload(add(slot, add(6, div(i, 32))))
+            }
+            for (uint256 j = 0; j < 32 && i + j < length; j++) {
+                rawOwners[i + j] = bytes1(uint8(chunk[j]));
+            }
+        }
+        return rawOwners;
+    }
+
     function _getkeyStoreInfo(bytes32 slot) internal pure returns (keyStoreInfo storage _keyStoreInfo) {
         assembly ("memory-safe") {
             _keyStoreInfo.slot := slot

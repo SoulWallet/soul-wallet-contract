@@ -3,13 +3,13 @@ pragma solidity ^0.8.17;
 
 import "./BaseValidator.sol";
 
-contract DefaultValidator is BaseValidator {
+contract KeystoreValidator is BaseValidator {
     using ECDSA for bytes32;
     using TypeConversion for address;
-
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
+
     function _packSignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure
@@ -17,9 +17,9 @@ contract DefaultValidator is BaseValidator {
         returns (bytes32 packedHash)
     {
         if (signatureType == 0x0) {
-            packedHash = hash.toEthSignedMessageHash();
+            packedHash = hash;
         } else if (signatureType == 0x1) {
-            packedHash = keccak256(abi.encodePacked(hash, validationData)).toEthSignedMessageHash();
+            packedHash = keccak256(abi.encodePacked(hash, validationData));
         } else if (signatureType == 0x2) {
             // passkey sign doesn't need toEthSignedMessageHash
             packedHash = hash;

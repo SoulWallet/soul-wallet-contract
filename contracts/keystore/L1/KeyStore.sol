@@ -6,8 +6,10 @@ import "../interfaces/IKeystoreProof.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import "../../base/ValidatorManager.sol";
+import "forge-std/console.sol";
 
-contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore {
+contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
     using ECDSA for bytes32;
 
     event ApproveHash(address indexed guardian, bytes32 hash);
@@ -28,7 +30,7 @@ contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore {
     bytes32 private constant _TYPE_HASH_SOCIAL_RECOVERY =
         keccak256("SocialRecovery(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
 
-    constructor() EIP712("KeyStore", "1") {}
+    constructor(IValidator _validator) EIP712("KeyStore", "1") ValidatorManager(_validator) {}
 
     function _keyGuard(bytes32 key) internal view override {
         super._keyGuard(key);
@@ -88,15 +90,23 @@ contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore {
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) internal view override {
-        address[] memory owners = abi.decode(rawOwners, (address[]));
+        bytes32[] memory owners = abi.decode(rawOwners, (bytes32[]));
         require(signKey == _getOwnersHash(rawOwners), "invaid rawOwners data");
 
         bytes32 digest = _verifyStructHash(slot, slotNonce, action, data);
-        address recoveredAddress = ECDSA.recover(digest, keySignature);
+
+        (, bytes32 recovered, bool success) = validator().recoverSignature(digest, keySignature);
+        if (!success) {
+            revert Errors.INVALID_SIGNATURE();
+        }
+        console.log("recovere");
+        console.logBytes32(recovered);
 
         bool result = false;
         for (uint256 i = 0; i < owners.length; i++) {
-            if (owners[i] == recoveredAddress) {
+            console.log("owners[i]", i);
+            console.logBytes32(owners[i]);
+            if (owners[i] == recovered) {
                 result = true;
                 break;
             }

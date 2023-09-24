@@ -6,9 +6,12 @@ import "@source/keystore/L1/KeyStore.sol";
 import "@source/keystore/L1/interfaces/IKeyStore.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/EIP1271Wallet.sol";
+import "@source/validator/KeystoreValidator.sol";
 
 contract L1KeyStoreEOATest is Test {
     using ECDSA for bytes32;
+
+    KeystoreValidator keystoreValidator;
 
     KeyStore keyStoreContract;
 
@@ -31,7 +34,8 @@ contract L1KeyStoreEOATest is Test {
     bytes32 private DOMAIN_SEPARATOR;
 
     function setUp() public {
-        keyStoreContract = new KeyStore();
+        keystoreValidator = new KeystoreValidator();
+        keyStoreContract = new KeyStore(keystoreValidator);
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 _TYPEHASH, keccak256(bytes("KeyStore")), keccak256(bytes("1")), block.chainid, address(keyStoreContract)
@@ -101,6 +105,7 @@ contract L1KeyStoreEOATest is Test {
         address _initialKey;
         uint256 _initialPrivateKey;
         (_initialKey, _initialPrivateKey) = makeAddrAndKey("initialKey");
+        console.log("initialKey:", _initialKey);
         address[] memory owners = new address[](1);
         owners[0] = _initialKey;
         initialKey = keccak256(abi.encode(owners));
@@ -140,13 +145,15 @@ contract L1KeyStoreEOATest is Test {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, typedDataHash);
 
             bytes memory keySignature = abi.encodePacked(r, s, v);
+            uint8 signType = 0;
+            bytes memory validatorSignature = abi.encodePacked(signType, keySignature);
             keyStoreContract.setKeyByOwner(
                 initialKey,
                 initialGuardianHash,
                 initialGuardianSafePeriod,
                 initialKey_new_1,
                 abi.encode(owners),
-                keySignature
+                validatorSignature
             );
 
             slot = keyStoreContract.getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
@@ -188,13 +195,15 @@ contract L1KeyStoreEOATest is Test {
             typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
             (v, r, s) = vm.sign(_initialPrivateKey_new_1, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
+            validatorSignature = abi.encodePacked(signType, keySignature);
+
             keyStoreContract.setKeyByOwner(
                 initialKey,
                 initialGuardianHash,
                 initialGuardianSafePeriod,
                 initialKey_new_2,
                 abi.encode(newOwners),
-                keySignature
+                validatorSignature
             );
             nonce = keyStoreContract.nonce(slot);
             assertEq(nonce, 2, "nonce != 2");
@@ -356,6 +365,8 @@ contract L1KeyStoreEOATest is Test {
         bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(_initialPrivateKey, typedDataHash);
         bytes memory keySignature = abi.encodePacked(r, s, v);
+        uint8 signType = 0;
+        bytes memory validatorSignature = abi.encodePacked(signType, keySignature);
 
         keyStoreContract.setGuardian(
             initialKey,
@@ -363,7 +374,7 @@ contract L1KeyStoreEOATest is Test {
             initialGuardianSafePeriod,
             newGuardianHash,
             abi.encode(owners),
-            keySignature
+            validatorSignature
         );
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
         require(
@@ -386,6 +397,7 @@ contract L1KeyStoreEOATest is Test {
             typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
             (v, r, s) = vm.sign(_initialPrivateKey, typedDataHash);
             keySignature = abi.encodePacked(r, s, v);
+            validatorSignature = abi.encodePacked(signType, keySignature);
 
             keyStoreContract.setKeyByOwner(
                 initialKey,
@@ -393,7 +405,7 @@ contract L1KeyStoreEOATest is Test {
                 initialGuardianSafePeriod,
                 initialKey_new_1,
                 abi.encode(owners),
-                keySignature
+                validatorSignature
             );
 
             _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);

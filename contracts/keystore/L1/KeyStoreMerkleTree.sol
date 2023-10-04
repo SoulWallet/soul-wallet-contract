@@ -14,6 +14,8 @@ contract KeyStoreMerkleTree is BaseKeyStore {
 
     using ECDSA for bytes32;
 
+    IKeyStoreStorage private immutable _KEYSTORE_STORAGE;
+
     function _bytes32ToAddress(bytes32 key) private view returns (address) {
         // @pseudocode
         {
@@ -104,5 +106,9 @@ contract KeyStoreMerkleTree is BaseKeyStore {
         // @pseudocode
         (slot, slotNonce, rawGuardian, newKey, guardianSignature);
         revert("TODO: social recovery is not supported yet");
+    }
+
+    function keyStoreStorage() public view virtual override returns (IKeyStoreStorage) {
+        return _KEYSTORE_STORAGE;
     }
 }

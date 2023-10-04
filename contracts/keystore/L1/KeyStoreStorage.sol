@@ -1,106 +1,129 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "./interfaces/IKeyStore.sol";
-import "../../libraries/Errors.sol";
+import "./interfaces/IKeyStoreStorage.sol";
+import "./interfaces/IMerkelTree.sol";
+import "./BaseMerkelTree.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract KeyStoreStorage is IKeyStore {
-    uint64 internal constant _GUARDIAN_PERIOD_MIN = 2 days;
-    uint64 internal constant _GUARDIAN_PERIOD_MAX = 30 days;
+// using eternal storage pattern
+contract KeyStoreStorage is IKeyStoreStorage, IMerkleTree, Ownable, BaseMerkleTree {
+    // storage mapping
+    // slot ->key-> value
+    mapping(bytes32 => mapping(bytes32 => string)) private stringStorage;
+    mapping(bytes32 => mapping(bytes32 => bytes)) private bytesStorage;
+    mapping(bytes32 => mapping(bytes32 => uint256)) private uint256Storage;
+    mapping(bytes32 => mapping(bytes32 => int256)) private intStorage;
+    mapping(bytes32 => mapping(bytes32 => address)) private addressStorage;
+    mapping(bytes32 => mapping(bytes32 => bool)) private booleanStorage;
+    mapping(bytes32 => mapping(bytes32 => bytes32)) private bytes32Storage;
 
-    constructor() {}
+    // slot can set which kesytore logic write to its storage
+    mapping(bytes32 => address) public slotToKeystoreLogic; // slot => keystore logic implementation
 
-    function _getNonce(bytes32 slot) internal view returns (uint256 _nonce) {
+    address defaultKeystoreLogic;
+
+    event KeystoreLogicSet(bytes32 indexed slot, address indexed logicAddress);
+    event LeafInserted(bytes32 indexed slot, bytes32 signingKey);
+
+    modifier onlyAuthrizedKeystore(bytes32 slot) {
+        if (slotToKeystoreLogic[slot] == address(0)) {
+            require(msg.sender == defaultKeystoreLogic);
+        } else {
+            require(msg.sender == slotToKeystoreLogic[slot], "CALLER_MUST_BE_AUTHORIZED_KEYSTORE");
+        }
+        _;
+    }
+
+    function getAddress(bytes32 _slot, bytes32 _key) external view override returns (address) {
+        return addressStorage[_slot][_key];
+    }
+
+    function getUint256(bytes32 _slot, bytes32 _key) external view override returns (uint256) {
+        return uint256Storage[_slot][_key];
+    }
+
+    function getString(bytes32 _slot, bytes32 _key) external view override returns (string memory) {
+        return stringStorage[_slot][_key];
+    }
+
+    function getBytes(bytes32 _slot, bytes32 _key) external view override returns (bytes memory) {
+        return bytesStorage[_slot][_key];
+    }
+
+    function getBool(bytes32 _slot, bytes32 _key) external view override returns (bool) {
+        return booleanStorage[_slot][_key];
+    }
+
+    function getInt(bytes32 _slot, bytes32 _key) external view override returns (int256) {
+        return intStorage[_slot][_key];
+    }
+
+    function getBytes32(bytes32 _slot, bytes32 _key) external view override returns (bytes32) {
+        return bytes32Storage[_slot][_key];
+    }
+
+    function getSlotValue(bytes32 _slot) external view override returns (bytes32 key) {
         assembly {
-            _nonce := sload(add(slot, 1))
+            key := sload(_slot)
         }
     }
 
-    function _increaseNonce(bytes32 slot) internal {
+    function setSlotValue(bytes32 _slot, bytes32 _value) external override onlyAuthrizedKeystore(_slot) {
         assembly {
-            slot := add(slot, 1)
-            sstore(slot, add(sload(slot), 1))
+            sstore(_slot, _value)
         }
     }
 
-    function _keyGuard(bytes32 key) internal view virtual {
-        if (key == bytes32(0)) {
-            revert Errors.INVALID_KEY();
-        }
+    function setAddress(bytes32 _slot, bytes32 _key, address _value) external override onlyAuthrizedKeystore(_slot) {
+        addressStorage[_slot][_key] = _value;
     }
 
-    function _saveKey(bytes32 slot, bytes32 key) internal {
-        _keyGuard(key);
-        assembly {
-            sstore(slot, key)
-        }
-        emit KeyChanged(slot, key);
+    function setUint256(bytes32 _slot, bytes32 _key, uint256 _value) external override onlyAuthrizedKeystore(_slot) {
+        uint256Storage[_slot][_key] = _value;
     }
 
-    function _getKey(bytes32 slot) internal view returns (bytes32 key) {
-        assembly {
-            key := sload(slot)
-        }
+    function setString(bytes32 _slot, bytes32 _key, string calldata _value)
+        external
+        override
+        onlyAuthrizedKeystore(_slot)
+    {
+        stringStorage[_slot][_key] = _value;
     }
 
-    function _getKey(bytes32 slot, bytes32 initialKey) internal view returns (bytes32 key) {
-        assembly {
-            key := sload(slot)
-            if eq(key, 0) { key := initialKey }
-        }
+    function setBytes(bytes32 _slot, bytes32 _key, bytes calldata _value)
+        external
+        override
+        onlyAuthrizedKeystore(_slot)
+    {
+        bytesStorage[_slot][_key] = _value;
     }
 
-    function _getGuardianInfo(bytes32 slot) internal pure returns (guardianInfo storage _guardianInfo) {
-        assembly ("memory-safe") {
-            slot := add(slot, 2)
-            _guardianInfo.slot := slot
-        }
+    function setBool(bytes32 _slot, bytes32 _key, bool _value) external override onlyAuthrizedKeystore(_slot) {
+        booleanStorage[_slot][_key] = _value;
     }
 
-    function _storeRawOwnerBytes(bytes32 slot, bytes memory data) internal {
-        assembly {
-            // raw owners offset
-            slot := add(slot, 5)
-            // calcuate the length of raw owners
-            sstore(slot, mload(data))
-            /* rounding up when divide by 32
-            For a bytes length of 1: (1 + 31) / 32 equals 32 / 32, which is 1.
-            For a bytes length of 32: (32 + 31) / 32 also equals 63 / 32, which rounds down to 1.
-            For a bytes length of 33: (33 + 31) / 32 equals 64 / 32, which is 2.
-            */
-            let dataLength := div(add(mload(data), 31), 32)
-            // skip the length offset
-            let dataPtr := add(data, 0x20)
-
-            for { let i := 0 } lt(i, dataLength) { i := add(i, 1) } {
-                sstore(add(slot, add(i, 1)), mload(dataPtr))
-                dataPtr := add(dataPtr, 0x20)
-            }
-        }
+    function setInt(bytes32 _slot, bytes32 _key, int256 _value) external override onlyAuthrizedKeystore(_slot) {
+        intStorage[_slot][_key] = _value;
     }
 
-    function _getRawOwners(bytes32 slot) internal view returns (bytes memory rawOwners) {
-        uint256 length;
-        // get length of array
-        assembly {
-            length := sload(add(slot, 5))
-        }
-        rawOwners = new bytes(length);
-        for (uint256 i = 0; i < length; i += 32) {
-            bytes32 chunk;
-            assembly {
-                chunk := sload(add(slot, add(6, div(i, 32))))
-            }
-            for (uint256 j = 0; j < 32 && i + j < length; j++) {
-                rawOwners[i + j] = bytes1(uint8(chunk[j]));
-            }
-        }
-        return rawOwners;
+    function setBytes32(bytes32 _slot, bytes32 _key, bytes32 _value) external override onlyAuthrizedKeystore(_slot) {
+        bytes32Storage[_slot][_key] = _value;
     }
 
-    function _getkeyStoreInfo(bytes32 slot) internal pure returns (keyStoreInfo storage _keyStoreInfo) {
-        assembly ("memory-safe") {
-            _keyStoreInfo.slot := slot
-        }
+    function insertLeaf(bytes32 _slot, bytes32 _signingKey) external override onlyAuthrizedKeystore(_slot) {
+        _insertLeaf(_slot, _signingKey);
+        emit LeafInserted(_slot, _signingKey);
+    }
+
+    function setKeystoreLogic(bytes32 _slot, address _logicAddress) external onlyAuthrizedKeystore(_slot) {
+        slotToKeystoreLogic[_slot] = _logicAddress;
+        emit KeystoreLogicSet(_slot, _logicAddress);
+    }
+
+    // admin function, set default keystore address
+    function setDefaultKeystoreAddress(address _defaultKeystoreLogic) external onlyOwner {
+        require(defaultKeystoreLogic == address(0), "defaultKeystoreLogic already initialized");
+        defaultKeystoreLogic = _defaultKeystoreLogic;
     }
 }

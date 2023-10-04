@@ -2,14 +2,16 @@
 pragma solidity ^0.8.17;
 
 import "./BaseKeyStore.sol";
-import "../interfaces/IKeystoreProof.sol";
+import "../interfaces/IKeyStoreProof.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "../../base/ValidatorManager.sol";
 
-contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
+contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
     using ECDSA for bytes32;
+
+    IKeyStoreStorage private immutable _KEYSTORE_STORAGE;
 
     event ApproveHash(address indexed guardian, bytes32 hash);
     event RejectHash(address indexed guardian, bytes32 hash);
@@ -29,7 +31,12 @@ contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
     bytes32 private constant _TYPE_HASH_SOCIAL_RECOVERY =
         keccak256("SocialRecovery(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
 
-    constructor(IValidator _validator) EIP712("KeyStore", "1") ValidatorManager(_validator) {}
+    constructor(IValidator _validator, IKeyStoreStorage _keystorStorage)
+        EIP712("KeyStore", "1")
+        ValidatorManager(_validator)
+    {
+        _KEYSTORE_STORAGE = _keystorStorage;
+    }
 
     function _keyGuard(bytes32 key) internal view override {
         super._keyGuard(key);
@@ -319,5 +326,9 @@ contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
         if (guardiansLen - skipCount < threshold) {
             revert Errors.GUARDIAN_SIGNATURE_INVALID();
         }
+    }
+
+    function keyStoreStorage() public view virtual override returns (IKeyStoreStorage) {
+        return _KEYSTORE_STORAGE;
     }
 }

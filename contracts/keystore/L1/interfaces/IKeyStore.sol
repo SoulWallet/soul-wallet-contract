@@ -32,7 +32,7 @@ interface IKeyStore {
     /* 
     #######################################################################################################################################
     #                                                                                                                                     #
-    #     Why do we need `uint64 initialGuardianSafePeriod`?                                                                              #
+    #     Why do we need `uint256 initialGuardianSafePeriod`?                                                                              #
     #         There are two implementations:                                                                                              #
     #          1. Set a fixed guardianSafePeriod for all users, such as 48 hours.                                                         #
     #          2. Provide the ability for each individual user to set their own guardianSafePeriod.                                       #
@@ -59,7 +59,7 @@ interface IKeyStore {
     /**
      * @dev Emitted when PreSetGuardian is called.
      */
-    event SetGuardian(bytes32 indexed slot, bytes32 guardianHash, uint64 effectAt);
+    event SetGuardian(bytes32 indexed slot, bytes32 guardianHash, uint256 effectAt);
 
     /**
      * @dev Emitted when `guardianHash` is changed in `slot`.
@@ -74,43 +74,17 @@ interface IKeyStore {
     /**
      * @dev Emitted when PreSetGuardianSafePeriod is called.
      */
-    event SetGuardianSafePeriod(bytes32 indexed slot, uint64 guardianSafePeriod, uint64 effectAt);
+    event SetGuardianSafePeriod(bytes32 indexed slot, uint256 guardianSafePeriod, uint256 effectAt);
 
     /**
      * @dev Emitted when `guardianSafePeriod` is changed in `slot`.
      */
-    event GuardianSafePeriodChanged(bytes32 indexed slot, uint64 guardianSafePeriod);
+    event GuardianSafePeriodChanged(bytes32 indexed slot, uint256 guardianSafePeriod);
 
     /**
      * @dev Emitted when CancelSetGuardianSafePeriod is called.
      */
-    event CancelSetGuardianSafePeriod(bytes32 indexed slot, uint64 guardianSafePeriod);
-
-    /*
-        # Storage Layout
-    slot offset
-    +-------------------------------------------+----------------+
-    |  offset 0| Key Hash                       |                |
-    +-------------------------------------------+                |
-    |  offset 1| nonce                          |                |
-    |──────────|────────────────────────────────|                +------------------+
-    |  offset 2| guardianHash                   |                |                  |
-    |──────────|────────────────────────────────|                |                  |
-    |  offset 3| pendingGuardianHash            |                |                  |
-    |──────────|────────────────────────────────|  KeyStoreInfo  |                  |
-    |  offset 4| guardianActivateAt             |                |                  |
-    |──────────|────────────────────────────────|                |                  |
-    |  offset 4| guardianSafePeriod             |                |   guardianInfo   |
-    |─────────++────────────────────────────────|                |                  |
-    |  offset 4| pendingGuardianSafePeriod      |                |                  |
-    |──────────|────────────────────────────────|                |                  |
-    |  offset 4| guardianSafePeriodActi^ateAt   |                |                  |
-    +-------------------------------------------+                +------------------+
-    |  offset 5| raw owners                     |                |  raw owner bytes |
-    +-------------------------------------------+----------------+------------------+
-
-    
-    */
+    event CancelSetGuardianSafePeriod(bytes32 indexed slot, uint256 guardianSafePeriod);
 
     struct keyStoreInfo {
         /*
@@ -124,13 +98,13 @@ interface IKeyStore {
         // guardian next
         bytes32 pendingGuardianHash;
         // `guardian next` effective time
-        uint64 guardianActivateAt;
+        uint256 guardianActivateAt;
         // guardian safe period (in seconds)    48 hours <= guardianSafePeriod <= 30 days
-        uint64 guardianSafePeriod;
+        uint256 guardianSafePeriod;
         // guardian safe period next
-        uint64 pendingGuardianSafePeriod;
+        uint256 pendingGuardianSafePeriod;
         // `guardian safe period next` effective time
-        uint64 guardianSafePeriodActivateAt;
+        uint256 guardianSafePeriodActivateAt;
     }
 
     /**
@@ -142,24 +116,24 @@ interface IKeyStore {
         // guardian next
         bytes32 pendingGuardianHash;
         // `guardian next` effective time
-        uint64 guardianActivateAt;
+        uint256 guardianActivateAt;
         // guardian safe period (in seconds)    48 hours <= guardianSafePeriod <= 30 days
-        uint64 guardianSafePeriod;
+        uint256 guardianSafePeriod;
         // guardian safe period next
-        uint64 pendingGuardianSafePeriod;
+        uint256 pendingGuardianSafePeriod;
         // `guardian safe period next` effective time
-        uint64 guardianSafePeriodActivateAt;
+        uint256 guardianSafePeriodActivateAt;
     }
 
     /**
-     * @dev get keystore nonce
+     * @dev get keyStore nonce
      */
     function nonce(bytes32 slot) external view returns (uint256 _nonce);
 
     /**
      * @dev calculate slot
      */
-    function getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint64 initialGuardianSafePeriod)
+    function getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint256 initialGuardianSafePeriod)
         external
         pure
         returns (bytes32 slot);
@@ -193,7 +167,7 @@ interface IKeyStore {
     function setKeyByOwner(
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newKey,
         bytes calldata rawOwners,
         bytes calldata keySignature
@@ -206,7 +180,7 @@ interface IKeyStore {
     function setKeyByGuardian(
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newKey,
         bytes calldata rawOwners,
         bytes calldata rawGuardian,
@@ -226,7 +200,7 @@ interface IKeyStore {
     ) external;
 
     /**
-     * @dev get keystore data
+     * @dev get keyStore data
      */
     function getKeyStoreInfo(bytes32 slot) external view returns (keyStoreInfo memory _keyStoreInfo);
 
@@ -242,7 +216,7 @@ interface IKeyStore {
     function setGuardian(
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newGuardianHash,
         bytes calldata rawOwners,
         bytes calldata keySignature
@@ -258,7 +232,7 @@ interface IKeyStore {
      */
     function setGuardianSafePeriod(
         bytes32 slot,
-        uint64 newGuardianSafePeriod,
+        uint256 newGuardianSafePeriod,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external;
@@ -269,8 +243,8 @@ interface IKeyStore {
     function setGuardianSafePeriod(
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
-        uint64 newGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
+        uint256 newGuardianSafePeriod,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external;

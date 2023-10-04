@@ -2,9 +2,9 @@ pragma solidity ^0.8.17;
 
 import "./IKnownStateRootWithHistory.sol";
 import "./MerklePatriciaVerifier.sol";
-import "../../keystore/interfaces/IKeystoreProof.sol";
+import "../../keystore/interfaces/IKeyStoreProof.sol";
 
-contract KeystoreProof is IKeystoreProof {
+contract KeystoreProof is IKeyStoreProof {
     mapping(bytes32 => bytes32) public l1SlotToSigningKey;
     mapping(bytes32 => bytes) public l1SlotToRawOwners;
     mapping(bytes32 => uint256) public lastProofBlock;

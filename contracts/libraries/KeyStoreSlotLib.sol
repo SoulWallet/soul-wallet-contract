@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 library KeyStoreSlotLib {
-    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod)
+    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         internal
         pure
         returns (bytes32 slot)

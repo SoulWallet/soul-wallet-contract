@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "@source/keystore/L1/KeyStore.sol";
+import "@source/keystore/L1/keyStoreStorage.sol";
 import "@source/keystore/L1/interfaces/IKeyStore.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/dev/EIP1271Wallet.sol";
@@ -14,6 +15,7 @@ contract L1KeyStoreEOATest is Test {
     KeystoreValidator keystoreValidator;
 
     KeyStore keyStoreContract;
+    KeyStoreStorage keyStoreStorage;
 
     bytes32 private constant _TYPE_HASH_SET_KEY =
         keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
@@ -35,69 +37,14 @@ contract L1KeyStoreEOATest is Test {
 
     function setUp() public {
         keystoreValidator = new KeystoreValidator();
-        keyStoreContract = new KeyStore(keystoreValidator);
+        keyStoreStorage = new KeyStoreStorage();
+        keyStoreContract = new KeyStore(keystoreValidator, keyStoreStorage);
+        keyStoreStorage.setDefaultKeystoreAddress(address(keyStoreContract));
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 _TYPEHASH, keccak256(bytes("KeyStore")), keccak256(bytes("1")), block.chainid, address(keyStoreContract)
             )
         );
-    }
-
-    function test_storageLayout() public {
-        /*
-            # Storage Layout
-
-            slot offset
-            ┌──────────┬────────────────────────────────┬────────────────┐
-            │  offset 0│ KeyHash                        │                │
-            ├──────────┼────────────────────────────────┤                │
-            │  offset 1│ nonce                          │                │
-            ├──────────┼────────────────────────────────┤                ├──────────────────┐
-            │  offset 2│ guardianHash                   │                │                  │
-            ├──────────┼────────────────────────────────┤                │                  │
-            │  offset 3│ pendingGuardianHash            │                │                  │
-            ├──────────┼────────────────────────────────┤  KeyStoreInfo  │                  │
-            │  offset 4│ guardianActivateAt             │                │                  │
-            ├──────────┼────────────────────────────────┤                │                  │
-            │  offset 5│ guardianSafePeriod             │                │   guardianInfo   │
-            ├──────────┼────────────────────────────────┤                │                  │
-            │  offset 6│ pendingGuardianSafePeriod      │                │                  │
-            ├──────────┼────────────────────────────────┤                │                  │
-            │  offset 7│ guardianSafePeriodActivateAt   │                │                  │
-            └──────────┴────────────────────────────────┴────────────────┴──────────────────┘
-
-        */
-
-        bytes32 slot_start = keccak256("0x1");
-
-        // solt #0
-        address _slot_0;
-        (_slot_0,) = makeAddrAndKey("0");
-        bytes32 slot_0 = bytes32(uint256(uint160(_slot_0)));
-        vm.store(address(keyStoreContract), slot_start, slot_0);
-
-        // solt #1
-        uint256 _slot_1 = 1;
-        bytes32 slot_1 = bytes32(_slot_1);
-        bytes32 slot_offset1;
-        assembly {
-            slot_offset1 := add(slot_start, 1)
-        }
-        vm.store(address(keyStoreContract), slot_offset1, slot_1);
-
-        // solt #2
-        bytes32 _slot_2 = bytes32(uint256(uint160(address(this))));
-        bytes32 slot_offset2;
-        assembly {
-            slot_offset2 := add(slot_start, 2)
-        }
-        vm.store(address(keyStoreContract), slot_offset2, _slot_2);
-
-        IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot_start);
-
-        require(_keyStoreInfo.key == slot_0, "keyStoreInfo.key != slot_0");
-        require(_keyStoreInfo.nonce == _slot_1, "keyStoreInfo.nonce != slot_1");
-        require(_keyStoreInfo.guardianHash == _slot_2, "keyStoreInfo.guardianHash != slot_2");
     }
 
     function test_changeKey() public {

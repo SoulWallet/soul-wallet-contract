@@ -5,13 +5,13 @@ import "./IKeyStoreModule.sol";
 import "./BlockVerifier.sol";
 import "./MerklePatriciaVerifier.sol";
 import "../../libraries/KeyStoreSlotLib.sol";
-import "../../keystore/interfaces/IKeystoreProof.sol";
+import "../../keystore/interfaces/IKeyStoreProof.sol";
 
 contract KeyStoreModule is IKeyStoreModule, BaseModule {
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(bytes32)"));
     bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(bytes32[])"));
 
-    IKeystoreProof public immutable keyStoreProof;
+    IKeyStoreProof public immutable keyStoreProof;
 
     mapping(address => bytes32) public l1Slot;
     mapping(address => bytes32) public lastKeyStoreSyncSignKey;
@@ -25,7 +25,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
     }
 
     constructor(address _keyStoreProof) {
-        keyStoreProof = IKeystoreProof(_keyStoreProof);
+        keyStoreProof = IKeyStoreProof(_keyStoreProof);
     }
     // validate the l1 keystore signing key using merkel patricia proof
 

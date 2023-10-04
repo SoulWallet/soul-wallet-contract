@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.17;
 
-import "./KeyStoreStorage.sol";
+import "./KeyStoreAdapter.sol";
 import "../../libraries/KeyStoreSlotLib.sol";
 
-abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
+abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     /**
      * @dev Verify the signature of the `signKey`
      * @param slot KeyStore slot
@@ -72,7 +72,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         return _getNonce(slot);
     }
 
-    function _getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod)
+    function _getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         private
         pure
         returns (bytes32 slot)
@@ -80,7 +80,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         return KeyStoreSlotLib.getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
     }
 
-    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod)
+    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         external
         pure
         override
@@ -100,35 +100,37 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         _;
     }
 
-    function _guardianSafePeriodGuard(uint64 safePeriodGuard) private pure {
+    function _guardianSafePeriodGuard(uint256 safePeriodGuard) private pure {
         if (safePeriodGuard < _GUARDIAN_PERIOD_MIN || safePeriodGuard > _GUARDIAN_PERIOD_MAX) {
             revert Errors.INVALID_TIME_RANGE();
         }
     }
 
     function _autoSetupGuardian(bytes32 slot) private onlyInitialized(slot) {
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
         require(_guardianInfo.guardianSafePeriod > 0);
 
-        uint64 nowTime = uint64(block.timestamp);
+        uint256 nowTime = uint256(block.timestamp);
         if (_guardianInfo.guardianActivateAt > 0 && _guardianInfo.guardianActivateAt <= nowTime) {
             bytes32 _pendingGuardianHash = _guardianInfo.pendingGuardianHash;
             _guardianInfo.guardianHash = _pendingGuardianHash;
             _guardianInfo.guardianActivateAt = 0;
             _guardianInfo.pendingGuardianHash = bytes32(0);
+            _setGuardianInfo(slot, _guardianInfo);
             emit GuardianChanged(slot, _pendingGuardianHash);
         }
         if (_guardianInfo.guardianSafePeriodActivateAt > 0 && _guardianInfo.guardianSafePeriodActivateAt <= nowTime) {
             _guardianSafePeriodGuard(_guardianInfo.pendingGuardianSafePeriod);
-            uint64 _pendingGuardianSafePeriod = _guardianInfo.pendingGuardianSafePeriod;
+            uint256 _pendingGuardianSafePeriod = _guardianInfo.pendingGuardianSafePeriod;
             _guardianInfo.guardianSafePeriod = _pendingGuardianSafePeriod;
             _guardianInfo.guardianSafePeriodActivateAt = 0;
             _guardianInfo.pendingGuardianSafePeriod = 0;
+            _setGuardianInfo(slot, _guardianInfo);
             emit GuardianSafePeriodChanged(slot, _pendingGuardianSafePeriod);
         }
     }
 
-    function _init(bytes32 initialKey, bytes32 initialGuardianHash, uint64 initialGuardianSafePeriod)
+    function _init(bytes32 initialKey, bytes32 initialGuardianHash, uint256 initialGuardianSafePeriod)
         private
         returns (bytes32 slot, bytes32 key)
     {
@@ -136,12 +138,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         key = _getKey(slot);
         if (key == bytes32(0)) {
             key = initialKey;
-            keyStoreInfo storage _keyStoreInfo = _getkeyStoreInfo(slot);
+            keyStoreInfo memory _keyStoreInfo = _getKeyStoreInfo(slot);
             _keyStoreInfo.key = initialKey;
             _keyStoreInfo.guardianHash = initialGuardianHash;
             _guardianSafePeriodGuard(initialGuardianSafePeriod);
             _keyStoreInfo.guardianSafePeriod = initialGuardianSafePeriod;
-
+            _setkeyStoreInfo(slot, _keyStoreInfo);
             emit Initialized(slot, key);
         }
     }
@@ -184,7 +186,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
     function setKeyByOwner(
         bytes32 initialKey,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newKey,
         bytes calldata rawOwners,
         bytes calldata keySignature
@@ -205,7 +207,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
     function setKeyByGuardian(
         bytes32 initialKey,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newKey,
         bytes calldata rawOwners,
         bytes calldata rawGuardian,
@@ -244,8 +246,8 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
      * @dev Get all data stored in the slot. See ./interfaces/IKeyStore.sol: struct keyStoreInfo
      * @param slot KeyStore slot
      */
-    function getKeyStoreInfo(bytes32 slot) external pure override returns (keyStoreInfo memory _keyStoreInfo) {
-        return _getkeyStoreInfo(slot);
+    function getKeyStoreInfo(bytes32 slot) external view override returns (keyStoreInfo memory _keyStoreInfo) {
+        return _getKeyStoreInfo(slot);
     }
 
     function _getGuardianHash(bytes memory rawGuardian) internal pure returns (bytes32 guardianHash) {
@@ -286,11 +288,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         bytes32 signKey = _getKey(slot);
         _verifySignature(slot, signKey, Action.SET_GUARDIAN, newGuardianHash, rawOwners, keySignature);
 
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
         _guardianInfo.pendingGuardianHash = newGuardianHash;
 
-        uint64 _guardianActivateAt = uint64(block.timestamp) + _guardianInfo.guardianSafePeriod;
+        uint256 _guardianActivateAt = uint256(block.timestamp) + _guardianInfo.guardianSafePeriod;
         _guardianInfo.guardianActivateAt = _guardianActivateAt;
+        _setGuardianInfo(slot, _guardianInfo);
 
         emit SetGuardian(slot, newGuardianHash, _guardianActivateAt);
     }
@@ -306,7 +309,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
     function setGuardian(
         bytes32 initialKey,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
         bytes32 newGuardianHash,
         bytes calldata rawOwners,
         bytes calldata keySignature
@@ -315,12 +318,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         _autoSetupGuardian(slot);
 
         _verifySignature(slot, signKey, Action.SET_GUARDIAN, newGuardianHash, rawOwners, keySignature);
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
         _guardianInfo.pendingGuardianHash = newGuardianHash;
 
-        uint64 _guardianActivateAt = uint64(block.timestamp) + _guardianInfo.guardianSafePeriod;
+        uint256 _guardianActivateAt = uint256(block.timestamp) + _guardianInfo.guardianSafePeriod;
         _guardianInfo.guardianActivateAt = _guardianActivateAt;
-
+        _setGuardianInfo(slot, _guardianInfo);
         emit SetGuardian(slot, newGuardianHash, _guardianActivateAt);
     }
 
@@ -334,12 +337,13 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
 
         bytes32 signKey = _getKey(slot);
         _verifySignature(slot, signKey, Action.CANCEL_SET_GUARDIAN, bytes32(0), rawOwners, keySignature);
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
 
         emit CancelSetGuardian(slot, _guardianInfo.pendingGuardianHash);
 
         _guardianInfo.pendingGuardianHash = bytes32(0);
         _guardianInfo.guardianActivateAt = 0;
+        _setGuardianInfo(slot, _guardianInfo);
     }
 
     /**
@@ -350,7 +354,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
      */
     function setGuardianSafePeriod(
         bytes32 slot,
-        uint64 newGuardianSafePeriod,
+        uint256 newGuardianSafePeriod,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external override {
@@ -362,10 +366,11 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         _verifySignature(
             slot, signKey, Action.SET_GUARDIAN_SAFE_PERIOD, _newGuardianSafePeriod, rawOwners, keySignature
         );
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
         _guardianInfo.pendingGuardianSafePeriod = newGuardianSafePeriod;
-        uint64 _guardianSafePeriodActivateAt = uint64(block.timestamp) + _guardianInfo.guardianSafePeriod;
+        uint256 _guardianSafePeriodActivateAt = uint256(block.timestamp) + _guardianInfo.guardianSafePeriod;
         _guardianInfo.guardianSafePeriodActivateAt = _guardianSafePeriodActivateAt;
+        _setGuardianInfo(slot, _guardianInfo);
         emit SetGuardianSafePeriod(slot, newGuardianSafePeriod, _guardianSafePeriodActivateAt);
     }
 
@@ -380,8 +385,8 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
     function setGuardianSafePeriod(
         bytes32 initialKey,
         bytes32 initialGuardianHash,
-        uint64 initialGuardianSafePeriod,
-        uint64 newGuardianSafePeriod,
+        uint256 initialGuardianSafePeriod,
+        uint256 newGuardianSafePeriod,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external override {
@@ -393,10 +398,11 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
         _verifySignature(
             slot, signKey, Action.SET_GUARDIAN_SAFE_PERIOD, _newGuardianSafePeriod, rawOwners, keySignature
         );
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
         _guardianInfo.pendingGuardianSafePeriod = newGuardianSafePeriod;
-        uint64 _guardianSafePeriodActivateAt = uint64(block.timestamp) + _guardianInfo.guardianSafePeriod;
+        uint256 _guardianSafePeriodActivateAt = uint256(block.timestamp) + _guardianInfo.guardianSafePeriod;
         _guardianInfo.guardianSafePeriodActivateAt = _guardianSafePeriodActivateAt;
+        _setGuardianInfo(slot, _guardianInfo);
 
         emit SetGuardianSafePeriod(slot, newGuardianSafePeriod, _guardianSafePeriodActivateAt);
     }
@@ -415,11 +421,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreStorage {
 
         bytes32 signKey = _getKey(slot);
         _verifySignature(slot, signKey, Action.CANCEL_SET_GUARDIAN_SAFE_PERIOD, bytes32(0), rawOwners, keySignature);
-        guardianInfo storage _guardianInfo = _getGuardianInfo(slot);
+        guardianInfo memory _guardianInfo = _getGuardianInfo(slot);
 
         emit CancelSetGuardianSafePeriod(slot, _guardianInfo.pendingGuardianSafePeriod);
 
         _guardianInfo.pendingGuardianSafePeriod = 0;
         _guardianInfo.guardianSafePeriodActivateAt = 0;
+        _setGuardianInfo(slot, _guardianInfo);
     }
 }

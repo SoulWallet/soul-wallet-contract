@@ -12,7 +12,6 @@ abstract contract BaseValidator is IValidator {
     using ECDSA for bytes32;
     using TypeConversion for address;
 
-    // 虚函数保持不变
     function _packSignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure

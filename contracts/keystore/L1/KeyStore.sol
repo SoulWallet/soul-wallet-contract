@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "../../base/ValidatorManager.sol";
-import "forge-std/console.sol";
 
 contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
     using ECDSA for bytes32;
@@ -99,13 +98,9 @@ contract KeyStore is IKeystoreProof, EIP712, BaseKeyStore, ValidatorManager {
         if (!success) {
             revert Errors.INVALID_SIGNATURE();
         }
-        console.log("recovere");
-        console.logBytes32(recovered);
 
         bool result = false;
         for (uint256 i = 0; i < owners.length; i++) {
-            console.log("owners[i]", i);
-            console.logBytes32(owners[i]);
             if (owners[i] == recovered) {
                 result = true;
                 break;

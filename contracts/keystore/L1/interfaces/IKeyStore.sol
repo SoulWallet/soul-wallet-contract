@@ -88,8 +88,7 @@ interface IKeyStore {
 
     /*
         # Storage Layout
-
-        slot offset
+    slot offset
     +-------------------------------------------+----------------+
     |  offset 0| Key Hash                       |                |
     +-------------------------------------------+                |
@@ -107,7 +106,7 @@ interface IKeyStore {
     |──────────|────────────────────────────────|                |                  |
     |  offset 4| guardianSafePeriodActi^ateAt   |                |                  |
     +-------------------------------------------+                +------------------+
-    |  offset 5|   raw owners                   |                |  raw owner bytes |
+    |  offset 5| raw owners                     |                |  raw owner bytes |
     +-------------------------------------------+----------------+------------------+
 
     

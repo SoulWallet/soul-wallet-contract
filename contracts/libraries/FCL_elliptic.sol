@@ -26,6 +26,8 @@ pragma solidity ^0.8.17;
 library FCL_Elliptic_ZZ {
     // Set parameters for curve sec256r1.
 
+    // address of the ModExp precompiled contract (Arbitrary-precision exponentiation under modulo)
+    address constant MODEXP_PRECOMPILE = 0x0000000000000000000000000000000000000005;
     //curve prime field modulus
     uint256 constant p = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF;
     //short weierstrass first coefficient
@@ -43,13 +45,14 @@ library FCL_Elliptic_ZZ {
     uint256 constant minus_2modn = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC63254F;
 
     uint256 constant minus_1 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-    /* p - gy */
-    uint256 constant gy_subtractedfrom_p = 0xB01CBD1C01E58065711814B583F061E9D431CCA994CEA1313449BF97C840AE0A;
-    /* p - gx */
-    uint256 constant gx_subtractedfrom_p = 0x94E82E0C1ED3BDB90743191A9C5BBF0D88FC827FD214CC5F0B5EC6BA27673D69;
+    //P+1 div 4
+    uint256 constant pp1div4 = 0x3fffffffc0000000400000000000000000000000400000000000000000000000;
+    //arbitrary constant to express no quadratic residuosity
+    uint256 constant _NOTSQUARE = 0xFFFFFFFF00000002000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 constant _NOTONCURVE = 0xFFFFFFFF00000003000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF;
 
     /**
-     * inversion mod n via a^(n-2), use of precompiled using little Fermat theorem
+     * /* inversion mod n via a^(n-2), use of precompiled using little Fermat theorem
      */
     function FCL_nModInv(uint256 u) internal view returns (uint256 result) {
         assembly {
@@ -68,10 +71,10 @@ library FCL_Elliptic_ZZ {
             result := mload(pointer)
         }
     }
-
     /**
-     * inversion mod nusing little Fermat theorem via a^(n-2), use of precompiled
+     * /* @dev inversion mod nusing little Fermat theorem via a^(n-2), use of precompiled
      */
+
     function FCL_pModInv(uint256 u) internal view returns (uint256 result) {
         assembly {
             let pointer := mload(0x40)
@@ -91,109 +94,133 @@ library FCL_Elliptic_ZZ {
     }
 
     /**
-     * @dev Check if a point in affine coordinates is on the curve (reject Neutral that is indeed on the curve).
+     * /* @dev Convert from XYZZ rep to affine rep
      */
-    function ecAff_isOnCurve(uint256 x, uint256 y) internal pure returns (bool onCurve) {
-        assembly {
-            /*
-                if (0 == x || x == p || 0 == y || y == p) {
-                    return false;
-                }
-             */
-            if or(iszero(and(x, y)), or(eq(x, p), eq(y, p))) { return(0, 0) }
-
-            let LHS := mulmod(y, y, p) // y^2
-            let RHS := addmod(mulmod(mulmod(x, x, p), x, p), mulmod(x, a, p), p) // x^3+ax
-            RHS := addmod(RHS, b, p) // x^3 + a*x + b
-            onCurve := eq(LHS, RHS)
-        }
+    /*    https://hyperelliptic.org/EFD/g1p/auto-shortw-xyzz-3.html#addition-add-2008-s*/
+    function ecZZ_SetAff(uint256 x, uint256 y, uint256 zz, uint256 zzz)
+        internal
+        view
+        returns (uint256 x1, uint256 y1)
+    {
+        uint256 zzzInv = FCL_pModInv(zzz); //1/zzz
+        y1 = mulmod(y, zzzInv, p); //Y/zzz
+        uint256 _b = mulmod(zz, zzzInv, p); //1/z
+        zzzInv = mulmod(_b, _b, p); //1/zz
+        x1 = mulmod(x, zzzInv, p); //X/zz
     }
 
-    function ecAff_add_affinepoint(uint256 x1, uint256 y1) internal view returns (uint256 _x1, uint256 _y1) {
-        assembly {
-            let _x, _y, _zz, _zzz
-            {
-                let _y2 := addmod(mulmod(y1, 1, p), gy_subtractedfrom_p, p)
-                let _x2 := addmod(mulmod(x1, 1, p), gx_subtractedfrom_p, p)
-                _x := mulmod(_x2, _x2, p) //PP = P^2
-                _y := mulmod(_x, _x2, p) //PPP = P*PP
-                _zz := mulmod(1, _x, p) ////ZZ3 = ZZ1*PP
-                _zzz := mulmod(1, _y, p) ////ZZZ3 = ZZZ1*PPP
-                let _zz1 := mulmod(gx, _x, p) //Q = X1*PP
-                _x := addmod(addmod(mulmod(_y2, _y2, p), sub(p, _y), p), mulmod(minus_2, _zz1, p), p) //R^2-PPP-2*Q
-                _y := addmod(mulmod(addmod(_zz1, sub(p, _x), p), _y2, p), mulmod(gy_subtractedfrom_p, _y, p), p) //R*(Q-X3)
-            }
-            let zzzInv
-            {
-                let T := mload(0x40)
-                // store data
-                // Bsize: [0; 31]
-                mstore(T, 0x20)
-                // Esize: [32; 63]
-                mstore(add(T, 0x20), 0x20)
-                // Msize: [64; 95]
-                mstore(add(T, 0x40), 0x20)
-                // B: [96; 127]
-                mstore(add(T, 0x60), _zzz)
-                // E: [128; 159]
-                mstore(add(T, 0x80), minus_2)
-                // M: [160; 191]
-                mstore(add(T, 0xa0), p)
+    /**
+     * @dev Sutherland2008 add a ZZ point with a normalized point and greedy formulae
+     * warning: assume that P1(x1,y1)!=P2(x2,y2), true in multiplication loop with prime order (cofactor 1)
+     */
 
-                // Call the precompiled contract 0x05 = ModExp
-                if iszero(staticcall(not(0), 0x05, T, 0xc0, T, 0x20)) { revert(0, 0) }
-                zzzInv := mload(T)
+    function ecZZ_AddN(uint256 x1, uint256 y1, uint256 zz1, uint256 zzz1, uint256 x2, uint256 y2)
+        internal
+        pure
+        returns (uint256 P0, uint256 P1, uint256 P2, uint256 P3)
+    {
+        unchecked {
+            if (y1 == 0) {
+                return (x2, y2, 1, 1);
             }
-            _y1 := mulmod(_y, zzzInv, p) //Y/zzz
-            zzzInv := mulmod(_zz, zzzInv, p) //1/z
-            zzzInv := mulmod(zzzInv, zzzInv, p) //1/zz
-            _x1 := mulmod(_x, zzzInv, p) //X/zz
+
+            assembly {
+                y1 := sub(p, y1)
+                y2 := addmod(mulmod(y2, zzz1, p), y1, p)
+                x2 := addmod(mulmod(x2, zz1, p), sub(p, x1), p)
+                P0 := mulmod(x2, x2, p) //PP = P^2
+                P1 := mulmod(P0, x2, p) //PPP = P*PP
+                P2 := mulmod(zz1, P0, p) ////ZZ3 = ZZ1*PP
+                P3 := mulmod(zzz1, P1, p) ////ZZZ3 = ZZZ1*PPP
+                zz1 := mulmod(x1, P0, p) //Q = X1*PP
+                P0 := addmod(addmod(mulmod(y2, y2, p), sub(p, P1), p), mulmod(minus_2, zz1, p), p) //R^2-PPP-2*Q
+                P1 := addmod(mulmod(addmod(zz1, sub(p, P0), p), y2, p), mulmod(y1, P1, p), p) //R*(Q-X3)
+            }
+            //end assembly
+        } //end unchecked
+        return (P0, P1, P2, P3);
+    }
+
+    /**
+     * @dev Check if the curve is the zero curve in affine rep.
+     */
+    // uint256 x, uint256 y)
+    function ecAff_IsZero(uint256, uint256 y) internal pure returns (bool flag) {
+        return (y == 0);
+    }
+
+    /**
+     * @dev Check if a point in affine coordinates is on the curve (reject Neutral that is indeed on the curve).
+     */
+    function ecAff_isOnCurve(uint256 x, uint256 y) internal pure returns (bool) {
+        if (0 == x || x == p || 0 == y || y == p) {
+            return false;
+        }
+        unchecked {
+            uint256 LHS = mulmod(y, y, p); // y^2
+            uint256 RHS = addmod(mulmod(mulmod(x, x, p), x, p), mulmod(x, a, p), p); // x^3+ax
+            RHS = addmod(RHS, b, p); // x^3 + a*x + b
+
+            return LHS == RHS;
         }
     }
 
     /**
+     * @dev Add two elliptic curve points in affine coordinates.
+     */
+
+    function ecAff_add(uint256 x0, uint256 y0, uint256 x1, uint256 y1) internal view returns (uint256, uint256) {
+        uint256 zz0;
+        uint256 zzz0;
+
+        if (ecAff_IsZero(x0, y0)) return (x1, y1);
+        if (ecAff_IsZero(x1, y1)) return (x0, y0);
+
+        (x0, y0, zz0, zzz0) = ecZZ_AddN(x0, y0, 1, 1, x1, y1);
+
+        return ecZZ_SetAff(x0, y0, zz0, zzz0);
+    }
+
+    /**
      * @dev Computation of uG+vQ using Strauss-Shamir's trick, G basepoint, Q public key
+     *       Returns only x for ECDSA use
+     *
      */
     function ecZZ_mulmuladd_S_asm(
-        uint256 Qx,
-        uint256 Qy, //affine rep for input point Q
+        uint256 Q0,
+        uint256 Q1, //affine rep for input point Q
         uint256 scalar_u,
         uint256 scalar_v
-    ) internal view returns (uint256) {
-        uint256 X;
+    ) internal view returns (uint256 X) {
         uint256 zz;
-        {
-            uint256 zzz;
-            uint256 Y;
-            uint256 index = 255;
-            uint256 H0;
-            uint256 H1;
+        uint256 zzz;
+        uint256 Y;
+        uint256 index = 255;
+        uint256 H0;
+        uint256 H1;
 
-            //(H0,H1 )=ecAff_add(gx,gy,Q0, Q1);//will not work if Q=P, obvious forbidden private key
-            (H0, H1) = ecAff_add_affinepoint(Qx, Qy);
+        unchecked {
+            if (scalar_u == 0 && scalar_v == 0) return 0;
+
+            (H0, H1) = ecAff_add(gx, gy, Q0, Q1); //will not work if Q=P, obvious forbidden private key
 
             assembly {
-                // if(scalar_u==0 && scalar_v==0) return 0;
-                if and(eq(scalar_u, 0), eq(scalar_v, 0)) { return(X, 0x20) }
-                /*
-                    while( ( ((scalar_u>>index)&1)+2*((scalar_v>>index)&1) ) ==0){
-                    index=index-1; 
-                    }
-                */
-                for { zz := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1)) } eq(zz, 0) {
+                for { let T4 := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1)) } eq(T4, 0) {
                     index := sub(index, 1)
-                    zz := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1))
+                    T4 := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1))
                 } {}
+                zz := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1))
 
-                if eq(zz, 1) {
+                switch zz
+                case 1 {
                     X := gx
                     Y := gy
                 }
-                if eq(zz, 2) {
-                    X := Qx
-                    Y := Qy
+                case 2 {
+                    X := Q0
+                    Y := Q1
                 }
-                if eq(zz, 3) {
+                case 3 {
                     X := H0
                     Y := H1
                 }
@@ -213,115 +240,104 @@ library FCL_Elliptic_ZZ {
                     zz := mulmod(T2, zz, p) //zz3=V*ZZ1, V free
 
                     X := addmod(mulmod(T4, T4, p), mulmod(minus_2, T3, p), p) //X3=M^2-2S
-                    //T2:=mulmod(T4,addmod(T3, sub(p, X),p),p)//M(S-X3)
                     T2 := mulmod(T4, addmod(X, sub(p, T3), p), p) //-M(S-X3)=M(X3-S)
-
-                    //Y:= addmod(T2, sub(p, mulmod(T1, Y ,p)),p  )//Y3= M(S-X3)-W*Y1
                     Y := addmod(mulmod(T1, Y, p), T2, p) //-Y3= W*Y1-M(S-X3), we replace Y by -Y to avoid a sub in ecAdd
 
-                    //value of dibit
-                    T4 := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1))
+                    {
+                        //value of dibit
+                        T4 := add(shl(1, and(shr(index, scalar_v), 1)), and(shr(index, scalar_u), 1))
 
-                    if iszero(T4) {
-                        Y := sub(p, Y) //restore the -Y inversion
-                        continue
-                    } // if T4!=0
+                        if iszero(T4) {
+                            Y := sub(p, Y) //restore the -Y inversion
+                            continue
+                        } // if T4!=0
 
-                    if eq(T4, 1) {
-                        T1 := gx
-                        T2 := gy
-                    }
-                    if eq(T4, 2) {
-                        T1 := Qx
-                        T2 := Qy
-                    }
-                    if eq(T4, 3) {
-                        T1 := H0
-                        T2 := H1
-                    }
-                    if eq(zz, 0) {
-                        X := T1
-                        Y := T2
-                        zz := 1
-                        zzz := 1
-                        continue
-                    }
-                    // inlined EcZZ_AddN
-
-                    //T3:=sub(p, Y)
-                    //T3:=Y
-                    let y2 := addmod(mulmod(T2, zzz, p), Y, p) //R
-                    T2 := addmod(mulmod(T1, zz, p), sub(p, X), p) //P
-
-                    //special extremely rare case accumulator where EcAdd is replaced by EcDbl, no need to optimize this
-                    //todo : construct edge vector case
-                    if eq(y2, 0) {
-                        if eq(T2, 0) {
-                            T1 := mulmod(minus_2, Y, p) //U = 2*Y1, y free
-                            T2 := mulmod(T1, T1, p) // V=U^2
-                            T3 := mulmod(X, T2, p) // S = X1*V
-
-                            let TT1 := mulmod(T1, T2, p) // W=UV
-                            y2 := addmod(X, zz, p)
-                            TT1 := addmod(X, sub(p, zz), p)
-                            y2 := mulmod(y2, TT1, p) //(X-ZZ)(X+ZZ)
-                            T4 := mulmod(3, y2, p) //M
-
-                            zzz := mulmod(TT1, zzz, p) //zzz3=W*zzz1
-                            zz := mulmod(T2, zz, p) //zz3=V*ZZ1, V free
-
-                            X := addmod(mulmod(T4, T4, p), mulmod(minus_2, T3, p), p) //X3=M^2-2S
-                            T2 := mulmod(T4, addmod(T3, sub(p, X), p), p) //M(S-X3)
-
-                            Y := addmod(T2, mulmod(T1, Y, p), p) //Y3= M(S-X3)-W*Y1
-
+                        switch T4
+                        case 1 {
+                            T1 := gx
+                            T2 := gy
+                        }
+                        case 2 {
+                            T1 := Q0
+                            T2 := Q1
+                        }
+                        case 3 {
+                            T1 := H0
+                            T2 := H1
+                        }
+                        if iszero(zz) {
+                            X := T1
+                            Y := T2
+                            zz := 1
+                            zzz := 1
                             continue
                         }
+                        // inlined EcZZ_AddN
+
+                        //T3:=sub(p, Y)
+                        //T3:=Y
+                        let y2 := addmod(mulmod(T2, zzz, p), Y, p) //R
+                        T2 := addmod(mulmod(T1, zz, p), sub(p, X), p) //P
+
+                        //special extremely rare case accumulator where EcAdd is replaced by EcDbl, no need to optimize this
+                        //todo : construct edge vector case
+                        if iszero(y2) {
+                            if iszero(T2) {
+                                T1 := mulmod(minus_2, Y, p) //U = 2*Y1, y free
+                                T2 := mulmod(T1, T1, p) // V=U^2
+                                T3 := mulmod(X, T2, p) // S = X1*V
+
+                                let TT1 := mulmod(T1, T2, p) // W=UV
+                                y2 := addmod(X, zz, p)
+                                TT1 := addmod(X, sub(p, zz), p)
+                                y2 := mulmod(y2, TT1, p) //(X-ZZ)(X+ZZ)
+                                T4 := mulmod(3, y2, p) //M
+
+                                zzz := mulmod(TT1, zzz, p) //zzz3=W*zzz1
+                                zz := mulmod(T2, zz, p) //zz3=V*ZZ1, V free
+
+                                X := addmod(mulmod(T4, T4, p), mulmod(minus_2, T3, p), p) //X3=M^2-2S
+                                T2 := mulmod(T4, addmod(T3, sub(p, X), p), p) //M(S-X3)
+
+                                Y := addmod(T2, mulmod(T1, Y, p), p) //Y3= M(S-X3)-W*Y1
+
+                                continue
+                            }
+                        }
+
+                        T4 := mulmod(T2, T2, p) //PP
+                        let TT1 := mulmod(T4, T2, p) //PPP, this one could be spared, but adding this register spare gas
+                        zz := mulmod(zz, T4, p)
+                        zzz := mulmod(zzz, TT1, p) //zz3=V*ZZ1
+                        let TT2 := mulmod(X, T4, p)
+                        T4 := addmod(addmod(mulmod(y2, y2, p), sub(p, TT1), p), mulmod(minus_2, TT2, p), p)
+                        Y := addmod(mulmod(addmod(TT2, sub(p, T4), p), y2, p), mulmod(Y, TT1, p), p)
+
+                        X := T4
                     }
+                } //end loop
+                let T := mload(0x40)
+                mstore(add(T, 0x60), zz)
+                //(X,Y)=ecZZ_SetAff(X,Y,zz, zzz);
+                //T[0] = inverseModp_Hard(T[0], p); //1/zzz, inline modular inversion using precompile:
+                // Define length of base, exponent and modulus. 0x20 == 32 bytes
+                mstore(T, 0x20)
+                mstore(add(T, 0x20), 0x20)
+                mstore(add(T, 0x40), 0x20)
+                // Define variables base, exponent and modulus
+                //mstore(add(pointer, 0x60), u)
+                mstore(add(T, 0x80), minus_2)
+                mstore(add(T, 0xa0), p)
 
-                    T4 := mulmod(T2, T2, p) //PP
-                    let TT1 := mulmod(T4, T2, p) //PPP, this one could be spared, but adding this register spare gas
-                    zz := mulmod(zz, T4, p)
-                    zzz := mulmod(zzz, TT1, p) //zz3=V*ZZ1
-                    let TT2 := mulmod(X, T4, p)
-                    T4 := addmod(addmod(mulmod(y2, y2, p), sub(p, TT1), p), mulmod(minus_2, TT2, p), p)
-                    Y := addmod(mulmod(addmod(TT2, sub(p, T4), p), y2, p), mulmod(Y, TT1, p), p)
+                // Call the precompiled contract 0x05 = ModExp
+                if iszero(staticcall(not(0), 0x05, T, 0xc0, T, 0x20)) { revert(0, 0) }
 
-                    X := T4
-                }
-            }
-        }
-
-        assembly {
-            /* 
-                get free memory pointer, but no need update free memory pointer(saving 15 gas)): 
-                'mstore(0x40, add(T, 0xc0))'
-                because we will return X, and T is a local variable.
-            */
-            let T := mload(0x40)
-
-            // store data
-            // Bsize: [0; 31]
-            mstore(T, 0x20)
-            // Esize: [32; 63]
-            mstore(add(T, 0x20), 0x20)
-            // Msize: [64; 95]
-            mstore(add(T, 0x40), 0x20)
-            // B: [96; 127]
-            mstore(add(T, 0x60), zz)
-            // E: [128; 159]
-            mstore(add(T, 0x80), minus_2)
-            // M: [160; 191]
-            mstore(add(T, 0xa0), p)
-
-            // Call the precompiled contract 0x05 = ModExp
-            if iszero(staticcall(not(0), 0x05, T, 0xc0, T, 0x20)) { revert(0, 0) }
-
-            //Y:=mulmod(Y,zzz,p)//Y/zzz
-            //zz :=mulmod(zz, mload(T),p) //1/z
-            //zz:= mulmod(zz,zz,p) //1/zz
-            X := mulmod(X, mload(T), p) //X/zz
-        }
+                //Y:=mulmod(Y,zzz,p)//Y/zzz
+                //zz :=mulmod(zz, mload(T),p) //1/z
+                //zz:= mulmod(zz,zz,p) //1/zz
+                X := mulmod(X, mload(T), p) //X/zz
+            } //end assembly
+        } //end unchecked
 
         return X;
     }
@@ -329,17 +345,11 @@ library FCL_Elliptic_ZZ {
     /**
      * @dev ECDSA verification, given , signature, and public key.
      */
-    function ecdsa_verify(bytes32 message, uint256 r, uint256 s, uint256 Qx, uint256 Qy) internal view returns (bool) {
-        assembly {
-            /* 
-             if (r == 0 || r >= n || s == 0 || s >= n) {
-                return false;
-             }
-             */
-            if or(iszero(and(r, s)), eq(and(gt(n, r), gt(n, s)), 0)) { revert(0, 0) }
+    function ecdsa_verify(bytes32 message, uint256 r, uint256 s, uint256 Q0, uint256 Q1) internal view returns (bool) {
+        if (r == 0 || r >= n || s == 0 || s >= n) {
+            return false;
         }
-
-        if (!ecAff_isOnCurve(Qx, Qy)) {
+        if (!ecAff_isOnCurve(Q0, Q1)) {
             return false;
         }
 
@@ -349,7 +359,7 @@ library FCL_Elliptic_ZZ {
         uint256 scalar_v = mulmod(r, sInv, n);
         uint256 x1;
 
-        x1 = ecZZ_mulmuladd_S_asm(Qx, Qy, scalar_u, scalar_v);
+        x1 = ecZZ_mulmuladd_S_asm(Q0, Q1, scalar_u, scalar_v);
 
         assembly {
             x1 := addmod(x1, sub(n, r), n)

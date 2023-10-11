@@ -25,7 +25,11 @@ enum Action
     /**
      * @dev Cancel the pending guardianSafePeriod change
      */
-    CANCEL_SET_GUARDIAN_SAFE_PERIOD
+    CANCEL_SET_GUARDIAN_SAFE_PERIOD,
+    /**
+     * @dev upgrade the keystore logic for slot
+     */
+    UPGRADE_KEYSTORE_LOGIC
 }
 
 interface IKeyStore {

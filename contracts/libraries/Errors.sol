@@ -43,4 +43,5 @@ library Errors {
     error UNAUTHORIZED();
     error INVALID_DATA();
     error GUARDIAN_SIGNATURE_INVALID();
+    error UNTRUSTED_KEYSTORE_LOGIC();
 }

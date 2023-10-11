@@ -7,16 +7,19 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "../../base/ValidatorManager.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
+contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Ownable {
     using ECDSA for bytes32;
 
     IKeyStoreStorage private immutable _KEYSTORE_STORAGE;
 
     event ApproveHash(address indexed guardian, bytes32 hash);
     event RejectHash(address indexed guardian, bytes32 hash);
+    event KeyStoreUpgraded(bytes32 indexed slot, address indexed newLogic);
 
     mapping(bytes32 => uint256) approvedHashes;
+    mapping(address => bool) trustedKeystoreLogic;
 
     bytes32 private constant _TYPE_HASH_SET_KEY =
         keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
@@ -30,6 +33,8 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
         keccak256("CancelSetGuardianSafePeriod(bytes32 keyStoreSlot,uint256 nonce)");
     bytes32 private constant _TYPE_HASH_SOCIAL_RECOVERY =
         keccak256("SocialRecovery(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
+    bytes32 private constant _TYPE_HASH_UPGRADE_KEYSTORE_LOGIC =
+        keccak256("KeyStoreUpgrade(bytes32 keyStoreSlot,uint256 nonce,address newLogic)");
 
     constructor(IValidator _validator, IKeyStoreStorage _keystorStorage)
         EIP712("KeyStore", "1")
@@ -55,7 +60,6 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
             digest = _hashTypedDataV4(keccak256(abi.encode(_TYPE_HASH_SET_GUARDIAN, slot, slotNonce, data)));
         } else if (action == Action.SET_GUARDIAN_SAFE_PERIOD) {
             // SetGuardianSafePeriod(bytes32 slot,uint256 nonce,uint64 newGuardianSafePeriod)
-
             // bytes32 -> uint64
             uint64 newGuardianSafePeriod;
             assembly ("memory-safe") {
@@ -71,6 +75,15 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
             // CancelSetGuardianSafePeriod(bytes32 slot,uint256 nonce)
             digest =
                 _hashTypedDataV4(keccak256(abi.encode(_TYPE_HASH_CANCEL_SET_GUARDIAN_SAFE_PERIOD, slot, slotNonce)));
+        } else if (action == Action.UPGRADE_KEYSTORE_LOGIC) {
+            // KeyStoreUpgrade(bytes32 keyStoreSlot,uint256 nonce,address newLogic)
+            address newKeystoreLogic;
+            assembly ("memory-safe") {
+                newKeystoreLogic := data
+            }
+            digest = _hashTypedDataV4(
+                keccak256(abi.encode(_TYPE_HASH_UPGRADE_KEYSTORE_LOGIC, slot, slotNonce, newKeystoreLogic))
+            );
         } else {
             revert Errors.INVALID_DATA();
         }
@@ -93,8 +106,8 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
         bytes32 signKey,
         Action action,
         bytes32 data,
-        bytes calldata rawOwners,
-        bytes calldata keySignature
+        bytes memory rawOwners,
+        bytes memory keySignature
     ) internal view override {
         bytes32[] memory owners = abi.decode(rawOwners, (bytes32[]));
         require(signKey == _getOwnersHash(rawOwners), "invaid rawOwners data");
@@ -330,5 +343,33 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager {
 
     function keyStoreStorage() public view virtual override returns (IKeyStoreStorage) {
         return _KEYSTORE_STORAGE;
+    }
+
+    function upgradeKeystore(bytes32 slot, address newLogic, bytes calldata keySignature)
+        external
+        onlyInitialized(slot)
+    {
+        if (!trustedKeystoreLogic[newLogic]) {
+            revert Errors.UNTRUSTED_KEYSTORE_LOGIC();
+        }
+        bytes32 signKey = _getKey(slot);
+        bytes memory rawOwners = _getRawOwners(slot);
+        verifySignature(
+            slot,
+            _getNonce(slot),
+            signKey,
+            Action.UPGRADE_KEYSTORE_LOGIC,
+            bytes32(bytes20(newLogic)),
+            rawOwners,
+            keySignature
+        );
+        _increaseNonce(slot);
+        _setKeyStoreLogic(slot, newLogic);
+        emit KeyStoreUpgraded(slot, newLogic);
+    }
+
+    // admin operation
+    function enableTrustedKeystoreLogic(address logic) external onlyOwner {
+        trustedKeystoreLogic[logic] = true;
     }
 }

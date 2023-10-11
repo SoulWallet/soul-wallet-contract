@@ -13,6 +13,8 @@ import "@source/modules/keystore/KeystoreProof.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/IL1Block.sol";
 import "@source/modules/keystore/KeyStoreModule.sol";
 import "@source/keystore/L1/KeyStore.sol";
+import "@source/keystore/L1/KeyStoreStorage.sol";
+import "@source/validator/KeystoreValidator.sol";
 import "./DeployHelper.sol";
 
 contract KeystoreDeployer is Script, DeployHelper {
@@ -78,7 +80,13 @@ contract KeystoreDeployer is Script, DeployHelper {
 
     function mainnetDeploy() private {
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
-        address keyStore = deploy("KeyStore", type(KeyStore).creationCode);
+        address keyStoreValidator = deploy("KeyStoreValidator", type(KeystoreValidator).creationCode);
+        writeAddressToEnv("KEYSTORE_VALIDATOR_ADDRESS", keyStoreValidator);
+        address keyStoreStorage = deploy("KeyStoreStorage", type(KeyStoreStorage).creationCode);
+        writeAddressToEnv("L1_KEYSTORE_STORAGE_ADDRESS", keyStoreStorage);
+        address keyStore = deploy(
+            "KeyStore", bytes.concat(type(KeyStore).creationCode, abi.encode(keyStoreValidator, keyStoreStorage))
+        );
         writeAddressToEnv("L1_KEYSTORE_ADDRESS", keyStore);
         address keyStoreModule =
             deploy("KeyStoreModule", bytes.concat(type(KeyStoreModule).creationCode, abi.encode(keyStore)));

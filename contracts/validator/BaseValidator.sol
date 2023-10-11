@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../interfaces/IValidator.sol";
 import "./libraries/ValidatorSigDecoder.sol";
@@ -25,7 +25,7 @@ abstract contract BaseValidator is IValidator {
     {
         if (signatureType == 0x0 || signatureType == 0x1) {
             //ecdas recover
-            (address recoveredAddr, ECDSA.RecoverError error) = ECDSA.tryRecover(rawHash, rawSignature);
+            (address recoveredAddr, ECDSA.RecoverError error,) = ECDSA.tryRecover(rawHash, rawSignature);
             if (error != ECDSA.RecoverError.NoError) {
                 success = false;
             } else {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "./interfaces/IKeyStoreStorage.sol";
 import "./interfaces/IMerkelTree.sol";
@@ -25,6 +25,8 @@ contract KeyStoreStorage is IKeyStoreStorage, IMerkleTree, Ownable, BaseMerkleTr
 
     event KeystoreLogicSet(bytes32 indexed slot, address indexed logicAddress);
     event LeafInserted(bytes32 indexed slot, bytes32 signingKey);
+
+    constructor() Ownable(msg.sender) {}
 
     modifier onlyAuthrizedKeystore(bytes32 slot) {
         if (slotToKeystoreLogic[slot] == address(0)) {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../base/SoulWalletLogicInstence.sol";
@@ -101,6 +101,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
         );
 
         bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
+        (userOpHash);
         userOperation.signature = signUserOp(userOperation, walletOwnerPrivateKey);
         vm.expectRevert(abi.encodeWithSelector(IEntryPoint.FailedOp.selector, 0, "AA21 didn't pay prefund"));
         bundler.post(entryPoint, userOperation);

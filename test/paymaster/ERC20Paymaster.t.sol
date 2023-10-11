@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../soulwallet/base/SoulWalletInstence.sol";
@@ -82,11 +82,13 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         vm.stopPrank();
     }
 
+    error OwnableUnauthorizedAccount(address account);
+
     function testWithdrawTokenFailNotOwner(uint256 _amount) external {
         vm.assume(_amount < token.totalSupply());
         token.sudoMint(address(paymaster), _amount);
         vm.startPrank(beneficiary);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, beneficiary));
         paymaster.withdrawToken(address(token), beneficiary, _amount);
         vm.stopPrank();
     }
@@ -95,6 +97,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         vm.deal(address(soulWallet), 1e18);
         (UserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
+        (prefund);
         op.signature = signUserOp(op, ownerKey);
         bundler.post(IEntryPoint(entryPoint), op);
     }
@@ -107,6 +110,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         token.sudoApprove(address(soulWallet), address(paymaster), 1000e6);
         (UserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
+        (prefund);
         vm.breakpoint("a");
         op.paymasterAndData =
             BytesLibTest.concat(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));

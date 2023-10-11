@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../helper/SignatureValidator.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";

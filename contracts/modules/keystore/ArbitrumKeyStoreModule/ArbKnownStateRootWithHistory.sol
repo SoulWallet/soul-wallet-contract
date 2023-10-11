@@ -1,4 +1,5 @@
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.20;
 
 import "../KnownStateRootWithHistoryBase.sol";
 import "@arbitrum/nitro-contracts/src/precompiles/ArbSys.sol";
@@ -8,9 +9,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ArbKnownStateRootWithHistory is KnownStateRootWithHistoryBase, Ownable {
     address public l1Target;
 
-    constructor(address _l1Target, address _owner) {
+    constructor(address _l1Target, address _owner) Ownable(_owner) {
         l1Target = _l1Target;
-        transferOwnership(_owner);
     }
 
     function updateL1Target(address _l1Target) public onlyOwner {

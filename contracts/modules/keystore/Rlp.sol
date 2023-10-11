@@ -1,4 +1,4 @@
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 // source: https://github.com/Keydonix/uniswap-oracle/blob/master/contracts/source/Rlp.sol
 library Rlp {

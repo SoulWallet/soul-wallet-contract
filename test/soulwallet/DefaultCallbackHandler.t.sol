@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "./base/SoulWalletInstence.sol";
@@ -44,10 +44,12 @@ contract DefaultCallbackHandlerTest is Test {
         assertEq(abi.decode(returnData, (bytes4)), bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")));
     }
 
+    error ERC721InvalidReceiver(address receiver);
+
     function test_transferERC721() public {
         tokenERC721.safeMint(address(soulWallet), 1);
         assertEq(tokenERC721.ownerOf(1), address(soulWallet));
-        vm.expectRevert(bytes("ERC721: transfer to non ERC721Receiver implementer"));
+        vm.expectRevert(abi.encodeWithSelector(ERC721InvalidReceiver.selector, address(this)));
         tokenERC721.safeMint(address(this), 2);
     }
 }

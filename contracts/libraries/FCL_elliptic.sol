@@ -21,7 +21,7 @@
 // reference: https://github.com/rdubois-crypto/FreshCryptoLib/blob/master/solidity/src/FCL_elliptic.sol
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 library FCL_Elliptic_ZZ {
     // Set parameters for curve sec256r1.

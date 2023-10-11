@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import {Base64Url} from "./Base64Url.sol";
 import {FCL_Elliptic_ZZ} from "./FCL_elliptic.sol";

@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../BasePlugin.sol";
 import "./ISimple2FA.sol";
 import "../../safeLock/SafeLock.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "../../base/ExecutionManager.sol";
 import "../../libraries/DecodeCalldata.sol";
 
 contract Simple2FA is BasePlugin, ISimple2FA, SafeLock {
     using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
 
     struct User2FA {
         bool initialized;
@@ -58,7 +60,7 @@ contract Simple2FA is BasePlugin, ISimple2FA, SafeLock {
             } else {
                 // check signature
                 bytes32 hash = userOpHash.toEthSignedMessageHash();
-                (address recovered, ECDSA.RecoverError error) = ECDSA.tryRecover(hash, guardData);
+                (address recovered, ECDSA.RecoverError error,) = ECDSA.tryRecover(hash, guardData);
                 if (error != ECDSA.RecoverError.NoError) {
                     revert("Simple2FA: invalid signature");
                 } else {

@@ -4,7 +4,7 @@ This code is based on https://github.com/Keydonix/uniswap-oracle/blob/master/con
 Credit to the original authors and contributors.
 */
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 library BlockVerifier {
     function extractStateRootAndTimestamp(bytes memory rlpBytes, bytes32 blockHash)

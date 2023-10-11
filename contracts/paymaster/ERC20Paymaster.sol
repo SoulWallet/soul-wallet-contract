@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IOracle.sol";
-import "@account-abstraction/contracts/core/EntryPoint.sol";
+import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
 struct TokenSetting {
     uint256 tokenDecimals;
@@ -41,8 +41,7 @@ contract ERC20Paymaster is BasePaymaster {
 
     event UserOperationSponsored(address indexed user, address token, uint256 actualTokenNeeded, uint256 actualGasCost);
 
-    constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint) {
-        transferOwnership(_owner);
+    constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint, _owner) {
         require(address(_walletFactory) != address(0), "Paymaster: invalid etnrypoint addr");
         WALLET_FACTORY = _walletFactory;
     }

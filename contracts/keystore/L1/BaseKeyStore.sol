@@ -22,8 +22,8 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         bytes32 signKey,
         Action action,
         bytes32 data,
-        bytes calldata rawOwners,
-        bytes calldata keySignature
+        bytes memory rawOwners,
+        bytes memory keySignature
     ) internal virtual;
 
     /**
@@ -47,8 +47,8 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         bytes32 signKey,
         Action action,
         bytes32 data,
-        bytes calldata rawOwners,
-        bytes calldata keySignature
+        bytes memory rawOwners,
+        bytes memory keySignature
     ) private {
         verifySignature(slot, _getNonce(slot), signKey, action, data, rawOwners, keySignature);
         _increaseNonce(slot);

@@ -130,4 +130,8 @@ abstract contract KeyStoreAdapter is IKeyStore {
         _setPendingGuardianSafePeriod(slot, _info.pendingGuardianSafePeriod);
         _setGuardianSafePeriodActivateAt(slot, _info.guardianSafePeriodActivateAt);
     }
+
+    function _setKeyStoreLogic(bytes32 slot, address newLogicAddress) internal {
+        keyStoreStorage().setKeystoreLogic(slot, newLogicAddress);
+    }
 }

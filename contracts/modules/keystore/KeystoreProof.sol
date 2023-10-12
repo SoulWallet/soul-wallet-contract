@@ -1,4 +1,5 @@
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.20;
 
 import "./IKnownStateRootWithHistory.sol";
 import "./MerklePatriciaVerifier.sol";

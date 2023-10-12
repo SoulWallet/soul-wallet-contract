@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
@@ -25,12 +25,11 @@ contract SoulWalletFactory is Ownable {
 
     event SoulWalletCreation(address proxy);
 
-    constructor(address _walletImpl, address _entryPoint, address _owner) {
+    constructor(address _walletImpl, address _entryPoint, address _owner) Ownable(_owner) {
         require(_walletImpl != address(0));
         _WALLETIMPL = uint256(uint160(_walletImpl));
         require(_entryPoint != address(0));
         entryPoint = IEntryPoint(_entryPoint);
-        transferOwnership(_owner);
     }
 
     function walletImpl() external view returns (address) {

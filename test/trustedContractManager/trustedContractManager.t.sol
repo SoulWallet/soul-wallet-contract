@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
@@ -17,11 +17,13 @@ contract trustedContractManagerTest is Test {
         moduleAddress = address(new CallHelperTarget());
     }
 
+    error OwnableUnauthorizedAccount(address account);
+
     function test_trustedModuleManager() public {
         assertEq(trustedModuleManager.owner(), ownerAddress);
         address newOwnerAddress = address(0x3333);
         vm.prank(deployAddress);
-        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, deployAddress));
         trustedModuleManager.transferOwnership(newOwnerAddress);
 
         vm.prank(ownerAddress);
@@ -32,7 +34,7 @@ contract trustedContractManagerTest is Test {
     function test_addModule() public {
         address[] memory moduleAddresses = new address[](1);
         moduleAddresses[0] = moduleAddress;
-        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, address(this)));
         trustedModuleManager.add(moduleAddresses);
 
         vm.startPrank(ownerAddress);
@@ -56,7 +58,7 @@ contract trustedContractManagerTest is Test {
         trustedModuleManager.add(moduleAddresses);
         vm.stopPrank();
         assertEq(trustedModuleManager.isTrustedContract(moduleAddress), true);
-        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, address(this)));
         trustedModuleManager.remove(moduleAddresses);
         vm.prank(ownerAddress);
         trustedModuleManager.remove(moduleAddresses);

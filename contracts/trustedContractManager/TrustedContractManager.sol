@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "./ITrustedContractManager.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -7,9 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 abstract contract TrustedContractManager is ITrustedContractManager, Ownable {
     mapping(address => bool) private _trustedContract;
 
-    constructor(address _owner) {
-        _transferOwnership(_owner);
-    }
+    constructor(address _owner) Ownable(_owner) {}
 
     function isTrustedContract(address module) external view returns (bool) {
         return _trustedContract[module];

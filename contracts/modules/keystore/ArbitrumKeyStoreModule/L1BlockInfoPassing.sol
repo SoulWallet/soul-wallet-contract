@@ -1,6 +1,7 @@
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.20;
 
-import "@arbitrum/nitro-contracts/src/bridge/Inbox.sol";
+import "@arbitrum/nitro-contracts/src/bridge/IInbox.sol";
 import "@arbitrum/nitro-contracts/src/bridge/Outbox.sol";
 import {ArbKnownStateRootWithHistory} from "./ArbKnownStateRootWithHistory.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,10 +12,9 @@ contract L1BlockInfoPassing is Ownable {
 
     event BlockHashPassingTickedCreated(uint256 ticketId, uint256 blockNumber, bytes32 blockHash);
 
-    constructor(address _l2Target, address _inbox, address _owner) {
+    constructor(address _l2Target, address _inbox, address _owner) Ownable(_owner) {
         l2Target = _l2Target;
         inbox = IInbox(_inbox);
-        transferOwnership(_owner);
     }
 
     function updateL2Target(address _l2Target) public onlyOwner {

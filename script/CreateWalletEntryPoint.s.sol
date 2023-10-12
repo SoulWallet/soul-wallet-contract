@@ -7,7 +7,8 @@ import "@source/SoulWallet.sol";
 import "@source/keystore/L1/KeyStore.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
 import "./DeployHelper.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@source/modules/keystore/KeyStoreModule.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWithHistory.sol";
 import "@source/modules/keystore/KeystoreProof.sol";
@@ -17,6 +18,7 @@ import "@source/libraries/TypeConversion.sol";
 
 contract CreateWalletEntryPoint is Script {
     using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
     using TypeConversion for address;
 
     uint256 guardianThreshold = 1;

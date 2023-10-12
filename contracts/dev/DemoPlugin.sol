@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../plugin/BasePlugin.sol";
 
@@ -14,10 +14,7 @@ contract DemoPlugin is BasePlugin {
         hookType = GUARD_HOOK | PRE_HOOK | POST_HOOK;
     }
 
-    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData)
-        external
-        override
-    {
+    function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardData) external override {
         (userOp, userOpHash, guardData);
         emit OnGuardHook();
     }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "./BaseKeyStore.sol";
 import "../interfaces/IKeyStoreProof.sol";
@@ -39,6 +39,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
     constructor(IValidator _validator, IKeyStoreStorage _keystorStorage)
         EIP712("KeyStore", "1")
         ValidatorManager(_validator)
+        Ownable(msg.sender)
     {
         _KEYSTORE_STORAGE = _keystorStorage;
     }

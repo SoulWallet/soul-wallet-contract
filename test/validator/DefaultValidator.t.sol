@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "@source/validator/DefaultValidator.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@source/libraries/TypeConversion.sol";
 
 contract ValidatorSigDecoderTest is Test {
@@ -11,7 +11,7 @@ contract ValidatorSigDecoderTest is Test {
 
     using TypeConversion for address;
 
-    using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
 
     function setUp() public {
         defaultValidator = new DefaultValidator();

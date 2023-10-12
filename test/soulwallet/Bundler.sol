@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
@@ -27,7 +27,7 @@ contract Bundler is Test {
         if (true) {
             uint256 snapshotId = vm.snapshot();
 
-            (bool success, bytes memory data) = address(entryPoint).call /* can not use staticcall */ (
+            (bool success, bytes memory data) = address(entryPoint).call( /* can not use staticcall */
                 abi.encodeWithSignature(
                     "simulateValidation((address,uint256,bytes,bytes,uint256,uint256,uint256,uint256,uint256,bytes,bytes))",
                     userOp

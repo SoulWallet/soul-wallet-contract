@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
-
+pragma solidity ^0.8.20;
 
 struct GuardianInfo {
     mapping(address => address) guardians;
@@ -29,15 +28,12 @@ struct RecoveryEntry {
 interface ISocialRecoveryModule {
     event AnonymousGuardianRevealed(address indexed wallet, address[] indexed guardians, bytes32 guardianHash);
     event ApproveRecovery(address indexed wallet, address indexed guardian, bytes32 indexed recoveryHash);
-    event  PendingRecovery(address indexed _wallet, address[] indexed _newOwners, uint256 _nonce, uint256 executeAfter);
-    event  SocialRecovery(address indexed _wallet, address[] indexed _newOwners);
-    event  SocialRecoveryCanceled(address indexed _wallet, uint256 _nonce);
+    event PendingRecovery(address indexed _wallet, address[] indexed _newOwners, uint256 _nonce, uint256 executeAfter);
+    event SocialRecovery(address indexed _wallet, address[] indexed _newOwners);
+    event SocialRecoveryCanceled(address indexed _wallet, uint256 _nonce);
     // change guardians --> wait 2 day --> guardian changed
-    function updateGuardians(
-        address[] calldata _guardians,
-        uint256 _threshold,
-        bytes32 _guardianHash
-    ) external;
+
+    function updateGuardians(address[] calldata _guardians, uint256 _threshold, bytes32 _guardianHash) external;
 
     function cancelSetGuardians(address _wallet) external; // owner or guardian
 
@@ -53,13 +49,9 @@ interface ISocialRecoveryModule {
         bytes memory signatures
     ) external;
 
-    function approveRecovery(
-        address _wallet,
-        address[] calldata _newOwners
-    ) external;
+    function approveRecovery(address _wallet, address[] calldata _newOwners) external;
 
     function executeRecovery(address _wallet) external;
 
     function cancelRecovery(address _wallet) external;
-
 }

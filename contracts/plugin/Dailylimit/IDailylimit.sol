@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 interface IDailylimit {
     event DailyLimitChanged(address[] token, uint256[] limit);

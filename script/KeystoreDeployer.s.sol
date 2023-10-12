@@ -103,7 +103,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeTo(keyStoreModule);
+
+        bytes memory _data;
+        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
     }
 
     function deployArbL1BlockInfoPassing() private {
@@ -153,7 +155,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeTo(keyStoreModule);
+
+        bytes memory _data;
+        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
         // setup l1 target
         ArbKnownStateRootWithHistory(arbKnownStateRootWithHistory).updateL1Target(arbL1KeyStorePassingAddress);
         writeAddressToEnv("ARB_KNOWN_STATE_ROOT_WITH_HISTORY_ADDRESS", arbKnownStateRootWithHistory);
@@ -188,6 +192,7 @@ contract KeystoreDeployer is Script, DeployHelper {
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeTo(keyStoreModule);
+        bytes memory _data;
+        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
     }
 }

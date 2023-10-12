@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import "../base/UpgradeManager.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";

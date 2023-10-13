@@ -33,18 +33,13 @@ abstract contract BaseValidator is IValidator {
             }
             recovered = recoveredAddr.toBytes32();
         } else if (signatureType == 0x2 || signatureType == 0x3) {
-            uint256 Qx = uint256(bytes32(rawSignature[0:32]));
-            uint256 Qy = uint256(bytes32(rawSignature[32:64]));
-            uint256 r = uint256(bytes32(rawSignature[64:96]));
-            uint256 s = uint256(bytes32(rawSignature[96:128]));
-            (bytes memory authenticatorData, string memory clientDataSuffix) =
-                abi.decode(rawSignature[128:], (bytes, string));
-            success = WebAuthn.verifySignature(Qx, Qy, r, s, rawHash, authenticatorData, clientDataSuffix);
-            if (success) {
-                recovered = keccak256(abi.encodePacked(Qx, Qy));
+            bytes32 publicKey = WebAuthn.recover(rawHash, rawSignature);
+            if (publicKey == 0) {
+                recovered = publicKey;
+                success = false;
             } else {
-                // notice: if signature is invalid, recovered should be 0?
-                recovered = bytes32(0);
+                recovered = publicKey;
+                success = true;
             }
         } else {
             revert Errors.INVALID_SIGNTYPE();

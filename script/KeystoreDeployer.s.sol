@@ -6,6 +6,7 @@ import {
     TransparentUpgradeableProxy,
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWithHistory.sol";
 import "@source/modules/keystore/ArbitrumKeyStoreModule/ArbKnownStateRootWithHistory.sol";
 import "@source/modules/keystore/ArbitrumKeyStoreModule/L1BlockInfoPassing.sol";
@@ -98,6 +99,9 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
+        // calcuate proxy admin contract in TransparentUpgradeableProxy
+        address proxyAdminContractAddress = getCreateAddress(keyStoreProxy, 1);
+        console.log("proxyAdminContractAddress", proxyAdminContractAddress);
         deployArbL1BlockInfoPassing();
 
         vm.stopBroadcast();
@@ -105,7 +109,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         vm.startBroadcast(proxyAdminPrivateKey);
 
         bytes memory _data;
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
+        ProxyAdmin(proxyAdminContractAddress).upgradeAndCall(
+            ITransparentUpgradeableProxy(keyStoreProxy), keyStoreModule, _data
+        );
     }
 
     function deployArbL1BlockInfoPassing() private {

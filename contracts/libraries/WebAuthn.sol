@@ -114,8 +114,9 @@ library WebAuthn {
             _dataOffset1 = _dataOffset2 + clientDataPrefixLength;
             clientDataPrefix = signature[_dataOffset2:_dataOffset1];
 
-            _dataOffset2 = _dataOffset1 + clientDataSuffixLength;
-            clientDataSuffix = signature[_dataOffset1:_dataOffset2];
+            // _dataOffset2 = _dataOffset1 + clientDataSuffixLength;
+            // clientDataSuffix = signature[_dataOffset1:_dataOffset2];
+            clientDataSuffix = signature[_dataOffset1:]; // avoid signature length attack
         }
     }
 

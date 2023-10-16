@@ -83,39 +83,38 @@ library WebAuthn {
             signature layout:
             1. r (32 bytes)
             2. s (32 bytes)
-            3. v (1 byte)                          ---+
-            4. authenticatorData length (4 byte)      |
-            5. clientDataPrefix length (4 byte)       +--> 32 bytes
-            6. clientDataSuffix length (4 byte)       |
-            7. gap (19 byte = 32-13)               ---+
-            7. authenticatorData
-            8. clientDataPrefix
-            9. clientDataSuffix
+            3. v (1 byte)
+            4. authenticatorData length (2 byte max 65535)
+            5. clientDataPrefix length (2 byte max 65535)
+            6. authenticatorData
+            7. clientDataPrefix
+            8. clientDataSuffix
             
         */
         uint256 authenticatorDataLength;
         uint256 clientDataPrefixLength;
-        uint256 clientDataSuffixLength;
         assembly ("memory-safe") {
             let calldataOffset := signature.offset
             r := calldataload(calldataOffset)
             s := calldataload(add(calldataOffset, 0x20))
-            let lengthData := calldataload(add(calldataOffset, 0x40))
-            v := shr(248, /* 8*31 */ lengthData)
-            authenticatorDataLength := and(shr(216, /* 27*8 */ lengthData), 0xffffffff)
-            clientDataPrefixLength := and(shr(184, /* 23*8 */ lengthData), 0xffffffff)
-            clientDataSuffixLength := and(shr(152, /* 19*8 */ lengthData), 0xffffffff)
+            let lengthData :=
+                and(
+                    calldataload(add(calldataOffset, 0x25 /* 32+5 */ )),
+                    0xffffffffff /* v+authenticatorDataLength+clientDataPrefixLength */
+                )
+            v := shr(0x20, /* 4*8 */ lengthData)
+            authenticatorDataLength := and(shr(0x10, /* 2*8 */ lengthData), 0xffff)
+            clientDataPrefixLength := and(lengthData, 0xffff)
         }
         unchecked {
-            uint256 _dataOffset1 = 0x60;
-            uint256 _dataOffset2 = 0x60 + authenticatorDataLength;
+            uint256 _dataOffset1 = 0x45; // 32+32+1+2+2
+            uint256 _dataOffset2 = 0x45 + authenticatorDataLength;
             authenticatorData = signature[_dataOffset1:_dataOffset2];
 
             _dataOffset1 = _dataOffset2 + clientDataPrefixLength;
             clientDataPrefix = signature[_dataOffset2:_dataOffset1];
 
-            _dataOffset2 = _dataOffset1 + clientDataSuffixLength;
-            clientDataSuffix = signature[_dataOffset1:_dataOffset2];
+            clientDataSuffix = signature[_dataOffset1:];
         }
     }
 

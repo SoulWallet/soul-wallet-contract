@@ -16,6 +16,8 @@ contract L1KeyStoreEOATest is Test {
 
     KeyStore keyStoreContract;
     KeyStoreStorage keyStoreStorage;
+    address keystoreAdmin;
+    uint256 keystoreAdminPrivateKey;
 
     bytes32 private constant _TYPE_HASH_SET_KEY =
         keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");
@@ -36,9 +38,11 @@ contract L1KeyStoreEOATest is Test {
     bytes32 private DOMAIN_SEPARATOR;
 
     function setUp() public {
+        (keystoreAdmin, keystoreAdminPrivateKey) = makeAddrAndKey("keystore");
         keystoreValidator = new KeystoreValidator();
-        keyStoreStorage = new KeyStoreStorage();
-        keyStoreContract = new KeyStore(keystoreValidator, keyStoreStorage);
+        keyStoreStorage = new KeyStoreStorage(keystoreAdmin);
+        keyStoreContract = new KeyStore(keystoreValidator, keyStoreStorage, keystoreAdmin);
+        vm.prank(keystoreAdmin);
         keyStoreStorage.setDefaultKeystoreAddress(address(keyStoreContract));
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(

@@ -26,11 +26,11 @@ contract KeyStoreStorage is IKeyStoreStorage, IMerkleTree, Ownable, BaseMerkleTr
     event KeystoreLogicSet(bytes32 indexed slot, address indexed logicAddress);
     event LeafInserted(bytes32 indexed slot, bytes32 signingKey);
 
-    constructor() Ownable(msg.sender) {}
+    constructor(address _owner) Ownable(_owner) {}
 
     modifier onlyAuthrizedKeystore(bytes32 slot) {
         if (slotToKeystoreLogic[slot] == address(0)) {
-            require(msg.sender == defaultKeystoreLogic);
+            require(msg.sender == defaultKeystoreLogic, "CALLER_MUST_BE_AUTHORIZED_KEYSTORE");
         } else {
             require(msg.sender == slotToKeystoreLogic[slot], "CALLER_MUST_BE_AUTHORIZED_KEYSTORE");
         }

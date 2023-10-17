@@ -36,10 +36,10 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
     bytes32 private constant _TYPE_HASH_UPGRADE_KEYSTORE_LOGIC =
         keccak256("KeyStoreUpgrade(bytes32 keyStoreSlot,uint256 nonce,address newLogic)");
 
-    constructor(IValidator _validator, IKeyStoreStorage _keystorStorage)
+    constructor(IValidator _validator, IKeyStoreStorage _keystorStorage, address _owner)
         EIP712("KeyStore", "1")
         ValidatorManager(_validator)
-        Ownable(msg.sender)
+        Ownable(_owner)
     {
         _KEYSTORE_STORAGE = _keystorStorage;
     }
@@ -186,6 +186,18 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
         emit RejectHash(msg.sender, hash);
     }
 
+    struct GuardianData {
+        address[] guardians;
+        uint256 threshold;
+        uint256 salt;
+    }
+
+    function _parseGuardianData(bytes calldata rawGuardian) internal pure returns (GuardianData memory) {
+        (address[] memory guardians, uint256 threshold, uint256 salt) =
+            abi.decode(rawGuardian, (address[], uint256, uint256));
+        return GuardianData({guardians: guardians, threshold: threshold, salt: salt});
+    }
+
     /**
      * @dev Verify the signature of the `guardian`
      * @param slot KeyStore slot
@@ -202,10 +214,10 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
         bytes calldata guardianSignature
     ) internal view override {
         bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(_TYPE_HASH_SOCIAL_RECOVERY, slot, slotNonce, newKey)));
-        (address[] memory guardians, uint256 threshold,) = abi.decode(rawGuardian, (address[], uint256, uint256));
-        uint256 guardiansLen = guardians.length;
+        GuardianData memory guardianData = _parseGuardianData(rawGuardian);
+        uint256 guardiansLen = guardianData.guardians.length;
         // for extreme cases
-        if (threshold > guardiansLen) threshold = guardiansLen;
+        if (guardianData.threshold > guardiansLen) guardianData.threshold = guardiansLen;
 
         /* 
             keySignature structure:
@@ -251,7 +263,6 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
                   If, in certain cases, 's' is defined as bytes4 (up to 4GB), there is no need to perform overflow prevention under the current known block gas limit.
                   Overall, it is more suitable for both Layer1 and Layer2. 
          */
-        // add block scope aviod stack too deep
         {
             uint8 v;
             uint256 cursor = 0;
@@ -284,7 +295,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
 
                     bytes calldata dynamicData = signatures[5:cursorEnd];
                     {
-                        (bool success, bytes memory result) = guardians[i].staticcall(
+                        (bool success, bytes memory result) = guardianData.guardians[i].staticcall(
                             abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, dynamicData)
                         );
                         require(
@@ -300,7 +311,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
                         r: no set
                         s: no set
                  */
-                    bytes32 key = _approveKey(guardians[i], digest);
+                    bytes32 key = _approveKey(guardianData.guardians[i], digest);
                     require(approvedHashes[key] == 1, "hash not approved");
                     unchecked {
                         cursor += 1; // see Note line 223
@@ -333,13 +344,13 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
 
                         cursor := add(cursor, 65) // see Note line 223
                     }
-                    require(guardians[i] == ECDSA.recover(digest, v, r, s), "guardian signature invalid");
+                    require(guardianData.guardians[i] == ECDSA.recover(digest, v, r, s), "guardian signature invalid");
                 }
                 unchecked {
                     i++; // see Note line 223
                 }
             }
-            if (guardiansLen - skipCount < threshold) {
+            if (guardiansLen - skipCount < guardianData.threshold) {
                 revert Errors.GUARDIAN_SIGNATURE_INVALID();
             }
         }

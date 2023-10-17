@@ -31,9 +31,16 @@ contract KeystoreDeployer is Script, DeployHelper {
     uint256 proxyAdminPrivateKey;
     address arbL1KeyStorePassingAddress;
 
+    address keyStoreAdminAddress;
+    uint256 keyStoreAdminPrivateKey;
+
     function run() public {
         proxyAdminPrivateKey = vm.envUint("PROXY_ADMIN_PRIVATE_KEY");
         proxyAdminAddress = vm.addr(proxyAdminPrivateKey);
+
+        keyStoreAdminPrivateKey = vm.envUint("KEYSTORE_ADMIN_PRIVATE_KEY");
+        keyStoreAdminAddress = vm.addr(keyStoreAdminPrivateKey);
+
         require(proxyAdminAddress != address(0), "proxyAdminAddress not provided");
         vm.startBroadcast(privateKey);
         Network network = getNetwork();
@@ -83,10 +90,17 @@ contract KeystoreDeployer is Script, DeployHelper {
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
         address keyStoreValidator = deploy("KeyStoreValidator", type(KeystoreValidator).creationCode);
         writeAddressToEnv("KEYSTORE_VALIDATOR_ADDRESS", keyStoreValidator);
-        address keyStoreStorage = deploy("KeyStoreStorage", type(KeyStoreStorage).creationCode);
+        // address keyStoreStorage = deploy("KeyStoreStorage", type(KeyStoreStorage).creationCode);
+        address keyStoreStorage = deploy(
+            "KeyStoreStorage", bytes.concat(type(KeyStoreStorage).creationCode, abi.encode(keyStoreAdminAddress))
+        );
+
         writeAddressToEnv("L1_KEYSTORE_STORAGE_ADDRESS", keyStoreStorage);
         address keyStore = deploy(
-            "KeyStore", bytes.concat(type(KeyStore).creationCode, abi.encode(keyStoreValidator, keyStoreStorage))
+            "KeyStore",
+            bytes.concat(
+                type(KeyStore).creationCode, abi.encode(keyStoreValidator, keyStoreStorage, keyStoreAdminAddress)
+            )
         );
         writeAddressToEnv("L1_KEYSTORE_ADDRESS", keyStore);
         address keyStoreModule =
@@ -112,6 +126,9 @@ contract KeystoreDeployer is Script, DeployHelper {
         ProxyAdmin(proxyAdminContractAddress).upgradeAndCall(
             ITransparentUpgradeableProxy(keyStoreProxy), keyStoreModule, _data
         );
+        vm.stopBroadcast();
+        vm.startBroadcast(keyStoreAdminPrivateKey);
+        KeyStoreStorage(keyStoreStorage).setDefaultKeystoreAddress(keyStore);
     }
 
     function deployArbL1BlockInfoPassing() private {
@@ -157,13 +174,17 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
+        address proxyAdminContractAddress = getCreateAddress(keyStoreProxy, 1);
+        console.log("arb proxyAdminContractAddress", proxyAdminContractAddress);
         require(address(keyStoreProxy).code.length > 0, "keyStoreProxy deployed failed");
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
 
         bytes memory _data;
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
+        ProxyAdmin(proxyAdminContractAddress).upgradeAndCall(
+            ITransparentUpgradeableProxy(keyStoreProxy), keyStoreModule, _data
+        );
         // setup l1 target
         ArbKnownStateRootWithHistory(arbKnownStateRootWithHistory).updateL1Target(arbL1KeyStorePassingAddress);
         writeAddressToEnv("ARB_KNOWN_STATE_ROOT_WITH_HISTORY_ADDRESS", arbKnownStateRootWithHistory);
@@ -195,10 +216,14 @@ contract KeystoreDeployer is Script, DeployHelper {
                 abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
             )
         );
+        address proxyAdminContractAddress = getCreateAddress(keyStoreProxy, 1);
+        console.log("op proxyAdminContractAddress", proxyAdminContractAddress);
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
         vm.startBroadcast(proxyAdminPrivateKey);
         bytes memory _data;
-        ITransparentUpgradeableProxy(keyStoreProxy).upgradeToAndCall(keyStoreModule, _data);
+        ProxyAdmin(proxyAdminContractAddress).upgradeAndCall(
+            ITransparentUpgradeableProxy(keyStoreProxy), keyStoreModule, _data
+        );
     }
 }

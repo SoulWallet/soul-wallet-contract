@@ -17,7 +17,7 @@ contract KeystoreProof is IKeyStoreProof {
     uint256 public lastestProofL1BlockNumber;
 
     event KeyStoreStorageProved(bytes32 stateRoot, bytes32 storageRoot);
-    event L1KeyStoreProved(bytes32 l1Slot, bytes32 signingKey);
+    event L1KeyStoreProved(bytes32 l1Slot, bytes32 signingKeyHash);
 
     constructor(address _l1KeystoreAddress, address _stateRootHistoryAddress) {
         L1_KEYSTORE_ADDRESS = _l1KeystoreAddress;
@@ -71,7 +71,7 @@ contract KeystoreProof is IKeyStoreProof {
         emit L1KeyStoreProved(l1Slot, newSigningKey);
     }
 
-    function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKey) {
+    function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKeyHash) {
         return (l1SlotToSigningKey[l1Slot]);
     }
 

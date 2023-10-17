@@ -60,9 +60,9 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
 
     function _init(bytes calldata _data) internal virtual override {
         address _sender = sender();
-        (bytes32 initialKey, bytes32 initialGuardianHash, uint64 guardianSafePeriod) =
+        (bytes32 initialKeyHash, bytes32 initialGuardianHash, uint64 guardianSafePeriod) =
             abi.decode(_data, (bytes32, bytes32, uint64));
-        bytes32 walletKeyStoreSlot = KeyStoreSlotLib.getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
+        bytes32 walletKeyStoreSlot = KeyStoreSlotLib.getSlot(initialKeyHash, initialGuardianHash, guardianSafePeriod);
         require(walletKeyStoreSlot != bytes32(0), "wallet slot needs to set");
         l1Slot[_sender] = walletKeyStoreSlot;
 
@@ -78,7 +78,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
             emit KeyStoreSyncd(_sender, keystoreSignKey);
         }
         walletInited[_sender] = true;
-        emit KeyStoreInited(_sender, initialKey, initialGuardianHash, guardianSafePeriod);
+        emit KeyStoreInited(_sender, initialKeyHash, initialGuardianHash, guardianSafePeriod);
     }
 
     function _deInit() internal virtual override {

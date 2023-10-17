@@ -15,7 +15,7 @@ abstract contract BaseMerkleTree is IKeyStoreMerkelProof {
 
     bytes32[CONTRACT_TREE_DEPTH] zero_hashes;
 
-    event newLeaf(bytes32 slot, bytes32 signingKey, uint256 blockNo, bytes32 leafNode, uint256 index);
+    event newLeaf(bytes32 slot, bytes32 signingKeyHash, uint256 blockNo, bytes32 leafNode, uint256 index);
 
     constructor() {
         for (uint256 height = 0; height < CONTRACT_TREE_DEPTH - 1; height++) {
@@ -45,10 +45,10 @@ abstract contract BaseMerkleTree is IKeyStoreMerkelProof {
         return CONTRACT_TREE_DEPTH;
     }
 
-    function _insertLeaf(bytes32 slot, bytes32 signingKey) internal {
+    function _insertLeaf(bytes32 slot, bytes32 signingKeyHash) internal {
         require(leaf_count < MAX_COUNT, "merkle tree full");
-        bytes32 node = sha256(abi.encodePacked(slot, signingKey, block.number));
-        emit newLeaf(slot, signingKey, block.number, node, leaf_count);
+        bytes32 node = sha256(abi.encodePacked(slot, signingKeyHash, block.number));
+        emit newLeaf(slot, signingKeyHash, block.number, node, leaf_count);
 
         leaf_count += 1;
         uint256 size = leaf_count;

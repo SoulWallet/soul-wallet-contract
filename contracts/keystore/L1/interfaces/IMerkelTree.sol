@@ -2,5 +2,5 @@
 pragma solidity ^0.8.20;
 
 interface IMerkleTree {
-    function insertLeaf(bytes32 slot, bytes32 signingKey) external;
+    function insertLeaf(bytes32 slot, bytes32 signingKeyHash) external;
 }

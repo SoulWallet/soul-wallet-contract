@@ -39,12 +39,12 @@ contract SoulWallet is
     }
 
     function initialize(
-        bytes32[] calldata anOwner,
+        bytes32[] calldata owners,
         address defalutCallbackHandler,
         bytes[] calldata modules,
         bytes[] calldata plugins
     ) external initializer {
-        _addOwners(anOwner);
+        _addOwners(owners);
         _setFallbackHandler(defalutCallbackHandler);
 
         for (uint256 i = 0; i < modules.length;) {

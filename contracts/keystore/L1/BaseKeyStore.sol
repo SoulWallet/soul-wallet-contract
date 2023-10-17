@@ -72,21 +72,21 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         return _getNonce(slot);
     }
 
-    function _getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
+    function _getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         private
         pure
         returns (bytes32 slot)
     {
-        return KeyStoreSlotLib.getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
+        return KeyStoreSlotLib.getSlot(initialKeyHash, initialGuardianHash, guardianSafePeriod);
     }
 
-    function getSlot(bytes32 initialKey, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
+    function getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         external
         pure
         override
         returns (bytes32 slot)
     {
-        return _getSlot(initialKey, initialGuardianHash, guardianSafePeriod);
+        return _getSlot(initialKeyHash, initialGuardianHash, guardianSafePeriod);
     }
 
     function getKey(bytes32 slot) external view override returns (bytes32 key) {
@@ -130,16 +130,16 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         }
     }
 
-    function _init(bytes32 initialKey, bytes32 initialGuardianHash, uint256 initialGuardianSafePeriod)
+    function _init(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint256 initialGuardianSafePeriod)
         private
         returns (bytes32 slot, bytes32 key)
     {
-        slot = _getSlot(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        slot = _getSlot(initialKeyHash, initialGuardianHash, initialGuardianSafePeriod);
         key = _getKey(slot);
         if (key == bytes32(0)) {
-            key = initialKey;
+            key = initialKeyHash;
             keyStoreInfo memory _keyStoreInfo = _getKeyStoreInfo(slot);
-            _keyStoreInfo.key = initialKey;
+            _keyStoreInfo.key = initialKeyHash;
             _keyStoreInfo.guardianHash = initialGuardianHash;
             _guardianSafePeriodGuard(initialGuardianSafePeriod);
             _keyStoreInfo.guardianSafePeriod = initialGuardianSafePeriod;
@@ -180,28 +180,29 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
 
     /**
      * @dev Change the key (only slot not initialized)
-     * @param initialKey Initial key
+     * @param initialKeyHash Initial key hash
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
      * @param newRawOwners New owners
      * @param currentRawOwners current owners
-     * @param keySignature `signature of initial key`
+     * @param keySignature  one of the current owners signature
+     *
      */
     function setKeyByOwner(
-        bytes32 initialKey,
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
         bytes calldata newRawOwners,
         bytes calldata currentRawOwners,
         bytes calldata keySignature
     ) external override {
-        (bytes32 slot, bytes32 key) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        (bytes32 slot, bytes32 key) = _init(initialKeyHash, initialGuardianHash, initialGuardianSafePeriod);
         _setKey(slot, key, newRawOwners, currentRawOwners, keySignature);
     }
 
     /**
      * @dev Social recovery, change the key (only slot not initialized)
-     * @param initialKey Initial key
+     * @param initialKeyHash Initial key hash
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
      * @param newRawOwners New Owners
@@ -209,7 +210,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
      * @param guardianSignature `signature of initialGuardian`
      */
     function setKeyByGuardian(
-        bytes32 initialKey,
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
         bytes calldata newRawOwners,
@@ -217,7 +218,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         bytes calldata guardianSignature
     ) external override {
         bytes32 newKey = _getOwnersHash(newRawOwners);
-        (bytes32 slot,) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        (bytes32 slot,) = _init(initialKeyHash, initialGuardianHash, initialGuardianSafePeriod);
         _autoSetupGuardian(slot);
         _verifyGuardianSignature(slot, rawGuardian, newKey, guardianSignature);
         _saveKey(slot, newKey);
@@ -302,21 +303,21 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
 
     /**
      * @dev Change guardian hash (only slot not initialized)
-     * @param initialKey Initial key
+     * @param initialKeyHash Initial key hash
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
      * @param newGuardianHash New guardian hash
-     * @param keySignature `signature of initial key`
+     * @param keySignature one of the current owners signature
      */
     function setGuardian(
-        bytes32 initialKey,
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
         bytes32 newGuardianHash,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external override {
-        (bytes32 slot, bytes32 signKey) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        (bytes32 slot, bytes32 signKey) = _init(initialKeyHash, initialGuardianHash, initialGuardianSafePeriod);
         _autoSetupGuardian(slot);
 
         _verifySignature(slot, signKey, Action.SET_GUARDIAN, newGuardianHash, rawOwners, keySignature);
@@ -378,21 +379,21 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
 
     /**
      * @dev Change guardian safe period (only slot not initialized)
-     * @param initialKey Initial key
+     * @param initialKeyHash Initial key hash
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
      * @param newGuardianSafePeriod New guardian safe period
-     * @param keySignature `signature of initial key`
+     * @param keySignature  one of the current owners signature
      */
     function setGuardianSafePeriod(
-        bytes32 initialKey,
+        bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
         uint256 newGuardianSafePeriod,
         bytes calldata rawOwners,
         bytes calldata keySignature
     ) external override {
-        (bytes32 slot, bytes32 signKey) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
+        (bytes32 slot, bytes32 signKey) = _init(initialKeyHash, initialGuardianHash, initialGuardianSafePeriod);
         _autoSetupGuardian(slot);
 
         _guardianSafePeriodGuard(newGuardianSafePeriod);

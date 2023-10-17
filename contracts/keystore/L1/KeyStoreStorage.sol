@@ -24,7 +24,7 @@ contract KeyStoreStorage is IKeyStoreStorage, IMerkleTree, Ownable, BaseMerkleTr
     address defaultKeystoreLogic;
 
     event KeystoreLogicSet(bytes32 indexed slot, address indexed logicAddress);
-    event LeafInserted(bytes32 indexed slot, bytes32 signingKey);
+    event LeafInserted(bytes32 indexed slot, bytes32 signingKeyHash);
 
     constructor(address _owner) Ownable(_owner) {}
 

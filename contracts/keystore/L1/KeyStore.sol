@@ -132,28 +132,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
         }
     }
 
-    /**
-     * @dev Why do we need this function:
-     * We expect the key to be an Externally Owned Account (EOA),
-     * but it is impossible to prevent users from accidentally setting a counterfactual contract address as the key.
-     * Adding this function does not introduce any additional costs (except for a limited `switch` with `bytes4`),
-     * and it allows for key reset in cases where an incorrect address is set as the key without
-     * relying solely on social recovery mechanisms.
-     */
-    function setKey(bytes32 slot, bytes32 newKey) external onlyInitialized(slot) {
-        _keyGuard(newKey);
-        bytes32 signKey = _getKey(slot);
-        address key;
-        assembly ("memory-safe") {
-            key := signKey
-        }
-        if (msg.sender != key) {
-            revert Errors.UNAUTHORIZED();
-        }
-        _saveKey(slot, newKey);
-    }
-
-    function keystoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKey) {
+    function keystoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKeyHash) {
         return _getKey(l1Slot);
     }
 

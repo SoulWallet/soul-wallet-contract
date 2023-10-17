@@ -36,7 +36,7 @@ contract SoulWalletInstence {
         new SoulWalletFactory(address(soulWalletLogicInstence.soulWalletLogic()), address(entryPoint), address(this));
 
         /*
-        address anOwner,
+        address owner,
         address defalutCallbackHandler,
         Module[] calldata modules,
         Plugin[] calldata plugins

@@ -15,7 +15,7 @@ contract NewImplementation is Initializable, UpgradeManager {
     }
 
     function initialize(
-        address anOwner,
+        bytes32[] calldata owners,
         address defalutCallbackHandler,
         bytes[] calldata modules,
         bytes[] calldata plugins

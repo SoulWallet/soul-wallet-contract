@@ -36,7 +36,7 @@ contract OptimismKeyStoreModuleTest is Test, MockKeyStoreData {
     address public newOwner = TEST_NEW_OWNER;
     uint256 public walletOwnerPrivateKey;
     bytes32 public walletL1Slot;
-    address public initialKey;
+    address public initialKeyHash;
     bytes32 public initialKeyBytes32;
     bytes32 public initialGuardianHash;
     uint64 public initialGuardianSafePeriod;

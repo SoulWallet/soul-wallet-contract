@@ -151,28 +151,31 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     function _setKey(
         bytes32 slot,
         bytes32 signKey,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
+        bytes calldata currentRawOwners,
         bytes calldata keySignature
     ) private {
-        _verifySignature(slot, signKey, Action.SET_KEY, newKey, rawOwners, keySignature);
+        bytes32 newKey = _getOwnersHash(newRawOwners);
+        _verifySignature(slot, signKey, Action.SET_KEY, newKey, currentRawOwners, keySignature);
         _saveKey(slot, newKey);
-        _storeRawOwnerBytes(slot, rawOwners);
+        _storeRawOwnerBytes(slot, newRawOwners);
     }
 
     /**
      * @dev Change the key (only slot initialized)
      * @param slot KeyStore slot
-     * @param newKey New key hash
+     * @param newRawOwners New owners
+     * @param currentRawOwners current owners
      * @param keySignature `signature of current key`
      */
-    function setKeyByOwner(bytes32 slot, bytes32 newKey, bytes calldata rawOwners, bytes calldata keySignature)
-        external
-        override
-        onlyInitialized(slot)
-    {
+    function setKeyByOwner(
+        bytes32 slot,
+        bytes calldata newRawOwners,
+        bytes calldata currentRawOwners,
+        bytes calldata keySignature
+    ) external override onlyInitialized(slot) {
         bytes32 signKey = _getKey(slot);
-        _setKey(slot, signKey, newKey, rawOwners, keySignature);
+        _setKey(slot, signKey, newRawOwners, currentRawOwners, keySignature);
     }
 
     /**
@@ -180,19 +183,20 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
      * @param initialKey Initial key
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newKey New key
+     * @param newRawOwners New owners
+     * @param currentRawOwners current owners
      * @param keySignature `signature of initial key`
      */
     function setKeyByOwner(
         bytes32 initialKey,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
+        bytes calldata currentRawOwners,
         bytes calldata keySignature
     ) external override {
         (bytes32 slot, bytes32 key) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
-        _setKey(slot, key, newKey, rawOwners, keySignature);
+        _setKey(slot, key, newRawOwners, currentRawOwners, keySignature);
     }
 
     /**
@@ -200,7 +204,7 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
      * @param initialKey Initial key
      * @param initialGuardianHash Initial guardian hash
      * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newKey New key
+     * @param newRawOwners New Owners
      * @param rawGuardian `raw guardian data`
      * @param guardianSignature `signature of initialGuardian`
      */
@@ -208,38 +212,36 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         bytes32 initialKey,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external override {
-        require(newKey == _getOwnersHash(rawOwners), "invaid rawOwners data");
+        bytes32 newKey = _getOwnersHash(newRawOwners);
         (bytes32 slot,) = _init(initialKey, initialGuardianHash, initialGuardianSafePeriod);
         _autoSetupGuardian(slot);
         _verifyGuardianSignature(slot, rawGuardian, newKey, guardianSignature);
         _saveKey(slot, newKey);
-        _storeRawOwnerBytes(slot, rawOwners);
+        _storeRawOwnerBytes(slot, newRawOwners);
     }
 
     /**
      * @dev Social recovery, change the key (only slot initialized)
      * @param slot KeyStore slot
-     * @param newKey New key
+     * @param newRawOwners New Owners
      * @param rawGuardian `raw guardian data`
      * @param guardianSignature `signature of current guardian`
      */
     function setKeyByGuardian(
         bytes32 slot,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external override {
-        require(newKey == _getOwnersHash(rawOwners), "invaid rawOwners data");
+        bytes32 newKey = _getOwnersHash(newRawOwners);
         _autoSetupGuardian(slot);
         _verifyGuardianSignature(slot, rawGuardian, newKey, guardianSignature);
         _saveKey(slot, newKey);
-        _storeRawOwnerBytes(slot, rawOwners);
+        _storeRawOwnerBytes(slot, newRawOwners);
     }
 
     /**

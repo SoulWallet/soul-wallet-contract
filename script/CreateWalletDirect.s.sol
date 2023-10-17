@@ -188,7 +188,6 @@ contract CreateWalletDirect is Script {
             keccak256(rawOwners),
             initialGuardianHash,
             initialGuardianSafePeriod,
-            keccak256(newRawOwners),
             newRawOwners,
             rawGuardian,
             abi.encodePacked(guardianSig)

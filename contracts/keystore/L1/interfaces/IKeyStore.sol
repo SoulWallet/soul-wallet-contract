@@ -161,8 +161,12 @@ interface IKeyStore {
      * @dev change key
      * @param keySignature `signature of old key`
      */
-    function setKeyByOwner(bytes32 slot, bytes32 newKey, bytes calldata rawOwners, bytes calldata keySignature)
-        external;
+    function setKeyByOwner(
+        bytes32 slot,
+        bytes calldata newRawOwners,
+        bytes calldata currentRawOwners,
+        bytes calldata keySignature
+    ) external;
 
     /**
      * @dev change key
@@ -172,8 +176,8 @@ interface IKeyStore {
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
+        bytes calldata currentRawOwners,
         bytes calldata keySignature
     ) external;
 
@@ -185,8 +189,7 @@ interface IKeyStore {
         bytes32 initialKeyHash,
         bytes32 initialGuardianHash,
         uint256 initialGuardianSafePeriod,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external;
@@ -197,8 +200,7 @@ interface IKeyStore {
      */
     function setKeyByGuardian(
         bytes32 slot,
-        bytes32 newKey,
-        bytes calldata rawOwners,
+        bytes calldata newRawOwners,
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external;

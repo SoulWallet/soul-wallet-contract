@@ -102,7 +102,7 @@ contract L1KeyStoreEOATest is Test {
                 initialKey,
                 initialGuardianHash,
                 initialGuardianSafePeriod,
-                initialKey_new_1,
+                abi.encode(newOwners),
                 abi.encode(owners),
                 validatorSignature
             );
@@ -129,7 +129,7 @@ contract L1KeyStoreEOATest is Test {
                 );
 
                 bytes memory rawOwners = keyStoreContract.rawOwnersBySlot(slot);
-                assertEq(rawOwners, abi.encode(owners));
+                assertEq(rawOwners, abi.encode(newOwners));
             }
 
             address _initialKey_new_2;
@@ -152,7 +152,7 @@ contract L1KeyStoreEOATest is Test {
                 initialKey,
                 initialGuardianHash,
                 initialGuardianSafePeriod,
-                initialKey_new_2,
+                abi.encode(new_owners_2),
                 abi.encode(newOwners),
                 validatorSignature
             );
@@ -163,7 +163,7 @@ contract L1KeyStoreEOATest is Test {
                 require(_keyStoreInfo.key == initialKey_new_2, "keyStoreInfo.key != initialKey_new");
 
                 bytes memory rawOwners = keyStoreContract.rawOwnersBySlot(slot);
-                assertEq(rawOwners, abi.encode(newOwners));
+                assertEq(rawOwners, abi.encode(new_owners_2));
             }
         }
     }
@@ -276,7 +276,6 @@ contract L1KeyStoreEOATest is Test {
             initialKey,
             initialGuardianHash,
             initialGuardianSafePeriod,
-            newKey,
             abi.encode(owners),
             rawGuardian,
             guardianSignature
@@ -284,6 +283,9 @@ contract L1KeyStoreEOATest is Test {
 
         IKeyStore.keyStoreInfo memory _keyStoreInfo = keyStoreContract.getKeyStoreInfo(slot);
         require(_keyStoreInfo.key == newKey, "keyStoreInfo.key != newKey");
+
+        bytes memory rawOwners = keyStoreContract.rawOwnersBySlot(slot);
+        assertEq(rawOwners, abi.encode(owners));
     }
 
     function test_updateGuardian() public {
@@ -341,7 +343,7 @@ contract L1KeyStoreEOATest is Test {
 
             address[] memory newOwners = new address[](1);
             newOwners[0] = address(0x2);
-            bytes32 initialKey_new_1 = keccak256(abi.encode(owners));
+            bytes32 initialKey_new_1 = keccak256(abi.encode(newOwners));
             nonce = keyStoreContract.nonce(slot);
 
             structHash = keccak256(abi.encode(_TYPE_HASH_SET_KEY, slot, nonce, initialKey_new_1));
@@ -354,7 +356,7 @@ contract L1KeyStoreEOATest is Test {
                 initialKey,
                 initialGuardianHash,
                 initialGuardianSafePeriod,
-                initialKey_new_1,
+                abi.encode(newOwners),
                 abi.encode(owners),
                 validatorSignature
             );

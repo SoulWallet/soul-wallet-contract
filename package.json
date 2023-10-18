@@ -22,6 +22,10 @@
     "deploy:op-goerli:all": "npm run deploy:op-goerli:keystore && npm run deploy:op-goerli:soulwallet && npm run deploy:op-goerli:paymaster",
     "deploy:arb-goerli:all": "npm run deploy:arb-goerli:keystore && npm run deploy:arb-goerli:soulwallet && npm run deploy:arb-goerli:paymaster",
     "deploy:all": "npm run deploy:goeril:all && npm run deploy:op-goerli:all && npm run deploy:arb-goerli:all",
+    "deploy:goeril:receivePayment": "source .env && forge script script/ReceivePayment.s.sol:ReceivePaymentDeployer --ffi --rpc-url $GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $GOERLI_SCAN_API_KEY",
+    "deploy:op-goerli:receivePayment": "source .env && forge script script/ReceivePayment.s.sol:ReceivePaymentDeployer --ffi --rpc-url $OPTIMISM_GOERLI_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_GOERLI_SCAN_API_KEY",
+    "deploy:arb-goerli:receivePayment": "source .env && forge script script/ReceivePayment.s.sol:ReceivePaymentDeployer --ffi --rpc-url $ARB_GOERLI_RPC_URL --gas-estimate-multiplier 1900 --legacy --with-gas-price 3000000000 --broadcast --verify --etherscan-api-key $ARB_GOERLI_SCAN_API_KEY --verifier-url https://api-goerli.arbiscan.io/api",
+    "deploy:all:receivePayment": "npm run deploy:goeril:receivePayment && npm run deploy:op-goerli:receivePayment && npm run deploy:arb-goerli:receivePayment",
     "gas-report": "forge test --gas-report"
   },
   "devDependencies": {

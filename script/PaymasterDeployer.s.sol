@@ -100,8 +100,8 @@ contract PaymasterDeployer is Script, DeployHelper {
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
 
-        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.1 ether}(address(paymaster));
-        ERC20Paymaster(paymaster).addStake{value: 0.1 ether}(1);
+        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
+        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
 
         ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
         ERC20Paymaster(paymaster).updatePrice(address(testUsdc));
@@ -127,8 +127,8 @@ contract PaymasterDeployer is Script, DeployHelper {
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
 
-        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.1 ether}(address(paymaster));
-        ERC20Paymaster(paymaster).addStake{value: 0.1 ether}(1);
+        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
+        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
 
         ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
         ERC20Paymaster(paymaster).updatePrice(address(testUsdc));
@@ -154,8 +154,8 @@ contract PaymasterDeployer is Script, DeployHelper {
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
 
-        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.1 ether}(address(paymaster));
-        ERC20Paymaster(paymaster).addStake{value: 0.1 ether}(1);
+        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
+        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
 
         ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
         ERC20Paymaster(paymaster).updatePrice(address(testUsdc));

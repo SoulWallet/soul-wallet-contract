@@ -77,8 +77,8 @@ contract CreateWalletDirect is Script {
             console.log("create wallet process on mainnet");
         } else if (network == Network.Goerli) {
             console.log("create wallet process on Goerli");
-            changeKeyStoreKeyByGuardian();
-            //     createWallet();
+            // changeGuardian();
+            createWallet();
             // changeKeyStoreKeyByGuardian();
             // syncKeyStore();
             // getSlot();
@@ -86,7 +86,7 @@ contract CreateWalletDirect is Script {
             console.log("create wallet process on Arbitrum");
         } else if (network == Network.Optimism) {
             console.log("create wallet process on Optimism");
-            opSyncL1Block();
+            // opSyncL1Block();
         } else if (network == Network.Anvil) {
             console.log("create wallet process on Anvil");
         } else if (network == Network.OptimismGoerli) {
@@ -94,8 +94,8 @@ contract CreateWalletDirect is Script {
             // opSyncL1Block();
             // getSlot();
             // opKeystoreProof();
-            // createWallet();
-            syncKeyStore();
+            createWallet();
+            // syncKeyStore();
         } else if (network == Network.ArbitrumGoerli) {
             // syncKeyStore();
             // arbAcountProof();
@@ -118,14 +118,15 @@ contract CreateWalletDirect is Script {
         guardians[0] = guardianAddress;
         bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
         bytes32 initialGuardianHash = keccak256(rawGuardian);
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = walletSigner.toBytes32();
 
         bytes memory keystoreModuleInitData =
-            abi.encode(walletSigner.toBytes32(), initialGuardianHash, initialGuardianSafePeriod);
+            abi.encode(keccak256(abi.encode(owners)), initialGuardianHash, initialGuardianSafePeriod);
+
         modules[1] = abi.encodePacked(keystoreModuleAddress, keystoreModuleInitData);
 
         bytes[] memory plugins = new bytes[](0);
-        bytes32[] memory owners = new bytes32[](1);
-        owners[0] = walletSigner.toBytes32();
 
         defaultCallbackHandler = loadEnvContract("DEFAULT_CALLBACK_HANDLER_ADDRESS");
         bytes memory initializer = abi.encodeWithSignature(
@@ -197,6 +198,62 @@ contract CreateWalletDirect is Script {
         require(_keyStoreInfo.key == keccak256(newRawOwners), "keyStoreInfo.key != newKey");
         console.log("changeKeyStoreKeyByGuardian success");
         console.log("newWalletSigner", newWalletSigner);
+    }
+
+    function changeGuardian() private {
+        keystoreContract = KeyStore(loadEnvContract("KEYSTORE_ADDRESS"));
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                _TYPEHASH, keccak256(bytes("KeyStore")), keccak256(bytes("1")), block.chainid, address(keystoreContract)
+            )
+        );
+        newWalletSingerPrivateKey = vm.envUint("WALLET_SIGNGER_NEW_PRIVATE_KEY");
+        newWalletSigner = vm.addr(newWalletSingerPrivateKey);
+        address[] memory guardians = new address[](1);
+        guardians[0] = guardianAddress;
+        bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
+        bytes32 initialGuardianHash = keccak256(rawGuardian);
+        address[] memory owners = new address[](1);
+        owners[0] = walletSigner;
+        bytes memory rawOwners = abi.encode(owners);
+
+        address[] memory newOwners = new address[](1);
+        newOwners[0] = newWalletSigner;
+        bytes memory newRawOwners = abi.encode(newOwners);
+
+        bytes32 slot = keystoreContract.getSlot(keccak256(rawOwners), initialGuardianHash, initialGuardianSafePeriod);
+
+        uint256 nonce = keystoreContract.nonce(slot);
+
+        address[] memory newGuardian = new address[](1);
+        newGuardian[0] = walletSigner;
+        bytes memory newGuardians = abi.encode(newGuardian);
+
+        bytes32 newGuardianHash = keccak256(newGuardians);
+
+        bytes32 structHash = keccak256(abi.encode(_TYPE_HASH_SET_GUARDIAN, slot, nonce, newGuardianHash));
+        bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(newWalletSingerPrivateKey, typedDataHash);
+        bytes memory keySignature = abi.encodePacked(r, s, v);
+        uint8 signType = 0;
+        bytes memory validatorSignature = abi.encodePacked(signType, keySignature);
+
+        keystoreContract.setGuardian(
+            keccak256(rawOwners),
+            initialGuardianHash,
+            initialGuardianSafePeriod,
+            newGuardianHash,
+            newRawOwners,
+            validatorSignature
+        );
+        console.log("newWalletSigner", newWalletSigner);
+        console.logBytes32(slot);
+        console.logBytes32(keccak256(rawOwners));
+        console.logBytes32(initialGuardianHash);
+        console.log(initialGuardianSafePeriod);
+        console.logBytes32(newGuardianHash);
+        console.logBytes(rawOwners);
+        console.logBytes(validatorSignature);
     }
 
     function syncKeyStore() private {

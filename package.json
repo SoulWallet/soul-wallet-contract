@@ -18,6 +18,10 @@
     "deploy:arb-goerli:keystore": "source .env && forge script script/KeystoreDeployer.s.sol:KeystoreDeployer --ffi --rpc-url $ARB_GOERLI_RPC_URL --gas-estimate-multiplier 1900 --legacy --with-gas-price 3000000000  --broadcast --verify --etherscan-api-key $ARB_GOERLI_SCAN_API_KEY --verifier-url https://api-goerli.arbiscan.io/api",
     "deploy:arb-goerli:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --rpc-url $ARB_GOERLI_RPC_URL --gas-estimate-multiplier 1900 --legacy --with-gas-price 3000000000 --broadcast --verify --etherscan-api-key $ARB_GOERLI_SCAN_API_KEY --verifier-url https://api-goerli.arbiscan.io/api",
     "deploy:arb-goerli:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --rpc-url $ARB_GOERLI_RPC_URL --gas-estimate-multiplier 1900 --legacy --with-gas-price 30000000000 --broadcast --verify --etherscan-api-key $ARB_GOERLI_SCAN_API_KEY --verifier-url https://api-goerli.arbiscan.io/api",
+    "deploy:goeril:all": "npm run deploy:goeril:keystore && npm run deploy:goeril:soulwallet && npm run deploy:goeril:paymaster",
+    "deploy:op-goerli:all": "npm run deploy:op-goerli:keystore && npm run deploy:op-goerli:soulwallet && npm run deploy:op-goerli:paymaster",
+    "deploy:arb-goerli:all": "npm run deploy:arb-goerli:keystore && npm run deploy:arb-goerli:soulwallet && npm run deploy:arb-goerli:paymaster",
+    "deploy:all": "npm run deploy:goeril:all && npm run deploy:op-goerli:all && npm run deploy:arb-goerli:all",
     "gas-report": "forge test --gas-report"
   },
   "devDependencies": {

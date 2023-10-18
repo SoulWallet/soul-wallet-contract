@@ -74,14 +74,14 @@ contract CreateWalletEntryPoint is Script {
         guardians[0] = guardianAddress;
         bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
         bytes32 initialGuardianHash = keccak256(rawGuardian);
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = walletSigner.toBytes32();
 
         bytes memory keystoreModuleInitData =
-            abi.encode(bytes32(uint256(uint160(walletSigner))), initialGuardianHash, initialGuardianSafePeriod);
+            abi.encode(keccak256(abi.encode(owners)), initialGuardianHash, initialGuardianSafePeriod);
         modules[1] = abi.encodePacked(keystoreModuleAddress, keystoreModuleInitData);
 
         bytes[] memory plugins = new bytes[](0);
-        bytes32[] memory owners = new bytes32[](1);
-        owners[0] = walletSigner.toBytes32();
 
         defaultCallbackHandler = loadEnvContract("DEFAULT_CALLBACK_HANDLER_ADDRESS");
         bytes memory initializer = abi.encodeWithSignature(

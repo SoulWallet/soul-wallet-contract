@@ -26,7 +26,8 @@ contract KeystoreDeployer is Script, DeployHelper {
     address private constant ARB_GOERLI_INBOX_ADDRESS = 0x6BEbC4925716945D46F0Ec336D5C2564F419682C;
     address private ARB_RUNTIME_INBOX_ADDRESS;
 
-    address l1KeyStoreAddress;
+    // address l1KeyStoreAddress;
+    address l1KeyStoreStorageAddress;
     address proxyAdminAddress;
     uint256 proxyAdminPrivateKey;
     address arbL1KeyStorePassingAddress;
@@ -144,9 +145,9 @@ contract KeystoreDeployer is Script, DeployHelper {
     }
 
     function arbDeploy() private {
-        l1KeyStoreAddress = vm.envAddress("L1_KEYSTORE_ADDRESS");
-        console.log("using l1Keystore address", l1KeyStoreAddress);
-        require(l1KeyStoreAddress != address(0), "L1_KEYSTORE_ADDRESS not provided");
+        l1KeyStoreStorageAddress = vm.envAddress("L1_KEYSTORE_STORAGE_ADDRESS");
+        console.log("using l1KeyStoreStorageAddress address", l1KeyStoreStorageAddress);
+        require(l1KeyStoreStorageAddress != address(0), "L1_KEYSTORE_ADDRESS not provided");
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
         arbL1KeyStorePassingAddress = vm.envAddress("ARB_L1_KEYSTORE_PASSING_ADDRESS");
         require(arbL1KeyStorePassingAddress != address(0), "ARB_L1_KEYSTORE_PASSING_ADDRESS not provided");
@@ -159,7 +160,9 @@ contract KeystoreDeployer is Script, DeployHelper {
 
         address keystoreProof = deploy(
             "KeystoreProof",
-            bytes.concat(type(KeystoreProof).creationCode, abi.encode(l1KeyStoreAddress, arbKnownStateRootWithHistory))
+            bytes.concat(
+                type(KeystoreProof).creationCode, abi.encode(l1KeyStoreStorageAddress, arbKnownStateRootWithHistory)
+            )
         );
         require(address(keystoreProof).code.length > 0, "keystoreProof deployed failed");
 
@@ -191,8 +194,8 @@ contract KeystoreDeployer is Script, DeployHelper {
     }
 
     function opDeploy() private {
-        l1KeyStoreAddress = vm.envAddress("L1_KEYSTORE_ADDRESS");
-        require(l1KeyStoreAddress != address(0), "L1_KEYSTORE_ADDRESS not provided");
+        l1KeyStoreStorageAddress = vm.envAddress("L1_KEYSTORE_STORAGE_ADDRESS");
+        require(l1KeyStoreStorageAddress != address(0), "L1_KEYSTORE_STORAGE_ADDRESS not provided");
 
         require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
 
@@ -203,7 +206,9 @@ contract KeystoreDeployer is Script, DeployHelper {
 
         address keystoreProof = deploy(
             "KeystoreProof",
-            bytes.concat(type(KeystoreProof).creationCode, abi.encode(l1KeyStoreAddress, opKnownStateRootWithHistory))
+            bytes.concat(
+                type(KeystoreProof).creationCode, abi.encode(l1KeyStoreStorageAddress, opKnownStateRootWithHistory)
+            )
         );
 
         address keyStoreModule =

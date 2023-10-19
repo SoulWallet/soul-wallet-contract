@@ -12,7 +12,11 @@ abstract contract SignatureValidator is OwnerAuth, Validator {
     using ECDSA for bytes32;
     using TypeConversion for address;
 
-    function _isValidateSignature(bytes32 rawHash, bytes calldata rawSignature)
+    function _encodeRawHash(bytes32 rawHash) internal view returns (bytes32 encodeRawHash) {
+        return validator().encodeRawHash(rawHash);
+    }
+
+    function _isValidate1271Signature(bytes32 rawHash, bytes calldata rawSignature)
         internal
         view
         returns (uint256 validationData, bool sigValid)
@@ -24,7 +28,7 @@ abstract contract SignatureValidator is OwnerAuth, Validator {
 
         (guardHookInputData, validatorSignature) = SignatureDecoder.decodeSignature(rawSignature);
 
-        (validationData, recovered, success) = validator().recoverSignature(rawHash, validatorSignature);
+        (validationData, recovered, success) = validator().recover1271Signature(rawHash, validatorSignature);
 
         if (!success) {
             sigValid = false;

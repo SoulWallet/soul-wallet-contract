@@ -17,14 +17,15 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
         return AccountStorage.layout().approvedHashes;
     }
 
-    function isValidSignature(bytes32 hash, bytes calldata signature)
+    function isValidSignature(bytes32 rawHash, bytes calldata signature)
         external
         view
         override
         returns (bytes4 magicValue)
     {
+        bytes32 datahash = _encodeRawHash(rawHash);
         if (signature.length > 0) {
-            (uint256 _validationData, bool sigValid) = _isValidateSignature(hash, signature);
+            (uint256 _validationData, bool sigValid) = _isValidate1271Signature(datahash, signature);
             if (!sigValid) {
                 return INVALID_ID;
             }
@@ -40,7 +41,7 @@ abstract contract ERC1271Handler is Authority, IERC1271Handler, SignatureValidat
         }
 
         mapping(bytes32 => uint256) storage approvedHashes = _approvedHashes();
-        uint256 status = approvedHashes[hash];
+        uint256 status = approvedHashes[datahash];
         if (status == 1) {
             // approved
             return MAGICVALUE;

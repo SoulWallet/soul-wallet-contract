@@ -46,7 +46,6 @@ contract SoulWallet is
     ) external initializer {
         _addOwners(owners);
         _setFallbackHandler(defalutCallbackHandler);
-
         for (uint256 i = 0; i < modules.length;) {
             _addModule(modules[i]);
             unchecked {

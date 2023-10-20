@@ -28,6 +28,9 @@ abstract contract SignatureValidator is OwnerAuth, Validator {
 
         (guardHookInputData, validatorSignature) = SignatureDecoder.decodeSignature(rawSignature);
 
+        // To prevent potential attacks, prohibit the use of guardHookInputData with EIP1271 signatures.
+        require(guardHookInputData.length == 0);
+
         (validationData, recovered, success) = validator().recover1271Signature(rawHash, validatorSignature);
 
         if (!success) {

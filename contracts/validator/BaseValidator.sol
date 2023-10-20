@@ -23,6 +23,12 @@ abstract contract BaseValidator is IValidator {
         virtual
         returns (bytes32);
 
+    function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
+        internal
+        pure
+        virtual
+        returns (bytes32);
+
     function recover(uint8 signatureType, bytes32 rawHash, bytes calldata rawSignature)
         internal
         view
@@ -65,7 +71,6 @@ abstract contract BaseValidator is IValidator {
 
         (recovered, success) = recover(signatureType, hash, signature);
     }
-    // 1271 signature verification doesn't needs to pack hash
 
     function recover1271Signature(bytes32 rawHash, bytes calldata rawSignature)
         external
@@ -76,7 +81,8 @@ abstract contract BaseValidator is IValidator {
         uint8 signatureType;
         bytes calldata signature;
         (signatureType, validationData, signature) = ValidatorSigDecoder.decodeValidatorSignature(rawSignature);
-        (recovered, success) = recover(signatureType, rawHash, signature);
+        bytes32 hash = _pack1271SignatureHash(rawHash, signatureType, validationData);
+        (recovered, success) = recover(signatureType, hash, signature);
     }
 
     function encodeRawHash(bytes32 rawHash) public view returns (bytes32) {

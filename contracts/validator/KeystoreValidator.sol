@@ -6,6 +6,7 @@ import "./BaseValidator.sol";
 contract KeystoreValidator is BaseValidator {
     using ECDSA for bytes32;
     using TypeConversion for address;
+
     /**
      * @dev pack hash message with `signatureData.validationData`
      */
@@ -29,5 +30,15 @@ contract KeystoreValidator is BaseValidator {
         } else {
             revert Errors.INVALID_SIGNTYPE();
         }
+    }
+
+    function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
+        internal
+        pure
+        virtual
+        override
+        returns (bytes32)
+    {
+        revert("KeystoreValidator doesn't support 1271");
     }
 }

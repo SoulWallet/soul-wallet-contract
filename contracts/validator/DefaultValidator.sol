@@ -31,4 +31,24 @@ contract DefaultValidator is BaseValidator {
             revert Errors.INVALID_SIGNTYPE();
         }
     }
+    // 1271 doesn't need toEthSignedMessageHash
+
+    function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
+        internal
+        pure
+        override
+        returns (bytes32 packedHash)
+    {
+        if (signatureType == 0x0) {
+            packedHash = hash;
+        } else if (signatureType == 0x1) {
+            packedHash = keccak256(abi.encodePacked(hash, validationData));
+        } else if (signatureType == 0x2) {
+            packedHash = hash;
+        } else if (signatureType == 0x3) {
+            packedHash = keccak256(abi.encodePacked(hash, validationData));
+        } else {
+            revert Errors.INVALID_SIGNTYPE();
+        }
+    }
 }

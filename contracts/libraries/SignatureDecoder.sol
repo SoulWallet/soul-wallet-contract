@@ -88,27 +88,22 @@ library SignatureDecoder {
         pure
         returns (bytes calldata guardHookInputData, bytes calldata validatorSignature)
     {
-        // Ensure that userOpsignature has at least 1 byte (for dataType)
-        require(userOpsignature.length >= 1, "Signature too short");
+        /*
+            When the calldata slice doesn't match the actual length at the index,
+            it will revert, so we don't need additional checks.
+         */
 
         uint8 dataType = uint8(bytes1(userOpsignature[0:1]));
 
         if (dataType == 0x0) {
-            // For dataType 0x0, the minimum length should be 2 bytes (1 for dataType and 1 for signature type)
-            require(userOpsignature.length >= 2, "Signature too short for dataType 0x0");
             // empty guardHookInputData
             guardHookInputData = userOpsignature[0:0];
             validatorSignature = userOpsignature[1:];
         } else if (dataType == 0x01) {
-            // For dataType 0x01, the minimum length should be 65 bytes (1 for dataType, 32 for dynamicDataLength, then some bytes for the multi-guardHookInputData and signature data)
-            require(userOpsignature.length >= 33, "Signature too short for dataType 0x01");
-
             uint256 dynamicDataLength = uint256(bytes32(userOpsignature[1:33]));
-            // Ensure the given dynamicDataLength doesn't exceed available bytes
-            require(33 + dynamicDataLength <= userOpsignature.length, "Invalid dynamicDataLength");
-
-            guardHookInputData = userOpsignature[33:33 + dynamicDataLength];
-            validatorSignature = userOpsignature[33 + dynamicDataLength:];
+            uint256 validatorSignatureOffset = 33 + dynamicDataLength;
+            guardHookInputData = userOpsignature[33:validatorSignatureOffset];
+            validatorSignature = userOpsignature[validatorSignatureOffset:];
         } else {
             revert("Unsupported data type");
         }

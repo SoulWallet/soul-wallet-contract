@@ -11,17 +11,11 @@ import "../libraries/WebAuthn.sol";
 abstract contract BaseValidator is IValidator {
     using ECDSA for bytes32;
     using TypeConversion for address;
-    //keccak256(
-    //    "SoulWalletMessage(bytes32 message)"
-    //);
 
-    bytes32 private constant SOUL_WALLET_MSG_TYPEHASH =
-        0x04e6b5b1de6ba008d582849d4956d004d09a345fc11e7ba894975b5b56a4be66;
-    // keccak256(
-    //     "EIP712Domain(uint256 chainId,address verifyingContract)"
-    // );
+    bytes32 private constant SOUL_WALLET_MSG_TYPEHASH = keccak256("SoulWalletMessage(bytes32 message)");
+
     bytes32 private constant DOMAIN_SEPARATOR_TYPEHASH =
-        0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218;
+        keccak256("EIP712Domain(uint256 chainId,address verifyingContract)");
 
     function _packSignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal

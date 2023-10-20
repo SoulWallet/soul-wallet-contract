@@ -15,13 +15,11 @@ contract SocialRecoveryModule is ISocialRecoveryModule, BaseModule {
     string public constant NAME = "Soulwallet Social Recovery Module";
     string public constant VERSION = "0.0.1";
 
-    // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
     bytes32 private constant _DOMAIN_SEPARATOR_TYPEHASH =
-        0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
 
-    // keccak256("SocialRecovery(address wallet,address[] newOwners,uint256 nonce)");
     bytes32 private constant _SOCIAL_RECOVERY_TYPEHASH =
-        0x333ef7ecc7b8a82065578df0879cefc36c32344d49afdf1e0370a60babe64feb;
+        keccak256("SocialRecovery(address wallet,address[] newOwners,uint256 nonce)");
 
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(bytes32)"));
     bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(bytes32[])"));

@@ -3,13 +3,21 @@ pragma solidity ^0.8.20;
 
 import "../interfaces/IUpgradable.sol";
 import "../libraries/Errors.sol";
+/**
+ * @title UpgradeManager
+ * @dev This contract allows for the logic of a proxy to be upgraded
+ */
 
 abstract contract UpgradeManager is IUpgradable {
     /**
-     * @dev Storage slot with the address of the current implementation.
+     * @dev Storage slot with the address of the current implementation
      * This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
      */
     bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+    /**
+     * @dev Upgrades the logic to a new implementation
+     * @param newImplementation Address of the new implementation
+     */
 
     function _upgradeTo(address newImplementation) internal {
         bool isContract;

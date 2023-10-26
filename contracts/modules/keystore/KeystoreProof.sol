@@ -5,6 +5,10 @@ import "./IKnownStateRootWithHistory.sol";
 import "./MerklePatriciaVerifier.sol";
 import "../../keystore/interfaces/IKeyStoreProof.sol";
 
+/**
+ * @title KeystoreProof
+ * @notice Contract for maintaining and proving a L1 keystore and its storage roots
+ */
 contract KeystoreProof is IKeyStoreProof {
     mapping(bytes32 => bytes32) public l1SlotToSigningKey;
     mapping(bytes32 => bytes) public l1SlotToRawOwners;
@@ -14,15 +18,24 @@ contract KeystoreProof is IKeyStoreProof {
     address public immutable STATE_ROOT_HISTORY_ADDESS;
     address public immutable L1_KEYSTORE_ADDRESS;
     // the latest block number in l1 that proved
-    uint256 public lastestProofL1BlockNumber;
+    uint256 public latestProofL1BlockNumber;
 
     event KeyStoreStorageProved(bytes32 stateRoot, bytes32 storageRoot);
     event L1KeyStoreProved(bytes32 l1Slot, bytes32 signingKeyHash);
+    /**
+     * @param _l1KeystoreAddress Address of L1 Keystore
+     * @param _stateRootHistoryAddress Address of state root history contract
+     */
 
     constructor(address _l1KeystoreAddress, address _stateRootHistoryAddress) {
         L1_KEYSTORE_ADDRESS = _l1KeystoreAddress;
         STATE_ROOT_HISTORY_ADDESS = _stateRootHistoryAddress;
     }
+    /**
+     * @notice Proves the keystore storage root
+     * @param stateRoot State root to be proved
+     * @param accountProof Proof for the account associated with the state root
+     */
 
     function proofKeystoreStorageRoot(bytes32 stateRoot, bytes memory accountProof) external {
         (bool searchResult, BlockInfo memory currentBlockInfo) =
@@ -35,11 +48,19 @@ contract KeystoreProof is IKeyStoreProof {
         Rlp.Item[] memory keyStoreDetails = Rlp.toList(Rlp.toItem(keyStoreAccountDetailsBytes));
         bytes32 keyStoreStorageRootHash = Rlp.toBytes32(keyStoreDetails[2]);
         stateRootToKeystoreStorageRoot[stateRoot] = keyStoreStorageRootHash;
-        if (currentBlockInfo.blockNumber > lastestProofL1BlockNumber) {
-            lastestProofL1BlockNumber = currentBlockInfo.blockNumber;
+        if (currentBlockInfo.blockNumber > latestProofL1BlockNumber) {
+            latestProofL1BlockNumber = currentBlockInfo.blockNumber;
         }
         emit KeyStoreStorageProved(stateRoot, keyStoreStorageRootHash);
     }
+    /**
+     * @notice Proves the L1 keystore
+     * @param l1Slot Slot of L1 keystore
+     * @param stateRoot State root to be proved
+     * @param newSigningKey New signing key to be set
+     * @param rawOwners Raw owners to be associated with the signing key
+     * @param keyProof Proof for the key
+     */
 
     function proofL1Keystore(
         bytes32 l1Slot,
@@ -70,10 +91,20 @@ contract KeystoreProof is IKeyStoreProof {
         l1SlotToRawOwners[l1Slot] = rawOwners;
         emit L1KeyStoreProved(l1Slot, newSigningKey);
     }
+    /**
+     * @notice Retrieves the signing key hash associated with a given L1 slot
+     * @param l1Slot Slot of L1 keystore
+     * @return signingKeyHash The signing key hash associated with the L1 slot
+     */
 
     function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKeyHash) {
         return (l1SlotToSigningKey[l1Slot]);
     }
+    /**
+     * @notice Retrieves the raw owners associated with a given L1 slot
+     * @param l1Slot Slot of L1 keystore
+     * @return owners The raw owners associated with the L1 slot
+     */
 
     function rawOwnersBySlot(bytes32 l1Slot) external view override returns (bytes memory owners) {
         return l1SlotToRawOwners[l1Slot];

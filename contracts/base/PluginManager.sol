@@ -9,12 +9,20 @@ import "../libraries/AddressLinkedList.sol";
 import "../interfaces/IPluggable.sol";
 import "../interfaces/IPluginStorage.sol";
 
+/**
+ * @title PluginManager
+ * @dev This contract manages plugins and provides associated utility functions
+ */
 abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
     uint8 private constant _GUARD_HOOK = 1 << 0;
     uint8 private constant _PRE_HOOK = 1 << 1;
     uint8 private constant _POST_HOOK = 1 << 2;
 
     using AddressLinkedList for mapping(address => address);
+    /**
+     * @dev Adds a new plugin
+     * @param pluginAndData The plugin address and associated data
+     */
 
     function addPlugin(bytes calldata pluginAndData) external override onlyModule {
         _addPlugin(pluginAndData);
@@ -52,6 +60,10 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
         }
         emit PluginAdded(pluginAddress);
     }
+    /**
+     * @dev Removes a plugin
+     * @param plugin Address of the plugin to be removed
+     */
 
     function removePlugin(address plugin) external override onlyModule {
         AccountStorage.Layout storage l = AccountStorage.layout();
@@ -66,10 +78,20 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
         l.preHookPlugins.tryRemove(plugin);
         l.postHookPlugins.tryRemove(plugin);
     }
+    /**
+     * @dev Checks if a plugin is authorized
+     * @param plugin Address of the plugin
+     * @return Returns true if the plugin is authorized, false otherwise
+     */
 
     function isAuthorizedPlugin(address plugin) external view override returns (bool) {
         return AccountStorage.layout().plugins.isExist(plugin);
     }
+    /**
+     * @dev Lists plugins based on the hook type
+     * @param hookType Type of the hook
+     * @return plugins An array of plugin addresses
+     */
 
     function listPlugin(uint8 hookType) external view override returns (address[] memory plugins) {
         if (hookType == 0) {
@@ -120,6 +142,13 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
             _cursorFrom = cursor;
         }
     }
+    /**
+     * @dev Hooks a user operation with associated data
+     * @param userOp User operation details
+     * @param userOpHash Hash of the user operation
+     * @param guardHookData Data for the guard hook
+     * @return Returns true if the hook was successful, false otherwise
+     */
 
     function guardHook(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata guardHookData)
         internal
@@ -178,6 +207,12 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
         }
         return true;
     }
+    /**
+     * @dev Executes hooks around a transaction
+     * @param target Address of the transaction target
+     * @param value Amount of ether to send with the transaction
+     * @param data Data of the transaction
+     */
 
     modifier executeHook(address target, uint256 value, bytes memory data) {
         AccountStorage.Layout storage l = AccountStorage.layout();
@@ -216,6 +251,9 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
             success := call(gas(), target, 0, add(data, 0x20), mload(data), 0, 0)
         }
     }
+    /**
+     * @dev Ensures that the function is only called by an authorized plugin
+     */
 
     modifier onlyPlugin() {
         if (AccountStorage.layout().plugins[msg.sender] == address(0)) {
@@ -223,10 +261,21 @@ abstract contract PluginManager is IPluginManager, Authority, IPluginStorage {
         }
         _;
     }
+    /**
+     * @dev Stores data for a plugin
+     * @param key Key to store the data against
+     * @param value Data to be stored
+     */
 
     function pluginDataStore(bytes32 key, bytes calldata value) external override onlyPlugin {
         AccountStorage.layout().pluginDataBytes[msg.sender][key] = value;
     }
+    /**
+     * @dev Loads data of a plugin
+     * @param plugin Address of the plugin
+     * @param key Key for which data needs to be loaded
+     * @return Returns the loaded data
+     */
 
     function pluginDataLoad(address plugin, bytes32 key) external view override returns (bytes memory) {
         return AccountStorage.layout().pluginDataBytes[plugin][key];

@@ -6,8 +6,8 @@ import "../authority/EntryPointAuth.sol";
 abstract contract EntryPointManager is EntryPointAuth {
     IEntryPoint private immutable _ENTRY_POINT;
 
-    constructor(IEntryPoint anEntryPoint) {
-        _ENTRY_POINT = anEntryPoint;
+    constructor(IEntryPoint entryPoint) {
+        _ENTRY_POINT = entryPoint;
     }
 
     function _entryPoint() internal view override returns (IEntryPoint) {

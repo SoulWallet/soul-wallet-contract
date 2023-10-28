@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
+/**
+ * @title SoulWalletProxy
+ * @notice A proxy contract that forwards calls to an implementation contract
+ * @dev This proxy uses the EIP-1967 standard for storage slots
+ */
 contract SoulWalletProxy {
     /**
-     * @dev Storage slot with the address of the current implementation.
-     * This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
+     * @notice Storage slot with the address of the current implementation
+     * @dev This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
      */
     bytes32 private constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
     /**
-     * @dev Initializes the contract setting the implementation
-     *
-     * @param logic Address of the initial implementation.
+     * @notice Initializes the proxy with the address of the initial implementation contract
+     * @param logic Address of the initial implementation
      */
     constructor(address logic) {
         assembly ("memory-safe") {
@@ -20,7 +24,8 @@ contract SoulWalletProxy {
     }
 
     /**
-     * @dev Fallback function
+     * @notice Fallback function which forwards all calls to the implementation contract
+     * @dev Uses delegatecall to ensure the context remains within the proxy
      */
     fallback() external payable {
         assembly {

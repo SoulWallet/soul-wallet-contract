@@ -6,15 +6,15 @@ import "../../libraries/KeyStoreSlotLib.sol";
 
 abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     /**
-     * @dev Verify the signature of the `signKey`
-     * @param slot KeyStore slot
-     * @param slotNonce used to prevent replay attack
-     * @param signKey Current sign key
-     * @param action Action type, See ./interfaces/IKeyStore.sol: enum Action
-     * @param data {new key(Action.SET_KEY) | new guardian hash(Action.SET_GUARDIAN) | new guardian safe period(Action.SET_GUARDIAN_SAFE_PERIOD) | empty(Action.CANCEL_SET_GUARDIAN | Action.CANCEL_SET_GUARDIAN_SAFE_PERIOD )}
-     * @param keySignature `signature of current sign key`
-     *
-     * Note Implementer must revert if the signature is invalid
+     * @notice Verify the signature of the `signKey`
+     * @dev Implementers must revert if the signature is invalid
+     * @param slot The KeyStore slot
+     * @param slotNonce Used to prevent replay attacks
+     * @param signKey The current sign key
+     * @param action The action type
+     * @param data Data associated with the action
+     * @param rawOwners Raw owner data
+     * @param keySignature Signature of the current sign key
      */
     function verifySignature(
         bytes32 slot,
@@ -27,12 +27,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     ) internal virtual;
 
     /**
-     * @dev Verify the signature of the `guardian`
-     * @param slot KeyStore slot
-     * @param slotNonce used to prevent replay attack
+     * @notice Verify the signature of the `guardian`
+     * @param slot The KeyStore slot
+     * @param slotNonce Used to prevent replay attacks
      * @param rawGuardian The raw data of the `guardianHash`
-     * @param newKey New key
-     * @param guardianSignature `signature of current guardian`
+     * @param newKey The new key
+     * @param guardianSignature Signature of the guardians
      */
     function verifyGuardianSignature(
         bytes32 slot,
@@ -67,6 +67,11 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         verifyGuardianSignature(slot, _getNonce(slot), rawGuardian, newKey, guardianSignature);
         _increaseNonce(slot);
     }
+    /**
+     * @notice View the nonce associated with a slot
+     * @param slot The KeyStore slot
+     * @return _nonce The nonce
+     */
 
     function nonce(bytes32 slot) external view override returns (uint256 _nonce) {
         return _getNonce(slot);
@@ -79,6 +84,13 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     {
         return KeyStoreSlotLib.getSlot(initialKeyHash, initialGuardianHash, guardianSafePeriod);
     }
+    /**
+     * @notice Calculate and retrieve the slot based on provided initial values
+     * @param initialKeyHash The initial key hash
+     * @param initialGuardianHash The initial guardian hash
+     * @param guardianSafePeriod The guardian safe period
+     * @return slot The KeyStore slot
+     */
 
     function getSlot(bytes32 initialKeyHash, bytes32 initialGuardianHash, uint256 guardianSafePeriod)
         external
@@ -89,6 +101,11 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
         return _getSlot(initialKeyHash, initialGuardianHash, guardianSafePeriod);
     }
 
+    /**
+     * @notice View the key associated with a slot
+     * @param slot The KeyStore slot
+     * @return key The key
+     */
     function getKey(bytes32 slot) external view override returns (bytes32 key) {
         return _getKey(slot);
     }
@@ -162,11 +179,11 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Change the key (only slot initialized)
-     * @param slot KeyStore slot
-     * @param newRawOwners New owners
-     * @param currentRawOwners current owners
-     * @param keySignature `signature of current key`
+     * @notice Set the key for a slot that is already initialized
+     * @param slot The KeyStore slot
+     * @param newRawOwners The new owners
+     * @param currentRawOwners The current owners
+     * @param keySignature Signature of the owners
      */
     function setKeyByOwner(
         bytes32 slot,
@@ -179,14 +196,13 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Change the key (only slot not initialized)
-     * @param initialKeyHash Initial key hash
-     * @param initialGuardianHash Initial guardian hash
-     * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newRawOwners New owners
-     * @param currentRawOwners current owners
-     * @param keySignature  one of the current owners signature
-     *
+     * @notice Set the key for a slot that is not yet initialized
+     * @param initialKeyHash The initial key hash
+     * @param initialGuardianHash The initial guardian hash
+     * @param initialGuardianSafePeriod The initial guardian safe period
+     * @param newRawOwners The new owners
+     * @param currentRawOwners The current owners
+     * @param keySignature One of the current owners' signature
      */
     function setKeyByOwner(
         bytes32 initialKeyHash,
@@ -201,13 +217,13 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Social recovery, change the key (only slot not initialized)
-     * @param initialKeyHash Initial key hash
-     * @param initialGuardianHash Initial guardian hash
-     * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newRawOwners New Owners
-     * @param rawGuardian `raw guardian data`
-     * @param guardianSignature `signature of initialGuardian`
+     * @notice Set the key for a slot using social recovery
+     * @param initialKeyHash The initial key hash
+     * @param initialGuardianHash The initial guardian hash
+     * @param initialGuardianSafePeriod The initial guardian safe period
+     * @param newRawOwners The new owners
+     * @param rawGuardian Raw guardian data
+     * @param guardianSignature Signature of the initial guardians
      */
     function setKeyByGuardian(
         bytes32 initialKeyHash,
@@ -226,11 +242,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Social recovery, change the key (only slot initialized)
-     * @param slot KeyStore slot
-     * @param newRawOwners New Owners
-     * @param rawGuardian `raw guardian data`
-     * @param guardianSignature `signature of current guardian`
+     * @notice Social recovery to change the key using the guardian's signature
+     * @dev Only works for initialized slots
+     * @param slot The KeyStore slot identifier
+     * @param newRawOwners The new raw owner data
+     * @param rawGuardian The raw data of the guardian
+     * @param guardianSignature The signature of the guardians
      */
     function setKeyByGuardian(
         bytes32 slot,
@@ -246,8 +263,9 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Get all data stored in the slot. See ./interfaces/IKeyStore.sol: struct keyStoreInfo
-     * @param slot KeyStore slot
+     * @notice Fetches all the data stored in a KeyStore slot
+     * @param slot The KeyStore slot identifier
+     * @return _keyStoreInfo The keyStoreInfo struct with all the data from the slot
      */
     function getKeyStoreInfo(bytes32 slot) external view override returns (keyStoreInfo memory _keyStoreInfo) {
         return _getKeyStoreInfo(slot);
@@ -262,25 +280,30 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Get guardian hash from raw guardian data
-     * @param rawGuardian `raw guardian data`
+     * @notice Computes the hash of a raw guardian data
+     * @param rawGuardian The raw data of the guardian
+     * @return guardianHash The computed hash of the provided guardian data
      */
     function getGuardianHash(bytes memory rawGuardian) external pure override returns (bytes32 guardianHash) {
         return _getGuardianHash(rawGuardian);
     }
 
     /**
-     * @dev calculate key hash
+     * @notice Computes the key hash from raw owner data
+     * @param rawOwners The raw owner data
+     * @return key The computed key hash
      */
     function getOwnersKeyHash(bytes memory rawOwners) external pure override returns (bytes32 key) {
         return _getOwnersHash(rawOwners);
     }
 
     /**
-     * @dev Change guardian hash (only slot initialized)
-     * @param slot KeyStore slot
-     * @param newGuardianHash New guardian hash
-     * @param keySignature `signature of current key`
+     * @notice Change the guardian hash for a given KeyStore slot
+     * @dev Only works for initialized slots
+     * @param slot The KeyStore slot identifier
+     * @param newGuardianHash The new guardian hash
+     * @param rawOwners The raw owner data
+     * @param keySignature The signature of the owner key
      */
     function setGuardian(bytes32 slot, bytes32 newGuardianHash, bytes calldata rawOwners, bytes calldata keySignature)
         external
@@ -302,12 +325,14 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Change guardian hash (only slot not initialized)
-     * @param initialKeyHash Initial key hash
-     * @param initialGuardianHash Initial guardian hash
-     * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newGuardianHash New guardian hash
-     * @param keySignature one of the current owners signature
+     * @notice Change the guardian hash for a KeyStore slot using initialization data
+     * @dev for slots that are not initialized
+     * @param initialKeyHash The initial key hash
+     * @param initialGuardianHash The initial guardian hash
+     * @param initialGuardianSafePeriod The initial guardian safe period duration
+     * @param newGuardianHash The new guardian hash
+     * @param rawOwners The raw owner data
+     * @param keySignature A signature from one of the current owners
      */
     function setGuardian(
         bytes32 initialKeyHash,
@@ -331,9 +356,10 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Cancel the pending guardianHash change
-     * @param slot KeyStore slot
-     * @param keySignature `signature of current key`
+     * @notice Cancels a pending change of the guardian hash for a given KeyStore slot
+     * @param slot The KeyStore slot identifier
+     * @param rawOwners The raw owner data
+     * @param keySignature The signature of the current key
      */
     function cancelSetGuardian(bytes32 slot, bytes calldata rawOwners, bytes calldata keySignature) external override {
         _autoSetupGuardian(slot);
@@ -350,10 +376,12 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Change guardian safe period (only slot initialized)
-     * @param slot KeyStore slot
-     * @param newGuardianSafePeriod New guardian safe period
-     * @param keySignature `signature of current key`
+     * @notice Changes the guardian safe period for a given KeyStore slot
+     * @dev using for initialized slots
+     * @param slot The KeyStore slot identifier
+     * @param newGuardianSafePeriod The new duration of the guardian safe period
+     * @param rawOwners The raw owner data
+     * @param keySignature The signature of the current key
      */
     function setGuardianSafePeriod(
         bytes32 slot,
@@ -378,12 +406,14 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Change guardian safe period (only slot not initialized)
-     * @param initialKeyHash Initial key hash
-     * @param initialGuardianHash Initial guardian hash
-     * @param initialGuardianSafePeriod Initial guardian safe period
-     * @param newGuardianSafePeriod New guardian safe period
-     * @param keySignature  one of the current owners signature
+     * @notice Changes the guardian safe period for a KeyStore slot using initialization data
+     * @dev for slots that are not initialized
+     * @param initialKeyHash The initial key hash
+     * @param initialGuardianHash The initial guardian hash
+     * @param initialGuardianSafePeriod The initial guardian safe period duration
+     * @param newGuardianSafePeriod The new duration of the guardian safe period
+     * @param rawOwners The raw owner data
+     * @param keySignature A signature from one of the current owners
      */
     function setGuardianSafePeriod(
         bytes32 initialKeyHash,
@@ -411,9 +441,10 @@ abstract contract BaseKeyStore is IKeyStore, KeyStoreAdapter {
     }
 
     /**
-     * @dev Cancel the pending guardian safe period change
-     * @param slot KeyStore slot
-     * @param keySignature `signature of current key`
+     * @notice Cancels a pending change of the guardian safe period for a given KeyStore slot
+     * @param slot The KeyStore slot identifier
+     * @param rawOwners The raw owner data
+     * @param keySignature The signature of the current key
      */
     function cancelSetGuardianSafePeriod(bytes32 slot, bytes calldata rawOwners, bytes calldata keySignature)
         external

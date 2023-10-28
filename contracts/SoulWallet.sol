@@ -15,7 +15,10 @@ import "./base/FallbackManager.sol";
 import "./base/UpgradeManager.sol";
 import "./base/ValidatorManager.sol";
 
-// Draft
+/// @title SoulWallet
+/// @author  SoulWallet team
+/// @notice logic contract of SoulWallet
+/// @dev Draft contract - may be subject to changes
 contract SoulWallet is
     Initializable,
     ISoulWallet,
@@ -31,6 +34,9 @@ contract SoulWallet is
     ERC1271Handler,
     ValidatorManager
 {
+    /// @notice Creates a new SoulWallet instance
+    /// @param _EntryPoint Address of the entry point
+    /// @param _validator Address of the validator
     constructor(IEntryPoint _EntryPoint, IValidator _validator)
         EntryPointManager(_EntryPoint)
         ValidatorManager(_validator)
@@ -38,6 +44,11 @@ contract SoulWallet is
         _disableInitializers();
     }
 
+    /// @notice Initializes the SoulWallet with given parameters
+    /// @param owners List of owner addresses (passkey public key hash or eoa address)
+    /// @param defalutCallbackHandler Default callback handler address
+    /// @param modules List of module data
+    /// @param plugins List of plugin data
     function initialize(
         bytes32[] calldata owners,
         address defalutCallbackHandler,
@@ -60,10 +71,16 @@ contract SoulWallet is
         }
     }
 
+    /// @notice Gets the address of the entry point
+    /// @return IEntryPoint Address of the entry point
     function entryPoint() public view override(BaseAccount) returns (IEntryPoint) {
         return EntryPointManager._entryPoint();
     }
 
+    /// @notice Validates the user's signature
+    /// @param userOp User operation details
+    /// @param userOpHash Hash of the user operation
+    /// @return validationData Data related to validation process
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
         internal
         virtual
@@ -91,10 +108,15 @@ contract SoulWallet is
         validationData = validationData | ((sigValid && guardHookResult) ? 0 : SIG_VALIDATION_FAILED);
     }
 
+    /// @notice Upgrades the contract to a new implementation
+    /// @param newImplementation Address of the new implementation
+    /// @dev Can only be called from an external module for security reasons
     function upgradeTo(address newImplementation) external onlyModule {
         UpgradeManager._upgradeTo(newImplementation);
     }
 
+    /// @notice Handles the upgrade from an old implementation
+    /// @param oldImplementation Address of the old implementation
     function upgradeFrom(address oldImplementation) external pure override {
         (oldImplementation);
         revert Errors.NOT_IMPLEMENTED(); //Initial version no need data migration

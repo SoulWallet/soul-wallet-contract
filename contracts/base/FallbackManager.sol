@@ -5,15 +5,29 @@ import "../interfaces/IFallbackManager.sol";
 import "../authority/Authority.sol";
 import "../libraries/AccountStorage.sol";
 
+/**
+ * @title FallbackManager
+ * @notice Manages the fallback behavior for the contract
+ * @dev Inherits functionalities from Authority and IFallbackManager
+ */
 abstract contract FallbackManager is Authority, IFallbackManager {
+    /// @notice A payable function that allows the contract to receive ether
     receive() external payable {}
 
+    /**
+     * @dev Sets the address of the fallback handler contract
+     * @param fallbackContract The address of the new fallback handler contract
+     */
     function _setFallbackHandler(address fallbackContract) internal {
         AccountStorage.layout().defaultFallbackContract = fallbackContract;
     }
 
+    /**
+     * @notice Fallback function that forwards all requests to the fallback handler contract
+     * @dev The request is forwarded using a STATICCALL
+     * It ensures that the state of the contract doesn't change even if the fallback function has state-changing operations
+     */
     fallback() external payable {
-        // all requests are forwarded to the fallback contract use STATICCALL
         address fallbackContract = AccountStorage.layout().defaultFallbackContract;
         assembly {
             /* not memory-safe */
@@ -26,6 +40,10 @@ abstract contract FallbackManager is Authority, IFallbackManager {
         }
     }
 
+    /**
+     * @notice Sets the address of the fallback handler and emits the FallbackChanged event
+     * @param fallbackContract The address of the new fallback handler
+     */
     function setFallbackHandler(address fallbackContract) external override onlySelfOrModule {
         _setFallbackHandler(fallbackContract);
         emit FallbackChanged(fallbackContract);

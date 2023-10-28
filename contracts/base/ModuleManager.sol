@@ -8,14 +8,21 @@ import "../interfaces/IPluginManager.sol";
 import "../libraries/AddressLinkedList.sol";
 import "../libraries/SelectorLinkedList.sol";
 
+/**
+ * @title ModuleManager
+ * @notice Manages the modules that are added to, or removed from, the wallet
+ * @dev Inherits functionalities from IModuleManager and Authority
+ */
 abstract contract ModuleManager is IModuleManager, Authority {
     using AddressLinkedList for mapping(address => address);
     using SelectorLinkedList for mapping(bytes4 => bytes4);
 
+    /// @dev Returns the mapping of modules
     function _modulesMapping() private view returns (mapping(address => address) storage modules) {
         modules = AccountStorage.layout().modules;
     }
 
+    /// @dev Returns the mapping of module selectors
     function _moduleSelectorsMapping()
         private
         view
@@ -23,6 +30,7 @@ abstract contract ModuleManager is IModuleManager, Authority {
     {
         moduleSelectors = AccountStorage.layout().moduleSelectors;
     }
+    /// @dev Checks if the sender is an authorized module
 
     function _isAuthorizedModule() internal view override returns (bool) {
         address module = msg.sender;
@@ -32,14 +40,24 @@ abstract contract ModuleManager is IModuleManager, Authority {
         mapping(address => mapping(bytes4 => bytes4)) storage moduleSelectors = _moduleSelectorsMapping();
         return moduleSelectors[module].isExist(msg.sig);
     }
+    /**
+     * @notice Check if a module is authorized
+     * @param module Address of the module
+     * @return A boolean indicating the authorization status
+     */
 
     function isAuthorizedModule(address module) external view override returns (bool) {
         return _modulesMapping().isExist(module);
     }
 
+    /**
+     * @notice Add a new module
+     * @param moduleAndData Byte data containing the module address and initialization data
+     */
     function addModule(bytes calldata moduleAndData) external override onlyModule {
         _addModule(moduleAndData);
     }
+    /// @dev Internal function to add a module
 
     function _addModule(bytes calldata moduleAndData) internal {
         if (moduleAndData.length < 20) {
@@ -62,6 +80,10 @@ abstract contract ModuleManager is IModuleManager, Authority {
         aModule.walletInit(initData);
         emit ModuleAdded(moduleAddress);
     }
+    /**
+     * @notice Remove a module
+     * @param module Address of the module to be removed
+     */
 
     function removeModule(address module) external override onlyModule {
         mapping(address => address) storage modules = _modulesMapping();
@@ -76,6 +98,11 @@ abstract contract ModuleManager is IModuleManager, Authority {
             emit ModuleRemovedWithError(module);
         }
     }
+    /**
+     * @notice List all the modules and their associated selectors
+     * @return modules An array of module addresses
+     * @return selectors A two-dimensional array of selectors
+     */
 
     function listModule() external view override returns (address[] memory modules, bytes4[][] memory selectors) {
         mapping(address => address) storage _modules = _modulesMapping();
@@ -114,6 +141,12 @@ abstract contract ModuleManager is IModuleManager, Authority {
             }
         }
     }
+    /**
+     * @notice Execute a transaction from a module
+     * @param to Address to which the transaction should be executed
+     * @param value Amount of ETH (in wei) to be sent
+     * @param data Transaction data
+     */
 
     function executeFromModule(address to, uint256 value, bytes memory data) external override onlyModule {
         if (to == address(this)) revert Errors.MODULE_EXECUTE_FROM_MODULE_RECURSIVE();

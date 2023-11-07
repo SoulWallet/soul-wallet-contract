@@ -35,7 +35,7 @@ contract WebAuthnTest is Test {
             hex"2c226368616c6c656e6765223a22222c226f726967696e223a22687474703a2f"
             hex"2f6c6f63616c686f73743a35353030222c2263726f73734f726967696e223a66" hex"616c73657d";
 
-        bytes32 publicKey = testWebAuthn.p256RecoverTest(userOpHash, sig);
+        bytes32 publicKey = testWebAuthn.recoverTest(userOpHash, sig);
         assertEq(publicKey, expected);
     }
 
@@ -58,7 +58,7 @@ contract WebAuthnTest is Test {
             hex"0500000000222c226f726967696e223a22687474703a2f2f6c6f63616c686f73"
             hex"743a35353030222c2263726f73734f726967696e223a66616c73657d";
 
-        bytes32 publicKey = testWebAuthn.p256RecoverTest(userOpHash, sig);
+        bytes32 publicKey = testWebAuthn.recoverTest(userOpHash, sig);
         assertEq(publicKey, expected);
     }
 
@@ -145,7 +145,7 @@ contract WebAuthnTest is Test {
             // 8. clientDataSuffix:  string memory clientDataSuffix = "\",\"origin\":\"http://localhost:5500\",\"crossOrigin\":false}";
             hex"222c226f726967696e223a22687474703a2f2f6c6f63616c686f73743a35353030222c2263726f73734f726967696e223a66616c73657d";
 
-        bytes32 publicKey = testWebAuthn.rs256VerifyTest(userOpHash, sig);
+        bytes32 publicKey = testWebAuthn.recoverTest(userOpHash, sig);
         assertEq(publicKey, expected);
     }
 }

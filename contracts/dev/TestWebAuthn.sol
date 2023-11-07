@@ -134,18 +134,10 @@ contract TestWebAuthn {
         require(success, "WebAuthn-RS256 verifySignature failed");
     }
 
-    function p256RecoverTest(bytes32 userOpHash, bytes calldata packedSignature) public view returns (bytes32) {
+    function recoverTest(bytes32 userOpHash, bytes calldata packedSignature) public view returns (bytes32) {
         bytes32 publicKey = WebAuthn.recover(userOpHash, packedSignature);
         if (publicKey == 0) {
             revert("WebAuthn-p256 recover failed");
-        }
-        return publicKey;
-    }
-
-    function rs256VerifyTest(bytes32 userOpHash, bytes calldata packedSignature) public view returns (bytes32) {
-        bytes32 publicKey = WebAuthn.recover_rs256(userOpHash, packedSignature);
-        if (publicKey == 0) {
-            revert("WebAuthn-rs256 recover failed");
         }
         return publicKey;
     }

@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {Base64Url} from "./Base64Url.sol";
 import {FCL_Elliptic_ZZ} from "./FCL_elliptic.sol";
 import {RS256Verify} from "./RS256Verify.sol";
-import "forge-std/Test.sol";
 
 library WebAuthn {
     /**
@@ -177,8 +176,8 @@ library WebAuthn {
             let calldataOffset := packedSignature.offset
             let lengthData :=
                 shr(
-                    calldataload(calldataOffset),
-                    0xd0 /* 8*(32-6), exponentLength+authenticatorDataLength+clientDataPrefixLength */
+                    0xd0, // 8*(32-6), exponentLength+authenticatorDataLength+clientDataPrefixLength
+                    calldataload(calldataOffset)
                 )
             exponentLength := shr(0x20, /* 4*8 */ lengthData)
             authenticatorDataLength := and(shr(0x10, /* 2*8 */ lengthData), 0xffff)
@@ -214,18 +213,6 @@ library WebAuthn {
         bytes calldata clientDataSuffix;
 
         (n, signature, authenticatorData, clientDataPrefix, clientDataSuffix) = decodeRS256Signature(packedSignature);
-        console2.log("n:");
-        console2.logBytes(n);
-        console2.log("signature:");
-        console2.logBytes(signature);
-        console2.log("authenticatorData:");
-        console2.logBytes(authenticatorData);
-        console2.log("clientDataPrefix:");
-        console2.logBytes(clientDataPrefix);
-        console2.log("clientDataSuffix:");
-        console2.logBytes(clientDataSuffix);
-        console2.log("userOpHash:");
-        console2.logBytes32(userOpHash);
 
         bytes memory challengeBase64 = bytes(Base64Url.encode(bytes.concat(userOpHash)));
         bytes memory clientDataJSON;

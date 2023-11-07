@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Base64Url} from "./Base64Url.sol";
 import {FCL_Elliptic_ZZ} from "./FCL_elliptic.sol";
-import {RsaVerify} from "./RsaVerify.sol";
+import {RS256Verify} from "./RS256Verify.sol";
 import "forge-std/Test.sol";
 
 library WebAuthn {
@@ -123,7 +123,7 @@ library WebAuthn {
     /**
      * @dev Recover public key from signature
      */
-    function recover_p256(bytes32 hash, bytes calldata packedSignature) internal view returns (bytes32) {
+    function recover_p256(bytes32 userOpHash, bytes calldata packedSignature) internal view returns (bytes32) {
         uint256 r;
         uint256 s;
         uint8 v;
@@ -131,7 +131,7 @@ library WebAuthn {
         bytes calldata clientDataPrefix;
         bytes calldata clientDataSuffix;
         (r, s, v, authenticatorData, clientDataPrefix, clientDataSuffix) = decodeP256Signature(packedSignature);
-        bytes memory challengeBase64 = bytes(Base64Url.encode(bytes.concat(hash)));
+        bytes memory challengeBase64 = bytes(Base64Url.encode(bytes.concat(userOpHash)));
         bytes memory clientDataJSON;
         if (clientDataPrefix.length == 0) {
             clientDataJSON = bytes.concat(bytes(ClIENTDATA_PREFIX), challengeBase64, clientDataSuffix);
@@ -155,6 +155,9 @@ library WebAuthn {
         )
     {
         /*
+
+            Note: currently use a fixed public exponent=0x010001. This is enough for the currently WebAuthn implementation.
+            
             signature layout:
             1. n(exponent) length (2 byte max to 8192 bits key)
             2. authenticatorData length (2 byte max 65535)
@@ -203,35 +206,43 @@ library WebAuthn {
      * @dev Recover public key from signature
      * in current version, only support e=65537
      */
-    function recover_rs256(bytes32 hash, bytes calldata packedSignature) internal view returns (bytes32) {
+    function recover_rs256(bytes32 userOpHash, bytes calldata packedSignature) internal view returns (bytes32) {
         bytes calldata n;
         bytes calldata signature;
         bytes calldata authenticatorData;
         bytes calldata clientDataPrefix;
         bytes calldata clientDataSuffix;
-        // public exponent
-        bytes memory e = hex"010001";
 
         (n, signature, authenticatorData, clientDataPrefix, clientDataSuffix) = decodeRS256Signature(packedSignature);
-        bytes memory challengeBase64 = bytes(Base64Url.encode(bytes.concat(hash)));
+        console2.log("n:");
+        console2.logBytes(n);
+        console2.log("signature:");
+        console2.logBytes(signature);
+        console2.log("authenticatorData:");
+        console2.logBytes(authenticatorData);
+        console2.log("clientDataPrefix:");
+        console2.logBytes(clientDataPrefix);
+        console2.log("clientDataSuffix:");
+        console2.logBytes(clientDataSuffix);
+        console2.log("userOpHash:");
+        console2.logBytes32(userOpHash);
+
+        bytes memory challengeBase64 = bytes(Base64Url.encode(bytes.concat(userOpHash)));
         bytes memory clientDataJSON;
         if (clientDataPrefix.length == 0) {
             clientDataJSON = bytes.concat(bytes(ClIENTDATA_PREFIX), challengeBase64, clientDataSuffix);
         } else {
             clientDataJSON = bytes.concat(clientDataPrefix, challengeBase64, clientDataSuffix);
         }
-        console.log("!!!!!!!! 1");
-        console.log("challengeBase64 len:", challengeBase64.length);
-        console.log("clientDataSuffix len:", clientDataSuffix.length);
-        console.logString(string(clientDataJSON));
         bytes32 clientHash = sha256(clientDataJSON);
+        bytes32 messageHash = sha256(bytes.concat(authenticatorData, clientHash));
 
-        console.log("!!!!!!!! 2");
-        console.logBytes(bytes.concat(authenticatorData, clientHash));
-        bytes32 message = sha256(bytes.concat(authenticatorData, clientHash));
-        bool success = RsaVerify.pkcs1Sha256(message, signature, e, n);
+        // Note: currently use a fixed public exponent=0x010001. This is enough for the currently WebAuthn implementation.
+        bytes memory e = hex"0000000000000000000000000000000000000000000000000000000000010001";
+
+        bool success = RS256Verify.RSASSA_PSS_VERIFY(n, e, messageHash, signature);
         if (success) {
-            return bytes32(uint256(keccak256(abi.encodePacked(e, n))));
+            return keccak256(abi.encodePacked(e, n));
         } else {
             return bytes32(0);
         }

@@ -124,6 +124,11 @@ contract ERC20Paymaster is BasePaymaster {
         return (abi.encode(sender, token, costOfPost, exchangeRate), 0);
     }
 
+    /*
+    * @notice This function is currently in the testing phase.
+    * @dev The Paymaster is potentially vulnerable to attacks, which poses a risk of reputation loss.
+    * The approval check in this context does not guarantee that the Paymaster will successfully receive the corresponding tokens via transferFrom in subsequent _postOp operations.
+    */
     function _validateConstructor(UserOperation calldata userOp, address token, uint256 tokenRequiredPreFund)
         internal
         view
@@ -131,35 +136,45 @@ contract ERC20Paymaster is BasePaymaster {
         address factory = address(bytes20(userOp.initCode));
         require(factory == WALLET_FACTORY, "Paymaster: unknown wallet factory");
         require(
-            bytes4(userOp.callData) == bytes4(0x18dfb3c7 /* 0x18dfb3c7 executeBatch(address[],bytes[]) */ ),
+            /*
+            * 0x18dfb3c7 executeBatch(address[],bytes[])
+            * 0x47e1da2a executeBatch(address[],uint256[],bytes[])
+            */
+            bytes4(userOp.callData) == bytes4(0x47e1da2a) || bytes4(userOp.callData) == bytes4(0x18dfb3c7),
             "invalid callData"
         );
-        (address[] memory dest, bytes[] memory func) = abi.decode(userOp.callData[4:], (address[], bytes[]));
-        require(dest.length == func.length, "Paymaster: invalid callData length");
+        address[] memory dest;
+        bytes[] memory func;
+        if (bytes4(userOp.callData) == bytes4(0x47e1da2a)) {
+            (dest,, func) = abi.decode(userOp.callData[4:], (address[], uint256[], bytes[]));
+        } else {
+            (dest, func) = abi.decode(userOp.callData[4:], (address[], bytes[]));
+        }
 
+        require(dest.length == func.length, "Paymaster: invalid callData length");
         address _destAddress = address(0);
+        bool checkAllowance = false;
         for (uint256 i = 0; i < dest.length; i++) {
             address destAddr = dest[i];
             require(isSupportToken(token), "Paymaster: token not support");
-            if (destAddr == token) {
+            // check it contains approve operation, 0x095ea7b3 approve(address,uint256)
+            if (destAddr == token && bytes4(func[i]) == bytes4(0x095ea7b3)) {
                 (address spender, uint256 amount) = _decodeApprove(func[i]);
                 require(spender == address(this), "Paymaster: invalid spender");
-                require(amount >= tokenRequiredPreFund, "Paymaster: snot enough approve");
+                require(amount >= tokenRequiredPreFund, "Paymaster: not enough approve");
+                checkAllowance = true;
+                break;
             }
-            require(destAddr > _destAddress, "Paymaster: duplicate");
-            _destAddress = destAddr;
         }
+        require(checkAllowance, "no approve found");
         // callGasLimit
         uint256 callGasLimit = dest.length * _SAFE_APPROVE_GAS_COST;
         require(userOp.callGasLimit >= callGasLimit, "Paymaster: gas too low for postOp");
     }
 
     function _decodeApprove(bytes memory func) private pure returns (address spender, uint256 value) {
-        // 0x095ea7b3 approve(address,uint256)
         // 0x095ea7b3   address  uint256
         // ____4_____|____32___|___32__
-
-        require(bytes4(func) == bytes4(0x095ea7b3), "invalid approve func");
         assembly {
             spender := mload(add(func, 36)) // 32 + 4
             value := mload(add(func, 68)) // 32 + 4 +32

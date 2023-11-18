@@ -102,10 +102,14 @@ contract CreateWalletEntryPointPaymaster is Script {
 
         tokenAddressList[0] = address(payToken);
 
+        uint256[] memory values = new uint256[](1);
+        values[0] = 0;
+
         bytes[] memory tokenCallData = new bytes[](1);
         tokenCallData[0] = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 1000e6);
-        bytes memory callData =
-            abi.encodeWithSignature("executeBatch(address[],bytes[])", tokenAddressList, tokenCallData);
+        bytes memory callData = abi.encodeWithSignature(
+            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
+        );
         bytes memory paymasterAndData =
             abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(payToken), uint256(1000e6)));
 

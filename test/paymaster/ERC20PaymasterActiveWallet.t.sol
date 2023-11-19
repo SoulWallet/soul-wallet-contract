@@ -72,7 +72,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         vm.stopPrank();
     }
 
-    function testActiveWalletUsingPaymaster() external {
+    function test_ActiveWalletUsingPaymaster() external {
         address sender;
         uint256 nonce;
         bytes memory initCode;
@@ -119,9 +119,14 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         address[] memory tokenAddressList = new address[](1);
         tokenAddressList[0] = address(token);
 
+        uint256[] memory values = new uint256[](1);
+        values[0] = 0;
+
         bytes[] memory tokenCallData = new bytes[](1);
         tokenCallData[0] = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 1000e6);
-        callData = abi.encodeWithSignature("executeBatch(address[],bytes[])", tokenAddressList, tokenCallData);
+        callData = abi.encodeWithSignature(
+            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
+        );
         paymasterAndData =
             abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
 
@@ -143,5 +148,84 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         bundler.post(entryPoint, userOperation);
         soulWallet = ISoulWallet(sender);
         assertEq(soulWallet.isOwner(ownerAddr.toBytes32()), true);
+    }
+
+    function test_ActiveWalletWithoutApprove() external {
+        address sender;
+        uint256 nonce;
+        bytes memory initCode;
+        bytes memory callData;
+        uint256 callGasLimit;
+        uint256 verificationGasLimit;
+        uint256 preVerificationGas;
+        uint256 maxFeePerGas;
+        uint256 maxPriorityFeePerGas;
+        bytes memory paymasterAndData;
+        bytes memory signature;
+
+        nonce = 0;
+
+        (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
+        TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
+        TrustedPluginManager trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
+        SecurityControlModule securityControlModule =
+            new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+
+        bytes[] memory modules = new bytes[](1);
+        modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
+        bytes[] memory plugins = new bytes[](0);
+
+        bytes32 salt = bytes32(0);
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = ownerAddr.toBytes32();
+        DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
+        bytes memory initializer = abi.encodeWithSignature(
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
+        );
+        sender = soulWalletFactory.getWalletAddress(initializer, salt);
+        // send wallet with testtoken
+        token.sudoMint(address(sender), 1000e6);
+        bytes memory soulWalletFactoryCall = abi.encodeWithSignature("createWallet(bytes,bytes32)", initializer, salt);
+        initCode = abi.encodePacked(address(soulWalletFactory), soulWalletFactoryCall);
+
+        verificationGasLimit = 2000000;
+        preVerificationGas = 500000;
+        maxFeePerGas = 10 gwei;
+        maxPriorityFeePerGas = 10 gwei;
+        callGasLimit = 3000000;
+
+        address[] memory tokenAddressList = new address[](1);
+        tokenAddressList[0] = address(token);
+
+        uint256[] memory values = new uint256[](1);
+        values[0] = 0;
+
+        bytes[] memory tokenCallData = new bytes[](1);
+        tokenCallData[0] = abi.encodeWithSignature("allowance(address,uint256)", address(paymaster), 1000e6);
+        callData = abi.encodeWithSignature(
+            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
+        );
+        paymasterAndData =
+            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
+
+        UserOperation memory userOperation = UserOperation(
+            sender,
+            nonce,
+            initCode,
+            callData,
+            callGasLimit,
+            verificationGasLimit,
+            preVerificationGas,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            paymasterAndData,
+            signature
+        );
+
+        userOperation.signature = signUserOp(userOperation, ownerKey);
+        vm.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("FailedOp(uint256,string)")), 0, "AA33 reverted: no approve found")
+        );
+        bundler.post(entryPoint, userOperation);
     }
 }

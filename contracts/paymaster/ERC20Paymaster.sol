@@ -29,6 +29,9 @@ contract ERC20Paymaster is BasePaymaster {
     uint256 public constant PRICE_DENOMINATOR = 1e6;
     // calculated cost of the postOp
     uint256 public constant COST_OF_POST = 40000;
+    // This is the threshold check in the active wallet constructor for the maximum sponsor fund.
+    // It prevents a malicious user from draining the Paymaster's deposit in a single user operation.
+    uint256 public constant MAX_ALLOW_SPONSOR_FUND_ACTIVE_WALLET = 0.1 ether;
 
     // Trusted token approve gas cost
     uint256 private constant _SAFE_APPROVE_GAS_COST = 50000;
@@ -85,7 +88,6 @@ contract ERC20Paymaster is BasePaymaster {
 
     function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32, uint256 requiredPreFund)
         internal
-        view
         override
         returns (bytes memory context, uint256 validationResult)
     {
@@ -94,6 +96,8 @@ contract ERC20Paymaster is BasePaymaster {
         address sender = userOp.getSender();
 
         // paymasterAndData: [paymaster, token, maxCost]
+        // The length check prevents the user from add exceeding calldata, which could drain paymaster deposits in entrypoint
+        require(userOp.paymasterAndData.length == 84, "invalid data length");
         (address token, uint256 maxCost) = abi.decode(userOp.paymasterAndData[20:], (address, uint256));
         require(isSupportToken(token), "Paymaster: token not support");
         IERC20Metadata ERC20Token = IERC20Metadata(token);
@@ -112,16 +116,17 @@ contract ERC20Paymaster is BasePaymaster {
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
 
         if (userOp.initCode.length != 0) {
+            // This operation prevents a malicious user from draining the Paymaster's deposit in a single active wallet user operation.
+            // However, it doesn't prevent a user from sending multiple active wallet user operations to drain the Paymaster's deposit.
+            // It does, however, add overhead for the attacker.
+            require(requiredPreFund < MAX_ALLOW_SPONSOR_FUND_ACTIVE_WALLET, "Paymaster: maxCost too high");
+            require(ERC20Token.balanceOf(sender) >= tokenRequiredPreFund, "Paymaster: not enough balance");
             _validateConstructor(userOp, token, tokenRequiredPreFund);
         } else {
-            require(
-                ERC20Token.allowance(sender, address(this)) >= tokenRequiredPreFund, "Paymaster: not enough allowance"
-            );
+            ERC20Token.safeTransferFrom(sender, address(this), tokenRequiredPreFund);
         }
 
-        require(ERC20Token.balanceOf(sender) >= tokenRequiredPreFund, "Paymaster: not enough balance");
-
-        return (abi.encode(sender, token, costOfPost, exchangeRate), 0);
+        return (abi.encode(sender, token, costOfPost, exchangeRate, tokenRequiredPreFund), 0);
     }
 
     /*
@@ -152,11 +157,10 @@ contract ERC20Paymaster is BasePaymaster {
         }
 
         require(dest.length == func.length, "Paymaster: invalid callData length");
-        address _destAddress = address(0);
+        require(isSupportToken(token), "Paymaster: token not support");
         bool checkAllowance = false;
         for (uint256 i = 0; i < dest.length; i++) {
             address destAddr = dest[i];
-            require(isSupportToken(token), "Paymaster: token not support");
             // check it contains approve operation, 0x095ea7b3 approve(address,uint256)
             if (destAddr == token && bytes4(func[i]) == bytes4(0x095ea7b3)) {
                 (address spender, uint256 amount) = _decodeApprove(func[i]);
@@ -185,12 +189,14 @@ contract ERC20Paymaster is BasePaymaster {
         if (mode == PostOpMode.postOpReverted) {
             return; // Do nothing here to not revert the whole bundle and harm reputation
         }
-        (address sender, address payable token, uint256 costOfPost, uint256 exchangeRate) =
-            abi.decode(context, (address, address, uint256, uint256));
+        (address sender, address payable token, uint256 costOfPost, uint256 exchangeRate, uint256 tokenRequiredPreFund)
+        = abi.decode(context, (address, address, uint256, uint256, uint256));
         uint256 tokenRequiredFund =
             (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * exchangeRate / (1e18 * PRICE_DENOMINATOR);
-
-        IERC20Metadata(token).safeTransferFrom(sender, address(this), tokenRequiredFund);
+        // refund unsed precharge token
+        if (tokenRequiredPreFund > tokenRequiredFund) {
+            IERC20Metadata(token).safeTransfer(sender, tokenRequiredPreFund - tokenRequiredFund);
+        }
         // update oracle
         uint192 lasestTokenPrice = fetchPrice(supportedToken[token].tokenOracle);
         supportedToken[token].previousPrice = lasestTokenPrice;

@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "@account-abstraction/contracts/core/EntryPoint.sol";
-import "@source/dev/Tokens/TokenERC20.sol";
+import "@source/dev/tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "./DeployHelper.sol";
 import "@source/paymaster/ERC20Paymaster.sol";

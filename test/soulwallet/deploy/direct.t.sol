@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
@@ -10,6 +9,7 @@ import "@source/abstract/DefaultCallbackHandler.sol";
 
 contract DeployDirectTest is Test {
     using TypeConversion for address;
+
     function setUp() public {}
 
     error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);

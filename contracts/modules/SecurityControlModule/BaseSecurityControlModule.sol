@@ -1,15 +1,15 @@
+
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import "../BaseModule.sol";
 import "./IBaseSecurityControlModule.sol";
-import "../../trustedContractManager/ITrustedContractManager.sol";
 import "../../libraries/TypeConversion.sol";
 
 // refer to: https://solidity-by-example.org/app/time-lock/
 
 abstract contract BaseSecurityControlModule is IBaseSecurityControlModule, BaseModule {
-    uint256 public constant MIN_DELAY = 1 days;
+    uint256 public constant MIN_DELAY = 1 seconds;
     uint256 public constant MAX_DELAY = 14 days;
 
     using TypeConversion for address;

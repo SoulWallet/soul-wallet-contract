@@ -2,19 +2,15 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "@source/SoulWalletFactory.sol";
+import "@source/factory/SoulWalletFactory.sol";
 import "@source/SoulWallet.sol";
 import "@source/keystore/L1/KeyStore.sol";
-import "@account-abstraction/contracts/core/EntryPoint.sol";
-import "./DeployHelper.sol";
+import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@source/modules/keystore/KeyStoreModule.sol";
-import "@source/modules/keystore/OptimismKeyStoreProofModule/OpKnownStateRootWithHistory.sol";
-import "@source/modules/keystore/KeystoreProof.sol";
-import {NetWorkLib} from "./DeployHelper.sol";
-import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import "@source/libraries/TypeConversion.sol";
+import {Solenv} from "@solenv/Solenv.sol";
+import {Execution} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
 
 contract CreateWalletEntryPointPaymaster is Script {
     using ECDSA for bytes32;
@@ -38,19 +34,18 @@ contract CreateWalletEntryPointPaymaster is Script {
     address keystoreModuleAddress;
 
     address defaultCallbackHandler;
+    address soulWalletDefaultValidator;
 
     SoulWalletFactory soulwalletFactory;
 
     address payable soulwalletAddress;
     KeyStore keystoreContract;
 
-    OpKnownStateRootWithHistory opKnownStateRootWithHistory;
-
-    KeystoreProof keystoreProofContract;
     bytes emptyBytes;
-    EntryPoint public entrypoint = EntryPoint(payable(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789));
+    EntryPoint public entryPoint = EntryPoint(payable(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789));
 
     function run() public {
+        Solenv.config(".env_backend");
         // wallet signer info
         walletSingerPrivateKey = vm.envUint("WALLET_SIGNGER_NEW_PRIVATE_KEY");
         walletSigner = vm.addr(walletSingerPrivateKey);
@@ -63,13 +58,14 @@ contract CreateWalletEntryPointPaymaster is Script {
     }
 
     function createWallet() private {
-        bytes32 salt = bytes32(uint256(4));
+        bytes32 salt = bytes32(uint256(12));
         bytes[] memory modules = new bytes[](2);
         // security control module setup
-        securityControlModuleAddress = loadEnvContract("SECURITY_CONTROL_MODULE_ADDRESS");
+        securityControlModuleAddress = loadEnvContract("SecurityControlModule");
+        soulWalletDefaultValidator = loadEnvContract("SoulWalletDefaultValidator");
         modules[0] = abi.encodePacked(securityControlModuleAddress, abi.encode(uint64(2 days)));
         // keystore module setup
-        keystoreModuleAddress = loadEnvContract("KEYSTORE_MODULE_ADDRESS");
+        keystoreModuleAddress = loadEnvContract("KeyStoreModuleProxy");
         address[] memory guardians = new address[](1);
         guardians[0] = guardianAddress;
         bytes memory rawGuardian = abi.encode(guardians, guardianThreshold, 0);
@@ -79,39 +75,32 @@ contract CreateWalletEntryPointPaymaster is Script {
 
         bytes memory keystoreModuleInitData =
             abi.encode(keccak256(abi.encode(owners)), initialGuardianHash, initialGuardianSafePeriod);
+
         modules[1] = abi.encodePacked(keystoreModuleAddress, keystoreModuleInitData);
 
-        bytes[] memory plugins = new bytes[](0);
+        bytes[] memory hooks = new bytes[](0);
 
-        defaultCallbackHandler = loadEnvContract("DEFAULT_CALLBACK_HANDLER_ADDRESS");
-
+        defaultCallbackHandler = loadEnvContract("DefaultCallbackHandler");
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
         );
-        soulwalletFactory = SoulWalletFactory(loadEnvContract("SOULWALLET_FACTORY_ADDRESS"));
+        soulwalletFactory = SoulWalletFactory(loadEnvContract("SoulwalletFactory"));
         address cacluatedAddress = soulwalletFactory.getWalletAddress(initializer, salt);
 
         bytes memory soulWalletFactoryCall = abi.encodeWithSignature("createWallet(bytes,bytes32)", initializer, salt);
         bytes memory initCode = abi.encodePacked(address(soulwalletFactory), soulWalletFactoryCall);
         console.log("cacluatedAddress", cacluatedAddress);
 
-        address[] memory tokenAddressList = new address[](1);
-
         address payToken = loadEnvContract("PAYTOKEN_ADDRESS");
-        address paymaster = loadEnvContract("PAYMASTER_ADDRESS");
+        address paymaster = loadEnvContract("Paymaster");
 
-        tokenAddressList[0] = address(payToken);
-
-        uint256[] memory values = new uint256[](1);
-        values[0] = 0;
-
-        bytes[] memory tokenCallData = new bytes[](1);
-        tokenCallData[0] = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 1000e6);
-        bytes memory callData = abi.encodeWithSignature(
-            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
-        );
+        Execution[] memory executions = new Execution[](1);
+        executions[0].target = address(payToken);
+        executions[0].value = 0;
+        executions[0].data = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 10000e6);
+        bytes memory callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
         bytes memory paymasterAndData =
-            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(payToken), uint256(1000e6)));
+            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(payToken), uint256(10000e6)));
 
         UserOperation[] memory ops = new UserOperation[](1);
 
@@ -123,12 +112,13 @@ contract CreateWalletEntryPointPaymaster is Script {
             callGasLimit: 5000000,
             verificationGasLimit: 1000000,
             preVerificationGas: 500000,
-            maxFeePerGas: 10 gwei,
-            maxPriorityFeePerGas: 10 gwei,
+            maxFeePerGas: 10000,
+            maxPriorityFeePerGas: 10000,
             paymasterAndData: paymasterAndData,
             signature: hex""
         });
-        userOperation.signature = signUserOp(userOperation, walletSigner, walletSingerPrivateKey);
+        userOperation.signature = signUserOp(userOperation, walletSingerPrivateKey, soulWalletDefaultValidator);
+        logUserOp(userOperation);
 
         ops[0] = userOperation;
 
@@ -136,9 +126,9 @@ contract CreateWalletEntryPointPaymaster is Script {
         console.log("bundelr address ", vm.addr(bundlerSinger));
         vm.startBroadcast(bundlerSinger);
         logUserOp(userOperation);
-        console.log("entrypoint", address(entrypoint));
+        console.log("entryPoint", address(entryPoint));
         console.log("beneficiary ", vm.addr(bundlerSinger));
-        entrypoint.handleOps(ops, payable(vm.addr(bundlerSinger)));
+        entryPoint.handleOps(ops, payable(vm.addr(bundlerSinger)));
     }
 
     function logUserOp(UserOperation memory op) private view {
@@ -164,16 +154,19 @@ contract CreateWalletEntryPointPaymaster is Script {
         console.logBytes(op.signature);
     }
 
-    function signUserOp(UserOperation memory op, address addr, uint256 key)
+    function signUserOp(UserOperation memory op, uint256 _key, address _validator)
         public
         view
         returns (bytes memory signature)
     {
-        bytes32 hash = entrypoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, hash.toEthSignedMessageHash());
-        require(addr == ECDSA.recover(hash.toEthSignedMessageHash(), v, r, s));
-        signature = abi.encodePacked(r, s, v);
-        require(addr == ECDSA.recover(hash.toEthSignedMessageHash(), signature));
+        bytes32 hash = entryPoint.getUserOpHash(op);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        bytes memory opSig;
+        bytes memory signatureData = abi.encodePacked(r, s, v);
+        uint8 signType = 0;
+        bytes4 signatureLength = bytes4(uint32(1 + signatureData.length));
+        opSig = abi.encodePacked(_validator, signatureLength, signType, signatureData);
+        signature = opSig;
     }
 
     function loadEnvContract(string memory label) private view returns (address) {

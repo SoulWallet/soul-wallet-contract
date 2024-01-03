@@ -1,25 +1,10 @@
 [profile.default]
-src = 'contracts'
+src = "contracts"
 test = 'test'
 out = "out"
 libs = ["lib"]
-gas_reports = [
-    "EntryPoint",
-    "KeyStore",
-    "SoulWalletFactory",
-    "SoulWalletProxy",
-    "SoulWallet",
-    "SecurityControlModule",
-    "SocialRecoveryModule",
-    "TrustedModuleManager",
-    "TrustedPluginManager",
-    "Dailylimit",
-    "Upgrade",
-    "ERC20Paymaster",
-    "Simple2FA"
-]
-# gas_reports_ignore = ["dev","test"]
-solc = "0.8.21"
+
+solc = "0.8.23"
 optimizer = true
 optimizer_runs = 100000
 via_ir = true
@@ -37,4 +22,4 @@ optimism = "${OPTIMISM_RPC_URL}"
 goerli = { key = "${GOERLI_SCAN_API_KEY}", chain = "goerli" }
 optimismgoerli = { key = "${OPTIMISM_GOERLI_SCAN_API_KEY}", chain = "optimism-goerli" }
 
-# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

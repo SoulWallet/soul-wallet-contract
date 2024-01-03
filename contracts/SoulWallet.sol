@@ -1,118 +1,142 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@account-abstraction/contracts/core/BaseAccount.sol";
-import "./interfaces/ISoulWallet.sol";
-import "./base/EntryPointManager.sol";
-import "./base/ExecutionManager.sol";
-import "./base/PluginManager.sol";
-import "./base/ModuleManager.sol";
-import "./base/OwnerManager.sol";
-import "./helper/SignatureValidator.sol";
-import "./handler/ERC1271Handler.sol";
-import "./base/FallbackManager.sol";
-import "./base/UpgradeManager.sol";
-import "./base/ValidatorManager.sol";
+import {IAccount, UserOperation} from "@soulwallet-core/contracts/interface/IAccount.sol";
+import {EntryPointManager} from "@soulwallet-core/contracts/base/EntryPointManager.sol";
+import {FallbackManager} from "@soulwallet-core/contracts/base/FallbackManager.sol";
+import {StandardExecutor} from "@soulwallet-core/contracts/base/StandardExecutor.sol";
+import {ValidatorManager} from "@soulwallet-core/contracts/base/ValidatorManager.sol";
+import {SignatureDecoder} from "@soulwallet-core/contracts/utils/SignatureDecoder.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {Errors} from "./libraries/Errors.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./abstract/ERC1271Handler.sol";
+import {SoulWalletOwnerManager} from "./abstract/SoulWalletOwnerManager.sol";
+import {SoulWalletModuleManager} from "./abstract/SoulWalletModuleManager.sol";
+import {SoulWalletHookManager} from "./abstract/SoulWalletHookManager.sol";
+import {SoulWalletUpgradeManager} from "./abstract/SoulWalletUpgradeManager.sol";
 
-/// @title SoulWallet
-/// @author  SoulWallet team
-/// @notice logic contract of SoulWallet
-/// @dev Draft contract - may be subject to changes
 contract SoulWallet is
     Initializable,
-    ISoulWallet,
-    BaseAccount,
+    IAccount,
+    IERC1271,
     EntryPointManager,
-    OwnerManager,
-    SignatureValidator,
-    PluginManager,
-    ModuleManager,
-    UpgradeManager,
-    ExecutionManager,
+    SoulWalletOwnerManager,
+    SoulWalletModuleManager,
+    SoulWalletHookManager,
+    StandardExecutor,
+    ValidatorManager,
     FallbackManager,
-    ERC1271Handler,
-    ValidatorManager
+    SoulWalletUpgradeManager,
+    ERC1271Handler
 {
-    /// @notice Creates a new SoulWallet instance
-    /// @param _EntryPoint Address of the entry point
-    /// @param _validator Address of the validator
-    constructor(IEntryPoint _EntryPoint, IValidator _validator)
-        EntryPointManager(_EntryPoint)
-        ValidatorManager(_validator)
-    {
+    address internal immutable _DEFAULT_VALIDATOR;
+
+    constructor(address _entryPoint, address defaultValidator) EntryPointManager(_entryPoint) {
+        _DEFAULT_VALIDATOR = defaultValidator;
         _disableInitializers();
     }
 
-    /// @notice Initializes the SoulWallet with given parameters
-    /// @param owners List of owner addresses (passkey public key hash or eoa address)
-    /// @param defalutCallbackHandler Default callback handler address
-    /// @param modules List of module data
-    /// @param plugins List of plugin data
     function initialize(
         bytes32[] calldata owners,
         address defalutCallbackHandler,
         bytes[] calldata modules,
-        bytes[] calldata plugins
+        bytes[] calldata hooks
     ) external initializer {
         _addOwners(owners);
         _setFallbackHandler(defalutCallbackHandler);
+        _installValidator(_DEFAULT_VALIDATOR, hex"");
         for (uint256 i = 0; i < modules.length;) {
             _addModule(modules[i]);
             unchecked {
                 i++;
             }
         }
-        for (uint256 i = 0; i < plugins.length;) {
-            _addPlugin(plugins[i]);
+        for (uint256 i = 0; i < hooks.length;) {
+            _installHook(hooks[i]);
             unchecked {
                 i++;
             }
         }
     }
 
-    /// @notice Gets the address of the entry point
-    /// @return IEntryPoint Address of the entry point
-    function entryPoint() public view override(BaseAccount) returns (IEntryPoint) {
-        return EntryPointManager._entryPoint();
+    function _uninstallValidator(address validator) internal override {
+        require(validator != _DEFAULT_VALIDATOR, "can't uninstall default validator");
+        super._uninstallValidator(validator);
     }
 
-    /// @notice Validates the user's signature
-    /// @param userOp User operation details
-    /// @param userOpHash Hash of the user operation
-    /// @return validationData Data related to validation process
-    function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
+    function isValidSignature(bytes32 _hash, bytes calldata signature)
+        public
+        view
+        override
+        returns (bytes4 magicValue)
+    {
+        bytes32 datahash = _encodeRawHash(_hash);
+
+        (address validator, bytes calldata validatorSignature, bytes calldata hookSignature) =
+            SignatureDecoder.signatureSplit(signature);
+        _preIsValidSignatureHook(datahash, hookSignature);
+        return _isValidSignature(datahash, validator, validatorSignature);
+    }
+
+    function _decodeSignature(bytes calldata signature)
         internal
+        pure
+        virtual
+        returns (address validator, bytes calldata validatorSignature, bytes calldata hookSignature)
+    {
+        return SignatureDecoder.signatureSplit(signature);
+    }
+
+    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+        public
+        payable
         virtual
         override
         returns (uint256 validationData)
     {
-        bool sigValid;
-        bytes calldata guardHookInputData;
-        (validationData, sigValid, guardHookInputData) = _isValidUserOp(userOpHash, userOp.signature);
+        _onlyEntryPoint();
 
-        /* 
-          Why using the current "non-gas-optimized" approach instead of using 
-          `sigValid = sigValid && guardHook(userOp, userOpHash, guardHookInputData);` :
-          
-          When data is executed on the blockchain, if `sigValid = true`, the gas cost remains consistent.
-          However, the benefits of using this approach are quite apparent:
-          By using "semi-valid" signatures off-chain to estimate gas fee (sigValid will always be false), 
-          the estimated fee can include a portion of the execution cost of `guardHook`. 
+        assembly ("memory-safe") {
+            if missingAccountFunds {
+                // ignore failure (its EntryPoint's job to verify, not account.)
+                pop(call(gas(), caller(), missingAccountFunds, 0x00, 0x00, 0x00, 0x00))
+            }
+        }
+        (address validator, bytes calldata validatorSignature, bytes calldata hookSignature) =
+            _decodeSignature(userOp.signature);
+
+        /*
+            Warning!!!
+                This function uses `return` to terminate the execution of the entire contract.
+                If any `Hook` fails, this function will stop the contract's execution and
+                return `SIG_VALIDATION_FAILED`, skipping all the subsequent unexecuted code.
+        */
+        _preUserOpValidationHook(userOp, userOpHash, missingAccountFunds, hookSignature);
+
+        /*
+            When any hook execution fails, this line will not be executed.
          */
-        bool guardHookResult = guardHook(userOp, userOpHash, guardHookInputData);
-
-        // equivalence code: `(sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48))`
-        // validUntil and validAfter is already packed in signatureData.validationData,
-        // and aggregator is address(0), so we just need to add sigFailed flag.
-        validationData = validationData | ((sigValid && guardHookResult) ? 0 : SIG_VALIDATION_FAILED);
+        return _validateUserOp(userOp, userOpHash, validator, validatorSignature);
     }
 
-    /// @notice Upgrades the contract to a new implementation
-    /// @param newImplementation Address of the new implementation
-    /// @dev Can only be called from an external module for security reasons
-    function upgradeTo(address newImplementation) external onlyModule {
-        UpgradeManager._upgradeTo(newImplementation);
+    /**
+     * Only authorized modules can manage hooks and modules.
+     */
+    function pluginManagementAccess() internal view override {
+        _onlyModule();
+    }
+
+    /**
+     * Only authorized modules can manage validators
+     */
+    function validatorManagementAccess() internal view override {
+        _onlyModule();
+    }
+
+    function upgradeTo(address newImplementation) external override {
+        _onlyModule();
+        _upgradeTo(newImplementation);
     }
 
     /// @notice Handles the upgrade from an old implementation

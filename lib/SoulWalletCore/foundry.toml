@@ -1,0 +1,17 @@
+[profile.default]
+src = "contracts"
+out = "out"
+libs = ["lib"]
+
+solc = "0.8.23"
+optimizer = true
+optimizer_runs = 100000
+via_ir = true
+evm_version = "paris"
+
+# [profile.default.model_checker]
+# contracts = { './contracts/SoulWalletCore.sol' = ['Contract'] }
+# engine = 'all'
+# timeout = 10000
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

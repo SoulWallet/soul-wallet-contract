@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "./DeployHelper.sol";
-import "@source/miscellaneous/ReceivePayment.sol";
+import "@source/dev/ReceivePayment.sol";
 
 contract ReceivePaymentDeployer is Script, DeployHelper {
     address paymasterOwner;

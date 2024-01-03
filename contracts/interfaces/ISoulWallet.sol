@@ -1,26 +1,24 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./IExecutionManager.sol";
-import "./IModuleManager.sol";
-import "./IOwnerManager.sol";
-import "./IPluginManager.sol";
-import "./IFallbackManager.sol";
-import "@account-abstraction/contracts/interfaces/IAccount.sol";
-import "./IUpgradable.sol";
+import {ISoulWalletHookManager} from "../interfaces/ISoulWalletHookManager.sol";
+import {ISoulWalletModuleManager} from "../interfaces/ISoulWalletModuleManager.sol";
+import {ISoulWalletOwnerManager} from "../interfaces/ISoulWalletOwnerManager.sol";
+import {ISoulWalletOwnerManager} from "../interfaces/ISoulWalletOwnerManager.sol";
+import {IUpgradable} from "../interfaces/IUpgradable.sol";
+import {IStandardExecutor} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
 
-/**
- * @title SoulWallet Interface
- * @dev This interface aggregates multiple sub-interfaces to represent the functionalities of the SoulWallet
- * It encompasses account management, execution management, module management, owner management, plugin management,
- * fallback management, and upgradeability
- */
 interface ISoulWallet is
-    IAccount,
-    IExecutionManager,
-    IModuleManager,
-    IOwnerManager,
-    IPluginManager,
-    IFallbackManager,
+    ISoulWalletHookManager,
+    ISoulWalletModuleManager,
+    ISoulWalletOwnerManager,
+    IStandardExecutor,
     IUpgradable
-{}
+{
+    function initialize(
+        bytes32[] calldata owners,
+        address defalutCallbackHandler,
+        bytes[] calldata modules,
+        bytes[] calldata hooks
+    ) external;
+}

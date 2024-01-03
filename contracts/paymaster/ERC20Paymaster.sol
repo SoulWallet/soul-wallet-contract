@@ -7,13 +7,12 @@ pragma solidity ^0.8.0;
 
 // Import the required libraries and contracts
 import "@account-abstraction/contracts/core/BasePaymaster.sol";
-import "@account-abstraction/contracts/core/Helpers.sol";
 import "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IOracle.sol";
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {Execution} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
 
 struct TokenSetting {
     uint256 tokenDecimals;
@@ -114,6 +113,7 @@ contract ERC20Paymaster is BasePaymaster {
             / (1e18 * PRICE_DENOMINATOR);
 
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
+        bool sponsorWalletCreation;
 
         if (userOp.initCode.length != 0) {
             // This operation prevents a malicious user from draining the Paymaster's deposit in a single active wallet user operation.
@@ -122,11 +122,13 @@ contract ERC20Paymaster is BasePaymaster {
             require(requiredPreFund < MAX_ALLOW_SPONSOR_FUND_ACTIVE_WALLET, "Paymaster: maxCost too high");
             require(ERC20Token.balanceOf(sender) >= tokenRequiredPreFund, "Paymaster: not enough balance");
             _validateConstructor(userOp, token, tokenRequiredPreFund);
+            sponsorWalletCreation = true;
         } else {
             ERC20Token.safeTransferFrom(sender, address(this), tokenRequiredPreFund);
+            sponsorWalletCreation = false;
         }
 
-        return (abi.encode(sender, token, costOfPost, exchangeRate, tokenRequiredPreFund), 0);
+        return (abi.encode(sender, token, costOfPost, exchangeRate, tokenRequiredPreFund, sponsorWalletCreation), 0);
     }
 
     /*
@@ -142,28 +144,21 @@ contract ERC20Paymaster is BasePaymaster {
         require(factory == WALLET_FACTORY, "Paymaster: unknown wallet factory");
         require(
             /*
-            * 0x18dfb3c7 executeBatch(address[],bytes[])
-            * 0x47e1da2a executeBatch(address[],uint256[],bytes[])
+            * 0x34fcd5be executeBatch((address,uint256,bytes)[])
             */
-            bytes4(userOp.callData) == bytes4(0x47e1da2a) || bytes4(userOp.callData) == bytes4(0x18dfb3c7),
+            bytes4(userOp.callData) == bytes4(0x34fcd5be),
             "invalid callData"
         );
-        address[] memory dest;
-        bytes[] memory func;
-        if (bytes4(userOp.callData) == bytes4(0x47e1da2a)) {
-            (dest,, func) = abi.decode(userOp.callData[4:], (address[], uint256[], bytes[]));
-        } else {
-            (dest, func) = abi.decode(userOp.callData[4:], (address[], bytes[]));
-        }
+        Execution[] memory executions;
+        executions = abi.decode(userOp.callData[4:], (Execution[]));
 
-        require(dest.length == func.length, "Paymaster: invalid callData length");
         require(isSupportToken(token), "Paymaster: token not support");
         bool checkAllowance = false;
-        for (uint256 i = 0; i < dest.length; i++) {
-            address destAddr = dest[i];
+        for (uint256 i = 0; i < executions.length; i++) {
+            address destAddr = executions[i].target;
             // check it contains approve operation, 0x095ea7b3 approve(address,uint256)
-            if (destAddr == token && bytes4(func[i]) == bytes4(0x095ea7b3)) {
-                (address spender, uint256 amount) = _decodeApprove(func[i]);
+            if (destAddr == token && bytes4(executions[i].data) == bytes4(0x095ea7b3)) {
+                (address spender, uint256 amount) = _decodeApprove(executions[i].data);
                 require(spender == address(this), "Paymaster: invalid spender");
                 require(amount >= tokenRequiredPreFund, "Paymaster: not enough approve");
                 checkAllowance = true;
@@ -172,7 +167,7 @@ contract ERC20Paymaster is BasePaymaster {
         }
         require(checkAllowance, "no approve found");
         // callGasLimit
-        uint256 callGasLimit = dest.length * _SAFE_APPROVE_GAS_COST;
+        uint256 callGasLimit = executions.length * _SAFE_APPROVE_GAS_COST;
         require(userOp.callGasLimit >= callGasLimit, "Paymaster: gas too low for postOp");
     }
 
@@ -189,12 +184,21 @@ contract ERC20Paymaster is BasePaymaster {
         if (mode == PostOpMode.postOpReverted) {
             return; // Do nothing here to not revert the whole bundle and harm reputation
         }
-        (address sender, address payable token, uint256 costOfPost, uint256 exchangeRate, uint256 tokenRequiredPreFund)
-        = abi.decode(context, (address, address, uint256, uint256, uint256));
+        (
+            address sender,
+            address payable token,
+            uint256 costOfPost,
+            uint256 exchangeRate,
+            uint256 tokenRequiredPreFund,
+            bool sponsorWalletCreation
+        ) = abi.decode(context, (address, address, uint256, uint256, uint256, bool));
         uint256 tokenRequiredFund =
             (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * exchangeRate / (1e18 * PRICE_DENOMINATOR);
-        // refund unsed precharge token
-        if (tokenRequiredPreFund > tokenRequiredFund) {
+        if (sponsorWalletCreation) {
+            // if sponsor during wallet creatation, charge the acutal amount
+            IERC20Metadata(token).safeTransferFrom(sender, address(this), tokenRequiredPreFund);
+        } else if (sponsorWalletCreation == false && tokenRequiredPreFund > tokenRequiredFund) {
+            // refund unsed precharge token
             IERC20Metadata(token).safeTransfer(sender, tokenRequiredPreFund - tokenRequiredFund);
         }
         // update oracle

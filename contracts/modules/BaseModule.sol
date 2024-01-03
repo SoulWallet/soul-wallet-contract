@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "../interfaces/IModule.sol";
-import "../interfaces/ISoulWallet.sol";
-import "../interfaces/IModuleManager.sol";
+import "./interfaces/ISoulWalletModule.sol";
+import "./../interfaces/ISoulWallet.sol";
 
 /**
  * @title BaseModule
  * @notice An abstract base contract that provides a foundation for other modules.
  * It ensures the initialization, de-initialization, and proper authorization of modules.
  */
-abstract contract BaseModule is IModule {
+abstract contract BaseModule is ISoulWalletModule {
     event ModuleInit(address indexed wallet);
     event ModuleDeInit(address indexed wallet);
     /**
@@ -42,10 +41,10 @@ abstract contract BaseModule is IModule {
      * @param data Initialization data for the module.
      */
 
-    function walletInit(bytes calldata data) external {
+    function Init(bytes calldata data) external {
         address _sender = sender();
         if (!inited(_sender)) {
-            if (!ISoulWallet(_sender).isAuthorizedModule(address(this))) {
+            if (!ISoulWallet(_sender).isInstalledModule(address(this))) {
                 revert("not authorized module");
             }
             _init(data);
@@ -56,10 +55,10 @@ abstract contract BaseModule is IModule {
      * @notice De-initializes the module for a wallet.
      */
 
-    function walletDeInit() external {
+    function DeInit() external {
         address _sender = sender();
         if (inited(_sender)) {
-            if (ISoulWallet(_sender).isAuthorizedModule(address(this))) {
+            if (ISoulWallet(_sender).isInstalledModule(address(this))) {
                 revert("authorized module");
             }
             _deInit();
@@ -73,6 +72,6 @@ abstract contract BaseModule is IModule {
      */
 
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
-        return interfaceId == type(IModule).interfaceId;
+        return interfaceId == type(ISoulWalletModule).interfaceId || interfaceId == type(IModule).interfaceId;
     }
 }

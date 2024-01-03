@@ -18,7 +18,10 @@ enum Network {
     Arbitrum,
     ArbitrumGoerli,
     OptimismGoerli,
-    Anvil
+    Anvil,
+    Sepolia,
+    ArbitrumSepolia,
+    OptimismSepolia
 }
 
 library NetWorkLib {
@@ -43,6 +46,44 @@ library NetWorkLib {
             return Network.OptimismGoerli;
         } else if (block.chainid == 421613) {
             return Network.ArbitrumGoerli;
+        } else if (block.chainid == 11155111) {
+            return Network.Sepolia;
+        } else if (block.chainid == 421614) {
+            return Network.ArbitrumSepolia;
+        } else if (block.chainid == 11155420) {
+            return Network.OptimismSepolia;
+        } else {
+            revert("unsupported network");
+        }
+    }
+
+    function getNetworkName() internal view returns (string memory) {
+        if (block.chainid == 1) {
+            return "Mainnet";
+        } else if (block.chainid == 3) {
+            return "Ropsten";
+        } else if (block.chainid == 4) {
+            return "Rinkeby";
+        } else if (block.chainid == 5) {
+            return "Goerli";
+        } else if (block.chainid == 42) {
+            return "Kovan";
+        } else if (block.chainid == 10) {
+            return "Optimism";
+        } else if (block.chainid == 42161) {
+            return "Arbitrum";
+        } else if (block.chainid == 31337) {
+            return "Anvil";
+        } else if (block.chainid == 420) {
+            return "OptimismGoerli";
+        } else if (block.chainid == 421613) {
+            return "ArbitrumGoerli";
+        } else if (block.chainid == 11155111) {
+            return "Sepolia";
+        } else if (block.chainid == 421614) {
+            return "ArbitrumSepolia";
+        } else if (block.chainid == 11155420) {
+            return "OptimismSepolia";
         } else {
             revert("unsupported network");
         }
@@ -55,7 +96,7 @@ abstract contract DeployHelper is Script {
     address internal constant SINGLE_USE_FACTORY_ADDRESS = 0xBb6e024b9cFFACB947A71991E386681B1Cd1477D;
     ISingletonFactory internal constant SINGLETON_FACTORY =
         ISingletonFactory(0xce0042B868300000d44A59004Da54A005ffdcf9f);
-    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x112));
+    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x165));
     address internal constant EMPTY_ADDRESS = 0x0000000000000000000000000000000000000000;
     bytes emptyBytes;
     address internal ENTRYPOINT_ADDRESS = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;
@@ -83,6 +124,7 @@ abstract contract DeployHelper is Script {
         } else {
             console.log(pad("Finding", 10), pad(name, 33), pad(LibString.toHexString(calculatedAddress), 63));
         }
+        writeAddressToEnvBackend(name, calculatedAddress);
 
         return calculatedAddress;
     }
@@ -97,6 +139,10 @@ abstract contract DeployHelper is Script {
 
     function getNetwork() internal view returns (Network network) {
         return NetWorkLib.getNetwork();
+    }
+
+    function getNetworkName() internal view returns (string memory) {
+        return NetWorkLib.getNetworkName();
     }
 
     function deploySingletonFactory() internal {
@@ -125,6 +171,15 @@ abstract contract DeployHelper is Script {
         string[] memory inputs = new string[](4);
         inputs[0] = "node";
         inputs[1] = "script/ffi/save_to_env.js";
+        inputs[2] = label;
+        inputs[3] = vm.toString(addr);
+        vm.ffi(inputs);
+    }
+
+    function writeAddressToEnvBackend(string memory label, address addr) internal {
+        string[] memory inputs = new string[](4);
+        inputs[0] = "node";
+        inputs[1] = "script/ffi/save_to_env_backend.js";
         inputs[2] = label;
         inputs[3] = vm.toString(addr);
         vm.ffi(inputs);

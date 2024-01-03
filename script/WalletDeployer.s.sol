@@ -2,56 +2,38 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "@source/SoulWalletFactory.sol";
+import "@source/factory/SoulWalletFactory.sol";
 import "@source/SoulWallet.sol";
-import "@source/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
-import "@source/trustedContractManager/trustedPluginManager/TrustedPluginManager.sol";
-import "@source/modules/SecurityControlModule/SecurityControlModule.sol";
-import "@source/handler/DefaultCallbackHandler.sol";
-import "@source/validator/DefaultValidator.sol";
-import "@account-abstraction/contracts/core/EntryPoint.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
+import
+    "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
+import "@source/modules/securityControlModule/SecurityControlModule.sol";
+import "@source/abstract/DefaultCallbackHandler.sol";
+import {SoulWalletDefaultValidator} from "@source/validator/SoulWalletDefaultValidator.sol";
+import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import "./DeployHelper.sol";
 
 contract WalletDeployer is Script, DeployHelper {
     function run() public {
         vm.startBroadcast(privateKey);
         Network network = getNetwork();
-        if (network == Network.Mainnet) {
-            console.log("deploy soul wallet contract on mainnet");
-            delpoy();
-        }
-        if (network == Network.Goerli) {
-            console.log("deploy soul wallet contract on Goerli");
-            delpoy();
-        } else if (network == Network.Arbitrum) {
-            console.log("deploy soul wallet contract on Arbitrum");
-            delpoy();
-        } else if (network == Network.Optimism) {
-            console.log("deploy soul wallet contract on Optimism");
-            delpoy();
-        } else if (network == Network.ArbitrumGoerli) {
-            console.log("deploy soul wallet contract on ArbitrumGoerli");
-            delpoy();
-        } else if (network == Network.Anvil) {
-            console.log("deploy soul wallet contract on Anvil");
+        string memory networkName = NetWorkLib.getNetworkName();
+        console.log("deploy soul wallet contract on ", networkName);
+        if (network == Network.Anvil) {
             deploySingletonFactory();
-            delpoylocalEntryPoint();
-            delpoy();
-        } else if (network == Network.OptimismGoerli) {
-            console.log("deploy soul wallet contract on OptimismGoerli");
-            delpoy();
-        } else {
-            console.log("deploy soul wallet contract on testnet");
-            delpoy();
+            deployLocalEntryPoint();
         }
+        deploy();
     }
 
-    function delpoy() private {
-        address defaultValidator = deploy("DefaultValidator", type(DefaultValidator).creationCode);
-        writeAddressToEnv("DEFAULT_VALIDATOR_ADDRESS", defaultValidator);
+    function deploy() private {
+        address soulWalletDefaultValidator =
+            deploy("SoulWalletDefaultValidator", type(SoulWalletDefaultValidator).creationCode);
+        writeAddressToEnv("SOUL_WALLET_DEFAULT_VALIDATOR", soulWalletDefaultValidator);
         address soulwalletInstance = deploy(
             "SoulwalletInstance",
-            bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS, defaultValidator))
+            bytes.concat(type(SoulWallet).creationCode, abi.encode(ENTRYPOINT_ADDRESS, soulWalletDefaultValidator))
         );
         address soulwalletFactoryOwner = vm.envAddress("SOULWALLET_FACTORY_OWNER");
         address soulwalletFactoryAddress = deploy(
@@ -69,21 +51,27 @@ contract WalletDeployer is Script, DeployHelper {
             "TrustedModuleManager", bytes.concat(type(TrustedModuleManager).creationCode, abi.encode(managerAddress))
         );
 
-        address trustedPluginManager = deploy(
-            "TrustedPluginManager", bytes.concat(type(TrustedPluginManager).creationCode, abi.encode(managerAddress))
+        address trustedHookManager = deploy(
+            "TrustedHookManager", bytes.concat(type(TrustedHookManager).creationCode, abi.encode(managerAddress))
+        );
+
+        address trustedValidatorManager = deploy(
+            "TrustedValidatorManager",
+            bytes.concat(type(TrustedValidatorManager).creationCode, abi.encode(managerAddress))
         );
 
         deploy(
             "SecurityControlModule",
             bytes.concat(
-                type(SecurityControlModule).creationCode, abi.encode(trustedModuleManager, trustedPluginManager)
+                type(SecurityControlModule).creationCode,
+                abi.encode(trustedModuleManager, trustedHookManager, trustedValidatorManager)
             )
         );
 
         deploy("DefaultCallbackHandler", type(DefaultCallbackHandler).creationCode);
     }
 
-    function delpoylocalEntryPoint() private {
+    function deployLocalEntryPoint() private {
         ENTRYPOINT_ADDRESS = deploy("EntryPoint", type(EntryPoint).creationCode);
     }
 }

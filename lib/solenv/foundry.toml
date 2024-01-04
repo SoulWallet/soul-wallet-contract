@@ -1,0 +1,8 @@
+[profile.default]
+src = 'src'
+out = 'out'
+libs = ['lib']
+ffi = true
+verbosity = 3
+
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config

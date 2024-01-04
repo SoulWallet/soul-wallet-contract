@@ -2,29 +2,35 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../soulwallet/base/SoulWalletLogicInstence.sol";
-import "../soulwallet/Bundler.sol";
-import "@source/SoulWalletFactory.sol";
-import "@source/handler/DefaultCallbackHandler.sol";
-import "@source/dev/Tokens/TokenERC721.sol";
+import "../soulwallet/base/SoulWalletInstence.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
+import
+    "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
+import "@source/modules/securityControlModule/SecurityControlModule.sol";
+import "@source/abstract/DefaultCallbackHandler.sol";
 import "@source/paymaster/ERC20Paymaster.sol";
-import "@source/dev/Tokens/TokenERC20.sol";
+import "@source/dev/tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
-import "@source/libraries/TypeConversion.sol";
-import "@source/validator/DefaultValidator.sol";
+import "../helper/Bundler.t.sol";
 import "../helper/UserOpHelper.t.sol";
-import "../libraries/BytesLib.t.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@source/libraries/TypeConversion.sol";
+import {SoulWalletDefaultValidator} from "@source/validator/SoulWalletDefaultValidator.sol";
 
 contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
     using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
+    using TypeConversion for address;
 
     SoulWalletLogicInstence public soulWalletLogicInstence;
     SoulWalletFactory public soulWalletFactory;
     ISoulWallet soulWallet;
     ERC20Paymaster paymaster;
     Bundler bundler;
-    DefaultValidator defaultValidator;
+    SoulWalletDefaultValidator defaultValidator;
 
     using TypeConversion for address;
 
@@ -49,13 +55,24 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         bundler = new Bundler();
 
         entryPoint = new EntryPoint();
-        defaultValidator = new DefaultValidator();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint, defaultValidator);
+        defaultValidator = new SoulWalletDefaultValidator();
+        soulWalletLogicInstence = new SoulWalletLogicInstence(
+            address(entryPoint),
+            address(defaultValidator)
+        );
         address logic = address(soulWalletLogicInstence.soulWalletLogic());
-        soulWalletFactory = new SoulWalletFactory(logic, address(entryPoint), address(this));
-        require(soulWalletFactory.walletImpl() == logic, "logic address not match");
+        soulWalletFactory = new SoulWalletFactory(
+            logic,
+            address(entryPoint),
+            address(this)
+        );
+        require(soulWalletFactory._WALLETIMPL() == logic, "logic address not match");
 
-        paymaster = new ERC20Paymaster(entryPoint, paymasterOwner, address(soulWalletFactory));
+        paymaster = new ERC20Paymaster(
+            entryPoint,
+            paymasterOwner,
+            address(soulWalletFactory)
+        );
 
         vm.deal(paymasterOwner, 10000e18);
         vm.startPrank(paymasterOwner);
@@ -88,21 +105,31 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         nonce = 0;
 
         (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
-        TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
-        TrustedPluginManager trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
-        SecurityControlModule securityControlModule =
-            new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+        TrustedModuleManager trustedModuleManager = new TrustedModuleManager(
+            trustedManagerOwner
+        );
+        TrustedHookManager trustedHookManager = new TrustedHookManager(
+            trustedManagerOwner
+        );
+        TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(
+                trustedManagerOwner
+            );
+        SecurityControlModule securityControlModule = new SecurityControlModule(
+            trustedModuleManager,
+            trustedHookManager,
+            trustedValidatorManager
+        );
 
         bytes[] memory modules = new bytes[](1);
         modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
-        bytes[] memory plugins = new bytes[](0);
+        bytes[] memory hooks = new bytes[](0);
 
         bytes32 salt = bytes32(0);
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = ownerAddr.toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
         );
         sender = soulWalletFactory.getWalletAddress(initializer, salt);
         // send wallet with testtoken
@@ -116,17 +143,12 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         maxPriorityFeePerGas = 10 gwei;
         callGasLimit = 3000000;
 
-        address[] memory tokenAddressList = new address[](1);
-        tokenAddressList[0] = address(token);
+        Execution[] memory executions = new Execution[](1);
+        executions[0].target = address(token);
+        executions[0].value = 0;
+        executions[0].data = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 10000e6);
 
-        uint256[] memory values = new uint256[](1);
-        values[0] = 0;
-
-        bytes[] memory tokenCallData = new bytes[](1);
-        tokenCallData[0] = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 1000e6);
-        callData = abi.encodeWithSignature(
-            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
-        );
+        callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
         paymasterAndData =
             abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
 
@@ -144,7 +166,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
             signature
         );
 
-        userOperation.signature = signUserOp(userOperation, ownerKey);
+        userOperation.signature = signUserOp(entryPoint, userOperation, ownerKey, address(defaultValidator));
         bundler.post(entryPoint, userOperation);
         soulWallet = ISoulWallet(sender);
         assertEq(soulWallet.isOwner(ownerAddr.toBytes32()), true);
@@ -166,21 +188,31 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         nonce = 0;
 
         (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
-        TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
-        TrustedPluginManager trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
-        SecurityControlModule securityControlModule =
-            new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+        TrustedModuleManager trustedModuleManager = new TrustedModuleManager(
+            trustedManagerOwner
+        );
+        TrustedHookManager trustedHookManager = new TrustedHookManager(
+            trustedManagerOwner
+        );
+        TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(
+                trustedManagerOwner
+            );
+        SecurityControlModule securityControlModule = new SecurityControlModule(
+            trustedModuleManager,
+            trustedHookManager,
+            trustedValidatorManager
+        );
 
         bytes[] memory modules = new bytes[](1);
         modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
-        bytes[] memory plugins = new bytes[](0);
+        bytes[] memory hooks = new bytes[](0);
 
         bytes32 salt = bytes32(0);
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = ownerAddr.toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes memory initializer = abi.encodeWithSignature(
-            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
+            "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
         );
         sender = soulWalletFactory.getWalletAddress(initializer, salt);
         // send wallet with testtoken
@@ -194,17 +226,12 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         maxPriorityFeePerGas = 10 gwei;
         callGasLimit = 3000000;
 
-        address[] memory tokenAddressList = new address[](1);
-        tokenAddressList[0] = address(token);
+        Execution[] memory executions = new Execution[](1);
+        executions[0].target = address(token);
+        executions[0].value = 0;
+        executions[0].data = abi.encodeWithSignature("allowance(address,uint256)", address(paymaster), 10000e6);
 
-        uint256[] memory values = new uint256[](1);
-        values[0] = 0;
-
-        bytes[] memory tokenCallData = new bytes[](1);
-        tokenCallData[0] = abi.encodeWithSignature("allowance(address,uint256)", address(paymaster), 1000e6);
-        callData = abi.encodeWithSignature(
-            "executeBatch(address[],uint256[],bytes[])", tokenAddressList, values, tokenCallData
-        );
+        callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
         paymasterAndData =
             abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
 
@@ -222,7 +249,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
             signature
         );
 
-        userOperation.signature = signUserOp(userOperation, ownerKey);
+        userOperation.signature = signUserOp(entryPoint, userOperation, ownerKey, address(defaultValidator));
         vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("FailedOp(uint256,string)")), 0, "AA33 reverted: no approve found")
         );

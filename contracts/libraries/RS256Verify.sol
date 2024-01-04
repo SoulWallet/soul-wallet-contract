@@ -17,6 +17,13 @@ pragma solidity ^0.8.21;
  * Copyright (c) 2023 Jayden
  */
 library RS256Verify {
+    // If the length of S is not k octets, output "invalid signature" and stop.
+    error InvalidSignature();
+    // must be an integer multiple of 32.
+    error InvalidLength();
+    // output "signature representative out of range" and stop.
+    error SignatureRepresentativeOutOfRange();
+
     /**
      *
      * @param n signer's RSA public key - n
@@ -32,8 +39,12 @@ library RS256Verify {
         uint256 k = n.length;
         // 1. Length checking: If the length of S is not k octets, output "invalid signature" and stop.
         if (k != S.length) {
-            return false;
+            revert InvalidSignature();
         }
+
+        bytes4 _InvalidSignature = InvalidSignature.selector;
+        bytes4 _InvalidLength = InvalidLength.selector;
+        bytes4 _SignatureRepresentativeOutOfRange = SignatureRepresentativeOutOfRange.selector;
 
         // 2. RSA verification:
         /* 
@@ -143,8 +154,8 @@ library RS256Verify {
 
                 // To simplify the calculations, k must be an integer multiple of 32.
                 if mod(k, 0x20) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidLength)
+                    revert(0x00, 4)
                 }
                 let _k := div(k, 0x20)
                 for { let i := 0 } lt(i, _k) { i := add(i, 0x01) } {
@@ -157,14 +168,14 @@ library RS256Verify {
                     }
                     if gt(_s, _n) {
                         // signature representative out of range
-                        mstore(0x00, false)
-                        return(0x00, 0x20)
+                        mstore(0x00, _SignatureRepresentativeOutOfRange)
+                        revert(0x00, 4)
                     }
                     if eq(_s, _n) {
                         if eq(i, sub(_k, 0x01)) {
                             // signature representative out of range
-                            mstore(0x00, false)
-                            return(0x00, 0x20)
+                            mstore(0x00, _SignatureRepresentativeOutOfRange)
+                            revert(0x00, 4)
                         }
                     }
                 }
@@ -185,8 +196,8 @@ library RS256Verify {
                 // copy e begin
                 // To simplify the calculations, e must be an integer multiple of 32.
                 if mod(e_length, 0x20) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidLength)
+                    revert(0x00, 4)
                 }
                 for { let i := 0 } lt(i, e_length) { i := add(i, 0x20) } {
                     mstore(_cursor_inline, mload(add(add(e, 0x20), i)))
@@ -203,8 +214,8 @@ library RS256Verify {
 
                 // Call the precompiled contract 0x05 = ModExp
                 if iszero(staticcall(not(0), 0x05, EM, _cursor_inline, add(EM, 0x20), k)) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
                 mstore(EM, k)
                 mstore(0x40, add(add(EM, 0x20), k))
@@ -215,16 +226,16 @@ library RS256Verify {
             if sub(mload(add(EM, 0x20)), 0x0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
                 //                             |_______________________ 0x1E bytes _______________________|
 
-                mstore(0x00, false)
-                return(0x00, 0x20)
+                mstore(0x00, _InvalidSignature)
+                revert(0x00, 4)
             }
             let paddingLen := sub(PS_ByteLen, 0x1E)
             let _times := div(paddingLen, 0x20)
             _cursor := add(EM, 0x40)
             for { let i := 0 } lt(i, _times) { i := add(i, 1) } {
                 if sub(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, mload(_cursor)) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
                 _cursor := add(_cursor, 0x20)
             }
@@ -235,8 +246,8 @@ library RS256Verify {
                     0x0000000000000000000000000000000000000000000000000000000000000000,
                     shl(_shift, not(shr(_shift, mload(_cursor))))
                 ) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
             }
 
@@ -246,17 +257,16 @@ library RS256Verify {
             // 0x003031300d060960864801650304020105000420
             // |______________ 0x14 bytes _______________|
             if sub(0x003031300d060960864801650304020105000420, shr(0x60, /* 8*12 */ mload(_cursor))) {
-                mstore(0x00, false)
-                return(0x00, 0x20)
+                mstore(0x00, _InvalidSignature)
+                revert(0x00, 4)
             }
         }
+
+        bytes32 _H;
         assembly ("memory-safe") {
-            if sub(H, mload(add(_cursor, 0x14))) {
-                mstore(0x00, false)
-                return(0x00, 0x20)
-            }
+            _H := mload(add(_cursor, 0x14))
         }
-        return true;
+        return H == _H;
     }
 
     /**
@@ -274,8 +284,12 @@ library RS256Verify {
         uint256 k = n.length;
         // 1. Length checking: If the length of S is not k octets, output "invalid signature" and stop.
         if (k != S.length) {
-            return false;
+            revert InvalidSignature();
         }
+
+        bytes4 _InvalidSignature = InvalidSignature.selector;
+        bytes4 _InvalidLength = InvalidLength.selector;
+        bytes4 _SignatureRepresentativeOutOfRange = SignatureRepresentativeOutOfRange.selector;
 
         // 2. RSA verification:
         /* 
@@ -385,8 +399,8 @@ library RS256Verify {
 
                 // To simplify the calculations, k must be an integer multiple of 32.
                 if mod(k, 0x20) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidLength)
+                    revert(0x00, 4)
                 }
                 let _k := div(k, 0x20)
                 for { let i := 0 } lt(i, _k) { i := add(i, 0x01) } {
@@ -399,14 +413,14 @@ library RS256Verify {
                     }
                     if gt(_s, _n) {
                         // signature representative out of range
-                        mstore(0x00, false)
-                        return(0x00, 0x20)
+                        mstore(0x00, _SignatureRepresentativeOutOfRange)
+                        revert(0x00, 4)
                     }
                     if eq(_s, _n) {
                         if eq(i, sub(_k, 0x01)) {
                             // signature representative out of range
-                            mstore(0x00, false)
-                            return(0x00, 0x20)
+                            mstore(0x00, _SignatureRepresentativeOutOfRange)
+                            revert(0x00, 4)
                         }
                     }
                 }
@@ -427,8 +441,8 @@ library RS256Verify {
                 // copy e begin
                 // To simplify the calculations, e must be an integer multiple of 32.
                 if mod(e_length, 0x20) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidLength)
+                    revert(0x00, 4)
                 }
                 for { let i := 0 } lt(i, e_length) { i := add(i, 0x20) } {
                     mstore(_cursor_inline, mload(add(add(e, 0x20), i)))
@@ -445,8 +459,8 @@ library RS256Verify {
 
                 // Call the precompiled contract 0x05 = ModExp
                 if iszero(staticcall(not(0), 0x05, EM, _cursor_inline, add(EM, 0x20), k)) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
                 mstore(EM, k)
                 mstore(0x40, add(add(EM, 0x20), k))
@@ -457,16 +471,16 @@ library RS256Verify {
             if sub(mload(add(EM, 0x20)), 0x0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
                 //                             |_______________________ 0x1E bytes _______________________|
 
-                mstore(0x00, false)
-                return(0x00, 0x20)
+                mstore(0x00, _InvalidSignature)
+                revert(0x00, 4)
             }
             let paddingLen := sub(PS_ByteLen, 0x1E)
             let _times := div(paddingLen, 0x20)
             _cursor := add(EM, 0x40)
             for { let i := 0 } lt(i, _times) { i := add(i, 1) } {
                 if sub(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, mload(_cursor)) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
                 _cursor := add(_cursor, 0x20)
             }
@@ -477,8 +491,8 @@ library RS256Verify {
                     0x0000000000000000000000000000000000000000000000000000000000000000,
                     shl(_shift, not(shr(_shift, mload(_cursor))))
                 ) {
-                    mstore(0x00, false)
-                    return(0x00, 0x20)
+                    mstore(0x00, _InvalidSignature)
+                    revert(0x00, 4)
                 }
             }
 
@@ -488,17 +502,15 @@ library RS256Verify {
             // 0x003031300d060960864801650304020105000420
             // |______________ 0x14 bytes _______________|
             if sub(0x003031300d060960864801650304020105000420, shr(0x60, /* 8*12 */ mload(_cursor))) {
-                mstore(0x00, false)
-                return(0x00, 0x20)
+                mstore(0x00, _InvalidSignature)
+                revert(0x00, 4)
             }
         }
-        bytes32 H = sha256(M);
+
+        bytes32 _H;
         assembly ("memory-safe") {
-            if sub(H, mload(add(_cursor, 0x14))) {
-                mstore(0x00, false)
-                return(0x00, 0x20)
-            }
+            _H := mload(add(_cursor, 0x14))
         }
-        return true;
+        return sha256(M) == _H;
     }
 }

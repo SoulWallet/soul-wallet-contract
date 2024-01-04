@@ -21,4 +21,5 @@ interface IKeyStoreStorage {
     function setBytes32(bytes32 _slot, bytes32 _key, bytes32 _value) external;
     function setSlotValue(bytes32 _slot, bytes32 _value) external;
     function setKeystoreLogic(bytes32 _slot, address _logicAddress) external;
+    function insertLeaf(bytes32 _slot, bytes32 _signingKey) external;
 }

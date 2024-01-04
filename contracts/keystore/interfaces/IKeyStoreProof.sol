@@ -11,7 +11,7 @@ interface IKeyStoreProof {
      * @param l1Slot The L1 slot
      * @return signingKeyHash The hash of the signing key associated with the L1 slot
      */
-    function keystoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKeyHash);
+    function keyStoreBySlot(bytes32 l1Slot) external view returns (bytes32 signingKeyHash);
 
     /**
      * @dev Returns the raw owners associated with a given L1 slot.

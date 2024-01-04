@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.20;
 
-import "../base/UpgradeManager.sol";
+import "../abstract/SoulWalletUpgradeManager.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract NewImplementation is Initializable, UpgradeManager {
+contract NewImplementation is Initializable, SoulWalletUpgradeManager {
     address public immutable WALLETIMPL;
     bytes32 public constant CURRENT_UPGRADE_SLOT = keccak256("soul.wallet.upgradeTo_NewImplementation");
 
@@ -18,7 +18,7 @@ contract NewImplementation is Initializable, UpgradeManager {
         bytes32[] calldata owners,
         address defalutCallbackHandler,
         bytes[] calldata modules,
-        bytes[] calldata plugins
+        bytes[] calldata hooks
     ) external initializer {}
 
     function hello() external pure returns (string memory) {
@@ -26,7 +26,7 @@ contract NewImplementation is Initializable, UpgradeManager {
     }
 
     function upgradeTo(address newImplementation) external override {
-        UpgradeManager._upgradeTo(newImplementation);
+        _upgradeTo(newImplementation);
     }
 
     function upgradeFrom(address oldImplementation) external override {

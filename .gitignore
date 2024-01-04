@@ -1,12 +1,31 @@
-cache
-artifacts
-node_modules
-.env
-coverage
-coverage.json
-.DS_Store
+# Compiler and build files
+cache/
+artifacts/
+out/
 compiler_config.json
-out
-lib
-.deps
+
+# Node modules
+node_modules/
+
+# Coverage files
+coverage/
+coverage.json
+
+# Environment files
+.env
+.env*
+
+# MacOS file system
+.DS_Store
+
+# Development broadcast logs
 broadcast/
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+broadcast/*
+
+# Documentation
+docs/
+.vscode/
+lcov.info

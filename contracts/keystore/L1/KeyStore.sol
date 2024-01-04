@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "./BaseKeyStore.sol";
-import "../interfaces/IKeyStoreProof.sol";
+import "./base/BaseKeyStore.sol";
+import {IKeyStoreProof} from "../interfaces/IKeyStoreProof.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "../../base/ValidatorManager.sol";
+import "./base/BaseKeyStoreValidatorManager.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Ownable {
+contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, BaseKeyStoreValidatorManager, Ownable {
     using ECDSA for bytes32;
 
     IKeyStoreStorage private immutable _KEYSTORE_STORAGE;
@@ -36,9 +36,9 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
     bytes32 private constant _TYPE_HASH_UPGRADE_KEYSTORE_LOGIC =
         keccak256("KeyStoreUpgrade(bytes32 keyStoreSlot,uint256 nonce,address newLogic)");
 
-    constructor(IValidator _validator, IKeyStoreStorage _keystorStorage, address _owner)
+    constructor(IKeyStoreValidator _validator, IKeyStoreStorage _keystorStorage, address _owner)
         EIP712("KeyStore", "1")
-        ValidatorManager(_validator)
+        BaseKeyStoreValidatorManager(_validator)
         Ownable(_owner)
     {
         _KEYSTORE_STORAGE = _keystorStorage;
@@ -115,7 +115,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
 
         bytes32 digest = _verifyStructHash(slot, slotNonce, action, data);
 
-        (, bytes32 recovered, bool success) = validator().recoverSignature(digest, keySignature);
+        (bytes32 recovered, bool success) = validator().recoverSignature(digest, keySignature);
         if (!success) {
             revert Errors.INVALID_SIGNATURE();
         }
@@ -132,7 +132,7 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
         }
     }
 
-    function keystoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKeyHash) {
+    function keyStoreBySlot(bytes32 l1Slot) external view override returns (bytes32 signingKeyHash) {
         return _getKey(l1Slot);
     }
 
@@ -242,96 +242,94 @@ contract KeyStore is IKeyStoreProof, EIP712, BaseKeyStore, ValidatorManager, Own
                   If, in certain cases, 's' is defined as bytes4 (up to 4GB), there is no need to perform overflow prevention under the current known block gas limit.
                   Overall, it is more suitable for both Layer1 and Layer2. 
          */
-        {
-            uint8 v;
-            uint256 cursor = 0;
+        uint8 v;
+        uint256 cursor = 0;
 
-            uint256 skipCount = 0;
-            uint256 guardianSignatureLen = guardianSignature.length;
-            for (uint256 i = 0; i < guardiansLen;) {
-                if (cursor >= guardianSignatureLen) break;
-                bytes calldata signatures = guardianSignature[cursor:];
-                assembly ("memory-safe") {
-                    v := byte(0, calldataload(signatures.offset))
-                }
+        uint256 skipCount = 0;
+        uint256 guardianSignatureLen = guardianSignature.length;
+        for (uint256 i = 0; i < guardiansLen;) {
+            if (cursor >= guardianSignatureLen) break;
+            bytes calldata signatures = guardianSignature[cursor:];
+            assembly ("memory-safe") {
+                v := byte(0, calldataload(signatures.offset))
+            }
 
-                if (v == 0) {
-                    /*
+            if (v == 0) {
+                /*
                     v = 0
                         EIP-1271 signature
                         s: bytes4 Length of signature data 
                         r: no set
                         dynamic data: signature data
                  */
-                    uint256 cursorEnd;
-                    assembly ("memory-safe") {
-                        // read 's' as bytes4
-                        let sigLen := shr(224, calldataload(add(signatures.offset, 1)))
+                uint256 cursorEnd;
+                assembly ("memory-safe") {
+                    // read 's' as bytes4
+                    let sigLen := shr(224, calldataload(add(signatures.offset, 1)))
 
-                        cursorEnd := add(5, sigLen) // see Note line 223
-                        cursor := add(cursor, cursorEnd)
-                    }
+                    cursorEnd := add(5, sigLen) // see Note line 223
+                    cursor := add(cursor, cursorEnd)
+                }
 
-                    bytes calldata dynamicData = signatures[5:cursorEnd];
-                    {
-                        (bool success, bytes memory result) = guardianData.guardians[i].staticcall(
-                            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, dynamicData)
-                        );
-                        require(
-                            success && result.length == 32
-                                && abi.decode(result, (bytes32)) == bytes32(IERC1271.isValidSignature.selector),
-                            "contract signature invalid"
-                        );
-                    }
-                } else if (v == 1) {
-                    /* 
+                bytes calldata dynamicData = signatures[5:cursorEnd];
+                {
+                    (bool success, bytes memory result) = guardianData.guardians[i].staticcall(
+                        abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, dynamicData)
+                    );
+                    require(
+                        success && result.length == 32
+                            && abi.decode(result, (bytes32)) == bytes32(IERC1271.isValidSignature.selector),
+                        "contract signature invalid"
+                    );
+                }
+            } else if (v == 1) {
+                /* 
                     v = 1
                         approved hash
                         r: no set
                         s: no set
                  */
-                    bytes32 key = _approveKey(guardianData.guardians[i], digest);
-                    require(approvedHashes[key] == 1, "hash not approved");
-                    unchecked {
-                        cursor += 1; // see Note line 223
-                    }
-                } else if (v == 2) {
-                    /* 
+                bytes32 key = _approveKey(guardianData.guardians[i], digest);
+                require(approvedHashes[key] == 1, "hash not approved");
+                unchecked {
+                    cursor += 1; // see Note line 223
+                }
+            } else if (v == 2) {
+                /* 
                     v = 2
                         skip
                         s: bytes4 skip times
                         r: no set
                  */
-                    assembly ("memory-safe") {
-                        // read 's' as bytes4
-                        let skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
+                assembly ("memory-safe") {
+                    // read 's' as bytes4
+                    let skipTimes := shr(224, calldataload(add(signatures.offset, 1)))
 
-                        i := add(i, skipTimes) // see Note line 223
-                        skipCount := add(skipCount, add(skipTimes, 1))
-                        cursor := add(cursor, 5)
-                    }
-                } else {
-                    /* 
+                    i := add(i, skipTimes) // see Note line 223
+                    skipCount := add(skipCount, add(skipTimes, 1))
+                    cursor := add(cursor, 5)
+                }
+            } else {
+                /* 
                     v > 2
                         EOA signature
                  */
-                    bytes32 s;
-                    bytes32 r;
-                    assembly ("memory-safe") {
-                        s := calldataload(add(signatures.offset, 1))
-                        r := calldataload(add(signatures.offset, 33))
+                bytes32 s;
+                bytes32 r;
+                assembly ("memory-safe") {
+                    s := calldataload(add(signatures.offset, 1))
+                    r := calldataload(add(signatures.offset, 33))
 
-                        cursor := add(cursor, 65) // see Note line 223
-                    }
-                    require(guardianData.guardians[i] == ECDSA.recover(digest, v, r, s), "guardian signature invalid");
+                    cursor := add(cursor, 65) // see Note line 223
                 }
-                unchecked {
-                    i++; // see Note line 223
-                }
+                require(guardianData.guardians[i] == ECDSA.recover(digest, v, r, s), "guardian signature invalid");
             }
-            if (guardiansLen - skipCount < guardianData.threshold) {
-                revert Errors.GUARDIAN_SIGNATURE_INVALID();
+            unchecked {
+                i++; // see Note line 223
             }
+        }
+        if (guardiansLen - skipCount < guardianData.threshold) {
+            revert Errors.GUARDIAN_SIGNATURE_INVALID();
         }
     }
 

@@ -81,28 +81,49 @@ library ValidatorSigDecoder {
 
      */
 
-    function decodeValidatorSignature(bytes calldata validatorSignature)
+    function decodeValidatorSignature(
+        bytes calldata validatorSignature
+    )
         internal
         pure
-        returns (uint8 signatureType, uint256 validationData, bytes calldata signature)
+        returns (
+            uint8 signatureType,
+            uint256 validationData,
+            bytes calldata signature
+        )
     {
-        require(validatorSignature.length >= 1, "validator signature too short");
+        require(
+            validatorSignature.length >= 1,
+            "validator signature too short"
+        );
 
         signatureType = uint8(bytes1(validatorSignature[0:1]));
         if (signatureType == 0x0) {
-            require(validatorSignature.length == 66, "invalid validator signature length");
+            require(
+                validatorSignature.length == 66,
+                "invalid validator signature length"
+            );
             validationData = 0;
             signature = validatorSignature[1:66];
         } else if (signatureType == 0x1) {
-            require(validatorSignature.length == 98, "invalid validator signature length");
+            require(
+                validatorSignature.length == 98,
+                "invalid validator signature length"
+            );
             validationData = uint256(bytes32(validatorSignature[1:33]));
             signature = validatorSignature[33:98];
         } else if (signatureType == 0x2) {
-            require(validatorSignature.length >= 129, "invalid validator signature length");
+            require(
+                validatorSignature.length >= 129,
+                "invalid validator signature length"
+            );
             validationData = 0;
             signature = validatorSignature[1:];
         } else if (signatureType == 0x3) {
-            require(validatorSignature.length >= 161, "invalid validator signature length");
+            require(
+                validatorSignature.length >= 161,
+                "invalid validator signature length"
+            );
             validationData = uint256(bytes32(validatorSignature[1:33]));
             signature = validatorSignature[33:];
         } else {

@@ -2,8 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "./interfaces/IKeyStoreStorage.sol";
-import "./interfaces/IMerkelTree.sol";
-import "./BaseMerkelTree.sol";
+import "./base/BaseMerkleTree.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -11,7 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Implements the eternal storage pattern. Provides generic storage capabilities
  * and integrates with a Merkle Tree structure.
  */
-contract KeyStoreStorage is IKeyStoreStorage, IMerkleTree, Ownable, BaseMerkleTree {
+contract KeyStoreStorage is IKeyStoreStorage, Ownable, BaseMerkleTree {
     // Mapping structure for various data types
     // slot ->key-> value
     mapping(bytes32 => mapping(bytes32 => string)) private stringStorage;

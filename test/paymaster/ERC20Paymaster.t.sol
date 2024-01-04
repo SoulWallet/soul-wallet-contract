@@ -3,18 +3,23 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../soulwallet/base/SoulWalletInstence.sol";
-import "../soulwallet/Bundler.sol";
-import "@source/handler/DefaultCallbackHandler.sol";
-import "@source/dev/Tokens/TokenERC721.sol";
+import "@source/abstract/DefaultCallbackHandler.sol";
 import "@source/paymaster/ERC20Paymaster.sol";
-import "@source/dev/Tokens/TokenERC20.sol";
+import "@source/dev/tokens/TokenERC20.sol";
 import "@source/dev/TestOracle.sol";
 import "@source/dev/HelloWorld.sol";
+import "../helper/Bundler.t.sol";
 import "../helper/UserOpHelper.t.sol";
-import "../libraries/BytesLib.t.sol";
+import {BytesLibTest} from "../helper/BytesLib.t.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {IStandardExecutor} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
+import "@source/libraries/TypeConversion.sol";
 
 contract ERC20PaymasterTest is Test, UserOpHelper {
     using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
+    using TypeConversion for address;
 
     SoulWalletInstence soulWalletInstence;
     ISoulWallet soulWallet;
@@ -40,15 +45,26 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         helloWorld = new HelloWorld();
         bundler = new Bundler();
         bytes[] memory modules = new bytes[](0);
-        bytes[] memory plugins = new bytes[](0);
+        bytes[] memory hooks = new bytes[](0);
         bytes32 salt = bytes32(0);
+        bytes32[] memory owners = new bytes32[](1);
+        owners[0] = address(ownerAddr).toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
-        soulWalletInstence =
-            new SoulWalletInstence(address(defaultCallbackHandler), ownerAddr,  modules, plugins,  salt);
+        soulWalletInstence = new SoulWalletInstence(
+            address(defaultCallbackHandler),
+            owners,
+            modules,
+            hooks,
+            salt
+        );
         soulWallet = soulWalletInstence.soulWallet();
         entryPoint = soulWalletInstence.entryPoint();
 
-        paymaster = new ERC20Paymaster(entryPoint, paymasterOwner, soulWalletInstence.soulWalletFactory.address);
+        paymaster = new ERC20Paymaster(
+            entryPoint,
+            paymasterOwner,
+            soulWalletInstence.soulWalletFactory.address
+        );
 
         vm.deal(paymasterOwner, 10000e18);
         vm.startPrank(paymasterOwner);
@@ -98,7 +114,9 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         (UserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
         (prefund);
-        op.signature = signUserOp(op, ownerKey);
+        op.signature = signUserOp(
+            soulWalletInstence.entryPoint(), op, ownerKey, address(soulWalletInstence.soulWalletDefaultValidator())
+        );
         bundler.post(IEntryPoint(entryPoint), op);
     }
 
@@ -115,7 +133,9 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         op.paymasterAndData =
             BytesLibTest.concat(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
         vm.breakpoint("b");
-        op.signature = signUserOp(op, ownerKey);
+        op.signature = signUserOp(
+            soulWalletInstence.entryPoint(), op, ownerKey, address(soulWalletInstence.soulWalletDefaultValidator())
+        );
         bundler.post(IEntryPoint(entryPoint), op);
     }
 
@@ -125,13 +145,15 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
     {
         op.sender = address(_sender);
         op.nonce = entryPoint.getNonce(address(_sender), 0);
-        op.callData = abi.encodeWithSelector(IExecutionManager.execute.selector, _to, _value, _data);
+        op.callData = abi.encodeWithSelector(IStandardExecutor.execute.selector, _to, _value, _data);
         op.callGasLimit = 50000;
-        op.verificationGasLimit = 80000;
+        op.verificationGasLimit = 300000;
         op.preVerificationGas = 50000;
         op.maxFeePerGas = 1000000000;
         op.maxPriorityFeePerGas = 100;
-        op.signature = signUserOp(op, _key);
+        op.signature = signUserOp(
+            soulWalletInstence.entryPoint(), op, _key, address(soulWalletInstence.soulWalletDefaultValidator())
+        );
         (op, prefund) = simulateVerificationGas(entryPoint, op);
         op.callGasLimit = simulateCallGas(entryPoint, op);
     }
@@ -149,7 +171,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         );
         op.preVerificationGas = retInfo.preOpGas;
         op.verificationGasLimit = retInfo.preOpGas;
-        op.maxFeePerGas = retInfo.prefund * 11 / (retInfo.preOpGas * 10);
+        op.maxFeePerGas = (retInfo.prefund * 11) / (retInfo.preOpGas * 10);
         op.maxPriorityFeePerGas = 1;
         return (op, retInfo.prefund);
     }
@@ -159,7 +181,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
             revert("Should have failed");
         } catch Error(string memory reason) {
             uint256 gas = abi.decode(bytes(reason), (uint256));
-            return gas * 11 / 10;
+            return (gas * 11) / 10;
         } catch {
             revert("Should have failed");
         }

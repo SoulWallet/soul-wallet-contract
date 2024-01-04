@@ -2,36 +2,45 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../base/SoulWalletLogicInstence.sol";
-import "@source/SoulWalletFactory.sol";
-import "@account-abstraction/contracts/core/EntryPoint.sol";
-import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import "@account-abstraction/contracts/interfaces/UserOperation.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "../Bundler.sol";
-import "@source/dev/Tokens/TokenERC721.sol";
-import "@source/handler/DefaultCallbackHandler.sol";
+import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
+import {IEntryPoint} from "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import "@source/validator/SoulWalletDefaultValidator.sol";
+import {SoulWalletFactory} from "@source/factory/SoulWalletFactory.sol";
+import "@source/abstract/DefaultCallbackHandler.sol";
+import "@source/modules/securityControlModule/SecurityControlModule.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
+import "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
 import "@source/libraries/TypeConversion.sol";
-import "@source/validator/DefaultValidator.sol";
-import "../../helper/UserOpHelper.t.sol";
+import {SoulWalletLogicInstence} from "../base/SoulWalletLogicInstence.sol";
+import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
+import {Bundler} from "../../helper/Bundler.t.sol";
 
 contract DeployProtocolTest is Test, UserOpHelper {
-    using ECDSA for bytes32;
     using TypeConversion for address;
-
+    SoulWalletDefaultValidator public soulWalletDefaultValidator;
     SoulWalletLogicInstence public soulWalletLogicInstence;
     SoulWalletFactory public soulWalletFactory;
     Bundler public bundler;
-    DefaultValidator defaultValidator;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        defaultValidator = new DefaultValidator();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(entryPoint, defaultValidator);
+        soulWalletDefaultValidator = new SoulWalletDefaultValidator();
+        soulWalletLogicInstence = new SoulWalletLogicInstence(
+            address(entryPoint),
+            address(soulWalletDefaultValidator)
+        );
         address logic = address(soulWalletLogicInstence.soulWalletLogic());
 
-        soulWalletFactory = new SoulWalletFactory(logic, address(entryPoint), address(this));
-        require(soulWalletFactory.walletImpl() == logic, "logic address not match");
+        soulWalletFactory = new SoulWalletFactory(
+            logic,
+            address(entryPoint),
+            address(this)
+        );
+        require(
+            soulWalletFactory._WALLETIMPL() == logic,
+            "logic address not match"
+        );
 
         bundler = new Bundler();
     }
@@ -49,19 +58,36 @@ contract DeployProtocolTest is Test, UserOpHelper {
         bytes memory paymasterAndData;
         bytes memory signature;
 
-        (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey("walletOwner");
+        (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey(
+            "walletOwner"
+        );
         {
             nonce = 0;
 
-            (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
-            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
-            TrustedPluginManager trustedPluginManager = new TrustedPluginManager(trustedManagerOwner);
-            SecurityControlModule securityControlModule =
-                new SecurityControlModule(trustedModuleManager, trustedPluginManager);
+            (address trustedManagerOwner, ) = makeAddrAndKey(
+                "trustedManagerOwner"
+            );
+            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(
+                    trustedManagerOwner
+                );
+            TrustedHookManager trustedHookManager = new TrustedHookManager(
+                trustedManagerOwner
+            );
+            TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(
+                    trustedManagerOwner
+                );
+            SecurityControlModule securityControlModule = new SecurityControlModule(
+                    trustedModuleManager,
+                    trustedHookManager,
+                    trustedValidatorManager
+                );
 
             bytes[] memory modules = new bytes[](1);
-            modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
-            bytes[] memory plugins = new bytes[](0);
+            modules[0] = abi.encodePacked(
+                securityControlModule,
+                abi.encode(uint64(2 days))
+            );
+            bytes[] memory hooks = new bytes[](0);
 
             bytes32 salt = bytes32(0);
 
@@ -69,7 +95,11 @@ contract DeployProtocolTest is Test, UserOpHelper {
             bytes32[] memory owners = new bytes32[](1);
             owners[0] = walletOwner.toBytes32();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, plugins
+                "initialize(bytes32[],address,bytes[],bytes[])",
+                owners,
+                defaultCallbackHandler,
+                modules,
+                hooks
             );
             sender = soulWalletFactory.getWalletAddress(initializer, salt);
 
@@ -102,7 +132,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
 
         bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
         (userOpHash);
-        userOperation.signature = signUserOp(userOperation, walletOwnerPrivateKey);
+        userOperation.signature = signUserOp(userOperation, walletOwnerPrivateKey, address(soulWalletDefaultValidator));
         vm.expectRevert(abi.encodeWithSelector(IEntryPoint.FailedOp.selector, 0, "AA21 didn't pay prefund"));
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length, 0, "A1:sender.code.length != 0");

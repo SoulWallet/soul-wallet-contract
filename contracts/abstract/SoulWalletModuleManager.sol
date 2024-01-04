@@ -9,7 +9,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 abstract contract SoulWalletModuleManager is ISoulWalletModuleManager, ModuleManager {
     function installModule(bytes calldata moduleAndData) external override {
-        _onlyModule();
+        pluginManagementAccess();
         _addModule(moduleAndData);
     }
 

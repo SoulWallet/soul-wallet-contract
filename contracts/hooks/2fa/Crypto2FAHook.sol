@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {IHook, UserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "forge-std/console.sol";
 
 contract Crypto2FAHook is IHook {
     using ECDSA for bytes32;
@@ -26,7 +25,6 @@ contract Crypto2FAHook is IHook {
     }
 
     function Init(bytes calldata data) external override {
-        console.logBytes(data);
         User2FA storage _user2fa = user2FA[msg.sender];
         require(_user2fa.initialized == false, "already initialized");
         address wallet2FAAddr = address(bytes20(data[:20]));
@@ -51,8 +49,6 @@ contract Crypto2FAHook is IHook {
         uint256 missingAccountFunds,
         bytes calldata hookSignature
     ) external view override {
-        console.log("hookSignature");
-        console.logBytes(hookSignature);
         (userOp, userOpHash, missingAccountFunds, hookSignature);
         address recoveredAddress = userOpHash.toEthSignedMessageHash().recover(hookSignature);
         require(recoveredAddress == user2FA[msg.sender].wallet2FAAddr, "Crypto2FAHook: invalid signature");

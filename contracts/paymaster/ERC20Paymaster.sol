@@ -37,6 +37,8 @@ contract ERC20Paymaster is BasePaymaster {
 
     address public immutable WALLET_FACTORY;
 
+    IOracle public nativeAssetOracle;
+
     mapping(address => TokenSetting) public supportedToken;
 
     event ConfigUpdated(address token, address oracle, uint32 priceMarkup);
@@ -46,6 +48,11 @@ contract ERC20Paymaster is BasePaymaster {
     constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint, _owner) {
         require(address(_walletFactory) != address(0), "Paymaster: invalid etnrypoint addr");
         WALLET_FACTORY = _walletFactory;
+    }
+
+    function setNativeAssetOracle(address _oracle) external onlyOwner {
+        require(_oracle != address(0), "Paymaster: invalid oracle addr");
+        nativeAssetOracle = IOracle(_oracle);
     }
 
     function setToken(address[] calldata _tokens, address[] calldata _tokenOracles, uint32[] calldata _priceMarkups)
@@ -66,7 +73,7 @@ contract ERC20Paymaster is BasePaymaster {
             require(IOracle(_tokenOracle).decimals() == 8, "Paymaster: token oracle decimals must be 8");
             supportedToken[_token].priceMarkup = _priceMarkup;
             supportedToken[_token].tokenOracle = IOracle(_tokenOracle);
-            supportedToken[_token].tokenDecimals = IERC20Metadata(_token).decimals();
+            supportedToken[_token].tokenDecimals = 10 ** IERC20Metadata(_token).decimals();
             emit ConfigUpdated(_token, _tokenOracle, _priceMarkup);
         }
     }
@@ -78,7 +85,9 @@ contract ERC20Paymaster is BasePaymaster {
     function updatePrice(address token) external {
         require(isSupportToken(token), "Paymaster: token not support");
         uint192 tokenPrice = fetchPrice(supportedToken[token].tokenOracle);
-        supportedToken[token].previousPrice = tokenPrice;
+        uint192 nativeAssetPrice = fetchPrice(nativeAssetOracle);
+        supportedToken[token].previousPrice =
+            nativeAssetPrice * uint192(supportedToken[token].tokenDecimals) / tokenPrice;
     }
 
     function isSupportToken(address token) public view returns (bool) {
@@ -104,12 +113,9 @@ contract ERC20Paymaster is BasePaymaster {
         uint256 cachedPrice = supportedToken[token].previousPrice;
         require(cachedPrice != 0, "Paymaster: price not set");
 
-        uint256 exchangeRate = (cachedPrice * 10 ** supportedToken[token].tokenDecimals) / 10 ** 8;
-        // tokenRequiredPreFund = requiredPreFund * exchangeRate / 10^18
-
         uint256 costOfPost = userOp.gasPrice() * COST_OF_POST;
 
-        uint256 tokenRequiredPreFund = (requiredPreFund + costOfPost) * supportedToken[token].priceMarkup * exchangeRate
+        uint256 tokenRequiredPreFund = (requiredPreFund + costOfPost) * supportedToken[token].priceMarkup * cachedPrice
             / (1e18 * PRICE_DENOMINATOR);
 
         require(tokenRequiredPreFund <= maxCost, "Paymaster: maxCost too low");
@@ -128,7 +134,7 @@ contract ERC20Paymaster is BasePaymaster {
             sponsorWalletCreation = false;
         }
 
-        return (abi.encode(sender, token, costOfPost, exchangeRate, tokenRequiredPreFund, sponsorWalletCreation), 0);
+        return (abi.encode(sender, token, costOfPost, cachedPrice, tokenRequiredPreFund, sponsorWalletCreation), 0);
     }
 
     /*
@@ -188,12 +194,12 @@ contract ERC20Paymaster is BasePaymaster {
             address sender,
             address payable token,
             uint256 costOfPost,
-            uint256 exchangeRate,
+            uint256 cachedPrice,
             uint256 tokenRequiredPreFund,
             bool sponsorWalletCreation
         ) = abi.decode(context, (address, address, uint256, uint256, uint256, bool));
         uint256 tokenRequiredFund =
-            (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * exchangeRate / (1e18 * PRICE_DENOMINATOR);
+            (actualGasCost + costOfPost) * supportedToken[token].priceMarkup * cachedPrice / (1e18 * PRICE_DENOMINATOR);
         if (sponsorWalletCreation) {
             // if sponsor during wallet creatation, charge the acutal amount
             IERC20Metadata(token).safeTransferFrom(sender, address(this), tokenRequiredPreFund);
@@ -203,7 +209,9 @@ contract ERC20Paymaster is BasePaymaster {
         }
         // update oracle
         uint192 lasestTokenPrice = fetchPrice(supportedToken[token].tokenOracle);
-        supportedToken[token].previousPrice = lasestTokenPrice;
+        uint192 nativeAssetPrice = fetchPrice(nativeAssetOracle);
+        supportedToken[token].previousPrice =
+            nativeAssetPrice * uint192(supportedToken[token].tokenDecimals) / lasestTokenPrice;
         emit UserOperationSponsored(sender, token, tokenRequiredFund, actualGasCost);
     }
 

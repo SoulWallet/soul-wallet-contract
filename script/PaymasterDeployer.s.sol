@@ -92,7 +92,8 @@ contract PaymasterDeployer is Script, DeployHelper {
 
     function delpoyGoerli() private {
         address testUsdc = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
-        address testOracle = 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e;
+        address nativeOracle = 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e;
+        address usdcOracle = 0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7;
         address paymaster = deploy(
             "Paymaster",
             bytes.concat(
@@ -102,13 +103,14 @@ contract PaymasterDeployer is Script, DeployHelper {
         address[] memory tokens = new address[](1);
         tokens[0] = testUsdc;
         address[] memory oracles = new address[](1);
-        oracles[0] = testOracle;
+        oracles[0] = usdcOracle;
         uint32[] memory priceMarkups = new uint32[](1);
         priceMarkups[0] = 1e6;
 
         vm.stopBroadcast();
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
+        ERC20Paymaster(paymaster).setNativeAssetOracle(address(nativeOracle));
 
         IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.05 ether}(address(paymaster));
         ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
@@ -119,7 +121,8 @@ contract PaymasterDeployer is Script, DeployHelper {
 
     function delpoySepolia() private {
         address testUsdc = 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8;
-        address testOracle = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+        address usdcOracle = 0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E;
+        address nativeOracle = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
         address paymaster = deploy(
             "Paymaster",
             bytes.concat(
@@ -129,13 +132,15 @@ contract PaymasterDeployer is Script, DeployHelper {
         address[] memory tokens = new address[](1);
         tokens[0] = testUsdc;
         address[] memory oracles = new address[](1);
-        oracles[0] = testOracle;
+        oracles[0] = usdcOracle;
         uint32[] memory priceMarkups = new uint32[](1);
         priceMarkups[0] = 1e6;
 
         vm.stopBroadcast();
         // start broadcast using  paymasterOwner
         vm.startBroadcast(paymasterOwnerPrivateKey);
+
+        ERC20Paymaster(paymaster).setNativeAssetOracle(address(nativeOracle));
 
         IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.05 ether}(address(paymaster));
         ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
@@ -144,37 +149,7 @@ contract PaymasterDeployer is Script, DeployHelper {
         ERC20Paymaster(paymaster).updatePrice(address(testUsdc));
     }
 
-    function delpoyArbGoerli() private {
-        address testUsdc_bridge = 0x8FB1E3fC51F3b789dED7557E680551d93Ea9d892;
-        address testUsdc_circle = 0xfd064A18f3BF249cf1f87FC203E90D8f650f2d63;
-        address testOracle = 0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08;
-        address paymaster = deploy(
-            "Paymaster",
-            bytes.concat(
-                type(ERC20Paymaster).creationCode, abi.encode(ENTRYPOINT_ADDRESS, paymasterOwner, soulwalletFactory)
-            )
-        );
-        address[] memory tokens = new address[](2);
-        tokens[0] = testUsdc_bridge;
-        tokens[1] = testUsdc_circle;
-        address[] memory oracles = new address[](2);
-        oracles[0] = testOracle;
-        oracles[1] = testOracle;
-        uint32[] memory priceMarkups = new uint32[](2);
-        priceMarkups[0] = 1e6;
-        priceMarkups[1] = 1e6;
-
-        vm.stopBroadcast();
-        // start broadcast using  paymasterOwner
-        vm.startBroadcast(paymasterOwnerPrivateKey);
-
-        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
-        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
-
-        ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
-        ERC20Paymaster(paymaster).updatePrice(address(testUsdc_bridge));
-        ERC20Paymaster(paymaster).updatePrice(address(testUsdc_circle));
-    }
+    function delpoyArbGoerli() private {}
 
     function delpoyArbSepolia() private {
         address paymaster = deploy(
@@ -204,37 +179,7 @@ contract PaymasterDeployer is Script, DeployHelper {
         ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
     }
 
-    function delpoyOpGoerli() private {
-        address testUsdc_bridge = 0xe05606174bac4A6364B31bd0eCA4bf4dD368f8C6;
-        address testUsdc_circle = 0x7E07E15D2a87A24492740D16f5bdF58c16db0c4E;
-        address testOracle = 0x57241A37733983F97C4Ab06448F244A1E0Ca0ba8;
-        address paymaster = deploy(
-            "Paymaster",
-            bytes.concat(
-                type(ERC20Paymaster).creationCode, abi.encode(ENTRYPOINT_ADDRESS, paymasterOwner, soulwalletFactory)
-            )
-        );
-        address[] memory tokens = new address[](2);
-        tokens[0] = testUsdc_bridge;
-        tokens[1] = testUsdc_circle;
-        address[] memory oracles = new address[](2);
-        oracles[0] = testOracle;
-        oracles[1] = testOracle;
-        uint32[] memory priceMarkups = new uint32[](2);
-        priceMarkups[0] = 1e6;
-        priceMarkups[1] = 1e6;
-
-        vm.stopBroadcast();
-        // start broadcast using  paymasterOwner
-        vm.startBroadcast(paymasterOwnerPrivateKey);
-
-        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
-        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
-
-        ERC20Paymaster(paymaster).setToken(tokens, oracles, priceMarkups);
-        ERC20Paymaster(paymaster).updatePrice(address(testUsdc_bridge));
-        ERC20Paymaster(paymaster).updatePrice(address(testUsdc_circle));
-    }
+    function delpoyOpGoerli() private {}
 
     function delpoylocalEntryPoint() private {
         ENTRYPOINT_ADDRESS = deploy("EntryPoint", type(EntryPoint).creationCode);

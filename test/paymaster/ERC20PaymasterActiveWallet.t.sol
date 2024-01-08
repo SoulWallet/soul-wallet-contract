@@ -41,6 +41,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
     address payable beneficiary;
     TokenERC20 token;
     TestOracle testOracle;
+    TestOracle nativeAssetOracle;
     HelloWorld helloWorld;
 
     function setUp() public {
@@ -50,7 +51,8 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         beneficiary = payable(makeAddr("beneficiary"));
 
         token = new TokenERC20(6);
-        testOracle = new TestOracle(190355094900);
+        testOracle = new TestOracle(166590000);
+        nativeAssetOracle = new TestOracle(190355094900);
         helloWorld = new HelloWorld();
         bundler = new Bundler();
 
@@ -76,6 +78,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
 
         vm.deal(paymasterOwner, 10000e18);
         vm.startPrank(paymasterOwner);
+        paymaster.setNativeAssetOracle(address(nativeAssetOracle));
         entryPoint.depositTo{value: 1000e18}(address(paymaster));
         paymaster.addStake{value: 1000e18}(1);
         address[] memory tokens = new address[](1);

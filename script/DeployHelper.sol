@@ -21,7 +21,9 @@ enum Network {
     Anvil,
     Sepolia,
     ArbitrumSepolia,
-    OptimismSepolia
+    OptimismSepolia,
+    ScrollSepolia,
+    Scroll
 }
 
 library NetWorkLib {
@@ -52,6 +54,10 @@ library NetWorkLib {
             return Network.ArbitrumSepolia;
         } else if (block.chainid == 11155420) {
             return Network.OptimismSepolia;
+        } else if (block.chainid == 534352) {
+            return Network.Scroll;
+        } else if (block.chainid == 534351) {
+            return Network.ScrollSepolia;
         } else {
             revert("unsupported network");
         }
@@ -84,6 +90,10 @@ library NetWorkLib {
             return "ArbitrumSepolia";
         } else if (block.chainid == 11155420) {
             return "OptimismSepolia";
+        } else if (block.chainid == 534351) {
+            return "ScrollSepolia";
+        } else if (block.chainid == 534352) {
+            return "Scroll";
         } else {
             revert("unsupported network");
         }
@@ -96,7 +106,7 @@ abstract contract DeployHelper is Script {
     address internal constant SINGLE_USE_FACTORY_ADDRESS = 0xBb6e024b9cFFACB947A71991E386681B1Cd1477D;
     ISingletonFactory internal constant SINGLETON_FACTORY =
         ISingletonFactory(0xce0042B868300000d44A59004Da54A005ffdcf9f);
-    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x165));
+    bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x170));
     address internal constant EMPTY_ADDRESS = 0x0000000000000000000000000000000000000000;
     bytes emptyBytes;
     address internal ENTRYPOINT_ADDRESS = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;

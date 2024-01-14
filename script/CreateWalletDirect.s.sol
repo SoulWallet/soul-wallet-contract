@@ -202,6 +202,34 @@ contract CreateWalletDirect is Script {
         );
     }
 
+    function scrollMerkleProof() private {
+        address keyStoreMerkleProofAddr = loadEnvContract("ScrollKeyStoreMerkleProof");
+        keyStoreMerkleProof = KeyStoreMerkleProof(keyStoreMerkleProofAddr);
+        bytes32[] memory zeros = new bytes32[](32);
+        for (uint256 height = 0; height < 32 - 1; height++) {
+            zeros[height + 1] = keccak256(abi.encodePacked(zeros[height], zeros[height]));
+        }
+        bytes32[] memory proofs = new bytes32[](32);
+        for (uint256 i = 0; i < 32; i++) {
+            proofs[i] = zeros[i];
+        }
+
+        bytes32[] memory newOwners = new bytes32[](2);
+        newOwners[0] = walletSigner.toBytes32();
+        newOwners[1] = guardianAddress.toBytes32();
+        bytes32 initialKey_new_1 = keccak256(abi.encode(newOwners));
+
+        keyStoreMerkleProof.proveKeyStoreData(
+            hex"09DAD8B126439E69C798745D802291BD1E23A35E6D5DA810D0EFBA60D9CDFF42",
+            hex"CE4F2F67A6E8091D0E8ECD5466A7995BB60958864F0F11D03B3C2A39B333FF90",
+            initialKey_new_1,
+            abi.encode(newOwners),
+            5085308,
+            0,
+            proofs
+        );
+    }
+
     function loadEnvContract(string memory label) private view returns (address) {
         address contractAddress = vm.envAddress(label);
         require(contractAddress != address(0), string(abi.encodePacked(label, " not provided")));

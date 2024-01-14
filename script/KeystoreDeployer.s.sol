@@ -12,6 +12,8 @@ import "@source/modules/keystore/optimism/OpMerkleRootHistory.sol";
 import "@source/modules/keystore/optimism/OpKeyStoreCrossChainMerkleRootManager.sol";
 import "@source/modules/keystore/arbitrum/ArbMerkleRootHistory.sol";
 import "@source/modules/keystore/arbitrum/ArbKeyStoreCrossChainMerkleRootManager.sol";
+import "@source/modules/keystore/scroll/ScrollMerkleRootHistory.sol";
+import "@source/modules/keystore/scroll/ScrollKeyStoreCrossChainMerkleRootManager.sol";
 import "@source/modules/keystore/KeyStoreMerkleProof.sol";
 import "@source/keystore/L1/KeyStore.sol";
 import "@source/keystore/L1/KeyStoreStorage.sol";
@@ -30,10 +32,22 @@ contract KeyStoreDeployer is Script, DeployHelper {
     address private constant OP_GOERLI_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = 0x5086d1eEF304eb5284A0f6720f79403b4e9bE294;
     address private constant OP_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = 0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef;
     address private OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
+    //https://docs.scroll.io/en/developers/scroll-contracts/
+    address private constant SCROLL_MAINNET_L1_CROSS_DOMAIN_MESSENGER_ADDRESS =
+        0x6774Bcbd5ceCeF1336b5300fb5186a12DDD8b367;
+    address private constant SCROLL_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS =
+        0x50c7d3e7f7c656493D1D76aaa1a836CedfCBB16A;
+    address private constant SCROLL_MAINNET_L2_CROSS_DOMAIN_MESSENGER_ADDRESS =
+        0x781e90f1c8Fc4611c9b7497C3B47F99Ef6969CbC;
+    address private constant SCROLL_SEPOLIA_L2_CROSS_DOMAIN_MESSENGER_ADDRESS =
+        0xBa50f5340FB9F3Bd074bD638c9BE13eCB36E603d;
+    address private SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
+    address private SCROLL_L2_CROSS_DOMAIN_MESSENGER_ADDRESS;
 
     address l1KeyStoreAddress;
     address opKeyStoreCrossChainMerkleRootManagerAddress;
     address arbKeyStoreCrossChainMerkleRootManagerAddress;
+    address scrollKeyStoreCrossChainMerkleRootManagerAddress;
 
     address l1KeyStoreStorageAddress;
     address proxyAdminAddress;
@@ -52,45 +66,33 @@ contract KeyStoreDeployer is Script, DeployHelper {
         require(proxyAdminAddress != address(0), "proxyAdminAddress not provided");
         vm.startBroadcast(privateKey);
         Network network = getNetwork();
+        string memory networkName = NetWorkLib.getNetworkName();
+        console.log("deploy keystore contract on ", networkName);
+
         if (network == Network.Mainnet) {
-            console.log("deploy keystore contract on mainnet");
             ARB_RUNTIME_INBOX_ADDRESS = ARB_ONE_INBOX_ADDRESS;
             mainnetDeploy();
         } else if (network == Network.Goerli) {
-            console.log("deploy keystore contract on Goerli");
-            //Goerli deploy same logic as mainnet
             ARB_RUNTIME_INBOX_ADDRESS = ARB_GOERLI_INBOX_ADDRESS;
             OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = OP_GOERLI_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
+            OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = OP_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
+            SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = SCROLL_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
             mainnetDeploy();
-            // deployKeystore();
         } else if (network == Network.Sepolia) {
-            console.log("deploy keystore contract on Sepolia");
-            //Goerli deploy same logic as mainnet
             ARB_RUNTIME_INBOX_ADDRESS = ARB_SEPOLIA_INBOX_ADDRESS;
             OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = OP_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
+            SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS = SCROLL_SEPOLIA_L1_CROSS_DOMAIN_MESSENGER_ADDRESS;
             mainnetDeploy();
-            // deployKeystore();
-        } else if (network == Network.Arbitrum) {
-            console.log("deploy keystore contract on Arbitrum");
+        } else if (
+            network == Network.Arbitrum || network == Network.ArbitrumGoerli || network == Network.ArbitrumSepolia
+        ) {
             arbDeploy();
-        } else if (network == Network.ArbitrumGoerli) {
-            console.log("deploy keystore contract on Arbitrum");
-            arbDeploy();
-        } else if (network == Network.Optimism) {
-            console.log("deploy keystore contract on Optimism");
+        } else if (
+            network == Network.Optimism || network == Network.OptimismGoerli || network == Network.OptimismSepolia
+        ) {
             opDeploy();
-        } else if (network == Network.Anvil) {
-            console.log("deploy keystore contract on Anvil");
-            AnvilDeploy();
-        } else if (network == Network.OptimismGoerli) {
-            console.log("deploy soul wallet contract on OptimismGoerli");
-            opDeploy();
-        } else if (network == Network.ArbitrumSepolia) {
-            console.log("deploy keystore contract on ArbitrumSepolia");
-            arbDeploy();
-        } else if (network == Network.OptimismSepolia) {
-            console.log("deploy soul wallet contract on OptimismSepolia");
-            opDeploy();
+        } else if (network == Network.Scroll || network == Network.ScrollSepolia) {
+            scrollDeploy();
         } else {
             console.log("deploy keystore contract on testnet");
         }
@@ -140,6 +142,7 @@ contract KeyStoreDeployer is Script, DeployHelper {
         console.log("proxyAdminContractAddress", proxyAdminContractAddress);
         deployArbKeyStoreCrossChainMerkleRootManager(address(keyStoreStorage));
         deployOpKeyStoreCrossChainMerkleRootManager(address(keyStoreStorage));
+        deployScrollKeyStoreCrossChainMerkleRootManager(address(keyStoreStorage));
 
         vm.stopBroadcast();
         // start broadcast using proxyAdminAddress
@@ -168,7 +171,6 @@ contract KeyStoreDeployer is Script, DeployHelper {
     }
 
     function deployOpKeyStoreCrossChainMerkleRootManager(address _keyStoreStorage) private {
-        // deploy op l1blockinfo passing on l1
         require(OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS != address(0), "OP_L1_CROSS_DOMAIN_MESSENGER_ADDRESS empty");
         require(_keyStoreStorage != address(0), "keyStoreStorage address empty");
         address opKeyStoreCrossChainMerkleRootManager = deploy(
@@ -179,6 +181,23 @@ contract KeyStoreDeployer is Script, DeployHelper {
             )
         );
         writeAddressToEnv("OP_KEYSTORE_CROSSCHAIN_MERKLEROOT_MANAGER_ADDRESS", opKeyStoreCrossChainMerkleRootManager);
+    }
+
+    function deployScrollKeyStoreCrossChainMerkleRootManager(address _keyStoreStorage) private {
+        require(
+            SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS != address(0), "SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS empty"
+        );
+        require(_keyStoreStorage != address(0), "keyStoreStorage address empty");
+        address scrollKeyStoreCrossChainMerkleRootManager = deploy(
+            "ScrollKeyStoreCrossChainMerkleRootManager",
+            bytes.concat(
+                type(ScrollKeyStoreCrossChainMerkleRootManager).creationCode,
+                abi.encode(EMPTY_ADDRESS, _keyStoreStorage, SCROLL_L1_CROSS_DOMAIN_MESSENGER_ADDRESS, proxyAdminAddress)
+            )
+        );
+        writeAddressToEnv(
+            "SCROLL_KEYSTORE_CROSSCHAIN_MERKLEROOT_MANAGER_ADDRESS", scrollKeyStoreCrossChainMerkleRootManager
+        );
     }
 
     function arbDeploy() private {
@@ -282,5 +301,68 @@ contract KeyStoreDeployer is Script, DeployHelper {
         // setup l1 target
         OpMerkleRootHistory(opMerkleRootHistory).updateL1Target(opKeyStoreCrossChainMerkleRootManagerAddress);
         writeAddressToEnv("OP_MERKLE_ROOT_HISTORY_ADDRESS", opMerkleRootHistory);
+    }
+
+    function scrollDeploy() private {
+        l1KeyStoreStorageAddress = vm.envAddress("L1_KEYSTORE_STORAGE_ADDRESS");
+        require(l1KeyStoreStorageAddress != address(0), "L1_KEYSTORE_STORAGE_ADDRESS not provided");
+
+        require(address(SINGLETON_FACTORY).code.length > 0, "singleton factory not deployed");
+
+        scrollKeyStoreCrossChainMerkleRootManagerAddress =
+            vm.envAddress("SCROLL_KEYSTORE_CROSSCHAIN_MERKLEROOT_MANAGER_ADDRESS");
+        require(
+            scrollKeyStoreCrossChainMerkleRootManagerAddress != address(0),
+            "SCROLL_KEYSTORE_CROSSCHAIN_MERKLEROOT_MANAGER_ADDRESS not provided"
+        );
+        Network network = getNetwork();
+        if (network == Network.Scroll) {
+            SCROLL_L2_CROSS_DOMAIN_MESSENGER_ADDRESS = SCROLL_MAINNET_L2_CROSS_DOMAIN_MESSENGER_ADDRESS;
+        } else if (network == Network.ScrollSepolia) {
+            SCROLL_L2_CROSS_DOMAIN_MESSENGER_ADDRESS = SCROLL_SEPOLIA_L2_CROSS_DOMAIN_MESSENGER_ADDRESS;
+        }
+        // set l1 keystore address to adress(0) first, and then using owner to update true address
+        address scrollMerkleRootHistory = deploy(
+            "ScrollMerkleRootHistory",
+            bytes.concat(
+                type(ScrollMerkleRootHistory).creationCode,
+                abi.encode(EMPTY_ADDRESS, proxyAdminAddress, SCROLL_L2_CROSS_DOMAIN_MESSENGER_ADDRESS)
+            )
+        );
+        require(address(scrollMerkleRootHistory).code.length > 0, "scrollMerkleRootHistory deployed failed");
+
+        address keystoreProof = deploy(
+            "ScrollKeyStoreMerkleProof",
+            bytes.concat(type(KeyStoreMerkleProof).creationCode, abi.encode(scrollMerkleRootHistory))
+        );
+        require(address(keystoreProof).code.length > 0, "keystoreProof deployed failed");
+
+        address keyStoreModule =
+            deploy("ScrollKeyStoreModule", bytes.concat(type(KeyStoreModule).creationCode, abi.encode(keystoreProof)));
+        // deploy keystore module using proxy, the initial implemention address to SINGLE_USE_FACTORY_ADDRESS for keeping the same address with other network
+        require(address(keyStoreModule).code.length > 0, "keyStoreModule deployed failed");
+        address keyStoreProxy = deploy(
+            "KeyStoreModuleProxy",
+            bytes.concat(
+                type(TransparentUpgradeableProxy).creationCode,
+                abi.encode(address(SINGLETON_FACTORY), proxyAdminAddress, emptyBytes)
+            )
+        );
+        address proxyAdminContractAddress = getCreateAddress(keyStoreProxy, 1);
+        console.log("scroll proxyAdminContractAddress", proxyAdminContractAddress);
+        require(address(keyStoreProxy).code.length > 0, "keyStoreProxy deployed failed");
+        vm.stopBroadcast();
+        // start broadcast using proxyAdminAddress
+        vm.startBroadcast(proxyAdminPrivateKey);
+        bytes memory _data;
+        ProxyAdmin(proxyAdminContractAddress).upgradeAndCall(
+            ITransparentUpgradeableProxy(keyStoreProxy), keyStoreModule, _data
+        );
+
+        // setup l1 target
+        ScrollMerkleRootHistory(scrollMerkleRootHistory).updateL1Target(
+            scrollKeyStoreCrossChainMerkleRootManagerAddress
+        );
+        writeAddressToEnv("SCROLL_MERKLE_ROOT_HISTORY_ADDRESS", scrollMerkleRootHistory);
     }
 }

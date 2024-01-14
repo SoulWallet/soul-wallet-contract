@@ -58,6 +58,9 @@ contract PaymasterDeployer is Script, DeployHelper {
         } else if (network == Network.ArbitrumSepolia) {
             console.log("deploy paymaster contract on ArbitrumSepolia");
             delpoyArbSepolia();
+        } else if (network == Network.ScrollSepolia) {
+            console.log("deploy paymaster contract on ScrollSepolia");
+            delpoyScrollSepolia();
         } else {
             console.log("deploy paymaster contract on testnet");
             deploy();
@@ -152,6 +155,20 @@ contract PaymasterDeployer is Script, DeployHelper {
     function delpoyArbGoerli() private {}
 
     function delpoyArbSepolia() private {
+        address paymaster = deploy(
+            "Paymaster",
+            bytes.concat(
+                type(ERC20Paymaster).creationCode, abi.encode(ENTRYPOINT_ADDRESS, paymasterOwner, soulwalletFactory)
+            )
+        );
+        vm.stopBroadcast();
+        vm.startBroadcast(paymasterOwnerPrivateKey);
+
+        IEntryPoint(ENTRYPOINT_ADDRESS).depositTo{value: 0.03 ether}(address(paymaster));
+        ERC20Paymaster(paymaster).addStake{value: 0.03 ether}(1);
+    }
+
+    function delpoyScrollSepolia() private {
         address paymaster = deploy(
             "Paymaster",
             bytes.concat(

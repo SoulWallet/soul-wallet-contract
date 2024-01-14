@@ -30,7 +30,7 @@ contract OpKeyStoreCrossChainMerkleRootManager is Ownable {
     function syncKeyStoreMerkleRootToOp() public {
         bytes32 merkleRoot = IKeyStoreMerkleProof(l1KeyStore).getMerkleRoot();
         bytes memory data = abi.encodeCall(MerkleRootHistoryBase.setMerkleRoot, (merkleRoot));
-        ICrossDomainMessenger(l1CrossDomainMessenger).sendMessage(l2Target, data, 200000);
+        ICrossDomainMessenger(l1CrossDomainMessenger).sendMessage(l2Target, data, 400000);
         emit KeyStoreMerkleRootSyncedToOp(block.number, merkleRoot);
     }
 }

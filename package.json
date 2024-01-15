@@ -38,9 +38,9 @@
     "deploy:sepolia:all": "npm run deploy:sepolia:keystore && npm run deploy:sepolia:soulwallet && npm run deploy:sepolia:paymaster",
     "deploy:arb-sepolia:all": "npm run deploy:arb-sepolia:keystore && npm run deploy:arb-sepolia:soulwallet && npm run deploy:arb-sepolia:paymaster",
     "deploy:op-sepolia:all": "npm run deploy:op-sepolia:keystore && npm run deploy:op-sepolia:soulwallet && npm run deploy:op-sepolia:paymaster",
-    "deploy:scroll-sepolia:keystore": "source .env && forge script script/KeyStoreDeployer.s.sol:KeyStoreDeployer --ffi --slow --rpc-url $SCROLL_SEPOLIA_RPC_URL  --legacy --with-gas-price 3000000000 --broadcast --verify --etherscan-api-key $SCROLL_SEPOLIA_SCAN_API_KEY  --verifier-url https://api-sepolia.scrollscan.com/api",
-    "deploy:scroll-sepolia:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --slow --rpc-url $SCROLL_SEPOLIA_RPC_URL --legacy --with-gas-price 3000000000  --broadcast --verify --etherscan-api-key $SCROLL_SEPOLIA_SCAN_API_KEY  --verifier-url https://api-sepolia.scrollscan.com/api",
-    "deploy:scroll-sepolia:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --slow --rpc-url $SCROLL_SEPOLIA_RPC_URL  --legacy --with-gas-price 3000000000 --broadcast --verify --etherscan-api-key $SCROLL_SEPOLIA_SCAN_API_KEY  --verifier-url https://api-sepolia.scrollscan.com/api",
+    "deploy:scroll-sepolia:keystore": "source .env && forge script script/KeyStoreDeployer.s.sol:KeyStoreDeployer --ffi --slow --rpc-url scrollsepolia --broadcast --verify --legacy",
+    "deploy:scroll-sepolia:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --slow --rpc-url scrollsepolia --broadcast --verify --legacy",
+    "deploy:scroll-sepolia:paymaster": "source .env && forge script script/PaymasterDeployer.s.sol:PaymasterDeployer --ffi --slow --rpc-url scrollsepolia --broadcast --verify --legacy",
     "deploy:scroll-sepolia:all": "npm run deploy:scroll-sepolia:keystore && npm run deploy:scroll-sepolia:soulwallet && npm run deploy:scroll-sepolia:paymaster",
     "deploy:all-sepolia": "npm run deploy:sepolia:all && npm run deploy:scroll-sepolia:all && npm run deploy:arb-sepolia:all && npm run deploy:op-sepolia:all",
     "gas-report": "forge test --gas-report"

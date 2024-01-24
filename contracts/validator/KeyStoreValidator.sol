@@ -19,29 +19,9 @@ contract KeyStoreValidator is IKeyStoreValidator {
         uint8 signatureType;
         bytes calldata signature;
         uint256 validationData;
-        (signatureType, validationData, signature) = ValidatorSigDecoder.decodeValidatorSignature(rawSignature);
+        (signatureType,, signature) = ValidatorSigDecoder.decodeValidatorSignature(rawSignature);
 
-        bytes32 hash = _packSignatureHash(rawHash, signatureType, validationData);
-
-        (recovered, success) = recover(signatureType, hash, signature);
-    }
-
-    function _packSignatureHash(bytes32 _hash, uint8 signatureType, uint256 validationData)
-        internal
-        pure
-        returns (bytes32 packedHash)
-    {
-        if (signatureType == 0x0) {
-            packedHash = _hash;
-        } else if (signatureType == 0x1) {
-            packedHash = keccak256(abi.encodePacked(_hash, validationData));
-        } else if (signatureType == 0x2) {
-            packedHash = _hash;
-        } else if (signatureType == 0x3) {
-            packedHash = keccak256(abi.encodePacked(_hash, validationData));
-        } else {
-            revert Errors.INVALID_SIGNTYPE();
-        }
+        (recovered, success) = recover(signatureType, rawHash, signature);
     }
 
     function recover(uint8 signatureType, bytes32 rawHash, bytes calldata rawSignature)

@@ -9,6 +9,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@source/libraries/TypeConversion.sol";
 import {Solenv} from "@solenv/Solenv.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
 
 contract CreateWalletEntryPoint is Script {
     using ECDSA for bytes32;
@@ -91,9 +92,9 @@ contract CreateWalletEntryPoint is Script {
         console.log("cacluatedAddress", cacluatedAddress);
 
         entryPoint.depositTo{value: 0.005 ether}(cacluatedAddress);
-        UserOperation[] memory ops = new UserOperation[](1);
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
 
-        UserOperation memory userOperation = UserOperation({
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
             sender: cacluatedAddress,
             nonce: 0,
             initCode: initCode,
@@ -103,8 +104,7 @@ contract CreateWalletEntryPoint is Script {
             preVerificationGas: 300000,
             maxFeePerGas: 10000,
             maxPriorityFeePerGas: 10000,
-            paymasterAndData: hex"",
-            signature: hex""
+            paymasterAndData: hex""
         });
         userOperation.signature = signUserOp(userOperation, walletSingerPrivateKey, soulWalletDefaultValidator);
         logUserOp(userOperation);
@@ -114,7 +114,7 @@ contract CreateWalletEntryPoint is Script {
         entryPoint.handleOps(ops, payable(walletSigner));
     }
 
-    function logUserOp(UserOperation memory op) private view {
+    function logUserOp(PackedUserOperation memory op) private view {
         console.log("sender: ", op.sender);
         console.log("nonce: ", op.nonce);
         console.log("initCode: ");
@@ -127,7 +127,7 @@ contract CreateWalletEntryPoint is Script {
         console.logBytes(op.signature);
     }
 
-    function signUserOp(UserOperation memory op, uint256 _key, address _validator)
+    function signUserOp(PackedUserOperation memory op, uint256 _key, address _validator)
         public
         view
         returns (bytes memory signature)

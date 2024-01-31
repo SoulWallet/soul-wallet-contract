@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
@@ -11,7 +11,7 @@ import {ReceiverHandler} from "./dev/ReceiverHandler.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {DeployEntryPoint} from "./dev/deployEntryPoint.sol";
 import {SoulWalletFactory} from "./dev/SoulWalletFactory.sol";
-import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS} from "../contracts/utils/Constants.sol";
 
 contract OwnerManagerTest is Test {
@@ -74,43 +74,16 @@ contract OwnerManagerTest is Test {
         return abi.encodePacked(validatorAddress, sigLen, signature);
     }
 
-    function getUserOpHash(UserOperation memory userOp) private view returns (bytes32) {
+    function getUserOpHash(PackedUserOperation memory userOp) private view returns (bytes32) {
         return entryPoint.getUserOpHash(userOp);
     }
 
-    function signUserOp(UserOperation memory userOperation) private view returns (bytes32 userOpHash) {
+    function signUserOp(PackedUserOperation memory userOperation) private view returns (bytes32 userOpHash) {
         userOpHash = getUserOpHash(userOperation);
         bytes32 hash = _packHash(userOperation.sender, userOpHash).toEthSignedMessageHash();
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, hash);
         bytes memory _signature = _packSignature(address(validator), abi.encodePacked(r, s, v));
         userOperation.signature = _signature;
-    }
-
-    function newUserOp(address sender) private pure returns (UserOperation memory) {
-        uint256 nonce = 0;
-        bytes memory initCode;
-        bytes memory callData;
-        uint256 callGasLimit;
-        uint256 verificationGasLimit = 1e6;
-        uint256 preVerificationGas = 1e5;
-        uint256 maxFeePerGas = 100 gwei;
-        uint256 maxPriorityFeePerGas = 100 gwei;
-        bytes memory paymasterAndData;
-        bytes memory signature;
-        UserOperation memory userOperation = UserOperation(
-            sender,
-            nonce,
-            initCode,
-            callData,
-            callGasLimit,
-            verificationGasLimit,
-            preVerificationGas,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
-        );
-        return userOperation;
     }
 
     function test_Owner() public {

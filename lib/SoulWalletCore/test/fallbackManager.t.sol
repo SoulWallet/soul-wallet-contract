@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
@@ -11,7 +11,7 @@ import {ReceiverHandler} from "./dev/ReceiverHandler.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {DeployEntryPoint} from "./dev/deployEntryPoint.sol";
 import {SoulWalletFactory} from "./dev/SoulWalletFactory.sol";
-import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS} from "../contracts/utils/Constants.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
@@ -75,54 +75,17 @@ contract FallbackManagerTest is Test {
         return abi.encodePacked(validatorAddress, sigLen, signature);
     }
 
-    function getUserOpHash(UserOperation memory userOp) private view returns (bytes32) {
-        return entryPoint.getUserOpHash(userOp);
-    }
-
-    function signUserOp(UserOperation memory userOperation) private view returns (bytes32 userOpHash) {
-        userOpHash = getUserOpHash(userOperation);
-        bytes32 hash = _packHash(userOperation.sender, userOpHash).toEthSignedMessageHash();
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, hash);
-        bytes memory _signature = _packSignature(address(validator), abi.encodePacked(r, s, v));
-        userOperation.signature = _signature;
-    }
-
-    function newUserOp(address sender) private pure returns (UserOperation memory) {
-        uint256 nonce = 0;
-        bytes memory initCode;
-        bytes memory callData;
-        uint256 callGasLimit;
-        uint256 verificationGasLimit = 1e6;
-        uint256 preVerificationGas = 1e5;
-        uint256 maxFeePerGas = 100 gwei;
-        uint256 maxPriorityFeePerGas = 100 gwei;
-        bytes memory paymasterAndData;
-        bytes memory signature;
-        UserOperation memory userOperation = UserOperation(
-            sender,
-            nonce,
-            initCode,
-            callData,
-            callGasLimit,
-            verificationGasLimit,
-            preVerificationGas,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
-        );
-        return userOperation;
-    }
-
     function test_Fallback() public {
         // send 1eth from walletOwner to address(wallet);
         address _wallet = address(wallet);
         uint256 _1_ether = 1 ether;
         assertEq(address(_wallet).balance, 0);
-        address(_wallet).call{value: _1_ether}("");
+        bool _1;
+        bytes memory _2;
+        (_1, _2) = address(_wallet).call{value: _1_ether}("");
         assertEq(address(_wallet).balance, _1_ether);
 
-        address(_wallet).call{value: _1_ether}(hex"aa");
+        (_1, _2) = address(_wallet).call{value: _1_ether}(hex"aa");
         assertEq(address(_wallet).balance, _1_ether * 2);
 
         vm.expectRevert(CALLER_MUST_BE_SELF_OR_MODULE.selector);
@@ -135,11 +98,11 @@ contract FallbackManagerTest is Test {
         vm.stopPrank();
 
         assertEq(address(_wallet).balance, _1_ether * 2);
-        address(_wallet).call{value: _1_ether}("");
+        (_1, _2) = address(_wallet).call{value: _1_ether}("");
         assertEq(address(_wallet).balance, _1_ether * 3);
 
         assertEq(address(_wallet).balance, _1_ether * 3);
-        address(_wallet).call{value: _1_ether}("aa");
+        (_1, _2) = address(_wallet).call{value: _1_ether}("aa");
         assertEq(address(_wallet).balance, _1_ether * 4);
 
         vm.startPrank(address(wallet));

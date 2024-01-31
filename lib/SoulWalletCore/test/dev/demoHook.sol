@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import {IHook} from "../../contracts/interface/IHook.sol";
-import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {IStandardExecutor, Execution} from "../../contracts/interface/IStandardExecutor.sol";
 import {IHookManager} from "../../contracts/interface/IHookManager.sol";
 
@@ -37,7 +37,7 @@ contract DemoHook is IHook {
     }
 
     function preUserOpValidationHook(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds,
         bytes calldata hookSignature

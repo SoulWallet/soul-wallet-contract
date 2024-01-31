@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {IAccount, UserOperation} from "@soulwallet-core/contracts/interface/IAccount.sol";
+import {IAccount, PackedUserOperation} from "@soulwallet-core/contracts/interface/IAccount.sol";
 import {EntryPointManager} from "@soulwallet-core/contracts/base/EntryPointManager.sol";
 import {FallbackManager} from "@soulwallet-core/contracts/base/FallbackManager.sol";
 import {StandardExecutor} from "@soulwallet-core/contracts/base/StandardExecutor.sol";
@@ -88,7 +88,7 @@ contract SoulWallet is
         return SignatureDecoder.signatureSplit(signature);
     }
 
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         public
         payable
         virtual

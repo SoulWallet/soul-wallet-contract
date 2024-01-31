@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {UserOperation} from "../interface/IAccount.sol";
+import {PackedUserOperation} from "../interface/IAccount.sol";
 import {IPluggable} from "./IPluggable.sol";
 
 interface IValidator is IPluggable {
@@ -25,8 +25,8 @@ interface IValidator is IPluggable {
         returns (bytes4 magicValue);
 
     /**
-     * @dev EIP-4337 validate userOperation
-     * NOTE: Do not rely on userOperation.signature, which may be empty in some versions of the implementation, see: contract/utils/CalldataPack.sol
+     * @dev EIP-4337 validate PackedUserOperation
+     * NOTE: Do not rely on PackedUserOperation.signature, which may be empty in some versions of the implementation, see: https://github.com/SoulWallet/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol
      * @param userOp the operation that is about to be executed.
      * @param userOpHash hash of the user's request data. can be used as the basis for signature.
      * @param validatorSignature Signature
@@ -38,7 +38,7 @@ interface IValidator is IPluggable {
      *      If an account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.
      *      Note that the validation code cannot use block.timestamp (or block.number) directly.
      */
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
         external
         returns (uint256 validationData);
 }

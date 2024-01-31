@@ -15,6 +15,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IStandardExecutor} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
 import "@source/libraries/TypeConversion.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
 
 contract ERC20PaymasterTest is Test, UserOpHelper {
     using ECDSA for bytes32;
@@ -114,7 +115,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
 
     function testWithoutPaymaster() external {
         vm.deal(address(soulWallet), 1e18);
-        (UserOperation memory op, uint256 prefund) =
+        (PackedUserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
         (prefund);
         op.signature = signUserOp(
@@ -129,12 +130,14 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         token.sudoMint(address(soulWallet), 1000e6);
         token.sudoMint(address(paymaster), 1);
         token.sudoApprove(address(soulWallet), address(paymaster), 1000e6);
-        (UserOperation memory op, uint256 prefund) =
+        (PackedUserOperation memory op, uint256 prefund) =
             fillUserOp(soulWallet, ownerKey, address(helloWorld), 0, abi.encodeWithSelector(helloWorld.output.selector));
         (prefund);
         vm.breakpoint("a");
-        op.paymasterAndData =
-            BytesLibTest.concat(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
+        op.paymasterAndData = BytesLibTest.concat(
+            abi.encodePacked(address(paymaster), uint128(400000), uint128(400000)),
+            abi.encode(address(token), uint256(1000e6))
+        );
         vm.breakpoint("b");
         op.signature = signUserOp(
             soulWalletInstence.entryPoint(), op, ownerKey, address(soulWalletInstence.soulWalletDefaultValidator())
@@ -144,42 +147,27 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
 
     function fillUserOp(ISoulWallet _sender, uint256 _key, address _to, uint256 _value, bytes memory _data)
         public
-        returns (UserOperation memory op, uint256 prefund)
+        returns (PackedUserOperation memory op, uint256 prefund)
     {
-        op.sender = address(_sender);
-        op.nonce = entryPoint.getNonce(address(_sender), 0);
-        op.callData = abi.encodeWithSelector(IStandardExecutor.execute.selector, _to, _value, _data);
-        op.callGasLimit = 50000;
-        op.verificationGasLimit = 300000;
-        op.preVerificationGas = 50000;
-        op.maxFeePerGas = 1000000000;
-        op.maxPriorityFeePerGas = 100;
+        op = UserOperationHelper.newUserOp({
+            sender: address(_sender),
+            nonce: entryPoint.getNonce(address(_sender), 0),
+            initCode: hex"",
+            callData: abi.encodeWithSelector(IStandardExecutor.execute.selector, _to, _value, _data),
+            callGasLimit: simulateCallGas(entryPoint, op),
+            verificationGasLimit: 300000,
+            preVerificationGas: 50000,
+            maxFeePerGas: 1000000000,
+            maxPriorityFeePerGas: 100,
+            paymasterAndData: hex""
+        });
+
         op.signature = signUserOp(
             soulWalletInstence.entryPoint(), op, _key, address(soulWalletInstence.soulWalletDefaultValidator())
         );
-        (op, prefund) = simulateVerificationGas(entryPoint, op);
-        op.callGasLimit = simulateCallGas(entryPoint, op);
     }
 
-    function simulateVerificationGas(EntryPoint _entrypoint, UserOperation memory op)
-        public
-        returns (UserOperation memory, uint256 preFund)
-    {
-        (bool success, bytes memory ret) =
-            address(_entrypoint).call(abi.encodeWithSelector(EntryPoint.simulateValidation.selector, op));
-        require(!success);
-        bytes memory data = BytesLibTest.slice(ret, 4, ret.length - 4);
-        (IEntryPoint.ReturnInfo memory retInfo,,,) = abi.decode(
-            data, (IEntryPoint.ReturnInfo, IStakeManager.StakeInfo, IStakeManager.StakeInfo, IStakeManager.StakeInfo)
-        );
-        op.preVerificationGas = retInfo.preOpGas;
-        op.verificationGasLimit = retInfo.preOpGas;
-        op.maxFeePerGas = (retInfo.prefund * 11) / (retInfo.preOpGas * 10);
-        op.maxPriorityFeePerGas = 1;
-        return (op, retInfo.prefund);
-    }
-
-    function simulateCallGas(EntryPoint _entrypoint, UserOperation memory op) internal returns (uint256) {
+    function simulateCallGas(EntryPoint _entrypoint, PackedUserOperation memory op) internal returns (uint256) {
         try this.calcGas(_entrypoint, op.sender, op.callData) {
             revert("Should have failed");
         } catch Error(string memory reason) {

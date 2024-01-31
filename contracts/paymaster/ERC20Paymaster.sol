@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
 
 // Import the required libraries and contracts
 import "@account-abstraction/contracts/core/BasePaymaster.sol";
-import "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IOracle.sol";
@@ -22,7 +22,7 @@ struct TokenSetting {
 }
 
 contract ERC20Paymaster is BasePaymaster {
-    using UserOperationLib for UserOperation;
+    using UserOperationLib for PackedUserOperation;
     using SafeERC20 for IERC20Metadata;
 
     uint256 public constant PRICE_DENOMINATOR = 1e6;
@@ -45,8 +45,9 @@ contract ERC20Paymaster is BasePaymaster {
 
     event UserOperationSponsored(address indexed user, address token, uint256 actualTokenNeeded, uint256 actualGasCost);
 
-    constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint, _owner) {
+    constructor(IEntryPoint _entryPoint, address _owner, address _walletFactory) BasePaymaster(_entryPoint) {
         require(address(_walletFactory) != address(0), "Paymaster: invalid etnrypoint addr");
+        _transferOwnership(_owner);
         WALLET_FACTORY = _walletFactory;
     }
 
@@ -94,19 +95,20 @@ contract ERC20Paymaster is BasePaymaster {
         return address(supportedToken[token].tokenOracle) != address(0);
     }
 
-    function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32, uint256 requiredPreFund)
+    function _validatePaymasterUserOp(PackedUserOperation calldata userOp, bytes32, uint256 requiredPreFund)
         internal
         override
         returns (bytes memory context, uint256 validationResult)
     {
-        require(userOp.verificationGasLimit > 45000, "Paymaster: gas too low for postOp");
+        require(userOp.unpackVerificationGasLimit() > 45000, "Paymaster: gas too low for postOp");
 
         address sender = userOp.getSender();
 
         // paymasterAndData: [paymaster, token, maxCost]
         // The length check prevents the user from add exceeding calldata, which could drain paymaster deposits in entrypoint
-        require(userOp.paymasterAndData.length == 84, "invalid data length");
-        (address token, uint256 maxCost) = abi.decode(userOp.paymasterAndData[20:], (address, uint256));
+        require(userOp.paymasterAndData.length == 116, "invalid data length");
+        (address token, uint256 maxCost) =
+            abi.decode(userOp.paymasterAndData[PAYMASTER_DATA_OFFSET:], (address, uint256));
         require(isSupportToken(token), "Paymaster: token not support");
         IERC20Metadata ERC20Token = IERC20Metadata(token);
 
@@ -142,7 +144,7 @@ contract ERC20Paymaster is BasePaymaster {
     * @dev The Paymaster is potentially vulnerable to attacks, which poses a risk of reputation loss.
     * The approval check in this context does not guarantee that the Paymaster will successfully receive the corresponding tokens via transferFrom in subsequent _postOp operations.
     */
-    function _validateConstructor(UserOperation calldata userOp, address token, uint256 tokenRequiredPreFund)
+    function _validateConstructor(PackedUserOperation calldata userOp, address token, uint256 tokenRequiredPreFund)
         internal
         view
     {
@@ -174,7 +176,7 @@ contract ERC20Paymaster is BasePaymaster {
         require(checkAllowance, "no approve found");
         // callGasLimit
         uint256 callGasLimit = executions.length * _SAFE_APPROVE_GAS_COST;
-        require(userOp.callGasLimit >= callGasLimit, "Paymaster: gas too low for postOp");
+        require(userOp.unpackCallGasLimit() >= callGasLimit, "Paymaster: gas too low for postOp");
     }
 
     function _decodeApprove(bytes memory func) private pure returns (address spender, uint256 value) {
@@ -186,7 +188,10 @@ contract ERC20Paymaster is BasePaymaster {
         }
     }
 
-    function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
+    function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost, uint256 actualUserOpFeePerGas)
+        internal
+        override
+    {
         if (mode == PostOpMode.postOpReverted) {
             return; // Do nothing here to not revert the whole bundle and harm reputation
         }

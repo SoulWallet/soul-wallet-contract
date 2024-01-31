@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
@@ -16,7 +16,7 @@ abstract contract UserOpHelper is Test {
         entryPoint = new EntryPoint();
     }
 
-    function signUserOp(UserOperation memory op, uint256 _key, address _validator)
+    function signUserOp(PackedUserOperation memory op, uint256 _key, address _validator)
         public
         view
         returns (bytes memory signature)
@@ -31,7 +31,7 @@ abstract contract UserOpHelper is Test {
         signature = opSig;
     }
 
-    function signUserOp(UserOperation memory op, uint256 _key, address _validator, bytes memory hookData)
+    function signUserOp(PackedUserOperation memory op, uint256 _key, address _validator, bytes memory hookData)
         public
         view
         returns (bytes memory signature)
@@ -46,7 +46,7 @@ abstract contract UserOpHelper is Test {
         signature = opSig;
     }
 
-    function signUserOp(EntryPoint _entryPoint, UserOperation memory op, uint256 _key, address _validator)
+    function signUserOp(EntryPoint _entryPoint, PackedUserOperation memory op, uint256 _key, address _validator)
         public
         view
         returns (bytes memory signature)
@@ -63,7 +63,7 @@ abstract contract UserOpHelper is Test {
 
     function signUserOp(
         EntryPoint _entryPoint,
-        UserOperation memory op,
+        PackedUserOperation memory op,
         uint256 _key,
         address _validator,
         bytes memory hookData

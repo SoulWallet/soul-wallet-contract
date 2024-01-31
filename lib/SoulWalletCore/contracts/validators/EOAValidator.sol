@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import {IValidator} from "../interface/IValidator.sol";
-import {UserOperation} from "../interface/IAccount.sol";
+import {PackedUserOperation} from "../interface/IAccount.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IOwnable} from "../interface/IOwnable.sol";
@@ -65,7 +65,7 @@ contract EOAValidator is IValidator {
         return _isOwner(recoveredAddr) ? MAGICVALUE : bytes4(0);
     }
 
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
         external
         view
         override

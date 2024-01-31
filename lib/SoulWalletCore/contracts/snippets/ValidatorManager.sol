@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {UserOperation} from "../interface/IAccount.sol";
+import {PackedUserOperation} from "../interface/IAccount.sol";
 
 abstract contract ValidatorManagerSnippet {
     /**
@@ -48,7 +48,7 @@ abstract contract ValidatorManagerSnippet {
      * @return validationData refer to https://github.com/eth-infinitism/account-abstraction/blob/v0.6.0/contracts/interfaces/IAccount.sol#L24-L30
      */
     function _validateUserOp(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         address validator,
         bytes calldata validatorSignature

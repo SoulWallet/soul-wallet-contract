@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {IValidator} from "@soulwallet-core/contracts/interface/IValidator.sol";
 import {IOwnable} from "@soulwallet-core/contracts/interface/IOwnable.sol";
-import {UserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
+import {PackedUserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "./libraries/ValidatorSigDecoder.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -23,14 +23,12 @@ contract SoulWalletDefaultValidator is IValidator {
     // Constants indicating different invalid states
     bytes4 internal constant INVALID_ID = 0xffffffff;
     bytes4 internal constant INVALID_TIME_RANGE = 0xfffffffe;
-    // ERC4337 constants
-    uint256 constant SIG_VALIDATION_FAILED = 1;
     // Utility for Ethereum typed structured data hashing
 
     using MessageHashUtils for bytes32;
     using TypeConversion for address;
 
-    function validateUserOp(UserOperation calldata, bytes32 userOpHash, bytes calldata validatorSignature)
+    function validateUserOp(PackedUserOperation calldata, bytes32 userOpHash, bytes calldata validatorSignature)
         external
         view
         override

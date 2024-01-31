@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
@@ -11,9 +11,10 @@ import {ReceiverHandler} from "./dev/ReceiverHandler.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {DeployEntryPoint} from "./dev/deployEntryPoint.sol";
 import {SoulWalletFactory} from "./dev/SoulWalletFactory.sol";
-import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS} from "../contracts/utils/Constants.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {UserOperationHelper} from "./dev/userOperationHelper.sol";
 
 contract ValidatorManagerTest is Test {
     using MessageHashUtils for bytes32;
@@ -75,43 +76,16 @@ contract ValidatorManagerTest is Test {
         return abi.encodePacked(validatorAddress, sigLen, signature);
     }
 
-    function getUserOpHash(UserOperation memory userOp) private view returns (bytes32) {
+    function getUserOpHash(PackedUserOperation memory userOp) private view returns (bytes32) {
         return entryPoint.getUserOpHash(userOp);
     }
 
-    function signUserOp(UserOperation memory userOperation) private view returns (bytes32 userOpHash) {
+    function signUserOp(PackedUserOperation memory userOperation) private view returns (bytes32 userOpHash) {
         userOpHash = getUserOpHash(userOperation);
         bytes32 hash = _packHash(userOperation.sender, userOpHash).toEthSignedMessageHash();
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(walletOwnerPrivateKey, hash);
         bytes memory _signature = _packSignature(address(validator), abi.encodePacked(r, s, v));
         userOperation.signature = _signature;
-    }
-
-    function newUserOp(address sender) private pure returns (UserOperation memory) {
-        uint256 nonce = 0;
-        bytes memory initCode;
-        bytes memory callData;
-        uint256 callGasLimit;
-        uint256 verificationGasLimit = 1e6;
-        uint256 preVerificationGas = 1e5;
-        uint256 maxFeePerGas = 100 gwei;
-        uint256 maxPriorityFeePerGas = 100 gwei;
-        bytes memory paymasterAndData;
-        bytes memory signature;
-        UserOperation memory userOperation = UserOperation(
-            sender,
-            nonce,
-            initCode,
-            callData,
-            callGasLimit,
-            verificationGasLimit,
-            preVerificationGas,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
-        );
-        return userOperation;
     }
 
     error INVALID_VALIDATOR();
@@ -150,17 +124,20 @@ contract ValidatorManagerTest is Test {
         assertEq(validators.length, 1);
         vm.stopPrank();
 
-        UserOperation memory userOperation = newUserOp(address(wallet));
-        userOperation.nonce = 1;
-        userOperation.callGasLimit = 200000;
-        // function execute(address target, uint256 value, bytes calldata data) external payable;
-        userOperation.callData = abi.encodeWithSelector(walletImpl.execute.selector, address(10), 1 ether, "");
-        userOperation.verificationGasLimit = 1e6;
-        userOperation.preVerificationGas = 1e5;
-        userOperation.maxFeePerGas = 100 gwei;
-        userOperation.maxPriorityFeePerGas = 100 gwei;
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp(
+            address(wallet), // address sender,
+            1, // uint256 nonce,
+            hex"", //  bytes memory initCode,
+            abi.encodeWithSelector(walletImpl.execute.selector, address(10), 1 ether, ""), // bytes memory callData,
+            1e6, // uint256 verificationGasLimit,
+            200000, //   uint256 callGasLimit,
+            1e5, //   uint256 preVerificationGas,
+            100 gwei, //   uint256 maxFeePerGas,
+            100 gwei, //  uint256 maxPriorityFeePerGas,
+            hex"" // bytes memory paymasterAndData
+        );
 
-        // function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+        // function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         vm.startPrank(address(entryPoint));
 
         bytes32 userOpHash = signUserOp(userOperation);

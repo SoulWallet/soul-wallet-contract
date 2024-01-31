@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {IHook, UserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
+import {IHook, PackedUserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
@@ -44,7 +44,7 @@ contract Crypto2FAHook is IHook {
     }
 
     function preUserOpValidationHook(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds,
         bytes calldata hookSignature

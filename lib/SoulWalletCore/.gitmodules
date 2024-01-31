@@ -4,9 +4,6 @@
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/Openzeppelin/openzeppelin-contracts
-	branch = release-v5.0
 [submodule "lib/account-abstraction"]
 	path = lib/account-abstraction
-	url = https://github.com/SoulWallet/account-abstraction
-	branch = v0.6.0-with-openzeppelin-v5
-
+	url = https://github.com/eth-infinitism/account-abstraction

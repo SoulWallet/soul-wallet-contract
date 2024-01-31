@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {UserOperation} from "../contracts/interface/IAccount.sol";
+import {PackedUserOperation} from "../contracts/interface/IAccount.sol";
 import {SoulWalletCore} from "../contracts/SoulWalletCore.sol";
-import {UserOperation} from "../contracts/interface/IAccount.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {OwnerManagerSnippet} from "../contracts/snippets/OwnerManager.sol";
@@ -46,11 +45,11 @@ abstract contract BuildinEOAValidator is OwnerManagerSnippet {
         return _isOwner(bytes32(uint256(uint160(recoveredAddr)))) ? __MAGICVALUE : bytes4(0);
     }
 
-    function __validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
-        internal
-        view
-        returns (uint256 validationData)
-    {
+    function __validateUserOp(
+        PackedUserOperation calldata userOp,
+        bytes32 userOpHash,
+        bytes calldata validatorSignature
+    ) internal view returns (uint256 validationData) {
         (userOp);
 
         if (validatorSignature.length != 65) {
@@ -119,7 +118,7 @@ contract ModularAccountWithBuildinEOAValidator is
      * @return validationData refer to https://github.com/eth-infinitism/account-abstraction/blob/v0.6.0/contracts/interfaces/IAccount.sol#L24-L30
      */
     function _validateUserOp(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         address validator,
         bytes calldata validatorSignature

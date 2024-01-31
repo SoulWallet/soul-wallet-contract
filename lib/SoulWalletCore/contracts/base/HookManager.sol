@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import {Authority} from "./Authority.sol";
 import {IHookManager} from "../interface/IHookManager.sol";
 import {IHook} from "../interface/IHook.sol";
 import {IPluggable} from "../interface/IPluggable.sol";
-import {IAccount, UserOperation} from "../interface/IAccount.sol";
+import {IAccount, PackedUserOperation} from "../interface/IAccount.sol";
 import {AccountStorage} from "../utils/AccountStorage.sol";
 import {AddressLinkedList} from "../utils/AddressLinkedList.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -255,7 +255,7 @@ abstract contract HookManager is Authority, IHookManager, HookManagerSnippet {
      * @param hookSignatures The hook signatures
      */
     function _preUserOpValidationHook(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds,
         bytes calldata hookSignatures

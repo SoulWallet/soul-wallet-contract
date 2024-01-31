@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {IAccount, UserOperation} from "./interface/IAccount.sol";
+import {IAccount, PackedUserOperation} from "./interface/IAccount.sol";
 import {EntryPointManager} from "./base/EntryPointManager.sol";
 import {FallbackManager} from "./base/FallbackManager.sol";
 import {ModuleManager} from "./base/ModuleManager.sol";
@@ -62,7 +62,7 @@ contract SoulWalletCore is
         return SignatureDecoder.signatureSplit(signature);
     }
 
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
         public
         payable
         virtual

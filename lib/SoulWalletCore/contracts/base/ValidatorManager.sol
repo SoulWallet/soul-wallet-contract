@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import {Authority} from "./Authority.sol";
 import {IValidatorManager} from "../interface/IValidatorManager.sol";
 import {IValidator} from "../interface/IValidator.sol";
-import {UserOperation} from "../interface/IAccount.sol";
+import {PackedUserOperation} from "../interface/IAccount.sol";
 import {AccountStorage} from "../utils/AccountStorage.sol";
 import {AddressLinkedList} from "../utils/AddressLinkedList.sol";
 import {SIG_VALIDATION_FAILED} from "../utils/Constants.sol";
@@ -132,7 +132,7 @@ abstract contract ValidatorManager is Authority, IValidatorManager, ValidatorMan
      * @return validationData refer to https://github.com/eth-infinitism/account-abstraction/blob/v0.6.0/contracts/interfaces/IAccount.sol#L24-L30
      */
     function _validateUserOp(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         address validator,
         bytes calldata validatorSignature

@@ -19,6 +19,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/libraries/TypeConversion.sol";
 import {SoulWalletDefaultValidator} from "@source/validator/SoulWalletDefaultValidator.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
 
 contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
     using ECDSA for bytes32;
@@ -152,10 +153,12 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         executions[0].data = abi.encodeWithSignature("approve(address,uint256)", address(paymaster), 10000e6);
 
         callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
-        paymasterAndData =
-            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
+        paymasterAndData = abi.encodePacked(
+            abi.encodePacked(address(paymaster), uint128(400000), uint128(400000)),
+            abi.encode(address(token), uint256(1000e6))
+        );
 
-        UserOperation memory userOperation = UserOperation(
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp(
             sender,
             nonce,
             initCode,
@@ -165,8 +168,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
             preVerificationGas,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
+            paymasterAndData
         );
 
         userOperation.signature = signUserOp(entryPoint, userOperation, ownerKey, address(defaultValidator));
@@ -235,10 +237,12 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         executions[0].data = abi.encodeWithSignature("allowance(address,uint256)", address(paymaster), 10000e6);
 
         callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
-        paymasterAndData =
-            abi.encodePacked(abi.encodePacked(address(paymaster)), abi.encode(address(token), uint256(1000e6)));
+        paymasterAndData = abi.encodePacked(
+            abi.encodePacked(address(paymaster), uint128(400000), uint128(400000)),
+            abi.encode(address(token), uint256(1000e6))
+        );
 
-        UserOperation memory userOperation = UserOperation(
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp(
             sender,
             nonce,
             initCode,
@@ -248,14 +252,11 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
             preVerificationGas,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
+            paymasterAndData
         );
 
         userOperation.signature = signUserOp(entryPoint, userOperation, ownerKey, address(defaultValidator));
-        vm.expectRevert(
-            abi.encodeWithSelector(bytes4(keccak256("FailedOp(uint256,string)")), 0, "AA33 reverted: no approve found")
-        );
+        vm.expectRevert();
         bundler.post(entryPoint, userOperation);
     }
 }

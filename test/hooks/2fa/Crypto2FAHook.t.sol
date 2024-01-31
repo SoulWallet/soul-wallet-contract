@@ -9,6 +9,7 @@ import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Bundler} from "../../helper/Bundler.t.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
 
 contract Crypto2FAHookTest is Test, UserOpHelper {
     using TypeConversion for address;
@@ -71,19 +72,18 @@ contract Crypto2FAHookTest is Test, UserOpHelper {
             maxFeePerGas = 100 gwei;
             maxPriorityFeePerGas = 100 gwei;
         }
-        UserOperation memory userOperation = UserOperation(
-            address(soulWallet),
-            nonce,
-            initCode,
-            callData,
-            callGasLimit,
-            verificationGasLimit,
-            preVerificationGas,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
-        );
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
+            sender: address(soulWallet),
+            nonce: nonce,
+            initCode: initCode,
+            callData: callData,
+            callGasLimit: callGasLimit,
+            verificationGasLimit: verificationGasLimit,
+            preVerificationGas: preVerificationGas,
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
+            paymasterAndData: paymasterAndData
+        });
         bytes32 hookSignHash = soulWalletInstence.entryPoint().getUserOpHash(userOperation);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(wallet2faOwnerPrivateKey, hookSignHash.toEthSignedMessageHash());
         bytes memory hookSignatureData = abi.encodePacked(r, s, v);
@@ -91,7 +91,7 @@ contract Crypto2FAHookTest is Test, UserOpHelper {
 
         bytes memory hookAndData = abi.encodePacked(address(crypto2FAHook), hookSignatureLength, hookSignatureData);
         vm.startBroadcast(wallet2faOwnerPrivateKey);
-        UserOperation[] memory ops = new UserOperation[](1);
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         userOperation.signature = signUserOp(
             soulWalletInstence.entryPoint(),
             userOperation,

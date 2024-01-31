@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
@@ -11,7 +11,7 @@ import {ReceiverHandler} from "./dev/ReceiverHandler.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {DeployEntryPoint} from "./dev/deployEntryPoint.sol";
 import {SoulWalletFactory} from "./dev/SoulWalletFactory.sol";
-import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {TokenERC20} from "./dev/TokenERC20.sol";
 import {DemoHook} from "./dev/demoHook.sol";
 import {DemoModule} from "./dev/demoModule.sol";

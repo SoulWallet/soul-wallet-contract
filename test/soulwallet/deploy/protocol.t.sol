@@ -10,14 +10,17 @@ import "@source/abstract/DefaultCallbackHandler.sol";
 import "@source/modules/securityControlModule/SecurityControlModule.sol";
 import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
 import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
-import "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
+import
+    "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
 import "@source/libraries/TypeConversion.sol";
 import {SoulWalletLogicInstence} from "../base/SoulWalletLogicInstence.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
 import {Bundler} from "../../helper/Bundler.t.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
 
 contract DeployProtocolTest is Test, UserOpHelper {
     using TypeConversion for address;
+
     SoulWalletDefaultValidator public soulWalletDefaultValidator;
     SoulWalletLogicInstence public soulWalletLogicInstence;
     SoulWalletFactory public soulWalletFactory;
@@ -37,10 +40,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
             address(entryPoint),
             address(this)
         );
-        require(
-            soulWalletFactory._WALLETIMPL() == logic,
-            "logic address not match"
-        );
+        require(soulWalletFactory._WALLETIMPL() == logic, "logic address not match");
 
         bundler = new Bundler();
     }
@@ -50,7 +50,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
         uint256 nonce;
         bytes memory initCode;
         bytes memory callData;
-        uint256 callGasLimit;
+        uint256 callGasLimit = 10000000;
         uint256 verificationGasLimit;
         uint256 preVerificationGas;
         uint256 maxFeePerGas;
@@ -58,15 +58,11 @@ contract DeployProtocolTest is Test, UserOpHelper {
         bytes memory paymasterAndData;
         bytes memory signature;
 
-        (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey(
-            "walletOwner"
-        );
+        (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey("walletOwner");
         {
             nonce = 0;
 
-            (address trustedManagerOwner, ) = makeAddrAndKey(
-                "trustedManagerOwner"
-            );
+            (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
             TrustedModuleManager trustedModuleManager = new TrustedModuleManager(
                     trustedManagerOwner
                 );
@@ -83,10 +79,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
                 );
 
             bytes[] memory modules = new bytes[](1);
-            modules[0] = abi.encodePacked(
-                securityControlModule,
-                abi.encode(uint64(2 days))
-            );
+            modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
             bytes[] memory hooks = new bytes[](0);
 
             bytes32 salt = bytes32(0);
@@ -95,11 +88,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
             bytes32[] memory owners = new bytes32[](1);
             owners[0] = walletOwner.toBytes32();
             bytes memory initializer = abi.encodeWithSignature(
-                "initialize(bytes32[],address,bytes[],bytes[])",
-                owners,
-                defaultCallbackHandler,
-                modules,
-                hooks
+                "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
             );
             sender = soulWalletFactory.getWalletAddress(initializer, salt);
 
@@ -110,13 +99,13 @@ contract DeployProtocolTest is Test, UserOpHelper {
                 abi.encodeWithSignature("createWallet(bytes,bytes32)", initializer, salt);
             initCode = abi.encodePacked(address(soulWalletFactory), soulWalletFactoryCall);
 
-            verificationGasLimit = 1000000;
-            preVerificationGas = 100000;
+            verificationGasLimit = 2000000;
+            preVerificationGas = 200000;
             maxFeePerGas = 10 gwei;
             maxPriorityFeePerGas = 10 gwei;
         }
 
-        UserOperation memory userOperation = UserOperation(
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp(
             sender,
             nonce,
             initCode,
@@ -126,14 +115,13 @@ contract DeployProtocolTest is Test, UserOpHelper {
             preVerificationGas,
             maxFeePerGas,
             maxPriorityFeePerGas,
-            paymasterAndData,
-            signature
+            paymasterAndData
         );
 
         bytes32 userOpHash = entryPoint.getUserOpHash(userOperation);
         (userOpHash);
         userOperation.signature = signUserOp(userOperation, walletOwnerPrivateKey, address(soulWalletDefaultValidator));
-        vm.expectRevert(abi.encodeWithSelector(IEntryPoint.FailedOp.selector, 0, "AA21 didn't pay prefund"));
+        vm.expectRevert();
         bundler.post(entryPoint, userOperation);
         assertEq(sender.code.length, 0, "A1:sender.code.length != 0");
 

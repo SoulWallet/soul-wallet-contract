@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {UserOperation} from "../interface/IAccount.sol";
+import {PackedUserOperation} from "../interface/IAccount.sol";
 import {IPluggable} from "./IPluggable.sol";
 
 interface IHook is IPluggable {
@@ -24,11 +24,11 @@ interface IHook is IPluggable {
 
     /**
      * @dev Hook that is called before any userOp is executed.
-     * NOTE: Do not rely on userOperation.signature, which may be empty in some versions of the implementation. see: contract/utils/CalldataPack.sol
+     * NOTE: Do not rely on userOperation.signature, which may be empty in some versions of the implementation. see: https://github.com/SoulWallet/SoulWalletCore/blob/dc76bdb9a156d4f99ef41109c59ab99106c193ac/contracts/utils/CalldataPack.sol
      * must revert if the userOp is invalid.
      */
     function preUserOpValidationHook(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds,
         bytes calldata hookSignature

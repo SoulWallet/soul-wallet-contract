@@ -49,6 +49,12 @@ contract SoulWalletFactory is Ownable {
      * @return proxy Address of the deployed proxy
      */
     function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
+        // factory expected to return the wallet address even if the wallet has already been created.
+        address addr = getWalletAddress(_initializer, _salt);
+        uint codeSize = addr.code.length;
+        if (codeSize > 0) {
+            return addr;
+        }
         bytes memory deploymentData = _proxyCode(_WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
         assembly ("memory-safe") {
@@ -89,7 +95,7 @@ contract SoulWalletFactory is Ownable {
      * @param _salt Salt for the create2 deployment
      * @return proxy Counterfactual address of the SoulWallet
      */
-    function getWalletAddress(bytes memory _initializer, bytes32 _salt) external view returns (address proxy) {
+    function getWalletAddress(bytes memory _initializer, bytes32 _salt) public view returns (address proxy) {
         bytes memory deploymentData = _proxyCode(_WALLETIMPL);
         bytes32 salt = _calcSalt(_initializer, _salt);
         proxy = Create2.computeAddress(salt, keccak256(deploymentData));

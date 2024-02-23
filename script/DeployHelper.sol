@@ -109,7 +109,7 @@ abstract contract DeployHelper is Script {
     bytes32 internal constant DEFAULT_SALT = bytes32(uint256(0x170));
     address internal constant EMPTY_ADDRESS = 0x0000000000000000000000000000000000000000;
     bytes emptyBytes;
-    address internal ENTRYPOINT_ADDRESS = 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789;
+    address internal ENTRYPOINT_ADDRESS = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
 
     function deploy(string memory name, bytes memory initCode) internal returns (address) {
         return deploy(name, DEFAULT_SALT, initCode);

@@ -133,7 +133,14 @@ contract SoulWallet is
     function validatorManagementAccess() internal view override {
         _onlyModule();
     }
-
+    /*
+    The permission to upgrade the logic contract is exclusively granted to modules (UpgradeModule),
+    meaning that even the wallet owner cannot directly invoke `upgradeTo` for upgrades.
+    This design is implemented for security reasons, ensuring that even if the signer's credentials
+    are compromised, attackers cannot upgrade the logic contract, potentially rendering the wallet unusable.
+    Users can regain control over their wallet through social recovery mechanisms.
+    This approach safeguards the wallet's integrity, maintaining its availability and security.
+    */
     function upgradeTo(address newImplementation) external override {
         _onlyModule();
         _upgradeTo(newImplementation);

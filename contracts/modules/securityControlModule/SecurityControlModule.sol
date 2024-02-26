@@ -10,6 +10,12 @@ import {IHookManager} from "@soulwallet-core/contracts/interface/IHookManager.so
 import {IModuleManager} from "@soulwallet-core/contracts/interface/IModuleManager.sol";
 import {IValidatorManager} from "@soulwallet-core/contracts/interface/IValidatorManager.sol";
 
+/*
+The SecurityControlModule is a default security module integrated into SoulWallet,
+designed to enhance security through a time-lock mechanism for managing module/hook/validator additions.
+This setup ensures that non-whitelist modules undergo a mandatory waiting period before integration, providing an additional layer of security against potential threats.
+But modules added to the SecurityControlModule whitelist can be immediately activated without waiting for the time-lock period.
+*/
 contract SecurityControlModule is BaseSecurityControlModule {
     error UnsupportedSelectorError(bytes4 selector);
     error RemoveSelfError();

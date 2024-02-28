@@ -3,6 +3,12 @@ pragma solidity ^0.8.17;
 import {IMerkleRoot} from "./interfaces/IMerkleRoot.sol";
 import {IKeyStoreProof} from "../../keystore/interfaces/IKeyStoreProof.sol";
 
+/**
+ * @title KeyStoreMerkleProof
+ * @dev enables L1 keystore signkey verification via Merkle proofs
+ * It allows users to prove the latest signing key in the L1 keystore slot.
+ * Users submit a Merkle proof that validates their claim to a specific signing key by proving its inclusion in a known Merkle root
+ */
 contract KeyStoreMerkleProof is IKeyStoreProof {
     mapping(bytes32 => bytes32) public l1SlotToSigningKey;
     mapping(bytes32 => bytes) public l1SlotToRawOwners;

@@ -4,6 +4,14 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IMerkleRoot.sol";
 
+/**
+ * @title Merkle Root History Base Contract
+ * @dev This base contract is designed for syncing the keystore's Merkle root from Layer 1 (L1) to Layer 2 (L2).
+ * Due to the varying implementations of cross-chain messaging across different Layer 2 solutions, this contract,
+ * when deployed on a Layer 2 network, requires the `isValidL1Sender` function to be overridden. This is to ensure
+ * that only authorized cross-chain message helper contracts from Layer 1 can invoke it. This mechanism is crucial
+ * for maintaining a secure and accurate history of the Merkle roots in the L1 keystore
+ */
 abstract contract MerkleRootHistoryBase is Ownable, IMerkleRoot {
     address public l1Target;
     mapping(uint256 => bytes32) public merkleRoots;

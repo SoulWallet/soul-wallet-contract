@@ -5,6 +5,16 @@ import "./interfaces/IKeyStoreModule.sol";
 import "../../libraries/KeyStoreSlotLib.sol";
 import {IKeyStoreProof} from "../../keystore/interfaces/IKeyStoreProof.sol";
 
+/**
+ * @title KeyStoreModule
+ * @dev  The KeyStoreModule integrates with wallets to manage signing keys using L1 keystore data.
+ * Upon wallet creation, it checks if the keystore has been synced. If so, the wallet's signing key
+ * is set to the keystore's signing key. Otherwise, it uses the initial signing key specified during creation.
+ * The module also offers functionality to sync the wallet's signing key with the latest from the L1 keystore
+ * via the `syncL1Keystore` method. This ensures wallet signing keys can be dynamically updated to reflect
+ * changes in the keystore
+ */
+
 contract KeyStoreModule is IKeyStoreModule, BaseModule {
     bytes4 private constant _FUNC_RESET_OWNER = bytes4(keccak256("resetOwner(bytes32)"));
     bytes4 private constant _FUNC_RESET_OWNERS = bytes4(keccak256("resetOwners(bytes32[])"));
@@ -12,7 +22,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
     IKeyStoreProof public immutable keyStoreProof;
 
     mapping(address => bytes32) public l1Slot;
-    mapping(address => bytes32) public lastKeyStoreSyncSignKey;
+    mapping(address => bytes32) public latestSyncedSignKey;
 
     mapping(address => bool) walletInited;
 
@@ -23,7 +33,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
     function _deInit() internal override {
         address _sender = sender();
         delete l1Slot[_sender];
-        delete lastKeyStoreSyncSignKey[_sender];
+        delete latestSyncedSignKey[_sender];
         walletInited[_sender] = false;
     }
 
@@ -43,8 +53,8 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
             ISoulWallet soulwallet = ISoulWallet(payable(_sender));
             // sync keystore signing key
             soulwallet.resetOwners(owners);
-            lastKeyStoreSyncSignKey[_sender] = keystoreSignKey;
-            emit KeyStoreSyncd(_sender, keystoreSignKey);
+            latestSyncedSignKey[_sender] = keystoreSignKey;
+            emit KeyStoreSynced(_sender, keystoreSignKey);
         }
         walletInited[_sender] = true;
         emit KeyStoreInited(_sender, initialKeyHash, initialGuardianHash, guardianSafePeriod);
@@ -66,7 +76,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
         require(slotInfo != bytes32(0), "wallet slot not set");
         bytes32 keystoreSignKey = keyStoreProof.keyStoreBySlot(slotInfo);
         require(keystoreSignKey != bytes32(0), "keystore proof not sync");
-        bytes32 lastSyncKeyStore = lastKeyStoreSyncSignKey[wallet];
+        bytes32 lastSyncKeyStore = latestSyncedSignKey[wallet];
         if (lastSyncKeyStore != bytes32(0) && lastSyncKeyStore == keystoreSignKey) {
             revert("keystore already synced");
         }
@@ -74,7 +84,7 @@ contract KeyStoreModule is IKeyStoreModule, BaseModule {
         bytes memory rawOwners = keyStoreProof.rawOwnersBySlot(slotInfo);
         bytes32[] memory owners = abi.decode(rawOwners, (bytes32[]));
         soulwallet.resetOwners(owners);
-        lastKeyStoreSyncSignKey[wallet] = keystoreSignKey;
-        emit KeyStoreSyncd(wallet, keystoreSignKey);
+        latestSyncedSignKey[wallet] = keystoreSignKey;
+        emit KeyStoreSynced(wallet, keystoreSignKey);
     }
 }

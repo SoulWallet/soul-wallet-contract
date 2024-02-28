@@ -6,6 +6,10 @@ import {IKeyStoreMerkleProof} from "../../../keystore/L1/base/BaseMerkleTree.sol
 import "../interfaces/ICrossDomainMessenger.sol";
 import {MerkleRootHistoryBase} from "../base/MerkleRootHistoryBase.sol";
 
+/**
+ * @title OpKeyStoreCrossChainMerkleRootManager
+ * @dev syncing the Merkle root from the L1 keystore to the optimism via the Cross-Domain Messenger
+ */
 contract OpKeyStoreCrossChainMerkleRootManager is Ownable {
     address public l2Target;
     address public l1KeyStore;

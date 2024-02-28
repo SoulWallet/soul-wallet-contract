@@ -5,8 +5,15 @@ import {MerkleRootHistoryBase} from "../base/MerkleRootHistoryBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {IKeyStoreMerkleProof} from "../../../keystore/L1/base/BaseMerkleTree.sol";
 
+/**
+ * @title ArbKeyStoreCrossChainMerkleRootManager
+ * @dev syncing the Merkle root from the L1 keystore to the Arbitrum. Utilizes Arbitrum's Inbox
+ * for cross-chain messages
+ */
 contract ArbKeyStoreCrossChainMerkleRootManager is Ownable {
+    // the ArbMerkleRootHistory contract address depolyed on Arbitrum
     address public l2Target;
+    // the L1 keystore storage contract address
     address public l1KeyStore;
     IInbox public immutable inbox;
 

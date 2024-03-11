@@ -43,7 +43,7 @@ contract Crypto2FAHookTest is Test, UserOpHelper {
         owners[0] = walletOwner.toBytes32();
 
         bytes32 salt = bytes32(0);
-        soulWalletInstence = new SoulWalletInstence(address(0), owners,  modules, hooks,  salt);
+        soulWalletInstence = new SoulWalletInstence(address(0), owners, modules, hooks, salt);
         soulWallet = soulWalletInstence.soulWallet();
         (address[] memory preIsValidSignatureHooks, address[] memory preUserOpValidationHooks) = soulWallet.listHook();
         assertEq(preIsValidSignatureHooks.length, 1, "preIsValidSignatureHooks length error");
@@ -63,7 +63,6 @@ contract Crypto2FAHookTest is Test, UserOpHelper {
         uint256 maxFeePerGas;
         uint256 maxPriorityFeePerGas;
         bytes memory paymasterAndData;
-        bytes memory signature;
         {
             callGasLimit = 900000;
             callData = abi.encodeWithSelector(IStandardExecutor.execute.selector, address(10), 1 ether, "");

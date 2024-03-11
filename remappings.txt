@@ -1,4 +1,4 @@
-@soulwallet-core/=lib/SoulWalletCore/
+@soulwallet-core/=lib/soulwallet-core/
 @source/=contracts/
 @arbitrum/nitro-contracts=lib/nitro-contracts/
 @solady=lib/solady/

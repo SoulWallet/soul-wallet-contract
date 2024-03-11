@@ -120,19 +120,6 @@ contract SoulWallet is
         return _validateUserOp(userOp, userOpHash, validator, validatorSignature);
     }
 
-    /**
-     * Only authorized modules can manage hooks and modules.
-     */
-    function pluginManagementAccess() internal view override {
-        _onlyModule();
-    }
-
-    /**
-     * Only authorized modules can manage validators
-     */
-    function validatorManagementAccess() internal view override {
-        _onlyModule();
-    }
     /*
     The permission to upgrade the logic contract is exclusively granted to modules (UpgradeModule),
     meaning that even the wallet owner cannot directly invoke `upgradeTo` for upgrades.

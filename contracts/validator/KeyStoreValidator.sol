@@ -18,7 +18,6 @@ contract KeyStoreValidator is IKeyStoreValidator {
     {
         uint8 signatureType;
         bytes calldata signature;
-        uint256 validationData;
         (signatureType,, signature) = ValidatorSigDecoder.decodeValidatorSignature(rawSignature);
 
         (recovered, success) = recover(signatureType, rawHash, signature);

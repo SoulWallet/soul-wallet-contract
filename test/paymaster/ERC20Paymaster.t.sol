@@ -53,21 +53,11 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = address(ownerAddr).toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
-        soulWalletInstence = new SoulWalletInstence(
-            address(defaultCallbackHandler),
-            owners,
-            modules,
-            hooks,
-            salt
-        );
+        soulWalletInstence = new SoulWalletInstence(address(defaultCallbackHandler), owners, modules, hooks, salt);
         soulWallet = soulWalletInstence.soulWallet();
         entryPoint = soulWalletInstence.entryPoint();
 
-        paymaster = new ERC20Paymaster(
-            entryPoint,
-            paymasterOwner,
-            soulWalletInstence.soulWalletFactory.address
-        );
+        paymaster = new ERC20Paymaster(entryPoint, paymasterOwner, soulWalletInstence.soulWalletFactory.address);
 
         vm.deal(paymasterOwner, 10000e18);
         vm.startPrank(paymasterOwner);

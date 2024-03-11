@@ -47,27 +47,6 @@ contract WalletDeployer is Script, DeployHelper {
         address managerAddress = vm.envAddress("MANAGER_ADDRESS");
         require(managerAddress != address(0), "MANAGER_ADDRESS not provided");
 
-        address trustedModuleManager = deploy(
-            "TrustedModuleManager", bytes.concat(type(TrustedModuleManager).creationCode, abi.encode(managerAddress))
-        );
-
-        address trustedHookManager = deploy(
-            "TrustedHookManager", bytes.concat(type(TrustedHookManager).creationCode, abi.encode(managerAddress))
-        );
-
-        address trustedValidatorManager = deploy(
-            "TrustedValidatorManager",
-            bytes.concat(type(TrustedValidatorManager).creationCode, abi.encode(managerAddress))
-        );
-
-        deploy(
-            "SecurityControlModule",
-            bytes.concat(
-                type(SecurityControlModule).creationCode,
-                abi.encode(trustedModuleManager, trustedHookManager, trustedValidatorManager)
-            )
-        );
-
         deploy("DefaultCallbackHandler", type(DefaultCallbackHandler).creationCode);
     }
 

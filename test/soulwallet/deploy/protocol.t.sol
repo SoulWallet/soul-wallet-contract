@@ -29,17 +29,10 @@ contract DeployProtocolTest is Test, UserOpHelper {
     function setUp() public {
         entryPoint = new EntryPoint();
         soulWalletDefaultValidator = new SoulWalletDefaultValidator();
-        soulWalletLogicInstence = new SoulWalletLogicInstence(
-            address(entryPoint),
-            address(soulWalletDefaultValidator)
-        );
+        soulWalletLogicInstence = new SoulWalletLogicInstence(address(entryPoint), address(soulWalletDefaultValidator));
         address logic = address(soulWalletLogicInstence.soulWalletLogic());
 
-        soulWalletFactory = new SoulWalletFactory(
-            logic,
-            address(entryPoint),
-            address(this)
-        );
+        soulWalletFactory = new SoulWalletFactory(logic, address(entryPoint), address(this));
         require(soulWalletFactory._WALLETIMPL() == logic, "logic address not match");
 
         bundler = new Bundler();
@@ -56,27 +49,17 @@ contract DeployProtocolTest is Test, UserOpHelper {
         uint256 maxFeePerGas;
         uint256 maxPriorityFeePerGas;
         bytes memory paymasterAndData;
-        bytes memory signature;
 
         (address walletOwner, uint256 walletOwnerPrivateKey) = makeAddrAndKey("walletOwner");
         {
             nonce = 0;
 
             (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
-            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(
-                    trustedManagerOwner
-                );
-            TrustedHookManager trustedHookManager = new TrustedHookManager(
-                trustedManagerOwner
-            );
-            TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(
-                    trustedManagerOwner
-                );
-            SecurityControlModule securityControlModule = new SecurityControlModule(
-                    trustedModuleManager,
-                    trustedHookManager,
-                    trustedValidatorManager
-                );
+            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
+            TrustedHookManager trustedHookManager = new TrustedHookManager(trustedManagerOwner);
+            TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(trustedManagerOwner);
+            SecurityControlModule securityControlModule =
+                new SecurityControlModule(trustedModuleManager, trustedHookManager, trustedValidatorManager);
 
             bytes[] memory modules = new bytes[](1);
             modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));

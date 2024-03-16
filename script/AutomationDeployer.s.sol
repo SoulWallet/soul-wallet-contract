@@ -35,6 +35,9 @@ contract AutomationDeployer is Script, DeployHelper {
         } else if (network == Network.ArbitrumSepolia) {
             console.log("deploy automation contract on ArbitrumSepolia");
             delpoyArbSepolia();
+        } else if (network == Network.BaseSepolia) {
+            console.log("deploy automation contract on BaseSepolia");
+            delpoyBaseSepolia();
         } else {
             console.log("deploy automation contract on testnet");
             deploy();
@@ -85,5 +88,19 @@ contract AutomationDeployer is Script, DeployHelper {
             )
         );
         writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_OP_SEPOLIA", aaveUsdcAutomation);
+    }
+
+    function delpoyBaseSepolia() private {
+        address usdc = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
+        address aaveUscPool = 0x07eA79F68B2B3df564D0A34F8e19D9B1e339814b;
+        address aUsdcToken = 0xf53B60F4006cab2b3C4688ce41fD5362427A2A66;
+
+        address aaveUsdcAutomation = deploy(
+            "AaveUsdcSaveAutomationBaseSepolia",
+            bytes.concat(
+                type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationBot, usdc, aaveUscPool, aUsdcToken)
+            )
+        );
+        writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_BASE_SEPOLIA", aaveUsdcAutomation);
     }
 }

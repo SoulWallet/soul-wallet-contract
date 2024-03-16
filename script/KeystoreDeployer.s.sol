@@ -89,6 +89,7 @@ contract KeyStoreDeployer is Script, DeployHelper {
             arbDeploy();
         } else if (
             network == Network.Optimism || network == Network.OptimismGoerli || network == Network.OptimismSepolia
+                || network == Network.BaseSepolia
         ) {
             opDeploy();
         } else if (network == Network.Scroll || network == Network.ScrollSepolia) {

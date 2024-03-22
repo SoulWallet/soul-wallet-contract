@@ -83,10 +83,10 @@ contract CreateWalletEntryPoint is Script {
         entryPoint.depositTo{value: 0.005 ether}(cacluatedAddress);
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
 
-        address aaveUsdcAutomationAddress = loadEnvContract("SOUL_WALLET_AAVE_USDC_AUTOMATION_SEPOLIA");
+        address aaveUsdcAutomationAddress = loadEnvContract("SOUL_WALLET_AAVE_USDC_AUTOMATION_BASE_SEPOLIA");
         bytes memory approveData =
             abi.encodeWithSignature("approve(address,uint256)", aaveUsdcAutomationAddress, 10000 ether);
-        address usdcAddress = loadEnvContract("USDC_SEPOLIA");
+        address usdcAddress = loadEnvContract("USDC_BASE");
 
         PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
             sender: cacluatedAddress,

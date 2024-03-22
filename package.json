@@ -45,6 +45,7 @@
     "deploy:scroll-sepolia:all": "npm run deploy:scroll-sepolia:keystore && npm run deploy:scroll-sepolia:soulwallet && npm run deploy:scroll-sepolia:paymaster",
     "deploy:base-sepolia:keystore": "source .env && forge script script/KeyStoreDeployer.s.sol:KeyStoreDeployer --ffi --slow --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $BASE_SEPOLIA_SCAN_API_KEY",
     "deploy:base-sepolia:soulwallet": "source .env && forge script script/WalletDeployer.s.sol:WalletDeployer --ffi --slow --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $BASE_SEPOLIA_SCAN_API_KEY",
+    "deploy:base-sepolia:automation": "source .env && forge script script/AutomationDeployer.s.sol:AutomationDeployer --ffi --slow --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $BASE_SEPOLIA_SCAN_API_KEY",
     "deploy:all-sepolia": "npm run deploy:sepolia:all && npm run deploy:scroll-sepolia:all && npm run deploy:arb-sepolia:all && npm run deploy:op-sepolia:all",
     "deploy:sepolia:receivePayment": "source .env && forge script script/ReceivePayment.s.sol:ReceivePaymentDeployer --ffi --slow --rpc-url $SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $SEPOLIA_SCAN_API_KEY",
     "deploy:op-sepolia:receivePayment": "source .env && forge script script/ReceivePayment.s.sol:ReceivePaymentDeployer --ffi --slow --rpc-url $OPTIMISM_SEPOLIA_RPC_URL --broadcast --verify --etherscan-api-key $OPTIMISM_SEPOLIA_SCAN_API_KEY --verifier-url https://api-sepolia-optimistic.etherscan.io/api",

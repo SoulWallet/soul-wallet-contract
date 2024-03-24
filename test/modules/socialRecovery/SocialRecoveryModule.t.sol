@@ -3,9 +3,13 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "@source/modules/socialRecovery/SocialRecoveryModule.sol";
 import "../../soulwallet/base/SoulWalletInstence.sol";
+import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
+import {Execution} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract SocialRecoveryModuleTest is Test {
     using TypeConversion for address;
+    using MessageHashUtils for bytes32;
 
     struct GuardianData {
         address[] guardians;
@@ -139,5 +143,63 @@ contract SocialRecoveryModuleTest is Test {
         socialRecoveryModule.executeReocvery(wallet, newRawOwners, rawGuardian, guardianSignature);
         assertEq(soulWallet.isOwner(_newOwner.toBytes32()), false);
         assertEq(soulWallet.isOwner(_owner.toBytes32()), true);
+    }
+
+    function test_cancelSocialRecovery() public {
+        (
+            address wallet,
+            bytes memory newRawOwners,
+            bytes memory rawGuardian,
+            bytes memory guardianSignature,
+            bytes32 recoveryId
+        ) = scheduleSocialReocery();
+        soulWalletInstence.entryPoint().depositTo{value: 5 ether}(address(soulWallet));
+        vm.startBroadcast(_ownerPrivateKey);
+        Execution[] memory executions = new Execution[](1);
+        executions[0].target = address(socialRecoveryModule);
+        executions[0].value = 0;
+        executions[0].data = abi.encodeWithSignature("cancelReocvery(bytes32)", recoveryId);
+
+        bytes memory callData = abi.encodeWithSignature("executeBatch((address,uint256,bytes)[])", executions);
+
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
+            sender: address(soulWallet),
+            nonce: 0,
+            initCode: hex"",
+            callData: callData,
+            callGasLimit: 1900000,
+            verificationGasLimit: 1000000,
+            preVerificationGas: 300000,
+            maxFeePerGas: 10000,
+            maxPriorityFeePerGas: 10000,
+            paymasterAndData: hex""
+        });
+        userOperation.signature =
+            signUserOp(userOperation, _ownerPrivateKey, address(soulWalletInstence.soulWalletDefaultValidator()));
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+
+        ops[0] = userOperation;
+
+        soulWalletInstence.entryPoint().handleOps(ops, payable(_owner));
+        vm.warp(block.timestamp + delayTime);
+        vm.expectRevert();
+        socialRecoveryModule.executeReocvery(wallet, newRawOwners, rawGuardian, guardianSignature);
+        assertEq(soulWallet.isOwner(_newOwner.toBytes32()), false);
+        assertEq(soulWallet.isOwner(_owner.toBytes32()), true);
+    }
+
+    function signUserOp(PackedUserOperation memory op, uint256 _key, address _validator)
+        private
+        view
+        returns (bytes memory signature)
+    {
+        bytes32 hash = soulWalletInstence.entryPoint().getUserOpHash(op);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        bytes memory opSig;
+        bytes memory signatureData = abi.encodePacked(r, s, v);
+        uint8 signType = 0;
+        bytes4 signatureLength = bytes4(uint32(1 + signatureData.length));
+        opSig = abi.encodePacked(_validator, signatureLength, signType, signatureData);
+        signature = opSig;
     }
 }

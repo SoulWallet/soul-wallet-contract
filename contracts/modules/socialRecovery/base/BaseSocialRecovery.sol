@@ -146,6 +146,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         }
         socialRecoveryInfo[wallet].txCreatedAt[recoveryId] = _DONE_TIMESTAMP;
         _increaseNonce(wallet);
+        emit RecoveryExecuted(wallet, recoveryId);
     }
 
     function _recoveryOwner(address wallet, bytes calldata newRawOwners) internal {

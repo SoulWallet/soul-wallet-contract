@@ -10,8 +10,11 @@ interface IAaveV3 {
 contract AaveUsdcSaveAutomation is Ownable {
     using SafeERC20 for IERC20;
 
+    event BotAdded(address bot);
+    event BotRemoved(address bot);
+    event UsdcDepositedToAave(address user, uint256 amount);
+
     IERC20 immutable usdcToken;
-    IERC20 immutable aUsdcToken;
     IAaveV3 immutable aave;
     mapping(address => bool) public bots;
 
@@ -20,28 +23,25 @@ contract AaveUsdcSaveAutomation is Ownable {
         _;
     }
 
-    constructor(address _owner, address _usdcAddr, address _aaveUsdcPoolAddr, address _aUsdcTokenAddr)
-        Ownable(_owner)
-    {
+    constructor(address _owner, address _usdcAddr, address _aaveUsdcPoolAddr) Ownable(_owner) {
         usdcToken = IERC20(_usdcAddr);
-        aUsdcToken = IERC20(_aUsdcTokenAddr);
         aave = IAaveV3(_aaveUsdcPoolAddr);
         usdcToken.approve(address(aave), 2 ** 256 - 1);
     }
 
     function depositUsdcToAave(address _user, uint256 amount) public onlyBot {
         usdcToken.safeTransferFrom(_user, address(this), amount);
-        uint256 aTokenBeforeSupply = aUsdcToken.balanceOf(_user);
         aave.supply(address(usdcToken), amount, _user, 0);
-        uint256 aTokenAfterSupply = aUsdcToken.balanceOf(_user);
-        require(aTokenAfterSupply - aTokenBeforeSupply == amount, "AaveSaveAutomation: deposit failed");
+        emit UsdcDepositedToAave(_user, amount);
     }
 
     function addBot(address bot) public onlyOwner {
         bots[bot] = true;
+        emit BotAdded(bot);
     }
 
     function removeBot(address bot) public onlyOwner {
         bots[bot] = false;
+        emit BotRemoved(bot);
     }
 }

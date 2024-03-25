@@ -202,4 +202,38 @@ contract SocialRecoveryModuleTest is Test {
         opSig = abi.encodePacked(_validator, signatureLength, signType, signatureData);
         signature = opSig;
     }
+
+    function test_reuseNonceRecovery() public {
+        deployWallet();
+        uint256 nonce = socialRecoveryModule.walletNonce(address(soulWallet));
+        bytes32[] memory newOwners = new bytes32[](1);
+        newOwners[0] = address(_newOwner).toBytes32();
+
+        bytes32 structHash = keccak256(
+            abi.encode(_TYPE_HASH_SOCIAL_RECOVERY, address(soulWallet), nonce, keccak256(abi.encodePacked(newOwners)))
+        );
+
+        bytes32 typedDataHash = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_guardianPrivateKey, typedDataHash);
+        bytes memory keySignature = abi.encodePacked(v, s, r);
+        bytes memory guardianSig = abi.encodePacked(keySignature);
+        console.log("guardianData");
+        console.logBytes(abi.encode(guarianData));
+        console.log("guardianData2");
+        console.logBytes(abi.encode(guarianData.guardians, guarianData.threshold, guarianData.salt));
+
+        socialRecoveryModule.scheduleReocvery(
+            address(soulWallet),
+            abi.encode(newOwners),
+            abi.encode(guarianData.guardians, guarianData.threshold, guarianData.salt),
+            guardianSig
+        );
+        vm.expectRevert();
+        socialRecoveryModule.scheduleReocvery(
+            address(soulWallet),
+            abi.encode(newOwners),
+            abi.encode(guarianData.guardians, guarianData.threshold, guarianData.salt),
+            guardianSig
+        );
+    }
 }

@@ -5,8 +5,8 @@ interface ISocialRecovery {
     struct SocialRecoveryInfo {
         bytes32 guardianHash;
         uint256 nonce;
-        // transaction id to transaction creation time
-        mapping(bytes32 id => uint256) txCreatedAt;
+        // transaction id to transaction valid time
+        mapping(bytes32 id => uint256) txValidAt;
         uint256 delayPeriod;
     }
 

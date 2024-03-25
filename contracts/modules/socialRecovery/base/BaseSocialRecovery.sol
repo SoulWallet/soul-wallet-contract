@@ -13,7 +13,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
     event GuardianSet(address wallet, bytes32 newGuardianHash);
     event DelayPeriodSet(address wallet, uint256 newDelay);
     event RecoveryCancelled(address wallet, bytes32 recoveryId);
-    event RecoveryScheduled(address wallet, bytes32 recoveryId, uint256 getTimestamp);
+    event RecoveryScheduled(address wallet, bytes32 recoveryId, uint256 txValidTime);
     event RecoveryExecuted(address wallet, bytes32 recoveryId);
     event ApproveHash(address indexed guardian, bytes32 hash);
     event RejectHash(address indexed guardian, bytes32 hash);
@@ -35,7 +35,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
     }
 
     function getOperationState(address wallet, bytes32 id) public view returns (OperationState) {
-        uint256 timestamp = getTimestamp(wallet, id);
+        uint256 timestamp = getTxValidTime(wallet, id);
         if (timestamp == 0) {
             return OperationState.Unset;
         } else if (timestamp == _DONE_TIMESTAMP) {
@@ -60,19 +60,21 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         return getOperationState(wallet, id) != OperationState.Unset;
     }
 
-    function getTimestamp(address wallet, bytes32 id) public view returns (uint256) {
-        return socialRecoveryInfo[wallet].txCreatedAt[id];
+    function getTxValidTime(address wallet, bytes32 id) public view returns (uint256) {
+        return socialRecoveryInfo[wallet].txValidAt[id];
     }
 
     function setGuardian(bytes32 newGuardianHash) external {
         address wallet = _msgSender();
         socialRecoveryInfo[wallet].guardianHash = newGuardianHash;
+        _increaseNonce(wallet);
         emit GuardianSet(wallet, newGuardianHash);
     }
 
     function setDelayPeriod(uint256 newDelay) external {
         address wallet = _msgSender();
         socialRecoveryInfo[wallet].delayPeriod = newDelay;
+        _increaseNonce(wallet);
         emit DelayPeriodSet(wallet, newDelay);
     }
 
@@ -86,9 +88,15 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
             );
         }
 
-        delete socialRecoveryInfo[wallet].txCreatedAt[recoveryId];
+        delete socialRecoveryInfo[wallet].txValidAt[recoveryId];
         _increaseNonce(wallet);
         emit RecoveryCancelled(wallet, recoveryId);
+    }
+
+    function cancelAllReocvery() external {
+        address wallet = _msgSender();
+        _increaseNonce(wallet);
+        emit RecoveryCancelled(wallet, 0);
     }
     /**
      * @dev Considering that not all contract are EIP-1271 compatible
@@ -118,7 +126,8 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external override returns (bytes32 recoveryId) {
-        recoveryId = hashOperation(wallet, abi.encode(newRawOwners, rawGuardian, guardianSignature));
+        recoveryId =
+            hashOperation(wallet, walletNonce(wallet), abi.encode(newRawOwners, rawGuardian, guardianSignature));
         if (isOperation(wallet, recoveryId)) {
             revert UN_EXPECTED_OPERATION_STATE(wallet, recoveryId, _encodeStateBitmap(OperationState.Unset));
         }
@@ -135,7 +144,8 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         bytes calldata rawGuardian,
         bytes calldata guardianSignature
     ) external override {
-        bytes32 recoveryId = hashOperation(wallet, abi.encode(newRawOwners, rawGuardian, guardianSignature));
+        bytes32 recoveryId =
+            hashOperation(wallet, walletNonce(wallet), abi.encode(newRawOwners, rawGuardian, guardianSignature));
         if (!isOperationReady(wallet, recoveryId)) {
             revert UN_EXPECTED_OPERATION_STATE(wallet, recoveryId, _encodeStateBitmap(OperationState.Ready));
         }
@@ -144,7 +154,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         if (!isOperationReady(wallet, recoveryId)) {
             revert UN_EXPECTED_OPERATION_STATE(wallet, recoveryId, _encodeStateBitmap(OperationState.Ready));
         }
-        socialRecoveryInfo[wallet].txCreatedAt[recoveryId] = _DONE_TIMESTAMP;
+        socialRecoveryInfo[wallet].txValidAt[recoveryId] = _DONE_TIMESTAMP;
         _increaseNonce(wallet);
         emit RecoveryExecuted(wallet, recoveryId);
     }
@@ -327,7 +337,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
 
     function _setTimeStamp(address wallet, bytes32 id) internal returns (uint256) {
         uint256 scheduleTime = block.timestamp + socialRecoveryInfo[wallet].delayPeriod;
-        socialRecoveryInfo[wallet].txCreatedAt[id] = scheduleTime;
+        socialRecoveryInfo[wallet].txValidAt[id] = scheduleTime;
         return scheduleTime;
     }
 
@@ -348,8 +358,13 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         socialRecoveryInfo[wallet].delayPeriod = delayPeriod;
     }
 
-    function hashOperation(address wallet, bytes memory data) internal pure virtual returns (bytes32) {
-        return keccak256(abi.encode(wallet, data));
+    /**
+     * @param   wallet  the address to recover
+     * @param   nonce  Add a nonce for the hash operation. When recovery is cancelled or the guardian is modified, the nonce can automatically invalidate the previous operation
+     * @return  bytes32  return recoveryId
+     */
+    function hashOperation(address wallet, uint256 nonce, bytes memory data) internal view virtual returns (bytes32) {
+        return keccak256(abi.encode(wallet, nonce, data, address(this), block.chainid));
     }
 
     function _encodeStateBitmap(OperationState operationState) internal pure returns (bytes32) {

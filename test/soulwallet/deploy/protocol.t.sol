@@ -3,15 +3,10 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
-import {IEntryPoint} from "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {ISoulWallet} from "@source/interfaces/ISoulWallet.sol";
 import "@source/validator/SoulWalletDefaultValidator.sol";
 import {SoulWalletFactory} from "@source/factory/SoulWalletFactory.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
-import "@source/modules/securityControlModule/SecurityControlModule.sol";
-import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
-import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
-import
-    "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
 import "@source/libraries/TypeConversion.sol";
 import {SoulWalletLogicInstence} from "../base/SoulWalletLogicInstence.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
@@ -54,15 +49,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
         {
             nonce = 0;
 
-            (address trustedManagerOwner,) = makeAddrAndKey("trustedManagerOwner");
-            TrustedModuleManager trustedModuleManager = new TrustedModuleManager(trustedManagerOwner);
-            TrustedHookManager trustedHookManager = new TrustedHookManager(trustedManagerOwner);
-            TrustedValidatorManager trustedValidatorManager = new TrustedValidatorManager(trustedManagerOwner);
-            SecurityControlModule securityControlModule =
-                new SecurityControlModule(trustedModuleManager, trustedHookManager, trustedValidatorManager);
-
-            bytes[] memory modules = new bytes[](1);
-            modules[0] = abi.encodePacked(securityControlModule, abi.encode(uint64(2 days)));
+            bytes[] memory modules = new bytes[](0);
             bytes[] memory hooks = new bytes[](0);
 
             bytes32 salt = bytes32(0);

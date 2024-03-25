@@ -4,11 +4,6 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "@source/factory/SoulWalletFactory.sol";
 import "@source/SoulWallet.sol";
-import "@source/modules/securityControlModule/trustedContractManager/trustedModuleManager/TrustedModuleManager.sol";
-import "@source/modules/securityControlModule/trustedContractManager/trustedHookManager/TrustedHookManager.sol";
-import
-    "@source/modules/securityControlModule/trustedContractManager/trustedValidatorManager/TrustedValidatorManager.sol";
-import "@source/modules/securityControlModule/SecurityControlModule.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
 import {SoulWalletDefaultValidator} from "@source/validator/SoulWalletDefaultValidator.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";

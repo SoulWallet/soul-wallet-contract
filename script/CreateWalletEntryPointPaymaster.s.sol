@@ -4,7 +4,6 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "@source/factory/SoulWalletFactory.sol";
 import "@source/SoulWallet.sol";
-import "@source/keystore/L1/KeyStore.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {UserOperationLib} from "@account-abstraction/contracts/core/UserOperationLib.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -42,7 +41,6 @@ contract CreateWalletEntryPointPaymaster is Script {
     SoulWalletFactory soulwalletFactory;
 
     address payable soulwalletAddress;
-    KeyStore keystoreContract;
 
     bytes emptyBytes;
     EntryPoint public entryPoint = EntryPoint(payable(0x0000000071727De22E5E9d8BAf0edAc6f37da032));

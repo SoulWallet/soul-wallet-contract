@@ -3,11 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "@source/factory/SoulWalletFactory.sol";
-import "@source/keystore/L1/KeyStore.sol";
 import "./DeployHelper.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import "@source/modules/keystore/optimism/OpMerkleRootHistory.sol";
-import "@source/modules/keystore/KeyStoreMerkleProof.sol";
 import {NetWorkLib} from "./DeployHelper.sol";
 import "@source/libraries/TypeConversion.sol";
 import {Solenv} from "@solenv/Solenv.sol";
@@ -37,11 +34,6 @@ contract CreateWalletDirect is Script {
     SoulWalletFactory soulwalletFactory;
 
     address payable soulwalletAddress;
-    KeyStore keyStoreContract;
-
-    OpMerkleRootHistory opMerkleRootHistory;
-
-    KeyStoreMerkleProof keyStoreMerkleProof;
 
     bytes32 private constant _TYPE_HASH_SET_KEY =
         keccak256("SetKey(bytes32 keyStoreSlot,uint256 nonce,bytes32 newSigner)");

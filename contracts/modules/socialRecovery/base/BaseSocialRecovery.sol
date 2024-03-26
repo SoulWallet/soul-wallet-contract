@@ -56,7 +56,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         return getOperationState(wallet, id) == OperationState.Ready;
     }
 
-    function isOperation(address wallet, bytes32 id) public view returns (bool) {
+    function isOperationSet(address wallet, bytes32 id) public view returns (bool) {
         return getOperationState(wallet, id) != OperationState.Unset;
     }
 
@@ -128,7 +128,7 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
     ) external override returns (bytes32 recoveryId) {
         recoveryId =
             hashOperation(wallet, walletNonce(wallet), abi.encode(newRawOwners, rawGuardian, guardianSignature));
-        if (isOperation(wallet, recoveryId)) {
+        if (isOperationSet(wallet, recoveryId)) {
             revert UN_EXPECTED_OPERATION_STATE(wallet, recoveryId, _encodeStateBitmap(OperationState.Unset));
         }
         bytes32 guardianHash = _getGuardianHash(rawGuardian);
@@ -151,12 +151,13 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
         }
         _recoveryOwner(wallet, newRawOwners);
 
-        if (!isOperationReady(wallet, recoveryId)) {
-            revert UN_EXPECTED_OPERATION_STATE(wallet, recoveryId, _encodeStateBitmap(OperationState.Ready));
-        }
-        socialRecoveryInfo[wallet].txValidAt[recoveryId] = _DONE_TIMESTAMP;
+        _setRecoveryDone(wallet, recoveryId);
         _increaseNonce(wallet);
         emit RecoveryExecuted(wallet, recoveryId);
+    }
+
+    function _setRecoveryDone(address wallet, bytes32 recoveryId) internal {
+        socialRecoveryInfo[wallet].txValidAt[recoveryId] = _DONE_TIMESTAMP;
     }
 
     function _recoveryOwner(address wallet, bytes calldata newRawOwners) internal {
@@ -326,9 +327,17 @@ abstract contract BaseSocialRecovery is ISocialRecovery, EIP712 {
             revert("Invalid guardian hash");
         }
     }
+    /**
+     * @notice This function is executed during module uninstallation.
+     * @dev Even during uninstallation, the nonce data is not cleared to prevent replay of historical data once reinstall this moudule agian.
+     * The nonce is permanently incrementing. Other variables can be reset.
+     * @param wallet The address of the wallet for which the social recovery info is to be cleared.
+     */
 
     function _clearWalletSocialRecoveryInfo(address wallet) internal {
-        delete socialRecoveryInfo[wallet];
+        _increaseNonce(wallet);
+        socialRecoveryInfo[wallet].guardianHash = bytes32(0);
+        socialRecoveryInfo[wallet].delayPeriod = 0;
     }
 
     function _getGuardianHash(bytes calldata rawGuardian) internal pure returns (bytes32 guardianHash) {

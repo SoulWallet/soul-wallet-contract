@@ -38,6 +38,9 @@ contract AutomationDeployer is Script, DeployHelper {
         } else if (network == Network.BaseSepolia) {
             console.log("deploy automation contract on BaseSepolia");
             delpoyBaseSepolia();
+        } else if (network == Network.Optimism) {
+            console.log("deploy automation contract on OP mainnet");
+            delpoyOp();
         } else {
             console.log("deploy automation contract on testnet");
             deploy();
@@ -51,13 +54,10 @@ contract AutomationDeployer is Script, DeployHelper {
     function delpoySepolia() private {
         address usdc = 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8;
         address aaveUscPool = 0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951;
-        address aUsdcToken = 0x16dA4541aD1807f4443d92D26044C1147406EB80;
 
         address aaveUsdcAutomation = deploy(
             "AaveUsdcSaveAutomationSepolia",
-            bytes.concat(
-                type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationBot, usdc, aaveUscPool, aUsdcToken)
-            )
+            bytes.concat(type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationOwner, usdc, aaveUscPool))
         );
         writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_SEPOLIA", aaveUsdcAutomation);
     }
@@ -65,13 +65,10 @@ contract AutomationDeployer is Script, DeployHelper {
     function delpoyArbSepolia() private {
         address usdc = 0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d;
         address aaveUscPool = 0xBfC91D59fdAA134A4ED45f7B584cAf96D7792Eff;
-        address aUsdcToken = 0x625E7708f30cA75bfd92586e17077590C60eb4cD;
 
         address aaveUsdcAutomation = deploy(
             "AaveUsdcSaveAutomationArbSepolia",
-            bytes.concat(
-                type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationBot, usdc, aaveUscPool, aUsdcToken)
-            )
+            bytes.concat(type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationOwner, usdc, aaveUscPool))
         );
         writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_ARB_SEPOLIA", aaveUsdcAutomation);
     }
@@ -79,27 +76,32 @@ contract AutomationDeployer is Script, DeployHelper {
     function delpoyOpSepolia() private {
         address usdc = 0x5fd84259d66Cd46123540766Be93DFE6D43130D7;
         address aaveUscPool = 0xb50201558B00496A145fE76f7424749556E326D8;
-        address aUsdcToken = 0xa818F1B57c201E092C4A2017A91815034326Efd1;
 
         address aaveUsdcAutomation = deploy(
             "AaveUsdcSaveAutomationOpSepolia",
-            bytes.concat(
-                type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationBot, usdc, aaveUscPool, aUsdcToken)
-            )
+            bytes.concat(type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationOwner, usdc, aaveUscPool))
         );
         writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_OP_SEPOLIA", aaveUsdcAutomation);
+    }
+
+    function delpoyOp() private {
+        address usdc = 0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85;
+        address aaveUscPool = 0x794a61358D6845594F94dc1DB02A252b5b4814aD;
+
+        address aaveUsdcAutomation = deploy(
+            "AaveUsdcSaveAutomationOpMainnet",
+            bytes.concat(type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationOwner, usdc, aaveUscPool))
+        );
+        writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_OP_MAINNET", aaveUsdcAutomation);
     }
 
     function delpoyBaseSepolia() private {
         address usdc = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
         address aaveUscPool = 0x07eA79F68B2B3df564D0A34F8e19D9B1e339814b;
-        address aUsdcToken = 0xf53B60F4006cab2b3C4688ce41fD5362427A2A66;
 
         address aaveUsdcAutomation = deploy(
             "AaveUsdcSaveAutomationBaseSepolia",
-            bytes.concat(
-                type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationBot, usdc, aaveUscPool, aUsdcToken)
-            )
+            bytes.concat(type(AaveUsdcSaveAutomation).creationCode, abi.encode(automationOwner, usdc, aaveUscPool))
         );
         writeAddressToEnv("SOUL_WALLET_AAVE_USDC_AUTOMATION_BASE_SEPOLIA", aaveUsdcAutomation);
     }

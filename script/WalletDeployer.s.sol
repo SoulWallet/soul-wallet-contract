@@ -39,8 +39,6 @@ contract WalletDeployer is Script, DeployHelper {
             )
         );
         writeAddressToEnv("SOULWALLET_FACTORY_ADDRESS", soulwalletFactoryAddress);
-        address managerAddress = vm.envAddress("MANAGER_ADDRESS");
-        require(managerAddress != address(0), "MANAGER_ADDRESS not provided");
 
         deploy("DefaultCallbackHandler", type(DefaultCallbackHandler).creationCode);
     }
